@@ -1,0 +1,25 @@
+package module.fileManagement.domain;
+
+
+
+class AbstractFileNode {
+}
+
+	class FileNode extends AbstractFileNode {
+	}
+
+	class DirNode extends FileNode {
+		String name;
+	}
+
+relation UserAbstractFileNode {
+	.myorg.domain.User playsRole user;
+	DirNode playsRole fileRepository;
+}
+
+relation DirNodeAbstractFileNode {
+	DirNode playsRole parent;
+	AbstractFileNode playsRole child {
+		multiplicity *;
+	}
+}
