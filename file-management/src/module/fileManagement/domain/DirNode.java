@@ -9,5 +9,17 @@ public class DirNode extends DirNode_Base {
         setUser(user);
         setName(user.getPresentationName());
     }
-    
+
+    public String getRepositoryName() {
+	return hasParent() ? getParent().getRepositoryName() : getName();
+    }
+
+    public boolean hasAnyChildFile() {
+	for (final AbstractFileNode abstractFileNode : getChildSet()) {
+	    if (abstractFileNode.isFile()) {
+		return true;
+	    }
+	}
+	return false;
+    }
 }
