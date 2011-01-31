@@ -1,6 +1,7 @@
 package module.fileManagement.domain;
 
 import myorg.domain.User;
+import pt.ist.fenixWebFramework.services.Service;
 
 public class DirNode extends DirNode_Base {
     
@@ -8,6 +9,12 @@ public class DirNode extends DirNode_Base {
         super();
         setUser(user);
         setName(user.getPresentationName());
+    }
+
+    public DirNode(final DirNode dirNode, final String name) {
+	super();
+	setParent(dirNode);
+	setName(name);
     }
 
     public String getRepositoryName() {
@@ -22,4 +29,20 @@ public class DirNode extends DirNode_Base {
 	}
 	return false;
     }
+
+    @Service
+    public void initIfNecessary() {
+	if (!hasAnyChild()) {
+	    final DirNode dirNode = new DirNode(this, "DocumentosOficiais");
+	    new DirNode(dirNode, "Contracto");
+	    new DirNode(dirNode, "IRS");
+	    new DirNode(dirNode, "Vencimento");
+	}
+    }
+
+    @Override
+    public boolean isDir() {
+        return true;
+    }
+
 }

@@ -5,7 +5,6 @@ import java.io.File;
 import module.contents.presentationTier.component.BaseComponent;
 import module.fileManagement.domain.AbstractFileNode;
 import module.fileManagement.domain.DirNode;
-import module.fileManagement.domain.FileNode;
 import module.fileManagement.domain.FileRepository;
 import myorg.applicationTier.Authenticate.UserView;
 import myorg.domain.User;
@@ -26,6 +25,7 @@ import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -34,7 +34,6 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
-import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.themes.Reindeer;
 
 @SuppressWarnings("serial")
@@ -54,7 +53,7 @@ public class FileRepositoryView extends BaseComponent
 
     private DirNode selectedNode;
     private Panel contentPanel;
-    private Panel panel0020;
+//    private Panel panel0020;
 
     @Override
     protected String getBundle() {
@@ -65,18 +64,70 @@ public class FileRepositoryView extends BaseComponent
     public void setArguments(final String... arguments) {
 	final User user = UserView.getCurrentUser();
 	dirNode = FileRepository.getOrCreateFileRepository(user);
+	dirNode.initIfNecessary();
     }
 
     @Override
     public void attach() {
 	final VerticalLayout layout = createVerticalLayout();
+	layout.setSpacing(true);
+	layout.setMargin(true);
+	setCompositionRoot(layout);
 
+	// Title
 	final Label title = new Label(getMessage("label.file.repository.of") + " " + dirNode.getName());
 	title.setStyleName(Reindeer.LABEL_H2);
 	layout.addComponent(title);
 	layout.setComponentAlignment(title, Alignment.MIDDLE_LEFT);
 
-	final GridLayout grid = createLayout(layout);
+	// Organize page body
+        final GridLayout grid = new GridLayout(3, 2);
+        grid.setSpacing(true);
+        grid.addStyleName("gridexample");
+        grid.setWidth(875, Sizeable.UNITS_PIXELS);
+        grid.setHeight(525, Sizeable.UNITS_PIXELS);
+        layout.addComponent(grid);
+        layout.setComponentAlignment(grid, Alignment.TOP_LEFT);
+
+        final Panel panel00 = createGridPanel(grid, 0, 0, 250, 350);
+        fillMainPanel(panel00);
+
+        final Panel panel1020 = new Panel(new HorizontalLayout());
+        final AbstractOrderedLayout layout1020 = (AbstractOrderedLayout) panel1020.getContent();
+        layout1020.setSpacing(true);
+        layout1020.setMargin(true);
+        panel1020.setWidth(600, Sizeable.UNITS_PIXELS);
+        panel1020.setHeight(350, Sizeable.UNITS_PIXELS);
+        grid.addComponent(panel1020, 1, 0, 2, 0);
+        grid.setComponentAlignment(panel1020, Alignment.TOP_LEFT);
+        layout1020.addComponent(new Label("xpto"));
+
+        final Panel panel01 = new Panel(new HorizontalLayout());
+        panel01.setWidth(250, Sizeable.UNITS_PIXELS);
+        panel01.setHeight(150, Sizeable.UNITS_PIXELS);
+        grid.addComponent(panel01, 0, 1);
+        grid.setComponentAlignment(panel01, Alignment.TOP_LEFT);
+        final HorizontalLayout layout01 = (HorizontalLayout) panel01.getContent();
+        layout01.addComponent(new Label("xpto"));
+
+        final Panel panel11 = new Panel(new HorizontalLayout());
+        panel11.setWidth(290, Sizeable.UNITS_PIXELS);
+        panel11.setHeight(150, Sizeable.UNITS_PIXELS);
+        grid.addComponent(panel11, 1, 1);
+        grid.setComponentAlignment(panel11, Alignment.TOP_LEFT);
+        final HorizontalLayout layout11 = (HorizontalLayout) panel11.getContent();
+        layout11.addComponent(new Label("xpto"));
+
+        final Panel panel21 = new Panel(new HorizontalLayout());
+        panel21.setWidth(290, Sizeable.UNITS_PIXELS);
+        panel21.setHeight(150, Sizeable.UNITS_PIXELS);
+        grid.addComponent(panel21, 2, 1);
+        grid.setComponentAlignment(panel21, Alignment.TOP_LEFT);
+        final HorizontalLayout layout21 = (HorizontalLayout) panel21.getContent();
+        layout21.addComponent(new Label("xpto"));
+
+
+/*
 
 	panel0020 = new Panel(new HorizontalLayout());
 	final HorizontalLayout layout1 = (HorizontalLayout) panel0020.getContent();
@@ -92,15 +143,27 @@ public class FileRepositoryView extends BaseComponent
 
 //	final Panel panel21 = createPanel(grid, 2, 1);
 //        fillPanel(panel21);
-
+*/
 	setImmediate(true);
 	super.attach();
     }
 
-    private void fillMainPanel() {
+    private Panel createGridPanel(final GridLayout grid, final int column, final int row, final int width, int height) {
+        final Panel panel = new Panel(new HorizontalLayout());
+        final AbstractOrderedLayout layout00 = (AbstractOrderedLayout) panel.getContent();
+        layout00.setSpacing(true);
+        layout00.setMargin(true);
+        panel.setWidth(width, Sizeable.UNITS_PIXELS);
+        panel.setHeight(height, Sizeable.UNITS_PIXELS);
+        grid.addComponent(panel, column, row);
+        grid.setComponentAlignment(panel, Alignment.TOP_LEFT);
+	return panel;
+    }
+
+    private void fillMainPanel(final Panel panel) {
 	selectedNode = dirNode;
 
-	final AbstractOrderedLayout layout = (AbstractOrderedLayout) panel0020.getContent();
+	final AbstractOrderedLayout layout = (AbstractOrderedLayout) panel.getContent();
 	
 	layout.setSpacing(true);
 
@@ -130,7 +193,7 @@ public class FileRepositoryView extends BaseComponent
             tree.expandItemsRecursively(id);
         }
 
-        listFiles(dirNode);
+//        listFiles(dirNode);
     }
 
     public HierarchicalContainer getHardwareContainer() {
@@ -142,9 +205,28 @@ public class FileRepositoryView extends BaseComponent
         item.getItemProperty("name").setValue(getMessage("label.file.repository.root"));
         hwContainer.setChildrenAllowed(0, true);
 
+        addChildNodes(hwContainer, dirNode, 0);
+
         return hwContainer;
     }
 
+    private int addChildNodes(final HierarchicalContainer hwContainer, final DirNode parentNode, final int parentItemId) {
+	int nextItemId = parentItemId + 1;
+	for (final AbstractFileNode abstractFileNode : parentNode.getChildSet()) {
+	    if (abstractFileNode.isDir()) {
+		final DirNode dirNode = (DirNode) abstractFileNode;
+		final Item item = hwContainer.addItem(nextItemId);
+		item.getItemProperty("name").setValue(dirNode.getName());
+		hwContainer.setParent(nextItemId, parentItemId);
+		hwContainer.setChildrenAllowed(nextItemId, true);
+
+		nextItemId = addChildNodes(hwContainer, dirNode, nextItemId);
+	    }
+	}
+	return nextItemId;
+    }
+
+/*
     private void listFiles(final DirNode dirNode) {
 	final Panel contentPanel = new Panel(getSelectedDirPath(dirNode));
 
@@ -175,6 +257,7 @@ public class FileRepositoryView extends BaseComponent
 
 	fillAddPanel(contentPanel);
     }
+*/
 
     private void fillAddPanel(final Panel panel) {
         final MultiFileUpload multiFileUpload = new MultiFileUpload() {
@@ -204,27 +287,6 @@ public class FileRepositoryView extends BaseComponent
 
     private String getSelectedDirPath(final DirNode dirNode) {
 	return dirNode.hasParent() ? getSelectedDirPath(dirNode.getParent()) + " > " + dirNode.getName() : getMessage("label.file.repository.root");
-    }
-
-    private GridLayout createLayout(final VerticalLayout layout) {
-	setCompositionRoot(layout);
-
-        final GridLayout grid = new GridLayout(3, 2);
-        grid.setSpacing(true);
-
-        // The style allows us to visualize the cell borders in this example.
-        grid.addStyleName("gridexample");
-
-        grid.setWidth(850, Sizeable.UNITS_PIXELS);
-        grid.setHeight(500, Sizeable.UNITS_PIXELS);
-
-        // Add the layout to the containing layout.
-        layout.addComponent(grid);
-
-        // Align the grid itself within its container layout.
-        layout.setComponentAlignment(grid, Alignment.MIDDLE_CENTER);
-
-        return grid;
     }
 
     private Panel createPanel(final GridLayout grid, final int column1, final int row1, final int column2, final int row2) {
@@ -258,12 +320,13 @@ public class FileRepositoryView extends BaseComponent
         }
     }
 
+
     public void valueChange(ValueChangeEvent event) {
         if (event.getProperty().getValue() != null) {
             final Integer itemId = (Integer) event.getProperty().getValue();
-            listFiles(dirNode);
+//            listFiles(dirNode);
         } else {
-            listFiles(dirNode);
+//            listFiles(dirNode);
         }
     }
 
