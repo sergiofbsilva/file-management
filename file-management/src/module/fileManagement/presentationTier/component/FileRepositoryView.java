@@ -1,10 +1,13 @@
 package module.fileManagement.presentationTier.component;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import module.contents.presentationTier.component.BaseComponent;
 import module.fileManagement.domain.AbstractFileNode;
 import module.fileManagement.domain.DirNode;
+import module.fileManagement.domain.FileNode;
 import module.fileManagement.domain.FileRepository;
 import myorg.applicationTier.Authenticate.UserView;
 import myorg.domain.User;
@@ -18,22 +21,25 @@ import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.util.HierarchicalContainer;
+import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.event.Action;
 import com.vaadin.terminal.Sizeable;
 import com.vaadin.terminal.ThemeResource;
+import com.vaadin.ui.AbstractComponentContainer;
 import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.themes.Reindeer;
 
 @SuppressWarnings("serial")
@@ -50,8 +56,11 @@ public class FileRepositoryView extends BaseComponent
     private DirNode dirNode = null;
 
     private Tree tree;
+    private List<String> dirNodeOids = new ArrayList<String>();
 
-    private DirNode selectedNode;
+    private AbstractOrderedLayout folderView;
+    private Table fileTable;
+
     private Panel contentPanel;
 //    private Panel panel0020;
 
@@ -90,41 +99,19 @@ public class FileRepositoryView extends BaseComponent
         layout.setComponentAlignment(grid, Alignment.TOP_LEFT);
 
         final Panel panel00 = createGridPanel(grid, 0, 0, 250, 350);
-        fillMainPanel(panel00);
+        attachTree(panel00);
 
-        final Panel panel1020 = new Panel(new HorizontalLayout());
-        final AbstractOrderedLayout layout1020 = (AbstractOrderedLayout) panel1020.getContent();
-        layout1020.setSpacing(true);
-        layout1020.setMargin(true);
-        panel1020.setWidth(600, Sizeable.UNITS_PIXELS);
-        panel1020.setHeight(350, Sizeable.UNITS_PIXELS);
-        grid.addComponent(panel1020, 1, 0, 2, 0);
-        grid.setComponentAlignment(panel1020, Alignment.TOP_LEFT);
-        layout1020.addComponent(new Label("xpto"));
+        final Panel panel1020 = createGridPanel(grid, 1, 0, 2, 0, 600, 350);
+        attachFolderView(panel1020);
 
-        final Panel panel01 = new Panel(new HorizontalLayout());
-        panel01.setWidth(250, Sizeable.UNITS_PIXELS);
-        panel01.setHeight(150, Sizeable.UNITS_PIXELS);
-        grid.addComponent(panel01, 0, 1);
-        grid.setComponentAlignment(panel01, Alignment.TOP_LEFT);
-        final HorizontalLayout layout01 = (HorizontalLayout) panel01.getContent();
-        layout01.addComponent(new Label("xpto"));
+        final Panel panel01 = createGridPanel(grid, 0, 1, 250, 150);
+        panel01.addComponent(new Label("Switch Repository Widget"));
 
-        final Panel panel11 = new Panel(new HorizontalLayout());
-        panel11.setWidth(290, Sizeable.UNITS_PIXELS);
-        panel11.setHeight(150, Sizeable.UNITS_PIXELS);
-        grid.addComponent(panel11, 1, 1);
-        grid.setComponentAlignment(panel11, Alignment.TOP_LEFT);
-        final HorizontalLayout layout11 = (HorizontalLayout) panel11.getContent();
-        layout11.addComponent(new Label("xpto"));
+        final Panel panel11 = createGridPanel(grid, 1, 1, 290, 150);
+        panel11.addComponent(new Label("Quota and Space Widget"));
 
-        final Panel panel21 = new Panel(new HorizontalLayout());
-        panel21.setWidth(290, Sizeable.UNITS_PIXELS);
-        panel21.setHeight(150, Sizeable.UNITS_PIXELS);
-        grid.addComponent(panel21, 2, 1);
-        grid.setComponentAlignment(panel21, Alignment.TOP_LEFT);
-        final HorizontalLayout layout21 = (HorizontalLayout) panel21.getContent();
-        layout21.addComponent(new Label("xpto"));
+        final Panel panel21 = createGridPanel(grid, 2, 1, 290, 150);
+        attachAddPanel(panel21);
 
 
 /*
@@ -149,31 +136,31 @@ public class FileRepositoryView extends BaseComponent
     }
 
     private Panel createGridPanel(final GridLayout grid, final int column, final int row, final int width, int height) {
+	return createGridPanel(grid, column, row, column, row, width, height);
+    }
+
+    private Panel createGridPanel(final GridLayout grid, final int column1, final int row1, final int column2, final int row2, final int width, int height) {
         final Panel panel = new Panel(new HorizontalLayout());
-        final AbstractOrderedLayout layout00 = (AbstractOrderedLayout) panel.getContent();
-        layout00.setSpacing(true);
-        layout00.setMargin(true);
+        final AbstractOrderedLayout layout = (AbstractOrderedLayout) panel.getContent();
+        layout.setSpacing(true);
+        layout.setMargin(true);
         panel.setWidth(width, Sizeable.UNITS_PIXELS);
         panel.setHeight(height, Sizeable.UNITS_PIXELS);
-        grid.addComponent(panel, column, row);
+        grid.addComponent(panel, column1, row1, column2, row2);
         grid.setComponentAlignment(panel, Alignment.TOP_LEFT);
 	return panel;
     }
 
-    private void fillMainPanel(final Panel panel) {
-	selectedNode = dirNode;
-
+    private void attachTree(final Panel panel) {
 	final AbstractOrderedLayout layout = (AbstractOrderedLayout) panel.getContent();
 	
-	layout.setSpacing(true);
-
         tree = new Tree();
-        tree.setWidth("150px");
+        tree.setSizeFull();
         layout.addComponent(tree);
         layout.setComponentAlignment(tree, Alignment.TOP_LEFT);
 
         // Contents from a (prefilled example) hierarchical container:
-        tree.setContainerDataSource(getHardwareContainer());
+        tree.setContainerDataSource(getHierarchicalContainer());
 
         // Add Valuechangelistener and Actionhandler
         tree.addListener(this);
@@ -196,15 +183,70 @@ public class FileRepositoryView extends BaseComponent
 //        listFiles(dirNode);
     }
 
-    public HierarchicalContainer getHardwareContainer() {
+    private void attachFolderView(final Panel panel) {
+	folderView = createFolderView();
+	panel.addComponent(folderView);
+    }
+
+    private AbstractOrderedLayout createFolderView() {
+	final AbstractOrderedLayout layout = new VerticalLayout();
+	layout.setSpacing(true);
+	layout.setMargin(false);
+
+	final Label selectedDirPrefix = new Label(getMessage("label.file.repository.selected.dir")
+		+ "<strong>" + getSelectedDirPath(dirNode) + "</strong>", Label.CONTENT_XHTML);
+	layout.addComponent(selectedDirPrefix);
+
+	fileTable = new Table();
+	layout.addComponent(fileTable);
+	fileTable.setWidth(550, Sizeable.UNITS_PIXELS);
+	fileTable.setHeight(275, Sizeable.UNITS_PIXELS);
+	fileTable.setSelectable(true);
+	fileTable.setMultiSelect(true);
+	fileTable.setImmediate(true);
+
+        // connect data source
+	fileTable.setContainerDataSource(getFileContainer());
+
+        // turn on column reordering and collapsing
+	fileTable.setColumnReorderingAllowed(true);
+	fileTable.setColumnCollapsingAllowed(true);
+
+        // set column headers
+	fileTable.setColumnHeaders(new String[] { "File Name", "File Size" });
+
+        return layout;
+    }
+
+    public IndexedContainer getFileContainer() {
+        IndexedContainer c = new IndexedContainer();
+        c.addContainerProperty("filename", String.class, null);
+        c.addContainerProperty("filesize", String.class, null);
+
+        for (final AbstractFileNode abstractFileNode : dirNode.getChildSet()) {
+            if (abstractFileNode.isFile()) {
+        	final FileNode fileNode = (FileNode) abstractFileNode;
+
+        	final String oid = fileNode.getExternalId();
+        	final String filename = "xxx" + oid;
+        	final String filesize = oid;
+
+                final Item item = c.addItem(oid);
+                item.getItemProperty("filename").setValue(filename);
+                item.getItemProperty("filesize").setValue(filesize);
+            }
+        }
+
+        c.sort(new Object[] { "filename" }, new boolean[] { true });
+        return c;
+    }
+
+    public HierarchicalContainer getHierarchicalContainer() {
         final HierarchicalContainer hwContainer = new HierarchicalContainer();
         hwContainer.addContainerProperty("name", String.class, null);
         hwContainer.addContainerProperty("icon", ThemeResource.class, new ThemeResource("../runo/icons/16/document.png"));
 
-        final Item item = hwContainer.addItem(0);
-        item.getItemProperty("name").setValue(getMessage("label.file.repository.root"));
-        hwContainer.setChildrenAllowed(0, true);
-
+        addItem(hwContainer, 0, dirNode);
         addChildNodes(hwContainer, dirNode, 0);
 
         return hwContainer;
@@ -215,15 +257,26 @@ public class FileRepositoryView extends BaseComponent
 	for (final AbstractFileNode abstractFileNode : parentNode.getChildSet()) {
 	    if (abstractFileNode.isDir()) {
 		final DirNode dirNode = (DirNode) abstractFileNode;
-		final Item item = hwContainer.addItem(nextItemId);
-		item.getItemProperty("name").setValue(dirNode.getName());
+		addItem(hwContainer, nextItemId, dirNode);
 		hwContainer.setParent(nextItemId, parentItemId);
-		hwContainer.setChildrenAllowed(nextItemId, true);
 
 		nextItemId = addChildNodes(hwContainer, dirNode, nextItemId);
 	    }
 	}
 	return nextItemId;
+    }
+
+    private Item addItem(final HierarchicalContainer hwContainer, final int itemId, final DirNode dirNode) {
+	final Item item = hwContainer.addItem(itemId);
+	if (dirNode.hasParent()) {
+	    item.getItemProperty("name").setValue(dirNode.getName());
+	} else {
+	    item.getItemProperty("name").setValue(getMessage("label.file.repository.root"));
+	}
+	final boolean hasChildren = dirNode.hasAnyChildDir();
+	hwContainer.setChildrenAllowed(itemId, hasChildren);
+	dirNodeOids.add(dirNode.getExternalId());
+	return item;
     }
 
 /*
@@ -259,7 +312,7 @@ public class FileRepositoryView extends BaseComponent
     }
 */
 
-    private void fillAddPanel(final Panel panel) {
+    private void attachAddPanel(final Panel panel) {
         final MultiFileUpload multiFileUpload = new MultiFileUpload() {
 
             @Override
@@ -273,16 +326,25 @@ public class FileRepositoryView extends BaseComponent
             }
             
 	    @Override
-	    protected void handleFile(File file, String fileName, String mimeType, long length) {
-		final Label label = new Label(fileName);
-		contentPanel.addComponent(label);
+	    protected void handleFile(final File file, final String fileName, final String mimeType, final long length) {
+        	//final FileNode fileNode = (FileNode) abstractFileNode;
+
+        	final String oid = Long.toString(System.currentTimeMillis());
+        	final String filename = fileName;
+        	final String filesize = Long.toString(length);
+
+                final Item item = (Item) fileTable.addItem(oid);
+                item.getItemProperty("filename").setValue(filename);
+                item.getItemProperty("filesize").setValue(filesize);
 	    }
 
 	};
 	final DirectoryFileFactory directoryFileFactory = new DirectoryFileFactory(new File("/tmp"));
 	multiFileUpload.setFileFactory(directoryFileFactory);
-	panel.addComponent(multiFileUpload);
-	//setComponentAlignment(multiFileUpload, Alignment.TOP_RIGHT);
+
+	final AbstractOrderedLayout layout = (AbstractOrderedLayout) panel.getContent();
+        layout.addComponent(multiFileUpload);
+        layout.setComponentAlignment(multiFileUpload, Alignment.TOP_CENTER);
     }
 
     private String getSelectedDirPath(final DirNode dirNode) {
@@ -324,9 +386,13 @@ public class FileRepositoryView extends BaseComponent
     public void valueChange(ValueChangeEvent event) {
         if (event.getProperty().getValue() != null) {
             final Integer itemId = (Integer) event.getProperty().getValue();
-//            listFiles(dirNode);
-        } else {
-//            listFiles(dirNode);
+            final String dirNodeOid = dirNodeOids.get(itemId.intValue());
+            dirNode = getDomainObject(dirNodeOid);
+
+            final AbstractComponentContainer parent = (AbstractComponentContainer) folderView.getParent();
+            final AbstractOrderedLayout newFolderView = createFolderView();
+            parent.replaceComponent(folderView, newFolderView);
+            folderView = newFolderView;
         }
     }
 

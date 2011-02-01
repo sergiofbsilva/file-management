@@ -30,10 +30,19 @@ public class DirNode extends DirNode_Base {
 	return false;
     }
 
+    public boolean hasAnyChildDir() {
+	for (final AbstractFileNode abstractFileNode : getChildSet()) {
+	    if (abstractFileNode.isDir()) {
+		return true;
+	    }
+	}
+	return false;
+    }
+
     @Service
     public void initIfNecessary() {
 	if (!hasAnyChild()) {
-	    final DirNode dirNode = new DirNode(this, "DocumentosOficiais");
+	    final DirNode dirNode = new DirNode(this, "Documentos Oficiais");
 	    new DirNode(dirNode, "Contracto");
 	    new DirNode(dirNode, "IRS");
 	    new DirNode(dirNode, "Vencimento");
