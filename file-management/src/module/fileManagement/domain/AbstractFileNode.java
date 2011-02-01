@@ -1,5 +1,7 @@
 package module.fileManagement.domain;
 
+import pt.ist.fenixWebFramework.services.Service;
+
 public class AbstractFileNode extends AbstractFileNode_Base {
     
     public AbstractFileNode() {
@@ -12,6 +14,16 @@ public class AbstractFileNode extends AbstractFileNode_Base {
 
     public boolean isDir() {
 	return false;
+    }
+
+    public void delete() {
+	removeParent();
+	deleteDomainObject();
+    }
+
+    @Service
+    public void deleteService() {
+	delete();
     }
 
 }

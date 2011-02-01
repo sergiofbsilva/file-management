@@ -21,6 +21,11 @@ relation UserAbstractFileNode {
 	DirNode playsRole fileRepository;
 }
 
+relation UnitAbstractFileNode {
+	.module.organization.domain.Unit playsRole unit;
+	DirNode playsRole fileRepository;
+}
+
 relation DirNodeAbstractFileNode {
 	DirNode playsRole parent;
 	AbstractFileNode playsRole child {
