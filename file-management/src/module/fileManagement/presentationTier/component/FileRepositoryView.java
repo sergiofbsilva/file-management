@@ -61,6 +61,8 @@ public class FileRepositoryView extends BaseComponent
 
     private DirNode dirNode = null;
 
+    private Label title;
+
     private AbstractOrderedLayout directoryView;    
     private Tree tree;
 
@@ -87,7 +89,8 @@ public class FileRepositoryView extends BaseComponent
 	setCompositionRoot(layout);
 
 	// Title
-	final Label title = new Label(getMessage("label.file.repository.of") + " " + dirNode.getName());
+	title = new Label();
+	setTitle(dirNode.getName());
 	title.setStyleName(Reindeer.LABEL_H2);
 	layout.addComponent(title);
 	layout.setComponentAlignment(title, Alignment.MIDDLE_LEFT);
@@ -118,6 +121,10 @@ public class FileRepositoryView extends BaseComponent
 
 	setImmediate(true);
 	super.attach();
+    }
+
+    private void setTitle(final String repositoryName) {
+	title.setValue(getMessage("label.file.repository.of") + " " + dirNode.getName());
     }
 
     private Panel createGridPanel(final GridLayout grid, final int column, final int row, final int width, int height) {
@@ -426,6 +433,7 @@ public class FileRepositoryView extends BaseComponent
 	        if (event.getProperty().getValue() != null) {
 	            final String dirNodeOid = (String) event.getProperty().getValue();
 	            dirNode = getDomainObject(dirNodeOid);
+	            setTitle(dirNode.getName());
 
 	            final AbstractComponentContainer parentFolder = (AbstractComponentContainer) folderView.getParent();
 	            final AbstractOrderedLayout newFolderView = createFolderView();
