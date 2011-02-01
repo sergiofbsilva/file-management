@@ -62,9 +62,6 @@ public class FileRepositoryView extends BaseComponent
     private AbstractOrderedLayout folderView;
     private Table fileTable;
 
-    private Panel contentPanel;
-//    private Panel panel0020;
-
     @Override
     protected String getBundle() {
 	return "resources.FileManagementResources";
@@ -300,35 +297,6 @@ public class FileRepositoryView extends BaseComponent
     private String getSelectedDirPath(final DirNode dirNode) {
 	return dirNode.hasParent() ? getSelectedDirPath(dirNode.getParent()) + " > " + dirNode.getName() : getMessage("label.file.repository.root");
     }
-
-    private Panel createPanel(final GridLayout grid, final int column1, final int row1, final int column2, final int row2) {
-        final Panel panel = createPanel();
-        grid.addComponent(panel, column1, row1, column2, row2);
-        grid.setComponentAlignment(panel, Alignment.MIDDLE_CENTER);
-        return panel;
-    }
-
-    private Panel createPanel(final GridLayout grid, final int column, final int row) {
-        final Panel panel = createPanel();
-        grid.addComponent(panel, column, row);
-        grid.setComponentAlignment(panel, Alignment.MIDDLE_CENTER);
-        return panel;
-    }
-
-    private Panel createPanel() {
-        final Panel panel = new Panel();
-        VerticalLayout layout1 = (VerticalLayout) panel.getContent();
-        layout1.setMargin(true);
-        layout1.setSpacing(true);
-        return panel;
-    }
-
-    private void fillPanel(final Panel panel) {
-	for (int i = 0; i < 2; i++) {
-            panel.addComponent(new Label("The quick brown fox jumps over the lazy dog."));
-        }
-    }
-
 
     public void valueChange(ValueChangeEvent event) {
         if (event.getProperty().getValue() != null) {
