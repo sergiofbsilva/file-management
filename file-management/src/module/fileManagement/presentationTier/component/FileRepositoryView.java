@@ -14,6 +14,7 @@ import myorg.domain.User;
 
 import org.vaadin.easyuploads.DirectoryFileFactory;
 
+import pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
 import vaadin.annotation.EmbeddedComponent;
 
@@ -30,6 +31,7 @@ import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -39,7 +41,6 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
-import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.themes.Reindeer;
 
 @SuppressWarnings("serial")
@@ -113,24 +114,6 @@ public class FileRepositoryView extends BaseComponent
         final Panel panel21 = createGridPanel(grid, 2, 1, 290, 150);
         attachAddPanel(panel21);
 
-
-/*
-
-	panel0020 = new Panel(new HorizontalLayout());
-	final HorizontalLayout layout1 = (HorizontalLayout) panel0020.getContent();
-        layout1.setMargin(true);
-        layout1.setSpacing(true);
-        grid.addComponent(panel0020, 0, 0, 2, 0);
-        grid.setComponentAlignment(panel0020, Alignment.MIDDLE_CENTER);
-	panel0020.setStyleName(Reindeer.PANEL_LIGHT);
-	fillMainPanel();
-
-	final Panel panel0111 = createPanel(grid, 0, 1, 1, 1);
-	fillAddPanel(panel0111);
-
-//	final Panel panel21 = createPanel(grid, 2, 1);
-//        fillPanel(panel21);
-*/
 	setImmediate(true);
 	super.attach();
     }
@@ -180,7 +163,6 @@ public class FileRepositoryView extends BaseComponent
             tree.expandItemsRecursively(id);
         }
 
-//        listFiles(dirNode);
     }
 
     private void attachFolderView(final Panel panel) {
@@ -226,12 +208,13 @@ public class FileRepositoryView extends BaseComponent
         for (final AbstractFileNode abstractFileNode : dirNode.getChildSet()) {
             if (abstractFileNode.isFile()) {
         	final FileNode fileNode = (FileNode) abstractFileNode;
+        	final GenericFile file = fileNode.getFile();
 
         	final String oid = fileNode.getExternalId();
-        	final String filename = "xxx" + oid;
-        	final String filesize = oid;
+        	final String filename = file.getFilename();
+        	final String filesize = Integer.toString(file.getContent().length);
 
-                final Item item = c.addItem(oid);
+                final Item item = (Item) c.addItem(oid);
                 item.getItemProperty("filename").setValue(filename);
                 item.getItemProperty("filesize").setValue(filesize);
             }
@@ -279,39 +262,6 @@ public class FileRepositoryView extends BaseComponent
 	return item;
     }
 
-/*
-    private void listFiles(final DirNode dirNode) {
-	final Panel contentPanel = new Panel(getSelectedDirPath(dirNode));
-
-        final VerticalLayout layout = (VerticalLayout) contentPanel.getContent();
-        layout.setMargin(true);
-        layout.setSpacing(true);
-        layout.setSizeFull();
-	if (dirNode.hasAnyChildFile()) {
-	    for (final AbstractFileNode abstractFileNode : dirNode.getChildSet()) {
-		if (abstractFileNode.isFile()) {
-		    final FileNode fileNode = (FileNode) abstractFileNode;
-		    final Label label = new Label(fileNode.getExternalId());
-		    contentPanel.addComponent(label);
-		}
-	    }
-	} else {
-	    final Label noFilesFound = new Label(getMessage("label.file.repository.no.files.found"));
-	    contentPanel.addComponent(noFilesFound);	    
-	}
-
-	if (this.contentPanel == null) {
-	    panel0020.addComponent(contentPanel);
-	} else {
-	    panel0020.replaceComponent(this.contentPanel, contentPanel);
-	}
-	((AbstractOrderedLayout) panel0020.getContent()).setComponentAlignment(contentPanel, Alignment.TOP_CENTER);
-	this.contentPanel = contentPanel;
-
-	fillAddPanel(contentPanel);
-    }
-*/
-
     private void attachAddPanel(final Panel panel) {
         final MultiFileUpload multiFileUpload = new MultiFileUpload() {
 
@@ -327,9 +277,9 @@ public class FileRepositoryView extends BaseComponent
             
 	    @Override
 	    protected void handleFile(final File file, final String fileName, final String mimeType, final long length) {
-        	//final FileNode fileNode = (FileNode) abstractFileNode;
+        	final FileNode fileNode = dirNode.createFile(file, fileName);
 
-        	final String oid = Long.toString(System.currentTimeMillis());
+        	final String oid = fileNode.getExternalId();
         	final String filename = fileName;
         	final String filesize = Long.toString(length);
 
@@ -367,12 +317,9 @@ public class FileRepositoryView extends BaseComponent
 
     private Panel createPanel() {
         final Panel panel = new Panel();
-        //panel.setHeight("200px");
-
         VerticalLayout layout1 = (VerticalLayout) panel.getContent();
         layout1.setMargin(true);
         layout1.setSpacing(true);
-
         return panel;
     }
 

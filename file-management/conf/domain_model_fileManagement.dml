@@ -1,16 +1,20 @@
 package module.fileManagement.domain;
 
-
+external class .pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile;
 
 class AbstractFileNode {
+	String ojbConcreteClass;
 }
 
 	class FileNode extends AbstractFileNode {
 	}
 
-	class DirNode extends FileNode {
+	class DirNode extends AbstractFileNode {
 		String name;
 	}
+
+class UploadedFile extends .pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile {
+}
 
 relation UserAbstractFileNode {
 	.myorg.domain.User playsRole user;
@@ -22,4 +26,11 @@ relation DirNodeAbstractFileNode {
 	AbstractFileNode playsRole child {
 		multiplicity *;
 	}
+}
+
+relation FileNodeFile {
+	FileNode playsRole {
+		multiplicity *;
+	}
+	.pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile playsRole file;
 }

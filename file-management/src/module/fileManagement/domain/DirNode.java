@@ -1,5 +1,7 @@
 package module.fileManagement.domain;
 
+import java.io.File;
+
 import myorg.domain.User;
 import pt.ist.fenixWebFramework.services.Service;
 
@@ -52,6 +54,11 @@ public class DirNode extends DirNode_Base {
     @Override
     public boolean isDir() {
         return true;
+    }
+
+    @Service
+    public FileNode createFile(final File file, final String fileName) {
+	return new FileNode(this, file, fileName);
     }
 
 }
