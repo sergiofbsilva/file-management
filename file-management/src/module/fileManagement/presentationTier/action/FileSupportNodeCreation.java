@@ -16,10 +16,10 @@ import pt.ist.bennu.vaadin.domain.contents.VaadinNode;
 import pt.ist.fenixWebFramework.servlets.functionalities.CreateNodeAction;
 import pt.ist.fenixWebFramework.struts.annotations.Mapping;
 
-@Mapping(path = "/fileSupportNodeCreation")
+@Mapping(path = "/fileManagementNodeCreation")
 public class FileSupportNodeCreation extends ContextBaseAction {
 
-    @CreateNodeAction(bundle = "FILE_SUPPORT_RESOURCES", key = "add.node.file.management.interface", groupKey = "label.module.fileSupport")
+    @CreateNodeAction(bundle = "FILE_MANAGEMENT_RESOURCES", key = "add.node.file.management.interface", groupKey = "label.module.fileSupport")
     public final ActionForward createFileManagerInterface(final ActionMapping mapping, final ActionForm form,
 	    final HttpServletRequest request, final HttpServletResponse response) throws Exception {
 	final VirtualHost virtualHost = getDomainObject(request, "virtualHostToManageId");
