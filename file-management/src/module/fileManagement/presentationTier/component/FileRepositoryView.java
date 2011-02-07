@@ -1,6 +1,7 @@
 package module.fileManagement.presentationTier.component;
 
 import java.io.File;
+import java.io.InputStream;
 
 import module.contents.presentationTier.component.BaseComponent;
 import module.fileManagement.domain.AbstractFileNode;
@@ -21,14 +22,16 @@ import pt.ist.fenixframework.pstm.AbstractDomainObject;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
 import vaadin.annotation.EmbeddedComponent;
 
+import com.vaadin.Application;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.HierarchicalContainer;
-import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.event.Action;
 import com.vaadin.terminal.Sizeable;
+import com.vaadin.terminal.StreamResource;
+import com.vaadin.terminal.StreamResource.StreamSource;
 import com.vaadin.terminal.ThemeResource;
 import com.vaadin.ui.AbstractComponentContainer;
 import com.vaadin.ui.AbstractOrderedLayout;
@@ -39,6 +42,7 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Link;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
@@ -83,6 +87,8 @@ public class FileRepositoryView extends BaseComponent
 
     @Override
     public void attach() {
+	super.attach();
+
 	final VerticalLayout layout = createVerticalLayout();
 	layout.setSpacing(true);
 	layout.setMargin(true);
@@ -108,7 +114,7 @@ public class FileRepositoryView extends BaseComponent
         attachTree(panel00);
 
         final Panel panel1020 = createGridPanel(grid, 1, 0, 2, 0, 600, 350);
-        attachFolderView(panel1020);
+        attachFolderView(getApplication(), panel1020);
 
         final Panel panel01 = createGridPanel(grid, 0, 1, 250, 150);
         attachChangeRepositoryView(panel01);
@@ -120,7 +126,6 @@ public class FileRepositoryView extends BaseComponent
         attachAddPanel(panel21);
 
 	setImmediate(true);
-	super.attach();
     }
 
     private void setTitle(final String repositoryName) {
@@ -180,12 +185,12 @@ public class FileRepositoryView extends BaseComponent
         return layout;
     }
 
-    private void attachFolderView(final Panel panel) {
-	folderView = createFolderView();
+    private void attachFolderView(final Application application, final Panel panel) {
+	folderView = createFolderView(application);
 	panel.addComponent(folderView);
     }
 
-    private AbstractOrderedLayout createFolderView() {
+    private AbstractOrderedLayout createFolderView(final Application application) {
 	final AbstractOrderedLayout layout = new VerticalLayout();
 	layout.setSpacing(true);
 	layout.setMargin(false);
@@ -198,12 +203,13 @@ public class FileRepositoryView extends BaseComponent
 	layout.addComponent(fileTable);
 	fileTable.setWidth(550, Sizeable.UNITS_PIXELS);
 	fileTable.setHeight(275, Sizeable.UNITS_PIXELS);
-	fileTable.setSelectable(true);
-	fileTable.setMultiSelect(true);
+	fileTable.setSelectable(false);
+	fileTable.setMultiSelect(false);
 	fileTable.setImmediate(true);
+	fileTable.setSortDisabled(false);
 
-        // connect data source
-	fileTable.setContainerDataSource(getFileContainer());
+        // add initial data
+	initFileContainer();
 
         // turn on column reordering and collapsing
 	fileTable.setColumnReorderingAllowed(true);
@@ -215,28 +221,44 @@ public class FileRepositoryView extends BaseComponent
         return layout;
     }
 
-    public IndexedContainer getFileContainer() {
-        IndexedContainer c = new IndexedContainer();
-        c.addContainerProperty("filename", String.class, null);
-        c.addContainerProperty("filesize", String.class, null);
+    public void initFileContainer() {
+        fileTable.addContainerProperty("filename", Link.class, null);
+        fileTable.addContainerProperty("filesize", Integer.class, null);
 
         for (final AbstractFileNode abstractFileNode : dirNode.getChildSet()) {
             if (abstractFileNode.isFile()) {
         	final FileNode fileNode = (FileNode) abstractFileNode;
-        	final GenericFile file = fileNode.getFile();
-
         	final String oid = fileNode.getExternalId();
-        	final String filename = file.getFilename();
-        	final String filesize = Integer.toString(file.getContent().length);
-
-                final Item item = (Item) c.addItem(oid);
-                item.getItemProperty("filename").setValue(filename);
-                item.getItemProperty("filesize").setValue(filesize);
+        	fileTable.addItem(createFileNodeItem(fileNode), oid);
             }
         }
+    }
 
-        c.sort(new Object[] { "filename" }, new boolean[] { true });
-        return c;
+    public Object[] createFileNodeItem(final FileNode fileNode) {
+	final GenericFile file = fileNode.getFile();
+
+	final String oid = fileNode.getExternalId();
+	final String filename = file.getFilename();
+
+	final StreamSource streamSource = new StreamSource() {
+	    @Override
+	    public InputStream getStream() {
+		final FileNode fileNode = AbstractDomainObject.fromExternalId(oid);
+		final GenericFile file = fileNode.getFile();
+		return file.getStream();
+	    }
+	};
+	final StreamResource resource = new StreamResource(streamSource, "picture.png", getApplication());
+	resource.setMIMEType("application/octet-stream");
+	resource.setCacheTime(0);
+
+        final Link download = new Link(filename, resource);
+        download.setDescription("Download image to your local computer");
+        download.setTargetName("_new");
+
+        final Label filesize = new Label(Integer.toString(file.getContent().length));
+
+        return new Object[] { download, filesize };
     }
 
     public HierarchicalContainer getHierarchicalContainer() {
@@ -292,14 +314,7 @@ public class FileRepositoryView extends BaseComponent
 	    @Override
 	    protected void handleFile(final File file, final String fileName, final String mimeType, final long length) {
         	final FileNode fileNode = dirNode.createFile(file, fileName);
-
-        	final String oid = fileNode.getExternalId();
-        	final String filename = fileName;
-        	final String filesize = Long.toString(length);
-
-                final Item item = (Item) fileTable.addItem(oid);
-                item.getItemProperty("filename").setValue(filename);
-                item.getItemProperty("filesize").setValue(filesize);
+        	fileTable.addItem(createFileNodeItem(fileNode), fileNode.getExternalId());
 	    }
 
 	};
@@ -321,7 +336,7 @@ public class FileRepositoryView extends BaseComponent
             dirNode = getDomainObject(itemId);
 
             final AbstractComponentContainer parent = (AbstractComponentContainer) folderView.getParent();
-            final AbstractOrderedLayout newFolderView = createFolderView();
+            final AbstractOrderedLayout newFolderView = createFolderView(getApplication());
             parent.replaceComponent(folderView, newFolderView);
             folderView = newFolderView;
         }
@@ -426,6 +441,8 @@ public class FileRepositoryView extends BaseComponent
 	    }
 	}
 
+	final Application application = getApplication();
+
 	optionGroup.addListener(new ValueChangeListener() {
 	    
 	    @Override
@@ -436,7 +453,7 @@ public class FileRepositoryView extends BaseComponent
 	            setTitle(dirNode.getName());
 
 	            final AbstractComponentContainer parentFolder = (AbstractComponentContainer) folderView.getParent();
-	            final AbstractOrderedLayout newFolderView = createFolderView();
+	            final AbstractOrderedLayout newFolderView = createFolderView(application);
 	            parentFolder.replaceComponent(folderView, newFolderView);
 	            folderView = newFolderView;
 
