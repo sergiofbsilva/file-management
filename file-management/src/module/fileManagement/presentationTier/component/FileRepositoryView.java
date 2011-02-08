@@ -19,6 +19,7 @@ import module.organization.domain.Party;
 import module.organization.domain.Person;
 import module.organization.domain.Unit;
 import myorg.applicationTier.Authenticate.UserView;
+import myorg.domain.MyOrg;
 import myorg.domain.User;
 
 import org.vaadin.easyuploads.DirectoryFileFactory;
@@ -41,9 +42,11 @@ import com.vaadin.terminal.ThemeResource;
 import com.vaadin.ui.AbstractComponentContainer;
 import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.AbstractSelect;
+import com.vaadin.ui.AbstractSelect.Filtering;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -492,7 +495,15 @@ public class FileRepositoryView extends BaseComponent
         }
     }
 
+    String lastRepositoryOption = null;
+    int count = 1;
+
     private void attachChangeRepositoryView(final Panel panel) {
+	final VerticalLayout layout = new VerticalLayout();
+	layout.setSpacing(true);
+	//layout.setMargin(true);
+	panel.addComponent(layout);
+
 	final OptionGroup optionGroup = new OptionGroup(getMessage("label.file.repository.select"));
 	optionGroup.setNullSelectionAllowed(false);
 	optionGroup.setImmediate(true);
@@ -516,6 +527,13 @@ public class FileRepositoryView extends BaseComponent
 		    final String repositoryOid = fileRepository.getExternalId();
 		    final Item repositoryItem = optionGroup.addItem(repositoryOid);
 		    repositoryItem.getItemProperty("name").setValue(unit.getPartyName().getContent());
+
+		    lastRepositoryOption = repositoryOid;
+		    count++;
+
+		    if (count == 3) {
+			break;
+		    }
 		}
 	    }
 	}
@@ -526,24 +544,97 @@ public class FileRepositoryView extends BaseComponent
 	    public void valueChange(final ValueChangeEvent event) {
 	        if (event.getProperty().getValue() != null) {
 	            final String dirNodeOid = (String) event.getProperty().getValue();
-	            dirNode = getDomainObject(dirNodeOid);
-	            setTitle(dirNode.getName());
-
-	            final AbstractComponentContainer parentFolder = (AbstractComponentContainer) folderView.getParent();
-	            final AbstractOrderedLayout newFolderView = createFolderView();
-	            parentFolder.replaceComponent(folderView, newFolderView);
-	            folderView = newFolderView;
-
-	            final AbstractComponentContainer parentDirectory = (AbstractComponentContainer) directoryView.getParent();
-	            final AbstractOrderedLayout newDirectoryView = createDirectoryView();
-	            parentDirectory.replaceComponent(directoryView, newDirectoryView);
-	            directoryView = newDirectoryView;
+	            switchRepository((DirNode) getDomainObject(dirNodeOid));
 	        }
 	    }
 
 	});
 
-	panel.addComponent(optionGroup);
+	layout.addComponent(optionGroup);
+
+	final HorizontalLayout horizontalLayout = new HorizontalLayout();
+	horizontalLayout.setSpacing(true);
+	layout.addComponent(horizontalLayout);
+
+	final Label label = new Label(getMessage("label.other"));
+	horizontalLayout.addComponent(label);
+
+        final ComboBox comboBox = new ComboBox();
+        comboBox.setWidth(400, UNITS_PIXELS);
+        comboBox.setNullSelectionAllowed(false);
+        comboBox.addContainerProperty("name", String.class, null);
+        comboBox.setItemCaptionPropertyId("name");
+        comboBox.setItemCaptionMode(AbstractSelect.ITEM_CAPTION_MODE_PROPERTY);
+        comboBox.setImmediate(true);
+        comboBox.setFilteringMode(Filtering.FILTERINGMODE_CONTAINS);
+        comboBox.addListener(new ValueChangeListener() {
+	    
+	    @Override
+	    public void valueChange(final ValueChangeEvent event) {
+	        if (event.getProperty().getValue() != null) {
+	            final String partyOid = (String) event.getProperty().getValue();
+	            final Party party = AbstractDomainObject.fromExternalId(partyOid);
+
+	            final DirNode fileRepository;
+	            if (party.isPerson()) {
+	        	final Person person = (Person) party;
+	        	fileRepository = FileRepository.getOrCreateFileRepository(person.getUser());
+	            } else if (party.isUnit()) {
+	        	final Unit unit = (Unit) party;
+	        	fileRepository = FileRepository.getOrCreateFileRepository(unit);
+	            } else {
+	        	throw new Error("unreachable.code");
+	            }
+
+	            switchRepository(fileRepository);
+
+	            comboBox.setValue(null);
+
+		    final String repositoryOid = fileRepository.getExternalId();
+		    if (!optionGroup.containsId(repositoryOid)) {
+
+			if (count == 3) {
+			    optionGroup.removeItem(lastRepositoryOption);
+			}
+
+			final Item repositoryItem = optionGroup.addItem(repositoryOid);
+			repositoryItem.getItemProperty("name").setValue(party.getPartyName().getContent());
+
+			lastRepositoryOption = repositoryOid;
+
+		    }
+
+		    optionGroup.select(repositoryOid);
+	        }
+	    }
+	});
+
+        for (final Party party : MyOrg.getInstance().getPartiesSet()) {
+            if (party.isUnit() || (party.isPerson() && ((Person) party).hasUser())) {
+        	final String externalId = party.getExternalId();
+        	final String name = party.getPresentationName();
+
+        	final Item comboItem = comboBox.addItem(externalId);
+        	comboItem.getItemProperty("name").setValue(name);
+            }
+        }
+
+        horizontalLayout.addComponent(comboBox);
+    }
+
+    private void switchRepository(final DirNode fileRepository) {
+	dirNode = fileRepository;
+	setTitle(dirNode.getName());
+
+	final AbstractComponentContainer parentFolder = (AbstractComponentContainer) folderView.getParent();
+	final AbstractOrderedLayout newFolderView = createFolderView();
+	parentFolder.replaceComponent(folderView, newFolderView);
+	folderView = newFolderView;
+
+	final AbstractComponentContainer parentDirectory = (AbstractComponentContainer) directoryView.getParent();
+	final AbstractOrderedLayout newDirectoryView = createDirectoryView();
+	parentDirectory.replaceComponent(directoryView, newDirectoryView);
+	directoryView = newDirectoryView;
     }
 
 }
