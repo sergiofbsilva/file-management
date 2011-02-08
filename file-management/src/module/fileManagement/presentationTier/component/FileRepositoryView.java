@@ -28,7 +28,6 @@ import pt.ist.fenixframework.pstm.AbstractDomainObject;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
 import vaadin.annotation.EmbeddedComponent;
 
-import com.vaadin.Application;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -101,38 +100,41 @@ public class FileRepositoryView extends BaseComponent
 	layout.setMargin(true);
 	setCompositionRoot(layout);
 
-	// Title
 	title = new Label();
 	setTitle(dirNode.getName());
 	title.setStyleName(Reindeer.LABEL_H2);
 	layout.addComponent(title);
 	layout.setComponentAlignment(title, Alignment.MIDDLE_LEFT);
 
-	// Organize page body
-        final GridLayout grid = new GridLayout(3, 2);
-        grid.setSpacing(true);
-        grid.addStyleName("gridexample");
-        grid.setWidth(875, Sizeable.UNITS_PIXELS);
-        grid.setHeight(525, Sizeable.UNITS_PIXELS);
-        layout.addComponent(grid);
-        layout.setComponentAlignment(grid, Alignment.TOP_LEFT);
 
-        final Panel panel00 = createGridPanel(grid, 0, 0, 250, 350);
+        final GridLayout grid1 = new GridLayout(2, 1);
+        grid1.setSpacing(true);
+        grid1.setWidth(875, Sizeable.UNITS_PIXELS);
+        grid1.setHeight(365, Sizeable.UNITS_PIXELS);
+        layout.addComponent(grid1);
+        layout.setComponentAlignment(grid1, Alignment.TOP_LEFT);
+
+        final Panel panel00 = createGridPanel(grid1, 0, 0, 250, 350);
         attachTree(panel00);
 
-        final Panel panel1020 = createGridPanel(grid, 1, 0, 2, 0, 600, 350);
-        attachFolderView(getApplication(), panel1020);
+        final Panel panel1020 = createGridPanel(grid1, 1, 0, 600, 350);
+        attachFolderView(panel1020);
 
-        final Panel panel01 = createGridPanel(grid, 0, 1, 250, 150);
+
+        final GridLayout grid2 = new GridLayout(2, 1);
+        grid2.setSpacing(true);
+        grid2.setWidth(875, Sizeable.UNITS_PIXELS);
+        grid2.setHeight(150, Sizeable.UNITS_PIXELS);
+        layout.addComponent(grid2);
+        layout.setComponentAlignment(grid2, Alignment.TOP_LEFT);
+
+        final Panel panel01 = createGridPanel(grid2, 0, 0, 550, 150);
         attachChangeRepositoryView(panel01);
 
-        final Panel panel11 = createGridPanel(grid, 1, 1, 290, 150);
-        panel11.addComponent(new Label("Quota and Space Widget"));
-
-        final Panel panel21 = createGridPanel(grid, 2, 1, 290, 150);
+        final Panel panel21 = createGridPanel(grid2, 1, 0, 290, 150);
         attachAddPanel(panel21);
 
-	setImmediate(true);
+        setImmediate(true);
     }
 
     private void setTitle(final String repositoryName) {
@@ -192,12 +194,12 @@ public class FileRepositoryView extends BaseComponent
         return layout;
     }
 
-    private void attachFolderView(final Application application, final Panel panel) {
-	folderView = createFolderView(application);
+    private void attachFolderView(final Panel panel) {
+	folderView = createFolderView();
 	panel.addComponent(folderView);
     }
 
-    private AbstractOrderedLayout createFolderView(final Application application) {
+    private AbstractOrderedLayout createFolderView() {
 	final AbstractOrderedLayout layout = new VerticalLayout();
 	layout.setSpacing(true);
 	layout.setMargin(false);
@@ -321,7 +323,7 @@ public class FileRepositoryView extends BaseComponent
 
 	final AbstractOrderedLayout layout = (AbstractOrderedLayout) panel.getContent();
         layout.addComponent(multiFileUpload);
-        layout.setComponentAlignment(multiFileUpload, Alignment.TOP_CENTER);
+        layout.setComponentAlignment(multiFileUpload, Alignment.MIDDLE_CENTER);
     }
 
     private String getSelectedDirPath(final DirNode dirNode) {
@@ -334,7 +336,7 @@ public class FileRepositoryView extends BaseComponent
             dirNode = getDomainObject(itemId);
 
             final AbstractComponentContainer parent = (AbstractComponentContainer) folderView.getParent();
-            final AbstractOrderedLayout newFolderView = createFolderView(getApplication());
+            final AbstractOrderedLayout newFolderView = createFolderView();
             parent.replaceComponent(folderView, newFolderView);
             folderView = newFolderView;
         }
@@ -396,24 +398,55 @@ public class FileRepositoryView extends BaseComponent
 
 	    getWindow().open(resource);
 	} else if (action == ACTION_ADD) {
-            // Allow children for the target item, and expand it
-            tree.setChildrenAllowed(target, true);
-            tree.expandItem(target);
+            final Window outerWindow = getWindow();
+            final Window subwindow = new Window(getMessage("label.file.repository.add.dir"));
+            subwindow.setModal(true);
+            subwindow.setWidth("200px");
+            outerWindow.addWindow(subwindow);
 
-            final String parentOid = (String) target;
+            final VerticalLayout layout = (VerticalLayout) subwindow.getContent();
+            layout.setMargin(true);
+            layout.setSpacing(true);
 
-            final DirNode selectedDirNode = getDomainObject(parentOid);
-            final DirNode dirNode = selectedDirNode.createDir("New Item");
-            final String oid = dirNode.getExternalId();
+            final TextField editor = new TextField();
 
-            final Item item = tree.addItem(oid);
-            tree.setParent(oid, parentOid);
-            tree.setChildrenAllowed(oid, false);
-            final Property name = item.getItemProperty(ExampleUtil.hw_PROPERTY_NAME);
-            name.setValue(dirNode.getName());
+            subwindow.addComponent(editor);
+
+            final Button save = new Button(getMessage("label.save"), new Button.ClickListener() {
+                public void buttonClick(ClickEvent event) {
+                    tree.setChildrenAllowed(target, true);
+                    tree.expandItem(target);
+
+                    final String parentOid = (String) target;
+
+                    final DirNode selectedDirNode = getDomainObject(parentOid);
+                    final DirNode dirNode = selectedDirNode.createDir((String) editor.getValue());
+                    final String oid = dirNode.getExternalId();
+
+                    final Item item = tree.addItem(oid);
+                    tree.setParent(oid, parentOid);
+                    tree.setChildrenAllowed(oid, false);
+                    final Property name = item.getItemProperty(ExampleUtil.hw_PROPERTY_NAME);
+                    name.setValue(dirNode.getName());
+
+                    outerWindow.removeWindow(subwindow);
+                }
+            });
+
+            final Button close = new Button(getMessage("label.close"), new Button.ClickListener() {
+                public void buttonClick(ClickEvent event) {
+                    outerWindow.removeWindow(subwindow);
+                }
+            });
+
+            final HorizontalLayout hlayout = new HorizontalLayout();
+            layout.addComponent(hlayout);
+            hlayout.addComponent(save);
+            hlayout.addComponent(close);
+
         } else if (action == ACTION_EDIT) {
             final Window outerWindow = getWindow();
-            final Window subwindow = new Window("A subwindow");
+            final Window subwindow = new Window(getMessage("label.file.repository.edit"));
             subwindow.setModal(true);
             subwindow.setWidth("200px");
             outerWindow.addWindow(subwindow);
@@ -487,8 +520,6 @@ public class FileRepositoryView extends BaseComponent
 	    }
 	}
 
-	final Application application = getApplication();
-
 	optionGroup.addListener(new ValueChangeListener() {
 	    
 	    @Override
@@ -499,7 +530,7 @@ public class FileRepositoryView extends BaseComponent
 	            setTitle(dirNode.getName());
 
 	            final AbstractComponentContainer parentFolder = (AbstractComponentContainer) folderView.getParent();
-	            final AbstractOrderedLayout newFolderView = createFolderView(application);
+	            final AbstractOrderedLayout newFolderView = createFolderView();
 	            parentFolder.replaceComponent(folderView, newFolderView);
 	            folderView = newFolderView;
 
