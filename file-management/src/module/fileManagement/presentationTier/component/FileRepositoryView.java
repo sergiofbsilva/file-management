@@ -70,7 +70,7 @@ public class FileRepositoryView extends BaseComponent
     private final Action ACTION_EDIT = new Action(getMessage("label.file.repository.edit"));
     private final Action ACTION_DELETE = new Action(getMessage("label.file.repository.delete"));
     private final Action[] ACTIONS = new Action[] { ACTION_DOWNLOAD_DIR, ACTION_ADD, ACTION_EDIT, ACTION_DELETE };
-    private final Action[] ACTIONS_ADD = new Action[] { ACTION_DOWNLOAD_DIR, ACTION_ADD };
+    private final Action[] ACTIONS_ADD = new Action[] { /* ACTION_DOWNLOAD_DIR, */ ACTION_ADD };
 
     private DirNode dirNode = null;
 
