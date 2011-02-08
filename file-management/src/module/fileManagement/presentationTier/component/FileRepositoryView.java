@@ -1,11 +1,9 @@
 package module.fileManagement.presentationTier.component;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.ZipEntry;
@@ -355,23 +353,13 @@ public class FileRepositoryView extends BaseComponent
 	    final StreamSource streamSource = new StreamSource() {
 		@Override
 		public InputStream getStream() {
-		    final String oid = dirNode.getExternalId();
-
-		    final String tempFilename = "/tmp/" + oid + System.currentTimeMillis() + ".zip";
 		    try {
-			final FileOutputStream dest = new FileOutputStream(tempFilename);
-			final ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
-
+			final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+			final ZipOutputStream out = new ZipOutputStream(byteArrayOutputStream);
 			zip(out, dirNode, "");
-
 			out.close();
+			return new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
 		    } catch(final Exception e) {
-			e.printStackTrace();
-		    }
-
-		    try {
-			return new FileInputStream(tempFilename);
-		    } catch (FileNotFoundException e) {
 			throw new Error(e);
 		    }
 		}
