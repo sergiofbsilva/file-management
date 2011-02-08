@@ -1,7 +1,15 @@
 package module.fileManagement.presentationTier.component;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import module.contents.presentationTier.component.BaseComponent;
 import module.fileManagement.domain.AbstractFileNode;
@@ -57,11 +65,12 @@ import com.vaadin.ui.themes.Reindeer;
 public class FileRepositoryView extends BaseComponent
 	implements EmbeddedComponentContainer, Property.ValueChangeListener, Action.Handler {
 
+    private final Action ACTION_DOWNLOAD_DIR = new Action(getMessage("label.file.repository.download.dir"));
     private final Action ACTION_ADD = new Action(getMessage("label.file.repository.add.dir"));
     private final Action ACTION_EDIT = new Action(getMessage("label.file.repository.edit"));
     private final Action ACTION_DELETE = new Action(getMessage("label.file.repository.delete"));
-    private final Action[] ACTIONS = new Action[] { ACTION_ADD, ACTION_EDIT, ACTION_DELETE };
-    private final Action[] ACTIONS_ADD = new Action[] { ACTION_ADD };
+    private final Action[] ACTIONS = new Action[] { ACTION_DOWNLOAD_DIR, ACTION_ADD, ACTION_EDIT, ACTION_DELETE };
+    private final Action[] ACTIONS_ADD = new Action[] { ACTION_DOWNLOAD_DIR, ACTION_ADD };
 
     private DirNode dirNode = null;
 
@@ -236,20 +245,11 @@ public class FileRepositoryView extends BaseComponent
 
     public Object[] createFileNodeItem(final FileNode fileNode) {
 	final GenericFile file = fileNode.getFile();
-
-	final String oid = fileNode.getExternalId();
 	final String filename = file.getFilename();
 
-	final StreamSource streamSource = new StreamSource() {
-	    @Override
-	    public InputStream getStream() {
-		final FileNode fileNode = AbstractDomainObject.fromExternalId(oid);
-		final GenericFile file = fileNode.getFile();
-		return file.getStream();
-	    }
-	};
-	final StreamResource resource = new StreamResource(streamSource, "picture.png", getApplication());
-	resource.setMIMEType("application/octet-stream");
+	final FileNodeStreamSource streamSource = new FileNodeStreamSource(fileNode);
+	final StreamResource resource = new StreamResource(streamSource, filename, getApplication());
+	resource.setMIMEType(file.getContentType());
 	resource.setCacheTime(0);
 
         final Link download = new Link(filename, resource);
@@ -349,7 +349,65 @@ public class FileRepositoryView extends BaseComponent
     }
 
     public void handleAction(final Action action, final Object sender, final Object target) {
-        if (action == ACTION_ADD) {
+	if (action == ACTION_DOWNLOAD_DIR) {
+	    final DirNode dirNode = getDomainObject((String) target);
+
+	    final StreamSource streamSource = new StreamSource() {
+		@Override
+		public InputStream getStream() {
+		    final String oid = dirNode.getExternalId();
+
+		    final String tempFilename = "/tmp/" + oid + System.currentTimeMillis() + ".zip";
+		    try {
+			final FileOutputStream dest = new FileOutputStream(tempFilename);
+			final ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
+
+			zip(out, dirNode, "");
+
+			out.close();
+		    } catch(final Exception e) {
+			e.printStackTrace();
+		    }
+
+		    try {
+			return new FileInputStream(tempFilename);
+		    } catch (FileNotFoundException e) {
+			throw new Error(e);
+		    }
+		}
+
+		private void zip(final ZipOutputStream out, final AbstractFileNode abstractFileNode, final String path) throws IOException {
+		    if (abstractFileNode.isFile()) {
+			final FileNode fileNode = (FileNode) abstractFileNode;
+			final GenericFile file = fileNode.getFile();
+
+			final BufferedInputStream origin = new BufferedInputStream(file.getStream());
+			final ZipEntry entry = new ZipEntry(path + file.getFilename());
+			out.putNextEntry(entry);
+			int count;
+			final int BUFFER = 4096;
+			final byte[] data = new byte[BUFFER];
+			while((count = origin.read(data, 0, BUFFER)) != -1) {
+			    out.write(data, 0, count);
+			}
+			origin.close();
+		    } else if (abstractFileNode.isDir()) {
+			final DirNode dirNode = (DirNode) abstractFileNode;
+			final String newPath = path + dirNode.getName() + "/";
+			for (final AbstractFileNode child : dirNode.getChildSet()) {
+			    zip(out, child, newPath);
+			}
+		    } else {
+			throw new Error("unreachable.code");
+		    }
+		}
+	    };
+	    final StreamResource resource = new StreamResource(streamSource, dirNode.getName() + ".zip", getApplication());
+	    resource.setMIMEType("application/octet-stream");
+	    resource.setCacheTime(0);
+
+	    getWindow().open(resource);
+	} else if (action == ACTION_ADD) {
             // Allow children for the target item, and expand it
             tree.setChildrenAllowed(target, true);
             tree.expandItem(target);
