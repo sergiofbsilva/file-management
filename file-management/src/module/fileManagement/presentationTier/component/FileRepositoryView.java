@@ -220,22 +220,38 @@ public class FileRepositoryView extends BaseComponent
 	fileTable.setImmediate(true);
 	fileTable.setSortDisabled(false);
 
-        // add initial data
-	initFileContainer();
-
         // turn on column reordering and collapsing
 	fileTable.setColumnReorderingAllowed(true);
 	fileTable.setColumnCollapsingAllowed(true);
 
+        // add initial data
+	initFileContainer();
+
         // set column headers
-	fileTable.setColumnHeaders(new String[] { "File Name", "File Size" });
+	fileTable.setColumnHeaders(new String[] {
+		getMessage("label.file.displayName"),
+		getMessage("label.file.filename"),
+		getMessage("label.file.contentType"),
+		getMessage("label.file.size"),
+		getMessage("label.file.contentKey"),
+		getMessage("label.file.storage")
+	});
 
         return layout;
     }
 
     public void initFileContainer() {
+	fileTable.addContainerProperty("displayName", Link.class, null);
         fileTable.addContainerProperty("filename", Link.class, null);
+        fileTable.addContainerProperty("contentType", String.class, null);
         fileTable.addContainerProperty("filesize", Integer.class, null);
+        fileTable.addContainerProperty("contentKey", String.class, null);
+        fileTable.addContainerProperty("storage", String.class, null);
+
+        fileTable.setColumnCollapsed("filename", true);
+        fileTable.setColumnCollapsed("contentType", true);
+        fileTable.setColumnCollapsed("contentKey", true);
+        fileTable.setColumnCollapsed("storage", true);
 
         for (final AbstractFileNode abstractFileNode : dirNode.getChildSet()) {
             if (abstractFileNode.isFile()) {
@@ -249,19 +265,36 @@ public class FileRepositoryView extends BaseComponent
     public Object[] createFileNodeItem(final FileNode fileNode) {
 	final GenericFile file = fileNode.getFile();
 	final String filename = file.getFilename();
+	final String displayName = file.getDisplayName();
 
 	final FileNodeStreamSource streamSource = new FileNodeStreamSource(fileNode);
 	final StreamResource resource = new StreamResource(streamSource, filename, getApplication());
 	resource.setMIMEType(file.getContentType());
 	resource.setCacheTime(0);
 
-        final Link download = new Link(filename, resource);
-        download.setDescription("Download image to your local computer");
-        download.setTargetName("_new");
+        final Link displayNameLink = new Link(displayName, resource);
+        displayNameLink.setDescription(filename);
+        displayNameLink.setTargetName("_new");
 
-        final Label filesize = new Label(Integer.toString(file.getContent().length));
+        final Link filenameLink = new Link(filename, resource);
+        filenameLink.setDescription(displayName);
+        filenameLink.setTargetName("_new");
 
-        return new Object[] { download, filesize };
+	fileTable.addContainerProperty("displayName", Link.class, null);
+        fileTable.addContainerProperty("filename", Link.class, null);
+        fileTable.addContainerProperty("contentType", String.class, null);
+        fileTable.addContainerProperty("filesize", Integer.class, null);
+        fileTable.addContainerProperty("contentKey", String.class, null);
+        fileTable.addContainerProperty("storage", String.class, null);
+
+        return new Object[] {
+        	displayNameLink,
+        	filenameLink,
+        	file.getContentType(),
+        	Integer.valueOf(file.getContent().length),
+        	file.getContentKey(),
+        	file.getStorage().getName()
+        };
     }
 
     public HierarchicalContainer getHierarchicalContainer() {
