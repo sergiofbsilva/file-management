@@ -37,15 +37,13 @@ import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.event.Action;
 import com.vaadin.terminal.Sizeable;
 import com.vaadin.terminal.StreamResource;
-import com.vaadin.terminal.StreamResource.StreamSource;
 import com.vaadin.terminal.ThemeResource;
+import com.vaadin.terminal.StreamResource.StreamSource;
 import com.vaadin.ui.AbstractComponentContainer;
 import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.AbstractSelect;
-import com.vaadin.ui.AbstractSelect.Filtering;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
@@ -58,6 +56,8 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.AbstractSelect.Filtering;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.themes.Reindeer;
 
 @SuppressWarnings("serial")
@@ -71,6 +71,10 @@ public class FileRepositoryView extends BaseComponent
     private final Action ACTION_DELETE = new Action(getMessage("label.file.repository.delete"));
     private final Action[] ACTIONS = new Action[] { ACTION_DOWNLOAD_DIR, ACTION_ADD, ACTION_EDIT, ACTION_DELETE };
     private final Action[] ACTIONS_ADD = new Action[] { /* ACTION_DOWNLOAD_DIR, */ ACTION_ADD };
+
+    private final Action ACTION_FILE_EDIT = new Action(getMessage("label.file.edit"));
+    private final Action ACTION_FILE_SHOW_DETAILS = new Action(getMessage("label.file.show.details"));
+    private final Action[] ACTIONS_FILES = new Action[] { ACTION_FILE_EDIT, ACTION_FILE_SHOW_DETAILS };
 
     private DirNode dirNode = null;
 
@@ -202,6 +206,9 @@ public class FileRepositoryView extends BaseComponent
 	panel.addComponent(folderView);
     }
 
+    private int fileCount = 0;
+    private long totalFilesize = 0l;
+
     private AbstractOrderedLayout createFolderView() {
 	final AbstractOrderedLayout layout = new VerticalLayout();
 	layout.setSpacing(true);
@@ -224,6 +231,10 @@ public class FileRepositoryView extends BaseComponent
 	fileTable.setColumnReorderingAllowed(true);
 	fileTable.setColumnCollapsingAllowed(true);
 
+	fileTable.setFooterVisible(true);
+
+	updateFileTableFooter();
+
         // add initial data
 	initFileContainer();
 
@@ -237,7 +248,30 @@ public class FileRepositoryView extends BaseComponent
 		getMessage("label.file.storage")
 	});
 
+	fileTable.addActionHandler(new Action.Handler() {
+
+	    public Action[] getActions(final Object target, final Object sender) {
+		return ACTIONS_FILES;
+            }
+
+            public void handleAction(final Action action, final Object sender, final Object target) {
+        	if (action == ACTION_FILE_EDIT) {
+        	} else if (action == ACTION_FILE_SHOW_DETAILS) {
+        	    final FileNode fileNode = getDomainObject((String) target);
+        	    final Window window = getWindow();
+        	    final FileNodeDetails fileNodeDetails = new FileNodeDetails(fileNode);
+        	    window.addWindow(fileNodeDetails);
+        	    fileNodeDetails.center();
+        	}
+            }
+        });
+
         return layout;
+    }
+
+    private void updateFileTableFooter() {
+	fileTable.setColumnFooter("displayName", getMessage("label.file.total.count", Integer.toString(fileCount)));
+	fileTable.setColumnFooter("filesize", Long.toString(totalFilesize));
     }
 
     public void initFileContainer() {
@@ -266,6 +300,7 @@ public class FileRepositoryView extends BaseComponent
 	final GenericFile file = fileNode.getFile();
 	final String filename = file.getFilename();
 	final String displayName = file.getDisplayName();
+	final int length = file.getContent().length;
 
 	final FileNodeStreamSource streamSource = new FileNodeStreamSource(fileNode);
 	final StreamResource resource = new StreamResource(streamSource, filename, getApplication());
@@ -287,11 +322,15 @@ public class FileRepositoryView extends BaseComponent
         fileTable.addContainerProperty("contentKey", String.class, null);
         fileTable.addContainerProperty("storage", String.class, null);
 
+        fileCount++;
+        totalFilesize += length;
+        updateFileTableFooter();
+
         return new Object[] {
         	displayNameLink,
         	filenameLink,
         	file.getContentType(),
-        	Integer.valueOf(file.getContent().length),
+        	Integer.valueOf(length),
         	file.getContentKey(),
         	file.getStorage().getName()
         };
@@ -668,6 +707,9 @@ public class FileRepositoryView extends BaseComponent
 	final AbstractOrderedLayout newDirectoryView = createDirectoryView();
 	parentDirectory.replaceComponent(directoryView, newDirectoryView);
 	directoryView = newDirectoryView;
+
+	fileCount = 0;
+	totalFilesize = 0l;
     }
 
 }
