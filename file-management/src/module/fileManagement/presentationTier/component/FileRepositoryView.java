@@ -255,14 +255,18 @@ public class FileRepositoryView extends BaseComponent
             }
 
             public void handleAction(final Action action, final Object sender, final Object target) {
+        	final FileNode fileNode = getDomainObject((String) target);
+        	final Window window = getWindow();
+        	final Window actionWindow;
         	if (action == ACTION_FILE_EDIT) {
+        	    actionWindow = new EditFileNode(fileNode, fileTable);
         	} else if (action == ACTION_FILE_SHOW_DETAILS) {
-        	    final FileNode fileNode = getDomainObject((String) target);
-        	    final Window window = getWindow();
-        	    final FileNodeDetails fileNodeDetails = new FileNodeDetails(fileNode);
-        	    window.addWindow(fileNodeDetails);
-        	    fileNodeDetails.center();
+        	    actionWindow = new FileNodeDetails(fileNode);
+        	} else {
+        	    throw new Error("unknown.action");
         	}
+        	window.addWindow(actionWindow);
+        	actionWindow.center();
             }
         });
 

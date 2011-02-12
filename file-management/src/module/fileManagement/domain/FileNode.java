@@ -2,6 +2,7 @@ package module.fileManagement.domain;
 
 import java.io.File;
 
+import pt.ist.fenixWebFramework.services.Service;
 import pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile;
 
 public class FileNode extends FileNode_Base {
@@ -28,6 +29,13 @@ public class FileNode extends FileNode_Base {
 	    removeFile();
 	}
         super.delete();
+    }
+
+    @Service
+    public void edit(final String displayName, final String filename) {
+	final GenericFile file = getFile();
+	file.setDisplayName(displayName);
+	file.setFilename(filename);
     }
 
 }
