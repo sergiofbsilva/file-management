@@ -74,7 +74,8 @@ public class FileRepositoryView extends BaseComponent
 
     private final Action ACTION_FILE_EDIT = new Action(getMessage("label.file.edit"));
     private final Action ACTION_FILE_SHOW_DETAILS = new Action(getMessage("label.file.show.details"));
-    private final Action[] ACTIONS_FILES = new Action[] { ACTION_FILE_EDIT, ACTION_FILE_SHOW_DETAILS };
+    private final Action ACTION_FILE_DELETE = new Action(getMessage("label.file.delete"));
+    private final Action[] ACTIONS_FILES = new Action[] { ACTION_FILE_EDIT, ACTION_FILE_SHOW_DETAILS, ACTION_FILE_DELETE };
 
     private DirNode dirNode = null;
 
@@ -262,6 +263,8 @@ public class FileRepositoryView extends BaseComponent
         	    actionWindow = new EditFileNode(fileNode, fileTable);
         	} else if (action == ACTION_FILE_SHOW_DETAILS) {
         	    actionWindow = new FileNodeDetails(fileNode);
+        	} else if (action == ACTION_FILE_DELETE) {
+        	    actionWindow = new ConfirmDeleteFile(fileNode, fileTable);
         	} else {
         	    throw new Error("unknown.action");
         	}

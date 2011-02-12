@@ -32,6 +32,11 @@ public class FileNode extends FileNode_Base {
     }
 
     @Service
+    public void deleteService() {
+	delete();
+    }
+
+    @Service
     public void edit(final String displayName, final String filename) {
 	final GenericFile file = getFile();
 	file.setDisplayName(displayName);
