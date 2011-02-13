@@ -1,5 +1,7 @@
 package module.fileManagement.domain;
 
+import myorg.applicationTier.Authenticate.UserView;
+import myorg.domain.User;
 import myorg.domain.groups.PersistentGroup;
 import pt.ist.fenixWebFramework.services.Service;
 
@@ -49,4 +51,16 @@ public class AbstractFileNode extends AbstractFileNode_Base {
         setWriteGroup(group);
     }
 
+    public boolean isReadGroupMember() {
+	return isGroupMember(getReadGroup());
+    }
+
+    public boolean isWriteGroupMember() {
+	return isGroupMember(getWriteGroup());
+    }
+
+    private boolean isGroupMember(final PersistentGroup group) {
+	final User user = UserView.getCurrentUser();
+	return group != null && group.isMember(user);
+    }
 }

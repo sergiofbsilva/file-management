@@ -70,13 +70,16 @@ public class FileRepositoryView extends BaseComponent
     private final Action ACTION_DIR_SHOW_DETAILS = new Action(getMessage("label.dir.show.details"));
     private final Action ACTION_ADD = new Action(getMessage("label.file.repository.add.dir"));
     private final Action ACTION_DELETE = new Action(getMessage("label.file.repository.delete"));
-    private final Action[] ACTIONS = new Action[] { ACTION_DOWNLOAD_DIR, ACTION_EDIT, ACTION_DIR_SHOW_DETAILS, ACTION_ADD, ACTION_DELETE };
-    private final Action[] ACTIONS_ADD = new Action[] { /* ACTION_DOWNLOAD_DIR, */ ACTION_DIR_SHOW_DETAILS, ACTION_ADD };
+    private final Action[] ACTIONS_DIR = new Action[] { ACTION_DOWNLOAD_DIR, ACTION_DIR_SHOW_DETAILS };
+    private final Action[] ACTIONS_DIR_NO_PARENT = new Action[] { ACTION_DIR_SHOW_DETAILS };
+    private final Action[] ACTIONS_DIR_CAN_EDIT = new Action[] { ACTION_DOWNLOAD_DIR, ACTION_EDIT, ACTION_DIR_SHOW_DETAILS, ACTION_ADD, ACTION_DELETE };
+    private final Action[] ACTIONS_DIR_NO_PARENT_CAN_EDIT = new Action[] { ACTION_DIR_SHOW_DETAILS, ACTION_ADD };
 
     private final Action ACTION_FILE_EDIT = new Action(getMessage("label.file.edit"));
     private final Action ACTION_FILE_SHOW_DETAILS = new Action(getMessage("label.file.show.details"));
     private final Action ACTION_FILE_DELETE = new Action(getMessage("label.file.delete"));
-    private final Action[] ACTIONS_FILES = new Action[] { ACTION_FILE_EDIT, ACTION_FILE_SHOW_DETAILS, ACTION_FILE_DELETE };
+    private final Action[] ACTIONS_FILES = new Action[] { ACTION_FILE_SHOW_DETAILS };
+    private final Action[] ACTIONS_FILES_CAN_EDIT = new Action[] { ACTION_FILE_EDIT, ACTION_FILE_SHOW_DETAILS, ACTION_FILE_DELETE };
 
     private DirNode dirNode = null;
 
@@ -128,7 +131,6 @@ public class FileRepositoryView extends BaseComponent
 
         final Panel panel1020 = createGridPanel(grid1, 1, 0, 600, 350);
         attachFolderView(panel1020);
-
 
         final GridLayout grid2 = new GridLayout(2, 1);
         grid2.setSpacing(true);
@@ -255,7 +257,8 @@ public class FileRepositoryView extends BaseComponent
 	fileTable.addActionHandler(new Action.Handler() {
 
 	    public Action[] getActions(final Object target, final Object sender) {
-		return ACTIONS_FILES;
+		final FileNode fileNode = getDomainObject((String) target);
+		return fileNode.isWriteGroupMember() ? ACTIONS_FILES_CAN_EDIT : ACTIONS_FILES;
             }
 
             public void handleAction(final Action action, final Object sender, final Object target) {
@@ -302,7 +305,7 @@ public class FileRepositoryView extends BaseComponent
         fileTable.setColumnCollapsed("groupWrite", true);
 
         for (final AbstractFileNode abstractFileNode : dirNode.getChildSet()) {
-            if (abstractFileNode.isFile()) {
+            if (abstractFileNode.isFile() && abstractFileNode.isReadGroupMember()) {
         	final FileNode fileNode = (FileNode) abstractFileNode;
         	final String oid = fileNode.getExternalId();
         	fileTable.addItem(createFileNodeItem(fileNode), oid);
@@ -369,8 +372,10 @@ public class FileRepositoryView extends BaseComponent
 	for (final AbstractFileNode abstractFileNode : parentNode.getChildSet()) {
 	    if (abstractFileNode.isDir()) {
 		final DirNode dirNode = (DirNode) abstractFileNode;
-		addItem(hwContainer, dirNode);
-		addChildNodes(hwContainer, dirNode);
+		if (dirNode.isReadGroupMember()) {
+		    addItem(hwContainer, dirNode);
+		    addChildNodes(hwContainer, dirNode);
+		}
 	    }
 	}
     }
@@ -391,8 +396,10 @@ public class FileRepositoryView extends BaseComponent
 	return item;
     }
 
+    private MultiFileUpload multiFileUpload;
+
     private void attachAddPanel(final Panel panel) {
-        final MultiFileUpload multiFileUpload = new MultiFileUpload() {
+	multiFileUpload = new MultiFileUpload() {
 
             @Override
             protected String getAreaText() {
@@ -417,6 +424,8 @@ public class FileRepositoryView extends BaseComponent
 	final AbstractOrderedLayout layout = (AbstractOrderedLayout) panel.getContent();
         layout.addComponent(multiFileUpload);
         layout.setComponentAlignment(multiFileUpload, Alignment.MIDDLE_CENTER);
+
+        multiFileUpload.setVisible(dirNode.isWriteGroupMember());
     }
 
     private String getSelectedDirPath(final DirNode dirNode) {
@@ -428,6 +437,8 @@ public class FileRepositoryView extends BaseComponent
             final String itemId = (String) event.getProperty().getValue();
             dirNode = getDomainObject(itemId);
 
+            multiFileUpload.setVisible(dirNode.isWriteGroupMember());
+
             final AbstractComponentContainer parent = (AbstractComponentContainer) folderView.getParent();
             final AbstractOrderedLayout newFolderView = createFolderView();
             parent.replaceComponent(folderView, newFolderView);
@@ -438,7 +449,10 @@ public class FileRepositoryView extends BaseComponent
     public Action[] getActions(Object target, Object sender) {
 	final String dirNodeOid = (String) target;
 	final DirNode dirNode = AbstractDomainObject.fromExternalId(dirNodeOid);
-	return dirNode.hasParent() ? ACTIONS : ACTIONS_ADD;
+
+	return dirNode.isWriteGroupMember()
+		? (dirNode.hasParent() ? ACTIONS_DIR_CAN_EDIT : ACTIONS_DIR_NO_PARENT_CAN_EDIT)
+		: (dirNode.hasParent() ? ACTIONS_DIR : ACTIONS_DIR_NO_PARENT);
     }
 
     public void handleAction(final Action action, final Object sender, final Object target) {
@@ -460,28 +474,30 @@ public class FileRepositoryView extends BaseComponent
 		}
 
 		private void zip(final ZipOutputStream out, final AbstractFileNode abstractFileNode, final String path) throws IOException {
-		    if (abstractFileNode.isFile()) {
-			final FileNode fileNode = (FileNode) abstractFileNode;
-			final GenericFile file = fileNode.getFile();
+		    if (abstractFileNode.isReadGroupMember()) {
+			if (abstractFileNode.isFile()) {
+			    final FileNode fileNode = (FileNode) abstractFileNode;
+			    final GenericFile file = fileNode.getFile();
 
-			final BufferedInputStream origin = new BufferedInputStream(file.getStream());
-			final ZipEntry entry = new ZipEntry(path + file.getFilename());
-			out.putNextEntry(entry);
-			int count;
-			final int BUFFER = 4096;
-			final byte[] data = new byte[BUFFER];
-			while((count = origin.read(data, 0, BUFFER)) != -1) {
-			    out.write(data, 0, count);
+			    final BufferedInputStream origin = new BufferedInputStream(file.getStream());
+			    final ZipEntry entry = new ZipEntry(path + file.getFilename());
+			    out.putNextEntry(entry);
+			    int count;
+			    final int BUFFER = 4096;
+			    final byte[] data = new byte[BUFFER];
+			    while((count = origin.read(data, 0, BUFFER)) != -1) {
+				out.write(data, 0, count);
+			    }
+			    origin.close();
+			} else if (abstractFileNode.isDir()) {
+			    final DirNode dirNode = (DirNode) abstractFileNode;
+			    final String newPath = path + dirNode.getName() + "/";
+			    for (final AbstractFileNode child : dirNode.getChildSet()) {
+				zip(out, child, newPath);
+			    }
+			} else {
+			    throw new Error("unreachable.code");
 			}
-			origin.close();
-		    } else if (abstractFileNode.isDir()) {
-			final DirNode dirNode = (DirNode) abstractFileNode;
-			final String newPath = path + dirNode.getName() + "/";
-			for (final AbstractFileNode child : dirNode.getChildSet()) {
-			    zip(out, child, newPath);
-			}
-		    } else {
-			throw new Error("unreachable.code");
 		    }
 		}
 	    };
@@ -721,6 +737,8 @@ public class FileRepositoryView extends BaseComponent
     private void switchRepository(final DirNode fileRepository) {
 	dirNode = fileRepository;
 	setTitle(dirNode.getName());
+
+	multiFileUpload.setVisible(dirNode.isWriteGroupMember());
 
 	final AbstractComponentContainer parentFolder = (AbstractComponentContainer) folderView.getParent();
 	final AbstractOrderedLayout newFolderView = createFolderView();

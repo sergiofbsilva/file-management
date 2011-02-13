@@ -7,8 +7,10 @@ import module.organization.domain.Unit;
 import module.organization.domain.groups.UnitGroup;
 import module.organizationIst.domain.IstAccountabilityType;
 import myorg.domain.User;
+import myorg.domain.groups.EmptyGroup;
 import myorg.domain.groups.PersistentGroup;
 import myorg.domain.groups.SingleUserGroup;
+import myorg.domain.groups.UserGroup;
 import pt.ist.fenixWebFramework.services.Service;
 
 public class DirNode extends DirNode_Base {
@@ -71,9 +73,15 @@ public class DirNode extends DirNode_Base {
     public void initIfNecessary() {
 	if (!hasAnyChild()) {
 	    final DirNode dirNode = new DirNode(this, "Documentos Oficiais");
+	    dirNode.setWriteGroup(EmptyGroup.getInstance());
 	    new DirNode(dirNode, "Contracto");
 	    new DirNode(dirNode, "IRS");
 	    new DirNode(dirNode, "Vencimento");
+
+	    new DirNode(this, "Os Meus Documentos");
+
+	    final DirNode sharedDirNode = new DirNode(this, "Documentos Partilhados");
+	    sharedDirNode.setReadGroup(UserGroup.getInstance());
 	}
     }
 

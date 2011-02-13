@@ -34,13 +34,13 @@ public class DirNodeDetails extends Window {
 
     public DirNodeDetails(final DirNode dirNode, final Table fileTable) {
 	super(getMessage("label.file.details"));
-	setWidth(65, UNITS_PERCENTAGE);
 	this.dirNode = dirNode;
 	this.fileTable = fileTable;
 
         final VerticalLayout layout = (VerticalLayout) getContent();
         layout.setMargin(true);
         layout.setSpacing(true);
+        layout.setSizeUndefined();
 
         final Label fileDetails = getDirDetails();
         layout.addComponent(fileDetails);
@@ -132,24 +132,26 @@ public class DirNodeDetails extends Window {
         layout.addComponent(label);
         setGroupLabel(label, labelKey, procedure.getGroup());
 
-        final ChangeGroupProcedure procedureWrapper = new ChangeGroupProcedure() {
+        if (dirNode.isWriteGroupMember()) {
+            final ChangeGroupProcedure procedureWrapper = new ChangeGroupProcedure() {
 
-            private PersistentGroup persistentGroup = procedure.getGroup();
+        	private PersistentGroup persistentGroup = procedure.getGroup();
 
-	    @Override
-	    public void execute(final PersistentGroup group) {
-		persistentGroup = group;
-		procedure.execute(group);
-		setGroupLabel(label, labelKey, group);
-	    }
+        	@Override
+        	public void execute(final PersistentGroup group) {
+        	    persistentGroup = group;
+        	    procedure.execute(group);
+        	    setGroupLabel(label, labelKey, group);
+        	}
 
-	    @Override
-	    public PersistentGroup getGroup() {
-		return persistentGroup;
-	    }
-	};
-	final Button changeGroupButton = createChangeGroupButton(window, layout, labelKey, procedureWrapper);
-        layout.addComponent(changeGroupButton);
+        	@Override
+        	public PersistentGroup getGroup() {
+        	    return persistentGroup;
+        	}
+            };
+            final Button changeGroupButton = createChangeGroupButton(window, layout, labelKey, procedureWrapper);
+            layout.addComponent(changeGroupButton);
+        }
 
         return layout;
     }
