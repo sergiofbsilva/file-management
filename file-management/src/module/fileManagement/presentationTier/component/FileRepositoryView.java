@@ -66,11 +66,12 @@ public class FileRepositoryView extends BaseComponent
 	implements EmbeddedComponentContainer, Property.ValueChangeListener, Action.Handler {
 
     private final Action ACTION_DOWNLOAD_DIR = new Action(getMessage("label.file.repository.download.dir"));
-    private final Action ACTION_ADD = new Action(getMessage("label.file.repository.add.dir"));
     private final Action ACTION_EDIT = new Action(getMessage("label.file.repository.edit"));
+    private final Action ACTION_DIR_SHOW_DETAILS = new Action(getMessage("label.dir.show.details"));
+    private final Action ACTION_ADD = new Action(getMessage("label.file.repository.add.dir"));
     private final Action ACTION_DELETE = new Action(getMessage("label.file.repository.delete"));
-    private final Action[] ACTIONS = new Action[] { ACTION_DOWNLOAD_DIR, ACTION_ADD, ACTION_EDIT, ACTION_DELETE };
-    private final Action[] ACTIONS_ADD = new Action[] { /* ACTION_DOWNLOAD_DIR, */ ACTION_ADD };
+    private final Action[] ACTIONS = new Action[] { ACTION_DOWNLOAD_DIR, ACTION_EDIT, ACTION_DIR_SHOW_DETAILS, ACTION_ADD, ACTION_DELETE };
+    private final Action[] ACTIONS_ADD = new Action[] { /* ACTION_DOWNLOAD_DIR, */ ACTION_DIR_SHOW_DETAILS, ACTION_ADD };
 
     private final Action ACTION_FILE_EDIT = new Action(getMessage("label.file.edit"));
     private final Action ACTION_FILE_SHOW_DETAILS = new Action(getMessage("label.file.show.details"));
@@ -572,6 +573,12 @@ public class FileRepositoryView extends BaseComponent
             layout.addComponent(hlayout);
             hlayout.addComponent(save);
             hlayout.addComponent(close);
+        } else if (action == ACTION_DIR_SHOW_DETAILS) {
+            final DirNode dirNode = getDomainObject((String) target);
+            final Window window = getWindow();
+            final Window actionWindow = new DirNodeDetails(dirNode, fileTable);
+            window.addWindow(actionWindow);
+            actionWindow.center();
         } else if (action == ACTION_DELETE) {
             final DirNode dirNode = getDomainObject((String) target);
             dirNode.delete();

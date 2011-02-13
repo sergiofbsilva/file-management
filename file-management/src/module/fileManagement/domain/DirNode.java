@@ -106,4 +106,28 @@ public class DirNode extends DirNode_Base {
 	setName(name);
     }
 
+    public int countFiles() {
+	int result = 0;
+	for (final AbstractFileNode node : getChildSet()) {
+	    if (node.isFile()) {
+		result++;
+	    } else {
+		result += ((DirNode) node).countFiles();
+	    }
+	}
+	return result;
+    }
+
+    public long countFilesSize() {
+	long result = 0;
+	for (final AbstractFileNode node : getChildSet()) {
+	    if (node.isFile()) {
+		result += ((FileNode) node).getFile().getContent().length;
+	    } else {
+		result += ((DirNode) node).countFiles();
+	    }
+	}
+	return result;
+    }
+
 }
