@@ -264,7 +264,7 @@ public class FileRepositoryView extends BaseComponent
         	if (action == ACTION_FILE_EDIT) {
         	    actionWindow = new EditFileNode(fileNode, fileTable);
         	} else if (action == ACTION_FILE_SHOW_DETAILS) {
-        	    actionWindow = new FileNodeDetails(fileNode);
+        	    actionWindow = new FileNodeDetails(fileNode, fileTable);
         	} else if (action == ACTION_FILE_DELETE) {
         	    actionWindow = new ConfirmDeleteFile(fileNode, fileTable);
         	} else {

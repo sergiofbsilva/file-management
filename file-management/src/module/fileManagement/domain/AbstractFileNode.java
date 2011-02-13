@@ -39,4 +39,14 @@ public class AbstractFileNode extends AbstractFileNode_Base {
 	return group == null && hasParent() ? getParent().getWriteGroup() : group;
     }
 
+    @Service
+    public void changeReadGroup(final PersistentGroup group) {
+        setReadGroup(group);
+    }
+
+    @Service
+    public void changeWriteGroup(final PersistentGroup group) {
+        setWriteGroup(group);
+    }
+
 }
