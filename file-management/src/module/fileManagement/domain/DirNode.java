@@ -2,8 +2,13 @@ package module.fileManagement.domain;
 
 import java.io.File;
 
+import module.organization.domain.AccountabilityType;
 import module.organization.domain.Unit;
+import module.organization.domain.groups.UnitGroup;
+import module.organizationIst.domain.IstAccountabilityType;
 import myorg.domain.User;
+import myorg.domain.groups.PersistentGroup;
+import myorg.domain.groups.SingleUserGroup;
 import pt.ist.fenixWebFramework.services.Service;
 
 public class DirNode extends DirNode_Base {
@@ -12,12 +17,26 @@ public class DirNode extends DirNode_Base {
         super();
         setUser(user);
         setName(user.getPresentationName());
+        final PersistentGroup group = SingleUserGroup.getOrCreateGroup(user);
+        setReadGroup(group);
+        setWriteGroup(group);
     }
 
     public DirNode(final Unit unit) {
         super();
         setUnit(unit);
         setName(unit.getPresentationName());
+        final AccountabilityType[] memberTypes = new AccountabilityType[] {
+        	IstAccountabilityType.PERSONNEL.readAccountabilityType(),
+        	IstAccountabilityType.TEACHING_PERSONNEL.readAccountabilityType(),
+        	IstAccountabilityType.RESEARCH_PERSONNEL.readAccountabilityType(),
+        	IstAccountabilityType.GRANT_OWNER_PERSONNEL.readAccountabilityType(),
+        };
+        final AccountabilityType[] childUnitTypes = new AccountabilityType[] {
+        	IstAccountabilityType.ORGANIZATIONAL.readAccountabilityType(),
+        };
+        setReadGroup(UnitGroup.getOrCreateGroup(unit, memberTypes, childUnitTypes ));
+        setWriteGroup(UnitGroup.getOrCreateGroup(unit, memberTypes, null ));
     }
 
     public DirNode(final DirNode dirNode, final String name) {

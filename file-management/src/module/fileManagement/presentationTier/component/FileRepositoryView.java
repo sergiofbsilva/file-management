@@ -246,7 +246,9 @@ public class FileRepositoryView extends BaseComponent
 		getMessage("label.file.contentType"),
 		getMessage("label.file.size"),
 		getMessage("label.file.contentKey"),
-		getMessage("label.file.storage")
+		getMessage("label.file.storage"),
+		getMessage("label.file.group.read"),
+		getMessage("label.file.group.write")
 	});
 
 	fileTable.addActionHandler(new Action.Handler() {
@@ -288,11 +290,15 @@ public class FileRepositoryView extends BaseComponent
         fileTable.addContainerProperty("filesize", Integer.class, null);
         fileTable.addContainerProperty("contentKey", String.class, null);
         fileTable.addContainerProperty("storage", String.class, null);
+        fileTable.addContainerProperty("groupRead", String.class, null);
+        fileTable.addContainerProperty("groupWrite", String.class, null);
 
         fileTable.setColumnCollapsed("filename", true);
         fileTable.setColumnCollapsed("contentType", true);
         fileTable.setColumnCollapsed("contentKey", true);
         fileTable.setColumnCollapsed("storage", true);
+        fileTable.setColumnCollapsed("groupRead", true);
+        fileTable.setColumnCollapsed("groupWrite", true);
 
         for (final AbstractFileNode abstractFileNode : dirNode.getChildSet()) {
             if (abstractFileNode.isFile()) {
@@ -328,6 +334,8 @@ public class FileRepositoryView extends BaseComponent
         fileTable.addContainerProperty("filesize", Integer.class, null);
         fileTable.addContainerProperty("contentKey", String.class, null);
         fileTable.addContainerProperty("storage", String.class, null);
+        fileTable.addContainerProperty("groupRead", String.class, null);
+        fileTable.addContainerProperty("groupWrite", String.class, null);
 
         fileCount++;
         totalFilesize += length;
@@ -339,7 +347,9 @@ public class FileRepositoryView extends BaseComponent
         	file.getContentType(),
         	Integer.valueOf(length),
         	file.getContentKey(),
-        	file.getStorage().getName()
+        	file.getStorage().getName(),
+        	fileNode.getReadGroup().getName(),
+        	fileNode.getWriteGroup().getName()
         };
     }
 

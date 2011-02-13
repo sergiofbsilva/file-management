@@ -2,16 +2,16 @@ package module.fileManagement.domain;
 
 import java.io.File;
 
+import myorg.domain.exceptions.DomainException;
 import pt.ist.fenixWebFramework.services.Service;
 import pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile;
 
 public class FileNode extends FileNode_Base {
 
-    public FileNode() {
-        super();
-    }
-
     public FileNode(final DirNode dirNode, final File file, final String fileName) {
+	if (dirNode == null) {
+	    throw new DomainException("must.specify.a.dir.node.when.creating.a.file.node");
+	}
 	setParent(dirNode);
 	setFile(new UploadedFile(file, fileName));
     }

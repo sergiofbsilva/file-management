@@ -23,7 +23,7 @@ public class FileNodeDetails extends Window {
 
     public FileNodeDetails(final FileNode fileNode) {
 	super(getMessage("label.file.details"));
-	setWidth(50, UNITS_PERCENTAGE);
+	setWidth(65, UNITS_PERCENTAGE);
 
         final VerticalLayout layout = (VerticalLayout) getContent();
         layout.setMargin(true);
@@ -57,6 +57,14 @@ public class FileNodeDetails extends Window {
         builder.append(getMessage("label.file.storage"));
         builder.append(": ");
         builder.append(file.getStorage().getName());
+        builder.append("<br/>");
+        builder.append(getMessage("label.file.group.read"));
+        builder.append(": ");
+        builder.append(fileNode.getReadGroup().getName());
+        builder.append("<br/>");
+        builder.append(getMessage("label.file.group.write"));
+        builder.append(": ");
+        builder.append(fileNode.getWriteGroup().getName());
         builder.append("<br/>");
 
         final Label label = new Label(builder.toString(), Label.CONTENT_XHTML);

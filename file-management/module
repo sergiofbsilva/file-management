@@ -1,2 +1,2 @@
 name=fileManagement
-depends=core,fileSupport
+depends=core,fileSupport,organization-ist

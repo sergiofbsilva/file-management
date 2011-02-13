@@ -1,5 +1,6 @@
 package module.fileManagement.domain;
 
+import myorg.domain.groups.PersistentGroup;
 import pt.ist.fenixWebFramework.services.Service;
 
 public class AbstractFileNode extends AbstractFileNode_Base {
@@ -24,6 +25,18 @@ public class AbstractFileNode extends AbstractFileNode_Base {
     @Service
     public void deleteService() {
 	delete();
+    }
+
+    @Override
+    public PersistentGroup getReadGroup() {
+	final PersistentGroup group = super.getReadGroup();
+        return group == null && hasParent() ? getParent().getReadGroup() : group;
+    }
+
+    @Override
+    public PersistentGroup getWriteGroup() {
+	final PersistentGroup group = super.getWriteGroup();
+	return group == null && hasParent() ? getParent().getWriteGroup() : group;
     }
 
 }
