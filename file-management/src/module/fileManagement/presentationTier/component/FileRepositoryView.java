@@ -643,7 +643,7 @@ public class FileRepositoryView extends BaseComponent
             }
         };
 	for (final Accountability accountability : person.getParentAccountabilitiesSet()) {
-	    if (accountability.isActiveNow() && defaultMemberTypes.contains(defaultMemberTypes)) {
+	    if (accountability.isActiveNow() && defaultMemberTypes.contains(accountability.getAccountabilityType())) {
 		final Party party = accountability.getParent();
 		if (party.isUnit()) {
 		    final Unit unit = (Unit) party;
