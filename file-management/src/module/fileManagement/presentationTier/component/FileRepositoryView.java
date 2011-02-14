@@ -6,6 +6,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -15,9 +17,11 @@ import module.fileManagement.domain.DirNode;
 import module.fileManagement.domain.FileNode;
 import module.fileManagement.domain.FileRepository;
 import module.organization.domain.Accountability;
+import module.organization.domain.AccountabilityType;
 import module.organization.domain.Party;
 import module.organization.domain.Person;
 import module.organization.domain.Unit;
+import module.organizationIst.domain.IstAccountabilityType;
 import myorg.applicationTier.Authenticate.UserView;
 import myorg.domain.MyOrg;
 import myorg.domain.User;
@@ -630,8 +634,16 @@ public class FileRepositoryView extends BaseComponent
 
 	final User user = UserView.getCurrentUser();
 	final Person person = user.getPerson();
+        final Set<AccountabilityType> defaultMemberTypes = new HashSet<AccountabilityType>() {
+            {
+        	add(IstAccountabilityType.PERSONNEL.readAccountabilityType());
+        	add(IstAccountabilityType.TEACHING_PERSONNEL.readAccountabilityType());
+        	add(IstAccountabilityType.RESEARCH_PERSONNEL.readAccountabilityType());
+        	add(IstAccountabilityType.GRANT_OWNER_PERSONNEL.readAccountabilityType());
+            }
+        };
 	for (final Accountability accountability : person.getParentAccountabilitiesSet()) {
-	    if (accountability.isActiveNow()) {
+	    if (accountability.isActiveNow() && defaultMemberTypes.contains(defaultMemberTypes)) {
 		final Party party = accountability.getParent();
 		if (party.isUnit()) {
 		    final Unit unit = (Unit) party;
