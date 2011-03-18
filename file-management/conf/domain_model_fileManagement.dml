@@ -2,6 +2,8 @@ package module.fileManagement.domain;
 
 external class .pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile;
 
+
+
 class AbstractFileNode {
 	String ojbConcreteClass;
 }
@@ -15,6 +17,28 @@ class AbstractFileNode {
 
 class UploadedFile extends .pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile {
 }
+
+class Metadata {
+	String valueKey;
+	String key;
+}
+
+class VersionFile extends .pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile {
+
+}
+
+relation VersionFileVersion {
+	VersionFile playsRole version;
+	VersionFile playsRole previousVersion;
+}
+
+relation FileNodeMetadata {
+	FileNode playsRole file;
+	Metadata playsRole metadata {
+		multiplicity *;
+	}
+}
+
 
 relation UserAbstractFileNode {
 	.myorg.domain.User playsRole user;
