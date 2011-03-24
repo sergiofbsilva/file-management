@@ -1,7 +1,7 @@
 package module.fileManagement.domain;
 
-external class .pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile;
 
+external class .pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile;
 
 
 class AbstractFileNode {
@@ -15,29 +15,78 @@ class AbstractFileNode {
 		String name;
 	}
 
-class UploadedFile extends .pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile {
+class Document {
 }
 
 class Metadata {
 	String valueKey;
-	String key;
+	String value;
 }
 
-class VersionFile extends .pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile {
-
+class VersionedFile extends .pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile {
 }
 
-relation VersionFileVersion {
-	VersionFile playsRole version;
-	VersionFile playsRole previousVersion;
+
+relation VersionedFileVersionedFile {
+	VersionedFile playsRole previousVersion;
+	VersionedFile playsRole nextVersion;
 }
 
-relation FileNodeMetadata {
-	FileNode playsRole file;
+relation DocumentVersionedFile {
+	Document playsRole document;
+	VersionedFile playsRole lastVersionedFile;
+}
+
+relation DocumentMetadata {
+	Document playsRole document;
 	Metadata playsRole metadata {
 		multiplicity *;
 	}
 }
+
+relation FileNodeFile {
+	FileNode playsRole fileNode {
+		multiplicity *;
+	}
+	Document playsRole document;
+}
+
+relation DirNodeAbstractFileNode {
+	DirNode playsRole parent;
+	AbstractFileNode playsRole child {
+		multiplicity *;
+	}
+}
+
+relation DirNodeReadGroup {
+	DirNode playsRole dirNodeFromReadGroup {
+		multiplicity *;
+	}
+	.myorg.domain.groups.PersistentGroup playsRole readGroup;
+}
+
+relation DirNodeWriteGroup {
+	DirNode playsRole dirNodeFromWriteGroup {
+		multiplicity *;
+	}
+	.myorg.domain.groups.PersistentGroup playsRole writeGroup;
+}
+
+relation DocumentReadGroup {
+	Document playsRole documentFromReadGroup {
+		multiplicity *;
+	}
+	.myorg.domain.groups.PersistentGroup playsRole readGroup;
+}
+
+relation DocumentWriteGroup {
+	Document playsRole documentFromWriteGroup {
+		multiplicity *;
+	}
+	.myorg.domain.groups.PersistentGroup playsRole writeGroup;
+}
+
+
 
 
 relation UserAbstractFileNode {
@@ -50,31 +99,4 @@ relation UnitAbstractFileNode {
 	DirNode playsRole fileRepository;
 }
 
-relation DirNodeAbstractFileNode {
-	DirNode playsRole parent;
-	AbstractFileNode playsRole child {
-		multiplicity *;
-	}
-}
 
-relation FileNodeFile {
-	FileNode playsRole {
-		multiplicity *;
-	}
-	.pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile playsRole file;
-}
-
-
-relation AbstractFileNodeReadGroup {
-	AbstractFileNode playsRole abstractFileNodeFromReadGroup {
-		multiplicity *;
-	}
-	.myorg.domain.groups.PersistentGroup playsRole readGroup;
-}
-
-relation AbstractFileNodeWriteGroup {
-	AbstractFileNode playsRole abstractFileNodeFromWriteGroup {
-		multiplicity *;
-	}
-	.myorg.domain.groups.PersistentGroup playsRole writeGroup;
-}

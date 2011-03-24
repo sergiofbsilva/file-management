@@ -56,7 +56,7 @@ public class FileNodeDetails extends Window {
 	    @Override
 	    public void execute(final PersistentGroup group) {
 		persistentGroup = group;
-		fileNode.changeReadGroup(group);
+//		fileNode.changeReadGroup(group);
 		final String externalId = fileNode.getExternalId();
 		final Item item = fileTable.getItem(externalId);
 		item.getItemProperty("groupRead").setValue(group.getName());
@@ -77,7 +77,7 @@ public class FileNodeDetails extends Window {
 	    @Override
 	    public void execute(final PersistentGroup group) {
 		persistentGroup = group;
-		fileNode.changeWriteGroup(group);
+//		fileNode.changeWriteGroup(group);
 		final String externalId = fileNode.getExternalId();
 		final Item item = fileTable.getItem(externalId);
 		item.getItemProperty("groupWrite").setValue(group.getName());
@@ -97,7 +97,7 @@ public class FileNodeDetails extends Window {
     }
 
     private Label getFileDetails() {
-	final GenericFile file = fileNode.getFile();
+	final GenericFile file = null; // fileNode.getFile();
 
         final StringBuilder builder = new StringBuilder();
         builder.append(getMessage("label.file.displayName"));

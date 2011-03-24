@@ -3,6 +3,7 @@ package module.fileManagement.presentationTier.component;
 import java.io.IOException;
 import java.io.InputStream;
 
+import module.fileManagement.domain.Document;
 import module.fileManagement.domain.FileNode;
 import pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile;
 import pt.ist.fenixframework.pstm.AbstractDomainObject;
@@ -27,7 +28,8 @@ public class FileNodeStreamSource extends InputStream implements StreamSource {
     public InputStream getStream() {
 	if (stream == null) {
 	    final FileNode fileNode = AbstractDomainObject.fromExternalId(fileNodeOid);
-	    final GenericFile file = fileNode.getFile();
+	    final Document document = fileNode.getDocument();
+	    final GenericFile file = document.getLastVersionedFile();
 	    stream = file.getStream();
 	}
 	return this;

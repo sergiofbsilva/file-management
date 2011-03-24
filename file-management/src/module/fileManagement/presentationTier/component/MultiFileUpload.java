@@ -9,8 +9,8 @@ import org.vaadin.easyuploads.DirectoryFileFactory;
 import org.vaadin.easyuploads.FileBuffer;
 import org.vaadin.easyuploads.FileFactory;
 import org.vaadin.easyuploads.MultiUpload;
-import org.vaadin.easyuploads.MultiUploadHandler;
 import org.vaadin.easyuploads.MultiUpload.FileDetail;
+import org.vaadin.easyuploads.MultiUploadHandler;
 
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
@@ -26,10 +26,10 @@ import com.vaadin.terminal.gwt.server.WebBrowser;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.DragAndDropWrapper;
+import com.vaadin.ui.DragAndDropWrapper.WrapperTransferable;
 import com.vaadin.ui.Html5File;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.ProgressIndicator;
-import com.vaadin.ui.DragAndDropWrapper.WrapperTransferable;
 
 /**
  * MultiFileUpload makes it easier to upload multiple files. MultiFileUpload
@@ -180,7 +180,9 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
 	label.setSizeUndefined();
 	dropZone = new DragAndDropWrapper(label);
 	dropZone.setStyleName("v-multifileupload-dropzone");
-	dropZone.setSizeUndefined();
+//	dropZone.setSizeUndefined();
+//	dropZone.setSizeFull();
+	dropZone.setWidth(50, UNITS_PERCENTAGE);
 	addComponent(dropZone, 1);
 	dropZone.setDropHandler(this);
 	addStyleName("no-horizontal-drag-hints");

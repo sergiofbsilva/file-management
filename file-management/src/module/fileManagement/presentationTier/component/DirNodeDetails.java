@@ -57,7 +57,7 @@ public class DirNodeDetails extends Window {
 	    @Override
 	    public void execute(final PersistentGroup group) {
 		persistentGroup = group;
-		dirNode.changeReadGroup(group);
+//		dirNode.changeReadGroup(group);
 
 		for (final Object itemId : fileTable.getItemIds()) {
 		    final Item item = fileTable.getItem(itemId);
@@ -82,7 +82,7 @@ public class DirNodeDetails extends Window {
 	    @Override
 	    public void execute(final PersistentGroup group) {
 		persistentGroup = group;
-		dirNode.changeWriteGroup(group);
+//		dirNode.changeWriteGroup(group);
 
 		for (final Object itemId : fileTable.getItemIds()) {
 		    final Item item = fileTable.getItem(itemId);

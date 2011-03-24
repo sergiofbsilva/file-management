@@ -91,11 +91,6 @@ public class DirNode extends DirNode_Base {
     }
 
     @Service
-    public FileNode createFile(final File file, final String fileName) {
-	return new FileNode(this, file, fileName);
-    }
-
-    @Service
     public DirNode createDir(final String dirName) {
 	return new DirNode(this, dirName);
     }
@@ -130,12 +125,39 @@ public class DirNode extends DirNode_Base {
 	long result = 0;
 	for (final AbstractFileNode node : getChildSet()) {
 	    if (node.isFile()) {
-		result += ((FileNode) node).getFile().getContent().length;
+		// TODO
 	    } else {
 		result += ((DirNode) node).countFiles();
 	    }
 	}
 	return result;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return getName();
+    }
+
+    @Override
+    public PersistentGroup getReadGroup() {
+	final PersistentGroup group = super.getReadGroup();
+	return group == null && hasParent() ? getParent().getReadGroup() : group;
+    }
+
+    @Override
+    public PersistentGroup getWriteGroup() {
+	final PersistentGroup group = super.getWriteGroup();
+	return group == null && hasParent() ? getParent().getWriteGroup() : group;
+    }
+
+    @Service
+    public FileNode createFile(final File file, final String fileName) {
+	return new FileNode(this, file, fileName);
+    }
+
+    @Override
+    public int compareTo(final AbstractFileNode node) {
+	return node.isFile() ? -1 : super.compareTo(node);
     }
 
 }

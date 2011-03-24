@@ -35,7 +35,7 @@ public class EditFileNode extends Window {
 
         final Window window = this;
 
-        final GenericFile file = fileNode.getFile();
+        final GenericFile file = null; //fileNode.getFile();
 
         final TextField displayNameField = new TextField(getMessage("label.file.displayName"));
         displayNameField.setValue(file.getDisplayName());
@@ -54,7 +54,7 @@ public class EditFileNode extends Window {
         	final String displayName = (String) displayNameField.getValue();
         	final String filename = (String) fileNameField.getValue();
 
-        	fileNode.edit(displayName, filename);
+//        	fileNode.edit(displayName, filename);
 
         	(getParent()).removeWindow(window);
 

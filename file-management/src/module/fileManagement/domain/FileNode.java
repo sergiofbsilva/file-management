@@ -3,8 +3,8 @@ package module.fileManagement.domain;
 import java.io.File;
 
 import myorg.domain.exceptions.DomainException;
+import myorg.domain.groups.PersistentGroup;
 import pt.ist.fenixWebFramework.services.Service;
-import pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile;
 
 public class FileNode extends FileNode_Base {
 
@@ -13,7 +13,7 @@ public class FileNode extends FileNode_Base {
 	    throw new DomainException("must.specify.a.dir.node.when.creating.a.file.node");
 	}
 	setParent(dirNode);
-	setFile(new UploadedFile(file, fileName));
+	setDocument(new Document(file, fileName));
     }
 
     @Override
@@ -23,11 +23,7 @@ public class FileNode extends FileNode_Base {
 
     @Override
     public void delete() {
-	if (hasFile()) {
-	    final GenericFile file = getFile();
-	    file.delete();
-	    removeFile();
-	}
+	getDocument().delete();
         super.delete();
     }
 
@@ -36,11 +32,39 @@ public class FileNode extends FileNode_Base {
 	delete();
     }
 
-    @Service
-    public void edit(final String displayName, final String filename) {
-	final GenericFile file = getFile();
-	file.setDisplayName(displayName);
-	file.setFilename(filename);
+    @Override
+    public PersistentGroup getReadGroup() {
+	final PersistentGroup group = getDocument().getReadGroup();
+	return group == null && hasParent() ? getParent().getReadGroup() : group;
+    }
+
+    @Override
+    public PersistentGroup getWriteGroup() {
+	final PersistentGroup group = getDocument().getWriteGroup();
+	return group == null && hasParent() ? getParent().getWriteGroup() : group;
+    }
+
+    @Override
+    public String getDisplayName() {
+	final Document document = getDocument();
+	return document.getDisplayName();
+    }
+
+    @Override
+    public int compareTo(final AbstractFileNode node) {
+	return node.isDir() ? 1 : super.compareTo(node);
+    }
+
+    @Override
+    protected void setReadGroup(final PersistentGroup persistentGroup) {
+	final Document document = getDocument();
+	document.setReadGroup(persistentGroup);
+    }
+
+    @Override
+    protected void setWriteGroup(PersistentGroup persistentGroup) {
+	final Document document = getDocument();
+	document.setWriteGroup(persistentGroup);
     }
 
 }

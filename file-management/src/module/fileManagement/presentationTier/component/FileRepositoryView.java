@@ -318,7 +318,7 @@ public class FileRepositoryView extends BaseComponent
     }
 
     public Object[] createFileNodeItem(final FileNode fileNode) {
-	final GenericFile file = fileNode.getFile();
+	final GenericFile file = null; // fileNode.getFile();
 	final String filename = file.getFilename();
 	final String displayName = file.getDisplayName();
 	final int length = file.getContent().length;
@@ -417,7 +417,7 @@ public class FileRepositoryView extends BaseComponent
             
 	    @Override
 	    protected void handleFile(final File file, final String fileName, final String mimeType, final long length) {
-        	final FileNode fileNode = dirNode.createFile(file, fileName);
+        	final FileNode fileNode = null; // dirNode.createFile(file, fileName);
         	fileTable.addItem(createFileNodeItem(fileNode), fileNode.getExternalId());
 	    }
 
@@ -481,7 +481,7 @@ public class FileRepositoryView extends BaseComponent
 		    if (abstractFileNode.isReadGroupMember()) {
 			if (abstractFileNode.isFile()) {
 			    final FileNode fileNode = (FileNode) abstractFileNode;
-			    final GenericFile file = fileNode.getFile();
+			    final GenericFile file = null; // fileNode.getFile();
 
 			    final BufferedInputStream origin = new BufferedInputStream(file.getStream());
 			    final ZipEntry entry = new ZipEntry(path + file.getFilename());
