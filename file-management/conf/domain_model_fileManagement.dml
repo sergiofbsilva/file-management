@@ -34,11 +34,15 @@ relation VersionedFileVersionedFile {
 
 relation DocumentVersionedFile {
 	Document playsRole document;
-	VersionedFile playsRole lastVersionedFile;
+	VersionedFile playsRole lastVersionedFile {
+		multiplicity 1..1;
+	}
 }
 
 relation DocumentMetadata {
-	Document playsRole document;
+	Document playsRole document {
+		multiplicity 1..1;
+	}
 	Metadata playsRole metadata {
 		multiplicity *;
 	}
@@ -48,7 +52,9 @@ relation FileNodeFile {
 	FileNode playsRole fileNode {
 		multiplicity *;
 	}
-	Document playsRole document;
+	Document playsRole document {
+		multiplicity 1..1;
+	}
 }
 
 relation DirNodeAbstractFileNode {
