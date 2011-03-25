@@ -160,4 +160,9 @@ public class DirNode extends DirNode_Base {
 	return node.isFile() ? -1 : super.compareTo(node);
     }
 
+    @Override
+    public String getPresentationFilesize() {
+	return null;
+    }
+
 }

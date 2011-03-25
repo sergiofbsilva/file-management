@@ -99,4 +99,6 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 	}
     }
 
+    public abstract String getPresentationFilesize();
+
 }

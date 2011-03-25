@@ -31,5 +31,10 @@ public class Document extends Document_Base {
 	}
 	deleteDomainObject();
     }
+
+    public String getPresentationFilesize() {
+	final VersionedFile file = getLastVersionedFile();
+	return file.getPresentationFilesize();
+    }
     
 }

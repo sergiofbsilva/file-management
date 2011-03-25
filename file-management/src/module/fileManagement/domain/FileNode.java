@@ -67,4 +67,10 @@ public class FileNode extends FileNode_Base {
 	document.setWriteGroup(persistentGroup);
     }
 
+    @Override
+    public String getPresentationFilesize() {
+	final Document document = getDocument();
+	return document.getPresentationFilesize();
+    }
+
 }
