@@ -87,40 +87,9 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 	    addListener((ClickListener) this);
 	}
 
-	public DirNodeLink(final DirNode dirNode) {
-	    this(dirNode, dirNode.getDisplayName());
-	}
-
 	@Override
 	public void buttonClick(final ClickEvent event) {
 	    changeDir(linkDirNode);
-	}
-	
-    }
-
-    private class FileNodeLink extends Button implements ClickListener {
-
-	private final FileNode fileNode;
-
-	public FileNodeLink(final FileNode fileNode) {
-	    super(fileNode.getDisplayName());
-	    setStyleName(BaseTheme.BUTTON_LINK);
-	    this.fileNode = fileNode;
-	    addListener((ClickListener) this);
-	}
-
-	@Override
-	public void buttonClick(final ClickEvent event) {
-	    final Document document = fileNode.getDocument();
-	    final VersionedFile file = document.getLastVersionedFile();
-	    final String filename = file.getFilename();
-
-	    final FileNodeStreamSource streamSource = new FileNodeStreamSource(fileNode);
-	    final StreamResource resource = new StreamResource(streamSource, filename, getApplication());
-	    resource.setMIMEType(file.getContentType());
-	    resource.setCacheTime(0);
-
-	    getWindow().open(resource);
 	}
 	
     }
@@ -486,45 +455,11 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 
 	    addComponent(new HomeIconDirNodeLink(), 0);
 	    addComponent(new NewDirNodeLink(), 1);
+/*
+ * TODO
 	    addComponent(new IconLink("Search", "SearchesBlack32.png"), 2);
 	    addComponent(new IconLink(getMessage("label.menu.shared.documents"), "FolderContactsBlack32.png"), 3);
 	    addComponent(new IconLink("Trash", "TrashBlack32.png"), 4);
-
-/*
-	    setColumnExpandRatio(0, 1f);
-	    setColumnExpandRatio(1, 1.25f);
-	    setColumnExpandRatio(2, 1f);
-	    setColumnExpandRatio(3, 1.75f);
-	    setColumnExpandRatio(4, 1f);
-*/
-/*
-	    addComponent("label.menu.home", "HomeBlack.png"));
-	    addComponent("label.menu.new.folder", "HomeBlack.png"));
-	    addComponent("label.menu.shared.documents", "HomeBlack.png"));
-	    //addComponent("Search", "HomeBlack.png"));
-	    //addComponent("Trash", "HomeBlack.png"));
-
-	        final Panel searchPanel = new Panel();
-	        searchPanel.setSizeFull();
-	        searchPanel.setStyleName(Reindeer.PANEL_LIGHT);
-	        gridLayout.addComponent(searchPanel, 0, 0, 0, 0);
-	        gridLayout.setComponentAlignment(searchPanel, Alignment.MIDDLE_LEFT);
-	        searchPanel.addComponent(searchDocuments);
-
-	        final Panel uploadPanel = new Panel(new HorizontalLayout());
-	        uploadPanel.setSizeFull();
-	        uploadPanel.setStyleName(Reindeer.PANEL_LIGHT);
-	        final HorizontalLayout uploadPanelLayout = (HorizontalLayout) uploadPanel.getContent();
-	        uploadPanelLayout.setSizeFull();
-	        gridLayout.addComponent(uploadPanel, 1, 0, 1, 0);
-	        gridLayout.setComponentAlignment(uploadPanel, Alignment.MIDDLE_CENTER);
-	        uploadPanel.addComponent(uploadFileArea);
-
-	        final Panel breadCrumbPanel = new Panel();
-	        breadCrumbPanel.setStyleName(Reindeer.PANEL_LIGHT);
-	        gridLayout.addComponent(breadCrumbPanel, 0, 1, 1, 1);
-	        gridLayout.setComponentAlignment(breadCrumbPanel, Alignment.MIDDLE_LEFT);
-	        breadCrumbPanel.addComponent(new Label("TODO"));
 */
 	}
 
@@ -630,11 +565,13 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 	        horizontalLayout.setSpacing(true);
 	        addComponent(horizontalLayout);
 
-	        horizontalLayout.addComponent(new EditNodeButton());
+	        if (selectedNode.hasParent() && selectedNode.isWriteGroupMember()) {
+	            horizontalLayout.addComponent(new EditNodeButton());
 
-	        horizontalLayout.addComponent(new DeleteNodeButton());
+	            horizontalLayout.addComponent(new DeleteNodeButton());
 
-	        addComponent(textField);
+	            addComponent(textField);
+	        }
 	    }
 
 	}
@@ -675,6 +612,10 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 			    super.buttonClick(event);
 			    abstractNodeInfoGrid.detach();
 			    abstractNodeInfoGrid.attach();
+
+			    if (!selectedNode.isReadGroupMember()) {
+				documentTable.removeItem(selectedNode.getExternalId());
+			    }
 			}
 		    }
 
@@ -1038,10 +979,12 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 	    addComponent(visibilityPanel, 0, 1);
 	    setComponentAlignment(visibilityPanel, Alignment.MIDDLE_CENTER);
 
+/*
 	    final Panel directoryPanel = new Panel("Directories");
 	    addComponent(directoryPanel, 0, 2);
 	    setComponentAlignment(directoryPanel, Alignment.MIDDLE_CENTER);
 	    directoryPanel.addComponent(new Label("TODO: work in progress."));
+*/
 	}
 
 	@Override
@@ -1080,7 +1023,12 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 	layout.addComponent(horizontalLayoutMenu);
 	
 	horizontalLayoutMenu.addComponent(new IconMenu());
+
+	if (!dirNode.isWriteGroupMember()) {
+	    uploadFileArea.setVisible(false);
+	}
 	horizontalLayoutMenu.addComponent(uploadFileArea);
+
 	horizontalLayoutMenu.setComponentAlignment(uploadFileArea, Alignment.MIDDLE_RIGHT);
 
 	layout.addComponent(documentMenu);
@@ -1106,6 +1054,8 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 
     private void changeDir(final DirNode dirNode) {
 	this.dirNode = dirNode;
+
+	uploadFileArea.setVisible(dirNode.isWriteGroupMember());
 	    
 	documentTable.detach();
 	documentTable.attach();
@@ -1114,6 +1064,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 	documentMenu.attach();
 
 	changeSelectedNode(dirNode);
+
     }
 
     private ThemeResource getThemeResource(final AbstractFileNode abstractFileNode) {

@@ -29,7 +29,7 @@ public class Document extends Document_Base {
 	    metadata.delete();
 	}
 	for (final FileNode fileNode : getFileNodeSet()) {
-	    fileNode.delete();
+	    fileNode.deleteFromDocument();
 	}
 	while (hasLastVersionedFile()) {
 	    getLastVersionedFile().delete();

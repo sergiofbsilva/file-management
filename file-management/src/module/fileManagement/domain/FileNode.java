@@ -23,7 +23,12 @@ public class FileNode extends FileNode_Base {
 
     @Override
     public void delete() {
-	getDocument().delete();
+	final Document document = getDocument();
+	document.delete();
+    }
+
+    void deleteFromDocument() {
+	removeDocument();
         super.delete();
     }
 
