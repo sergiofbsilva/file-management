@@ -51,6 +51,12 @@ public class FileNode extends FileNode_Base {
     }
 
     @Override
+    protected void setDisplayName(final String displayName) {
+	final Document document = getDocument();
+	document.setDisplayName(displayName);
+    }
+
+    @Override
     public int compareTo(final AbstractFileNode node) {
 	return node.isDir() ? 1 : super.compareTo(node);
     }

@@ -39,6 +39,7 @@ import com.vaadin.data.Property;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.data.util.ItemSorter;
 import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.ShortcutListener;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.terminal.Resource;
 import com.vaadin.terminal.Sizeable;
@@ -531,6 +532,113 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 
     private class AbstractNodeInfoGrid extends GridLayout {
 
+	private class NodePanel extends Panel {
+
+	    private class EditNodeButton extends Button implements ClickListener {
+
+		private EditNodeButton() {
+		    super(getMessage("label.edit"));
+		    setStyleName(BaseTheme.BUTTON_LINK);
+		    addListener((ClickListener) this);
+		}
+
+		@Override
+		public void buttonClick(final ClickEvent event) {
+		    textField.setVisible(true);
+		}
+
+	    }
+
+	    private class DeleteNodeButton extends Button implements ClickListener {
+
+		private DeleteNodeButton() {
+		    super(getMessage("label.delete"));
+		    setStyleName(BaseTheme.BUTTON_LINK);
+		    addListener((ClickListener) this);
+		}
+
+		@Override
+		public void buttonClick(final ClickEvent event) {
+		    if (selectedNode.hasParent()) {
+			final DirNode parent = selectedNode.getParent();
+			if (parent != null) {
+			    selectedNode.deleteService();
+			    changeDir(parent);
+			} else {
+			    documentTable.removeItem(selectedNode.getExternalId());
+			    selectedNode.deleteService();
+			    abstractNodeInfoGrid.detach();
+			    abstractNodeInfoGrid.attach();
+			}
+		    }
+		}
+	    }
+
+	    private class NodeTextField extends TextField {
+
+		private class NodeTextFieldShortcutListener extends ShortcutListener {
+
+		    public NodeTextFieldShortcutListener() {
+			super(null, KeyCode.ENTER, null);
+		    }
+
+		    @Override
+		    public void handleAction(final Object sender, final Object target) {
+			final String nodeDisplayName = (String) textField.getValue();
+			selectedNode.updateDisplayName(nodeDisplayName);
+			textField.setVisible(false);
+			updateNodePanelCaption(nodeDisplayName);
+			if (dirNode == selectedNode) {
+			    documentMenu.detach();
+			    documentMenu.attach();
+			}
+			documentTable.detach();
+			documentTable.attach();
+		    }
+		    
+		}
+
+		private NodeTextField() {
+		    setVisible(false);
+		    setValue(selectedNode.getDisplayName());
+		    setWidth(100, UNITS_PERCENTAGE);
+		    addShortcutListener(new NodeTextFieldShortcutListener());
+		}
+
+	    }
+
+	    private TextField textField = new NodeTextField();
+
+	    private NodePanel() {
+		super(getSelectedNodeName());
+		setIcon(getThemeResource(selectedNode));
+		setStyleName(Reindeer.PANEL_LIGHT);
+		final VerticalLayout fileHeaderLayout = ((VerticalLayout) getContent());
+		fileHeaderLayout.setSpacing(true);
+		fileHeaderLayout.setMargin(false);
+	    }
+
+	    private void updateNodePanelCaption(final String caption) {
+		setCaption(caption);
+	    }
+
+	    @Override
+	    public void attach() {
+	        super.attach();
+
+	        final HorizontalLayout horizontalLayout = new HorizontalLayout();
+	        horizontalLayout.setSpacing(true);
+	        addComponent(horizontalLayout);
+
+	        horizontalLayout.addComponent(new EditNodeButton());
+
+	        horizontalLayout.addComponent(new DeleteNodeButton());
+
+	        addComponent(textField);
+	    }
+
+	}
+
 	private class VisibilityPanel extends Panel {
 	    
 	    private class ChangeVisibilityButton extends Button implements ClickListener {
@@ -922,12 +1030,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 	public void attach() {
 	    super.attach();
 
-	    final Panel fileHeaderPanel = new Panel(getSelectedNodeName());
-	    fileHeaderPanel.setIcon(getThemeResource(selectedNode));
-	    fileHeaderPanel.setStyleName(Reindeer.PANEL_LIGHT);
-	    final VerticalLayout fileHeaderLayout = ((VerticalLayout) fileHeaderPanel.getContent());
-	    fileHeaderLayout.setSpacing(true);
-	    fileHeaderLayout.setMargin(false);
+	    final Panel fileHeaderPanel = new NodePanel();
 	    addComponent(fileHeaderPanel, 0, 0);
 	    setComponentAlignment(fileHeaderPanel, Alignment.MIDDLE_CENTER);
 

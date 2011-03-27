@@ -101,4 +101,11 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 
     public abstract String getPresentationFilesize();
 
+    protected abstract void setDisplayName(final String displayName);
+
+    @Service
+    public void updateDisplayName(final String displayName) {
+	setDisplayName(displayName);
+    }
+
 }

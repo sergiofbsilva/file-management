@@ -17,6 +17,11 @@ public class Document extends Document_Base {
 	return file.getDisplayName();
     }
 
+    public void setDisplayName(final String displayName) {
+	final VersionedFile file = getLastVersionedFile();
+	file.setDisplayName(displayName);
+    }
+
     public void delete() {
 	removeReadGroup();
 	removeWriteGroup();

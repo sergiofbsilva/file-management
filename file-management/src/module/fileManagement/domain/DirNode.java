@@ -139,6 +139,11 @@ public class DirNode extends DirNode_Base {
     }
 
     @Override
+    protected void setDisplayName(final String displayName) {
+	setName(displayName);
+    }
+
+    @Override
     public PersistentGroup getReadGroup() {
 	final PersistentGroup group = super.getReadGroup();
 	return group == null && hasParent() ? getParent().getReadGroup() : group;
