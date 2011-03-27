@@ -13,8 +13,8 @@ import module.fileManagement.domain.FileNode;
 import module.fileManagement.domain.FileRepository;
 import module.fileManagement.domain.VersionedFile;
 import module.fileManagement.domain.VisibilityGroup;
-import module.fileManagement.domain.VisibilityGroup.VisibilityOperation;
 import module.fileManagement.domain.VisibilityList;
+import module.fileManagement.domain.VisibilityGroup.VisibilityOperation;
 import module.organization.domain.AccountabilityType;
 import module.organization.domain.Party;
 import module.organization.domain.Person;
@@ -38,17 +38,17 @@ import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.data.util.ItemSorter;
+import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.terminal.Resource;
 import com.vaadin.terminal.Sizeable;
 import com.vaadin.terminal.StreamResource;
 import com.vaadin.terminal.ThemeResource;
-import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
@@ -63,6 +63,7 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.themes.BaseTheme;
 import com.vaadin.ui.themes.Reindeer;
 
@@ -123,7 +124,16 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 	
     }
 
-    private class DocumentTable extends Table implements Table.ValueChangeListener {
+    private class DocumentTable extends Table implements Table.ValueChangeListener, ItemClickListener {
+
+	private class NodeTextField extends TextField {
+
+	    private NodeTextField(final AbstractFileNode abstractFileNode) {
+		setValue(abstractFileNode.getDisplayName());
+		setReadOnly(true);
+	    }
+
+	}
 
 	DocumentTable() {
 	    setSizeFull();
@@ -136,7 +146,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 	    setColumnReorderingAllowed(true);
 	    setColumnCollapsingAllowed(true);
 
-	    addContainerProperty("displayName", Button.class, null, false, "label.file.displayName");
+	    addContainerProperty("displayName", TextField.class, null, false, "label.file.displayName");
 	    addContainerProperty("visibility", String.class, null, false, "label.file.visibility");
 	    addContainerProperty("filesize", String.class, null, true, "label.file.size");
 	    addContainerProperty("icon", Resource.class, null, true, null);
@@ -162,8 +172,11 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 
 	    });
 
-	    final Table.ValueChangeListener listener = this;
-	    addListener(listener);
+	    final Table.ValueChangeListener valueChangeListener = this;
+	    addListener(valueChangeListener);
+
+	    final ItemClickListener itemClickListener = this;
+	    addListener(itemClickListener);
 	}
 
 	@Override
@@ -196,38 +209,20 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 
 	public void addAbstractFileNode(final AbstractFileNode abstractFileNode) {
 	    final String oid = abstractFileNode.getExternalId();
+	    final Item item = addItem(oid);
+
+	    final TextField displayNameLink = new NodeTextField(abstractFileNode);
+	    item.getItemProperty("displayName").setValue(displayNameLink);
 
 	    final String visibility = abstractFileNode.getVisibility();
-
-	    final Button displayNameLink;
-	    final String filesize;
-	    if (abstractFileNode.isDir()) {
-		final DirNode dirNode = (DirNode) abstractFileNode;
-		displayNameLink = new DirNodeLink(dirNode);
-		filesize = null;
-	    } else if (abstractFileNode.isFile()) {
-		final FileNode fileNode = (FileNode) abstractFileNode;
-		displayNameLink = new FileNodeLink(fileNode);
-		final Document document = fileNode.getDocument();
-		final VersionedFile file = document.getLastVersionedFile();
-		filesize = file.getPresentationFilesize();
-	    } else {
-		throw new Error("unknown.file.type: " + abstractFileNode);
-	    }
-
-	    final Item item = addItem(oid);
-	    item.getItemProperty("displayName").setValue(displayNameLink);
 	    item.getItemProperty("visibility").setValue(visibility);
+
+	    final String filesize = abstractFileNode.getPresentationFilesize();
 	    item.getItemProperty("filesize").setValue(filesize);
+
 	    item.getItemProperty("icon").setValue(getThemeResource(abstractFileNode));
 
 	    sort(new Object[] { "displayName" }, new boolean[] { true });
-	}
-
-	private String getIconFile(final String filename) {
-	    final int lastDot = filename.lastIndexOf('.');
-	    final String fileSuffix = lastDot < 0 ? "file" : filename.substring(lastDot + 1);
-	    return "fileicons/" + fileSuffix + ".png";
 	}
 
 	@Override
@@ -244,6 +239,35 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 		}
 	    }
 	}
+
+	@Override
+	public void itemClick(final ItemClickEvent event) {
+	    final String oid = (String) event.getItemId();
+	    final AbstractFileNode abstractFileNode = AbstractDomainObject.fromExternalId(oid);
+
+	    if (event.isDoubleClick()) {
+		if (abstractFileNode.isDir()) {
+		    final DirNode dirNode = (DirNode) abstractFileNode;
+		    changeDir(dirNode);
+		} else if (abstractFileNode.isFile()) {
+		    final FileNode fileNode = (FileNode) abstractFileNode;
+		    final Document document = fileNode.getDocument();
+		    final VersionedFile file = document.getLastVersionedFile();
+		    final String filename = file.getFilename();
+
+		    final FileNodeStreamSource streamSource = new FileNodeStreamSource(fileNode);
+		    final StreamResource resource = new StreamResource(streamSource, filename, getApplication());
+		    resource.setMIMEType(file.getContentType());
+		    resource.setCacheTime(0);
+
+		    getWindow().open(resource);
+		} else {
+		    throw new Error("unknown.file.type: " + abstractFileNode);
+		}
+	    } else {
+//		changeSelectedNode(abstractFileNode);
+	    }
+  	}
 
     }
 
@@ -970,9 +994,11 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
     }
 
     private void changeSelectedNode(final AbstractFileNode abstractFileNode) {
-	this.selectedNode = abstractFileNode;
-	abstractNodeInfoGrid.detach();
-	abstractNodeInfoGrid.attach();
+	if (abstractFileNode != selectedNode) {
+	    this.selectedNode = abstractFileNode;
+	    abstractNodeInfoGrid.detach();
+	    abstractNodeInfoGrid.attach();
+	}
     }
 
     private void changeDir(final DirNode dirNode) {
