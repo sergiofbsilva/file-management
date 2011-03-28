@@ -2,10 +2,10 @@ package module.fileManagement.domain;
 
 import java.io.File;
 
-import module.organization.domain.AccountabilityType;
-import module.organization.domain.Unit;
-import module.organization.domain.groups.UnitGroup;
-import module.organizationIst.domain.IstAccountabilityType;
+//import module.organization.domain.AccountabilityType;
+//import module.organization.domain.Unit;
+//import module.organization.domain.groups.UnitGroup;
+//import module.organizationIst.domain.IstAccountabilityType;
 import myorg.domain.User;
 import myorg.domain.groups.EmptyGroup;
 import myorg.domain.groups.PersistentGroup;
@@ -24,7 +24,7 @@ public class DirNode extends DirNode_Base {
         setWriteGroup(group);
     }
 
-    public DirNode(final Unit unit) {
+    /*public DirNode(final Unit unit) {
         super();
         setUnit(unit);
         setName(unit.getPresentationName());
@@ -39,7 +39,7 @@ public class DirNode extends DirNode_Base {
         };
         setReadGroup(UnitGroup.getOrCreateGroup(unit, memberTypes, childUnitTypes ));
         setWriteGroup(UnitGroup.getOrCreateGroup(unit, memberTypes, null ));
-    }
+    }*/
 
     public DirNode(final DirNode dirNode, final String name) {
 	super();
@@ -97,7 +97,7 @@ public class DirNode extends DirNode_Base {
 
     public void delete() {
 	removeUser();
-	removeUnit();
+//	removeUnit();
 	for (final AbstractFileNode abstractFileNode : getChildSet()) {
 	    abstractFileNode.delete();
 	}

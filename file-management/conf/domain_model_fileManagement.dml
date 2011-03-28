@@ -100,9 +100,9 @@ relation UserAbstractFileNode {
 	DirNode playsRole fileRepository;
 }
 
-relation UnitAbstractFileNode {
+/*relation UnitAbstractFileNode {
 	.module.organization.domain.Unit playsRole unit;
 	DirNode playsRole fileRepository;
-}
+}*/
 
 

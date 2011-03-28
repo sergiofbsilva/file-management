@@ -15,12 +15,12 @@ import module.fileManagement.domain.VersionedFile;
 import module.fileManagement.domain.VisibilityGroup;
 import module.fileManagement.domain.VisibilityList;
 import module.fileManagement.domain.VisibilityGroup.VisibilityOperation;
-import module.organization.domain.AccountabilityType;
-import module.organization.domain.Party;
-import module.organization.domain.Person;
-import module.organization.domain.Unit;
-import module.organization.domain.groups.UnitGroup;
-import module.organizationIst.domain.IstAccountabilityType;
+//import module.organization.domain.AccountabilityType;
+//import module.organization.domain.Party;
+//import module.organization.domain.Person;
+//import module.organization.domain.Unit;
+//import module.organization.domain.groups.UnitGroup;
+//import module.organizationIst.domain.IstAccountabilityType;
 import myorg.applicationTier.Authenticate.UserView;
 import myorg.domain.MyOrg;
 import myorg.domain.User;
@@ -759,7 +759,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 					comboItem.getItemProperty("name").setValue(name);
 				    }
 
-				    for (final Party party : MyOrg.getInstance().getPartiesSet()) {
+				    /*for (final Party party : MyOrg.getInstance().getPartiesSet()) {
 					if (party.isUnit() || (party.isPerson() && ((Person) party).hasUser())) {
 					    final String externalId = party.getExternalId();
 					    final String name = party.getPresentationName();
@@ -767,7 +767,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 					    final Item comboItem = addItem(externalId);
 					    comboItem.getItemProperty("name").setValue(name);
 					}
-				    }
+				    }*/
 				}
 
 				@Override
@@ -792,7 +792,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 						public void renderGroupSpecificLayout(final AbstractOrderedLayout abstractOrderedLayout) {
 						}
 					    };
-					} else if (domainObject instanceof Person) {
+					    /*} else if (domainObject instanceof Person) {
 					    final Person person = (Person) domainObject;
 					    final User user = person.getUser();
 					    final SingleUserGroup singleUserGroup = SingleUserGroup.getOrCreateGroup(user);
@@ -806,7 +806,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 						public void renderGroupSpecificLayout(final AbstractOrderedLayout abstractOrderedLayout) {
 						}
 					    };
-					} else if (domainObject instanceof Unit) {
+					    } else if (domainObject instanceof Unit) {
 					    final Unit unit = (Unit) domainObject;
 					    hasPersistentGroup = new HasPersistentGroup() {
 						private Set<AccountabilityType> selectedAccountabilityTypes = new HashSet<AccountabilityType>();
@@ -848,7 +848,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 							}
 						    });
 						}
-					    };
+					    };*/
 					} else {
 					    throw new Error("unregistered.type: " + domainObject);
 					}
