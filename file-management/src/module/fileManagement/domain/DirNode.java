@@ -164,6 +164,15 @@ public class DirNode extends DirNode_Base {
 	return new FileNode(this, file, fileName);
     }
 
+    @Service
+    public FileNode createFile(final File file, final String fileName,
+	    final PersistentGroup readGroup, final PersistentGroup writeGroup) {
+	final FileNode fileNode = createFile(file, fileName);
+	fileNode.setReadGroup(readGroup);
+	fileNode.setWriteGroup(writeGroup);
+	return fileNode;
+    }
+
     @Override
     public int compareTo(final AbstractFileNode node) {
 	return node.isFile() ? -1 : super.compareTo(node);
