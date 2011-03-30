@@ -29,8 +29,8 @@ public class FileSupportNodeCreation extends ContextBaseAction {
 	final VaadinNode documentNode = VaadinNode.createVaadinNode(virtualHost, node,
 		"resources.FileManagementResources", "label.link.documents", "DocumentFrontPage-", UserGroup.getInstance());
 
-	VaadinNode.createVaadinNode(virtualHost, documentNode, "resources.FileManagementResources", "add.node.file.management.interface",
-		"FileRepositoryView-", UserGroup.getInstance());
+//	VaadinNode.createVaadinNode(virtualHost, documentNode, "resources.FileManagementResources", "add.node.file.management.interface",
+//		"FileRepositoryView-", UserGroup.getInstance());
 
 	return forwardToMuneConfiguration(request, virtualHost, node);
     }

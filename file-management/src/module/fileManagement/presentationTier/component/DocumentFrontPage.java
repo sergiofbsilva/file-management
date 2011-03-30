@@ -2,8 +2,6 @@ package module.fileManagement.presentationTier.component;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 import module.fileManagement.domain.AbstractFileNode;
 import module.fileManagement.domain.DirNode;
@@ -13,19 +11,12 @@ import module.fileManagement.domain.FileNode;
 import module.fileManagement.domain.FileRepository;
 import module.fileManagement.domain.VersionedFile;
 import module.fileManagement.domain.VisibilityGroup;
-import module.fileManagement.domain.VisibilityList;
 import module.fileManagement.domain.VisibilityGroup.VisibilityOperation;
-//import module.organization.domain.AccountabilityType;
-//import module.organization.domain.Party;
-//import module.organization.domain.Person;
-//import module.organization.domain.Unit;
-//import module.organization.domain.groups.UnitGroup;
-//import module.organizationIst.domain.IstAccountabilityType;
+import module.fileManagement.domain.VisibilityList;
 import myorg.applicationTier.Authenticate.UserView;
 import myorg.domain.MyOrg;
 import myorg.domain.User;
 import myorg.domain.groups.PersistentGroup;
-import myorg.domain.groups.SingleUserGroup;
 
 import org.vaadin.easyuploads.DirectoryFileFactory;
 
@@ -39,8 +30,8 @@ import com.vaadin.data.Property;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.data.util.ItemSorter;
 import com.vaadin.event.ItemClickEvent;
-import com.vaadin.event.ShortcutListener;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.event.ShortcutListener;
 import com.vaadin.terminal.Resource;
 import com.vaadin.terminal.Sizeable;
 import com.vaadin.terminal.StreamResource;
@@ -50,6 +41,7 @@ import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
@@ -58,13 +50,11 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.NativeSelect;
-import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.themes.BaseTheme;
 import com.vaadin.ui.themes.Reindeer;
 
@@ -406,8 +396,12 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 
 	    @Override
 	    public void buttonClick(final ClickEvent event) {
-		final AddDirWindow addDirWindow = new AddDirWindow();
-		outerWindow.addWindow(addDirWindow);
+		if (dirNode.isWriteGroupMember()) {
+		    final AddDirWindow addDirWindow = new AddDirWindow();
+		    outerWindow.addWindow(addDirWindow);
+		} else {
+                    getWindow().showNotification(getMessage("message.dir.cannot.write"));
+		}
 	    }
 	}
 
@@ -1001,7 +995,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
     private final AbstractNodeInfoGrid abstractNodeInfoGrid = new AbstractNodeInfoGrid();
 
     private Window outerWindow;
-    private DirNode dirNode = FileRepository.getOrCreateFileRepository(UserView.getCurrentUser());
+    private DirNode dirNode = getInitialDirNode();
     private AbstractFileNode selectedNode = dirNode;
 
     @Override
@@ -1042,6 +1036,10 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 
 	horizontalLayout.addComponent(abstractNodeInfoGrid);
 	horizontalLayout.setExpandRatio(abstractNodeInfoGrid, 1.0f);
+    }
+
+    protected DirNode getInitialDirNode() {
+	return FileRepository.getOrCreateFileRepository(UserView.getCurrentUser());
     }
 
     private void changeSelectedNode(final AbstractFileNode abstractFileNode) {

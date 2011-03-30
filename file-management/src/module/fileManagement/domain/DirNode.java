@@ -2,10 +2,6 @@ package module.fileManagement.domain;
 
 import java.io.File;
 
-//import module.organization.domain.AccountabilityType;
-//import module.organization.domain.Unit;
-//import module.organization.domain.groups.UnitGroup;
-//import module.organizationIst.domain.IstAccountabilityType;
 import myorg.domain.User;
 import myorg.domain.groups.EmptyGroup;
 import myorg.domain.groups.PersistentGroup;
@@ -93,6 +89,14 @@ public class DirNode extends DirNode_Base {
     @Service
     public DirNode createDir(final String dirName) {
 	return new DirNode(this, dirName);
+    }
+
+    @Service
+    public DirNode createDir(final String dirName, final PersistentGroup readGroup, final PersistentGroup writeGroup) {
+	final DirNode dirNode = createDir(dirName);
+	dirNode.setReadGroup(readGroup);
+	dirNode.setWriteGroup(writeGroup);
+	return dirNode;
     }
 
     public void delete() {
