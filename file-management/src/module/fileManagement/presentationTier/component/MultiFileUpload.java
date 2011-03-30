@@ -75,7 +75,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
 	    private LinkedList<ProgressIndicator> indicators;
 
 	    public void streamingStarted(StreamingStartEvent event) {
-		System.err.println("Started" + event.getFileName() + " size " + event.getContentLength());
+//		System.err.println("Started" + event.getFileName() + " size " + event.getContentLength());
 	    }
 
 	    public void streamingFinished(StreamingEndEvent event) {
@@ -113,7 +113,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
 		    indicators = new LinkedList<ProgressIndicator>();
 		}
 		for (FileDetail f : pendingFileNames) {
-		    System.err.println("Info to handler about file: " + f.getFileName());
+//		    System.err.println("Info to handler about file: " + f.getFileName());
 		    ProgressIndicator pi = createProgressIndicator();
 		    progressBars.addComponent(pi);
 		    pi.setCaption(f.getFileName());
