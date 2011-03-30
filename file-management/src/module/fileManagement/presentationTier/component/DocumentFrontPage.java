@@ -2,6 +2,8 @@ package module.fileManagement.presentationTier.component;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import module.fileManagement.domain.AbstractFileNode;
 import module.fileManagement.domain.DirNode;
@@ -61,6 +63,64 @@ import com.vaadin.ui.themes.Reindeer;
 @SuppressWarnings("serial")
 @EmbeddedComponent(path = { "DocumentFrontPage-(.*)" })
 public class DocumentFrontPage extends CustomComponent implements EmbeddedComponentContainer {
+
+    private static class PersistentGroupHolder implements HasPersistentGroup {
+
+	private final PersistentGroup persistentGroup;
+
+	private PersistentGroupHolder(final PersistentGroup persistentGroup) {
+	    this.persistentGroup = persistentGroup;
+	}
+
+	@Override
+	public PersistentGroup getPersistentGroup() {
+	    return persistentGroup;
+	}
+
+	@Override
+	public void renderGroupSpecificLayout(final AbstractOrderedLayout abstractOrderedLayout) {
+	    // nothing to do, we already have a group :o)
+	}
+	
+    }
+
+    private static class PersistentGroupCreator implements HasPersistentGroupCreator {
+
+	@Override
+	public HasPersistentGroup createGroupFor(final Object itemId) {
+	    if (itemId != null && itemId instanceof String) {
+		final String externalId = (String) itemId;
+		final DomainObject domainObject = AbstractDomainObject.fromExternalId(externalId);
+		if (domainObject != null && domainObject instanceof PersistentGroup) {
+		    final PersistentGroup persistentGroup = (PersistentGroup) domainObject;
+		    return new PersistentGroupHolder(persistentGroup);
+		}
+	    }
+	    return null;
+	}
+
+	@Override
+	public void addItems(final ComboBox comboBox, final String displayItemProperty) {
+	    for (final PersistentGroup persistentGroup : MyOrg.getInstance().getSystemGroupsSet()) {
+		final String externalId = persistentGroup.getExternalId();
+		final String name = persistentGroup.getName();
+
+		final Item comboItem = comboBox.addItem(externalId);
+		comboItem.getItemProperty(displayItemProperty).setValue(name);
+	    }
+	}
+
+    }
+
+    private static final Set<HasPersistentGroupCreator> persistentGroupCreators = new HashSet<HasPersistentGroupCreator>();
+
+    static {
+	registerPersistentGroupCreator(new PersistentGroupCreator());
+    }
+
+    public static synchronized void registerPersistentGroupCreator(final HasPersistentGroupCreator hasPersistentGroupCreator) {
+	persistentGroupCreators.add(hasPersistentGroupCreator);
+    }
 
     protected String getMessage(final String key, String... args) {
 	return DocumentSystem.getMessage(key, args);
@@ -745,14 +805,9 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 				public void attach() {
 				    super.attach();
 
-				    for (final PersistentGroup persistentGroup : MyOrg.getInstance().getSystemGroupsSet()) {
-					final String externalId = persistentGroup.getExternalId();
-					final String name = persistentGroup.getName();
-
-					final Item comboItem = addItem(externalId);
-					comboItem.getItemProperty("name").setValue(name);
+				    for (final HasPersistentGroupCreator hasPersistentGroupCreator : persistentGroupCreators) {
+					hasPersistentGroupCreator.addItems(this, "name");
 				    }
-
 				    /*for (final Party party : MyOrg.getInstance().getPartiesSet()) {
 					if (party.isUnit() || (party.isPerson() && ((Person) party).hasUser())) {
 					    final String externalId = party.getExternalId();
@@ -768,24 +823,17 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 				public void valueChange(final com.vaadin.data.Property.ValueChangeEvent event) {
 				    groupSpecificLayout.removeAllComponents();
 
-				    if (event.getProperty().getValue() != null) {
-					final String externalId = (String) event.getProperty().getValue();
-					final DomainObject domainObject = AbstractDomainObject.fromExternalId(externalId);
-
-					select(externalId);
-
-					if (domainObject instanceof PersistentGroup) {
-					    final PersistentGroup persistentGroup = (PersistentGroup) domainObject;
-					    hasPersistentGroup = new HasPersistentGroup() {
-					        @Override
-					        public PersistentGroup getPersistentGroup() {
-					            return persistentGroup;
-					        }
-
-						@Override
-						public void renderGroupSpecificLayout(final AbstractOrderedLayout abstractOrderedLayout) {
-						}
-					    };
+				    final Object itemId = event.getProperty().getValue();
+				    if (itemId != null) {
+					for (final HasPersistentGroupCreator hasPersistentGroupCreator : persistentGroupCreators) {
+					    final HasPersistentGroup groupHolder = hasPersistentGroupCreator.createGroupFor(itemId);
+					    if (groupHolder != null) {
+						hasPersistentGroup = groupHolder; 
+						select(itemId);
+						hasPersistentGroup.renderGroupSpecificLayout(groupSpecificLayout);
+					    }
+					}
+					
 					    /*} else if (domainObject instanceof Person) {
 					    final Person person = (Person) domainObject;
 					    final User user = person.getUser();
@@ -843,12 +891,6 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 						    });
 						}
 					    };*/
-					} else {
-					    throw new Error("unregistered.type: " + domainObject);
-					}
-					if (hasPersistentGroup != null) {
-					    hasPersistentGroup.renderGroupSpecificLayout(groupSpecificLayout);
-					}
 				    }
 				}
 
