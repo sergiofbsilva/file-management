@@ -12,19 +12,22 @@ public class VersionedFile extends VersionedFile_Base {
 	B, KB, MB, GB, TB, PB;
 
 	private final double units;
+	private final double unitsForConv;
 
 	{
 	    units = Math.pow(1024, ordinal() + 1);
+	    unitsForConv = Math.pow(1024, ordinal());
 	}
 
 	private double convert(final double size) {
-	    return size / units;
+	    return size / unitsForConv;
 	}
 
 	private String toPresentationString(final double size) {
 	    final double convertedSize = convert(size);
+	    final long roundedValue = Math.round(convertedSize);
 	    return DocumentSystem.getMessage("label.file.size.value",
-		    Double.toString(convertedSize), toString());
+		    Long.toString(roundedValue), toString());
 	}
 
 	private static String prettyPring(final double bytes) {

@@ -65,7 +65,7 @@ import com.vaadin.ui.themes.Reindeer;
 @EmbeddedComponent(path = { "DocumentFrontPage-(.*)" })
 public class DocumentFrontPage extends CustomComponent implements EmbeddedComponentContainer {
 
-    private static class PersistentGroupHolder implements HasPersistentGroup {
+     private static class PersistentGroupHolder implements HasPersistentGroup {
 
 	private final PersistentGroup persistentGroup;
 
@@ -147,15 +147,6 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 
     private class DocumentTable extends Table implements Table.ValueChangeListener, ItemClickListener {
 
-	private class NodeTextField extends TextField {
-
-	    private NodeTextField(final AbstractFileNode abstractFileNode) {
-		setValue(abstractFileNode.getDisplayName());
-		setReadOnly(true);
-	    }
-
-	}
-
 	DocumentTable() {
 	    setSizeFull();
 	    setPageLength(0);
@@ -167,10 +158,12 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 	    setColumnReorderingAllowed(true);
 	    setColumnCollapsingAllowed(true);
 
-	    addContainerProperty("displayName", TextField.class, null, false, "label.file.displayName");
+	    addContainerProperty("displayName", String.class, null, false, "label.file.displayName");
 	    addContainerProperty("visibility", String.class, null, false, "label.file.visibility");
 	    addContainerProperty("filesize", String.class, null, true, "label.file.size");
 	    addContainerProperty("icon", Resource.class, null, true, null);
+
+	    setColumnAlignment("filesize", Table.ALIGN_RIGHT);
 
 	    setColumnExpandRatio("displayName", 1);
 
@@ -232,8 +225,8 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 	    final String oid = abstractFileNode.getExternalId();
 	    final Item item = addItem(oid);
 
-	    final TextField displayNameLink = new NodeTextField(abstractFileNode);
-	    item.getItemProperty("displayName").setValue(displayNameLink);
+	    final String displayName = abstractFileNode.getDisplayName();
+	    item.getItemProperty("displayName").setValue(displayName);
 
 	    final String visibility = abstractFileNode.getVisibility();
 	    item.getItemProperty("visibility").setValue(visibility);
@@ -361,17 +354,19 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
     
 	@Override
 	protected void handleFile(final File file, final String fileName, final String mimeType, final long length) {
-	    if (length < 50 * 1024 * 1024) {
-		final DirNode destination = dirNode == null || !dirNode.isWriteGroupMember() ?
-			UserView.getCurrentUser().getFileRepository() : dirNode;
-		if (destination != null) {
+	    final DirNode destination = dirNode == null || !dirNode.isWriteGroupMember() ?
+		    UserView.getCurrentUser().getFileRepository() : dirNode;
+	    if (destination != null) {
+		if (destination.hasAvailableQuota(length)) {
 		    final FileNode fileNode = destination.createFile(file, fileName);
 		    if (destination == dirNode) {
 			documentTable.addAbstractFileNode(fileNode);
 		    }
+		} else {
+		    getWindow().showNotification(getMessage("message.file.upload.failled"),
+			    getMessage("message.file.upload.failled.exceeded.quota"),
+			    Notification.TYPE_ERROR_MESSAGE);
 		}
-	    } else {
-		getWindow().showNotification(getMessage("message.file.upload.failled"), getMessage("message.file.upload.failled.exceeded.quota"), Notification.TYPE_ERROR_MESSAGE);
 	    }
 	}
 

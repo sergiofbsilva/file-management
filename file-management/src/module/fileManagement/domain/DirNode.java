@@ -10,7 +10,9 @@ import myorg.domain.groups.UserGroup;
 import pt.ist.fenixWebFramework.services.Service;
 
 public class DirNode extends DirNode_Base {
-    
+
+    private static final long USER_REPOSITORY_QUOTA = 50 * 1024 * 1024;
+
     public DirNode(final User user) {
         super();
         setUser(user);
@@ -181,6 +183,32 @@ public class DirNode extends DirNode_Base {
     @Override
     public String getPresentationFilesize() {
 	return null;
+    }
+
+    public boolean hasAvailableQuota(final long length) {
+	return hasParent() ? getParent().hasAvailableQuota(length) : hasAvailableQuotaInRepository(length);
+    }
+
+    private boolean hasAvailableQuotaInRepository(final long length) {
+	final User user = getUser();
+	return user == null || getUsedSpace() + length < USER_REPOSITORY_QUOTA;
+    }
+
+    protected long getUsedSpace() {
+	long result = 0;
+	for (final AbstractFileNode abstractFileNode : getChildSet()) {
+	    if (abstractFileNode.isDir()) {
+		final DirNode dirNode = (DirNode) abstractFileNode;
+		result += dirNode.getUsedSpace();
+	    } else if (abstractFileNode.isFile()) {
+		final FileNode fileNode = (FileNode) abstractFileNode;
+		final Document document = fileNode.getDocument();
+		for (VersionedFile file = document.getLastVersionedFile(); file != null; file = file.getPreviousVersion() ) {
+		    result += file.getContent().length;
+		}
+	    }
+	}
+	return result;
     }
 
 }
