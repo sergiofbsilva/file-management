@@ -57,6 +57,7 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.Window.Notification;
 import com.vaadin.ui.themes.BaseTheme;
 import com.vaadin.ui.themes.Reindeer;
 
@@ -360,13 +361,17 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
     
 	@Override
 	protected void handleFile(final File file, final String fileName, final String mimeType, final long length) {
-	    final DirNode destination = dirNode == null || !dirNode.isWriteGroupMember() ?
-		    UserView.getCurrentUser().getFileRepository() : dirNode;
-	    if (destination != null) {
-		final FileNode fileNode = destination.createFile(file, fileName);
-		if (destination == dirNode) {
-		    documentTable.addAbstractFileNode(fileNode);
+	    if (length < 50 * 1024 * 1024) {
+		final DirNode destination = dirNode == null || !dirNode.isWriteGroupMember() ?
+			UserView.getCurrentUser().getFileRepository() : dirNode;
+		if (destination != null) {
+		    final FileNode fileNode = destination.createFile(file, fileName);
+		    if (destination == dirNode) {
+			documentTable.addAbstractFileNode(fileNode);
+		    }
 		}
+	    } else {
+		getWindow().showNotification(getMessage("message.file.upload.failled"), getMessage("message.file.upload.failled.exceeded.quota"), Notification.TYPE_ERROR_MESSAGE);
 	    }
 	}
 
@@ -1064,7 +1069,6 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 	    uploadFileArea.setVisible(false);
 	}
 	horizontalLayoutMenu.addComponent(uploadFileArea);
-
 	horizontalLayoutMenu.setComponentAlignment(uploadFileArea, Alignment.MIDDLE_RIGHT);
 
 	layout.addComponent(documentMenu);
