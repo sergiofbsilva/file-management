@@ -584,7 +584,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 		    } else {
 			resource.setMIMEType(file.getContentType());
 		    }
-		    resource.setCacheTime(0);
+//		    resource.setCacheTime(0);
 
 		    setResource(resource);
 		}
