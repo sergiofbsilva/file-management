@@ -15,6 +15,7 @@ import module.fileManagement.domain.VersionedFile;
 import module.fileManagement.domain.VisibilityGroup;
 import module.fileManagement.domain.VisibilityGroup.VisibilityOperation;
 import module.fileManagement.domain.VisibilityList;
+import module.fileManagement.presentationTier.DownloadUtil;
 import myorg.applicationTier.Authenticate.UserView;
 import myorg.domain.MyOrg;
 import myorg.domain.User;
@@ -27,6 +28,7 @@ import pt.ist.fenixframework.pstm.AbstractDomainObject;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
 import vaadin.annotation.EmbeddedComponent;
 
+import com.vaadin.Application;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.IndexedContainer;
@@ -34,6 +36,7 @@ import com.vaadin.data.util.ItemSorter;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.event.ShortcutListener;
+import com.vaadin.terminal.ExternalResource;
 import com.vaadin.terminal.Resource;
 import com.vaadin.terminal.Sizeable;
 import com.vaadin.terminal.StreamResource;
@@ -574,19 +577,23 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 		public void attach() {
 		    final FileNode fileNode = (FileNode) selectedNode;
 		    final Document document = fileNode.getDocument();
-		    final VersionedFile file = document.getLastVersionedFile();
-		    final String filename = file.getFilename();
+//		    final VersionedFile file = document.getLastVersionedFile();
+//		    final String filename = file.getFilename();
+//
+//		    final FileNodeStreamSource streamSource = new FileNodeStreamSource(fileNode);
+//		    final StreamResource resource = new StreamResource(streamSource, filename, getApplication());
+//		    if (filename.endsWith(".pdf")) {
+//			resource.setMIMEType("application/pdf");
+//		    } else {
+//			resource.setMIMEType(file.getContentType());
+//		    }
+////		    resource.setCacheTime(0);
+//		    setResource(resource);
 
-		    final FileNodeStreamSource streamSource = new FileNodeStreamSource(fileNode);
-		    final StreamResource resource = new StreamResource(streamSource, filename, getApplication());
-		    if (filename.endsWith(".pdf")) {
-			resource.setMIMEType("application/pdf");
-		    } else {
-			resource.setMIMEType(file.getContentType());
-		    }
-//		    resource.setCacheTime(0);
-
-		    setResource(resource);
+		    final Application application = getApplication();
+		    final String url = DownloadUtil.getDownloadUrl(application, document);
+		    final ExternalResource externalResource = new ExternalResource(url);
+		    setResource(externalResource);
 		}
 		
 	    }

@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import module.fileManagement.domain.Document;
 import module.fileManagement.domain.FileNode;
 import module.fileManagement.domain.VersionedFile;
+import module.fileManagement.presentationTier.DownloadUtil;
 import myorg.applicationTier.Authenticate.UserView;
 import myorg.domain.User;
 import pt.ist.fenixWebFramework.Config.CasConfig;
@@ -50,7 +51,7 @@ public class DownloadDocumentServlet extends HttpServlet {
 		    versionedFile = null;
 		}
 		if (document != null && versionedFile != null) {
-		    process(request, response, document, versionedFile, uri);
+		    process(request, response, document, versionedFile);
 		}
 	    }
 	} else {
@@ -59,7 +60,7 @@ public class DownloadDocumentServlet extends HttpServlet {
     }
 
     private void process(final HttpServletRequest request, final HttpServletResponse response,
-	    final Document document, final VersionedFile versionedFile, final String uri) throws IOException {
+	    final Document document, final VersionedFile versionedFile) throws IOException {
 	for (final FileNode fileNode : document.getFileNodeSet()) {
 	    if (fileNode.isAccessible()) {
 		process(request, response, versionedFile);
@@ -68,22 +69,14 @@ public class DownloadDocumentServlet extends HttpServlet {
 		if (user == null) {
 		    final String serverName = request.getServerName();
 		    final CasConfig casConfig = FenixWebFramework.getConfig().getCasConfig(serverName);
-//		    if (casConfig != null && casConfig.isCasEnabled()) {
+		    if (casConfig != null && casConfig.isCasEnabled()) {
 			final String casLoginUrl = casConfig.getCasLoginUrl();
 			final StringBuilder url = new StringBuilder();
 			url.append(casLoginUrl);
-			url.append(request.getScheme());
-			url.append("://");
-			url.append(request.getServerName());
-			final int serverPort = request.getServerPort();
-			if (serverPort != 80 && serverPort != 443) {
-			    url.append(":");
-			    url.append(serverPort);
-			}
-			url.append(uri);
+			url.append(DownloadUtil.getDownloadUrl(request, versionedFile));
 			response.sendRedirect(url.toString());
 			return;
-//		    }
+		    }
 		}
 		response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Access to this resource is restrited");
 	    }
