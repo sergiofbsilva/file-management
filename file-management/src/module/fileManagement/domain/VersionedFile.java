@@ -70,4 +70,8 @@ public class VersionedFile extends VersionedFile_Base {
         super.delete();
     }
 
+    public Document getConnectedDocument() {
+	return hasDocument() ? getDocument() : (hasNextVersion() ? getNextVersion().getDocument() : null);
+    }
+
 }
