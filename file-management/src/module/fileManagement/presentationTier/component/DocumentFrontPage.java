@@ -579,7 +579,11 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 
 		    final FileNodeStreamSource streamSource = new FileNodeStreamSource(fileNode);
 		    final StreamResource resource = new StreamResource(streamSource, filename, getApplication());
-		    resource.setMIMEType(file.getContentType());
+		    if (filename.endsWith(".pdf")) {
+			resource.setMIMEType("application/pdf");
+		    } else {
+			resource.setMIMEType(file.getContentType());
+		    }
 		    resource.setCacheTime(0);
 
 		    setResource(resource);
