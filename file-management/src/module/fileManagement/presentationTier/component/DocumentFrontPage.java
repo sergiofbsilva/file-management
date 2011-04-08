@@ -563,6 +563,31 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 		}
 	    }
 
+	    private class DownloadButton extends Button implements ClickListener {
+
+		private DownloadButton() {
+		    super(getMessage("label.download"));
+		    setStyleName(BaseTheme.BUTTON_LINK);
+		    addListener((ClickListener) this);
+		}
+
+		@Override
+		public void buttonClick(final ClickEvent event) {
+		    final FileNode fileNode = (FileNode) selectedNode;
+		    final Document document = fileNode.getDocument();
+		    final VersionedFile file = document.getLastVersionedFile();
+		    final String filename = file.getFilename();
+
+		    final FileNodeStreamSource streamSource = new FileNodeStreamSource(fileNode);
+		    final StreamResource resource = new StreamResource(streamSource, filename, getApplication());
+		    resource.setMIMEType(file.getContentType());
+		    resource.setCacheTime(0);
+
+		    getWindow().open(resource);
+		}
+		
+	    }
+
 	    private class NodeTextField extends TextField {
 
 		private class NodeTextFieldShortcutListener extends ShortcutListener {
@@ -623,7 +648,11 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 	            horizontalLayout.addComponent(new EditNodeButton());
 
 	            horizontalLayout.addComponent(new DeleteNodeButton());
-
+	        }
+	        if (selectedNode.isFile() && selectedNode.isAccessible()) {
+	            horizontalLayout.addComponent(new DownloadButton());
+	        }
+	        if (selectedNode.hasParent() && selectedNode.isWriteGroupMember()) {
 	            addComponent(textField);
 	        }
 	    }
