@@ -50,6 +50,7 @@ import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Link;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Panel;
@@ -563,16 +564,14 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 		}
 	    }
 
-	    private class DownloadButton extends Button implements ClickListener {
+	    private class DownloadButton extends Link {
 
 		private DownloadButton() {
-		    super(getMessage("label.download"));
-		    setStyleName(BaseTheme.BUTTON_LINK);
-		    addListener((ClickListener) this);
+		    setCaption(getMessage("label.download"));
 		}
 
 		@Override
-		public void buttonClick(final ClickEvent event) {
+		public void attach() {
 		    final FileNode fileNode = (FileNode) selectedNode;
 		    final Document document = fileNode.getDocument();
 		    final VersionedFile file = document.getLastVersionedFile();
@@ -583,7 +582,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 		    resource.setMIMEType(file.getContentType());
 		    resource.setCacheTime(0);
 
-		    getWindow().open(resource);
+		    setResource(resource);
 		}
 		
 	    }
