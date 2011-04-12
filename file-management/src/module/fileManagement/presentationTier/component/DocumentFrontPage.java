@@ -164,10 +164,10 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 
 	    addContainerProperty("displayName", String.class, null, false, "label.file.displayName");
 	    addContainerProperty("visibility", String.class, null, false, "label.file.visibility");
-	    addContainerProperty("filesize", String.class, null, true, "label.file.size");
+//	    addContainerProperty("filesize", String.class, null, true, "label.file.size");
 	    addContainerProperty("icon", Resource.class, null, true, null);
 
-	    setColumnAlignment("filesize", Table.ALIGN_RIGHT);
+//	    setColumnAlignment("filesize", Table.ALIGN_RIGHT);
 
 	    setColumnExpandRatio("displayName", 1);
 
@@ -235,8 +235,8 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 	    final String visibility = abstractFileNode.getVisibility();
 	    item.getItemProperty("visibility").setValue(visibility);
 
-	    final String filesize = abstractFileNode.getPresentationFilesize();
-	    item.getItemProperty("filesize").setValue(filesize);
+//	    final String filesize = abstractFileNode.getPresentationFilesize();
+//	    item.getItemProperty("filesize").setValue(filesize);
 
 	    item.getItemProperty("icon").setValue(getThemeResource(abstractFileNode));
 
