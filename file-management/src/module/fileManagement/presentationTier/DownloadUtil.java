@@ -36,7 +36,7 @@ public class DownloadUtil {
 	url.append(scheme);
 	url.append("://");
 	url.append(servername);
-	if (serverPort != 80 && serverPort != 443) {
+	if (serverPort > 0 && serverPort != 80 && serverPort != 443) {
 	    url.append(":");
 	    url.append(serverPort);
 	}
