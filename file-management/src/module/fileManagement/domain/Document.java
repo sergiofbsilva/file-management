@@ -41,5 +41,12 @@ public class Document extends Document_Base {
 	final VersionedFile file = getLastVersionedFile();
 	return file.getPresentationFilesize();
     }
-    
+
+    public void addVersion(final File file, final String filename) {
+	final VersionedFile versionedFile = getLastVersionedFile();
+	final VersionedFile newVersion = new VersionedFile(file, filename);
+	newVersion.setPreviousVersion(versionedFile);
+	setLastVersionedFile(newVersion);
+    }
+
 }
