@@ -156,8 +156,6 @@ relation FileManagementMetadataKeys {
 
 relation FileManagementMyOrg {
 	.myorg.domain.MyOrg playsRole myOrg;
-	FileManagementSystem playsRole fileManagementSystem {
-		multiplicity 1..1;
-	}
+	FileManagementSystem playsRole fileManagementSystem;
 }
 
