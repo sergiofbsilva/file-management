@@ -26,7 +26,7 @@ public class VersionedFile extends VersionedFile_Base {
 	private String toPresentationString(final double size) {
 	    final double convertedSize = convert(size);
 	    final long roundedValue = Math.round(convertedSize);
-	    return DocumentSystem.getMessage("label.file.size.value",
+	    return FileManagementSystem.getMessage("label.file.size.value",
 		    Long.toString(roundedValue), toString());
 	}
 

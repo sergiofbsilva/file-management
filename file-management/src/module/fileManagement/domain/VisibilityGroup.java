@@ -16,7 +16,7 @@ public class VisibilityGroup implements Serializable {
 	}
 
 	public String getDescription() {
-	    return DocumentSystem.getMessage(key);
+	    return FileManagementSystem.getMessage(key);
 	}
 
 	public boolean isMember(final VisibilityOperation[] visibilityOperations) {

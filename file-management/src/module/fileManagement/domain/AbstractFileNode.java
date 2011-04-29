@@ -66,10 +66,9 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 	final String key = readGroup instanceof SingleUserGroup ?
 		"label.visibility.private" : readGroup instanceof AnyoneGroup ?
 			"label.visibility.public" : "label.visibility.shared";
-	return DocumentSystem.getMessage(key);
+	return FileManagementSystem.getMessage(key);
     }
-
-    @Override
+    
     public int compareTo(final AbstractFileNode node) {
 	final String displayName1 = getDisplayName();
 	final String displayName2 = node.getDisplayName();

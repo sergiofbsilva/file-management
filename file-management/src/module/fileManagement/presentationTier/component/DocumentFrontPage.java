@@ -8,7 +8,7 @@ import java.util.Set;
 import module.fileManagement.domain.AbstractFileNode;
 import module.fileManagement.domain.DirNode;
 import module.fileManagement.domain.Document;
-import module.fileManagement.domain.DocumentSystem;
+import module.fileManagement.domain.FileManagementSystem;
 import module.fileManagement.domain.FileNode;
 import module.fileManagement.domain.FileRepository;
 import module.fileManagement.domain.VersionedFile;
@@ -76,12 +76,12 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 	private PersistentGroupHolder(final PersistentGroup persistentGroup) {
 	    this.persistentGroup = persistentGroup;
 	}
-
+	
 	@Override
 	public PersistentGroup getPersistentGroup() {
 	    return persistentGroup;
 	}
-
+	
 	@Override
 	public void renderGroupSpecificLayout(final AbstractOrderedLayout abstractOrderedLayout) {
 	    // nothing to do, we already have a group :o)
@@ -128,7 +128,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
     }
 
     protected String getMessage(final String key, String... args) {
-	return DocumentSystem.getMessage(key, args);
+	return FileManagementSystem.getMessage(key, args);
     }
 
     private class DirNodeLink extends Button implements ClickListener {

@@ -18,10 +18,52 @@ class AbstractFileNode {
 class Document {
 }
 
-class Metadata {
-	String valueKey;
-	String value;
+class MetadataKey {
+	String keyValue;
 }
+
+class Metadata {
+	String value;
+	LocalDate timestamp;
+}
+
+relation MetadataMetadataKey {
+	MetadataKey playsRole metadataKey {
+		multiplicity 1..1;
+	}
+	Metadata playsRole metadata {
+		multiplicity *;
+	}
+}
+
+
+class MetadataTemplate {
+	String name;
+}
+
+
+
+relation MetadataKeysTemplate {
+	MetadataTemplate playsRole template;
+	MetadataKey playsRole keys {
+		multiplicity *;
+	}
+}
+
+relation DocumentMetadata {
+	Document playsRole document {
+		multiplicity 1..1;
+	}
+	Metadata playsRole metadata {
+		multiplicity *;
+	}
+}
+
+relation TemplateTemplates {
+	MetadataTemplate playsRole parent;
+	MetadataTemplate playsRole child;
+}
+
 
 class VersionedFile extends .pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile {
 }
@@ -36,15 +78,6 @@ relation DocumentVersionedFile {
 	Document playsRole document;
 	VersionedFile playsRole lastVersionedFile {
 		multiplicity 1..1;
-	}
-}
-
-relation DocumentMetadata {
-	Document playsRole document {
-		multiplicity 1..1;
-	}
-	Metadata playsRole metadata {
-		multiplicity *;
 	}
 }
 
@@ -93,8 +126,6 @@ relation DocumentWriteGroup {
 }
 
 
-
-
 relation UserAbstractFileNode {
 	.myorg.domain.User playsRole user;
 	DirNode playsRole fileRepository;
@@ -105,4 +136,28 @@ relation UserAbstractFileNode {
 	DirNode playsRole fileRepository;
 }*/
 
+class FileManagementSystem { 
+
+}
+
+relation FileManagementTemplates {
+	FileManagementSystem playsRole ;
+	MetadataTemplate playsRole metadataTemplates {
+		multiplicity *;
+	}
+}
+
+relation FileManagementMetadataKeys {
+	FileManagementSystem playsRole ;
+	MetadataKey playsRole metadataKeys {
+		multiplicity *;
+	}
+}
+
+relation FileManagementMyOrg {
+	.myorg.domain.MyOrg playsRole myOrg;
+	FileManagementSystem playsRole fileManagementSystem {
+		multiplicity 1..1;
+	}
+}
 
