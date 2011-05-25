@@ -26,7 +26,7 @@ import org.vaadin.easyuploads.DirectoryFileFactory;
 import pt.ist.fenixframework.DomainObject;
 import pt.ist.fenixframework.pstm.AbstractDomainObject;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
-import vaadin.annotation.EmbeddedComponent;
+import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 
 import com.vaadin.Application;
 import com.vaadin.data.Item;
