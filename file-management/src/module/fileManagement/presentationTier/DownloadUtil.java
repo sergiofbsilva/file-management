@@ -41,7 +41,7 @@ public class DownloadUtil {
 	    url.append(serverPort);
 	}
 	url.append(contextPath);
-	url.append("download/");
+	url.append("/download/");
 	url.append(domainObject.getExternalId());
 	return url.toString();
     }
