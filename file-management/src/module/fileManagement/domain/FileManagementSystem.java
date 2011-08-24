@@ -1,23 +1,32 @@
 package module.fileManagement.domain;
 
+import java.util.ResourceBundle;
+
 import myorg.domain.MyOrg;
 import myorg.util.BundleUtil;
+
+import org.apache.log4j.Level;
+
 import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.vaadinframework.VaadinFrameworkLogger;
 
 public class FileManagementSystem extends FileManagementSystem_Base {
     
     private static FileManagementSystem system;
+    private static final String BUNDLE  = "resources.FileManagementResources";
+    
+//    private static final Logger logger = Logger.getLogger(FileManagementSystem.class);
+    
+    static {
+	VaadinFrameworkLogger.getLogger().setLevel(Level.ALL);
+    }
     
     private FileManagementSystem() {
         super();
     }
     
-    public static String getBundle() {
-	return "resources.FileManagementResources";
-    }
-
     public static String getMessage(final String key, String... args) {
-	return BundleUtil.getFormattedStringFromResourceBundle(getBundle(), key, args);
+	return BundleUtil.getFormattedStringFromResourceBundle(BUNDLE, key, args);
     }
     
     public MetadataKey getMetadataKey(String keyValue) {
@@ -32,17 +41,35 @@ public class FileManagementSystem extends FileManagementSystem_Base {
     
     public static FileManagementSystem getInstance() {
 	if (system == null) {
-	    system = initFileManagementSystem();
+	    system = getOrCreateInstance();
 	}
 	return system;
 	
     }
     
     @Service
-    private static FileManagementSystem initFileManagementSystem() {
-	final FileManagementSystem fileManagementSystem = new FileManagementSystem();
-	MyOrg.getInstance().setFileManagementSystem(fileManagementSystem);
-	return fileManagementSystem;
+    private static FileManagementSystem getOrCreateInstance() {
+	final MyOrg myorg = MyOrg.getInstance();
+	if (!myorg.hasFileManagementSystem()) {
+	    final FileManagementSystem fileManagementSystem = new FileManagementSystem();
+	    myorg.setFileManagementSystem(fileManagementSystem);
+	    
+	}
+	return myorg.getFileManagementSystem();
     }
+    
+    public static ResourceBundle getBundle() {
+	return ResourceBundle.getBundle(BUNDLE);
+    }
+    
+//    public static void goTo(Class clazz) {
+//	
+//	for(Annotation anot : clazz.getAnnotations()) {
+//	    if (anot.annotationType().equals(EmbeddedComponent.class)) {
+//		EmbeddedComponent embedded = (EmbeddedComponent) anot;
+//		
+//	    }
+//	}
+//    }
     
 }

@@ -3,6 +3,9 @@ package module.fileManagement.domain;
 
 external class .pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile;
 
+class task.CreateDefaultMetadataTemplates extends .myorg.domain.scheduler.Task {
+
+}
 
 class AbstractFileNode {
 	String ojbConcreteClass;
@@ -14,8 +17,19 @@ class AbstractFileNode {
 	class DirNode extends AbstractFileNode {
 		String name;
 	}
+	
+	class SharedFileNode extends FileNode {
+	
+	}
+	
+	class SharedDirNode extends DirNode {
+	
+	}
+	
+	
 
 class Document {
+	DateTime lastModifiedDate;
 }
 
 class MetadataKey {
@@ -24,12 +38,12 @@ class MetadataKey {
 
 class Metadata {
 	String value;
-	LocalDate timestamp;
+	DateTime timestamp ( REQUIRED );
 }
 
 relation MetadataMetadataKey {
 	MetadataKey playsRole metadataKey {
-		multiplicity 1..1;
+		multiplicity 1;
 	}
 	Metadata playsRole metadata {
 		multiplicity *;
@@ -44,7 +58,9 @@ class MetadataTemplate {
 
 
 relation MetadataKeysTemplate {
-	MetadataTemplate playsRole template;
+	MetadataTemplate playsRole templates {
+		multiplicity *;
+	}
 	MetadataKey playsRole keys {
 		multiplicity *;
 	}
@@ -52,7 +68,7 @@ relation MetadataKeysTemplate {
 
 relation DocumentMetadata {
 	Document playsRole document {
-		multiplicity 1..1;
+		multiplicity 1;
 	}
 	Metadata playsRole metadata {
 		multiplicity *;
@@ -61,7 +77,9 @@ relation DocumentMetadata {
 
 relation TemplateTemplates {
 	MetadataTemplate playsRole parent;
-	MetadataTemplate playsRole child;
+	MetadataTemplate playsRole childs {
+		multiplicity *;
+	}
 }
 
 
@@ -81,12 +99,30 @@ relation DocumentVersionedFile {
 	}
 }
 
+relation SharedFileNodeFileNode {
+	FileNode playsRole node {
+		multiplicity 1..1;
+	}
+	SharedFileNode playsRole sharedFileNodes {
+		multiplicity *;
+	} 
+}
+
+relation SharedDirNodeDirNode {
+	DirNode playsRole node {
+		multiplicity 1..1;
+	}
+	SharedDirNode playsRole sharedDirNodes {
+		multiplicity *;
+	} 
+}
+
 relation FileNodeFile {
 	FileNode playsRole fileNode {
 		multiplicity *;
 	}
 	Document playsRole document {
-		multiplicity 1..1;
+		multiplicity 1;
 	}
 }
 
@@ -131,6 +167,12 @@ relation UserAbstractFileNode {
 	DirNode playsRole fileRepository;
 }
 
+relation UserTrash {
+	.myorg.domain.User playsRole ;
+	DirNode playsRole trash;
+}
+
+
 /*relation UnitAbstractFileNode {
 	.module.organization.domain.Unit playsRole unit;
 	DirNode playsRole fileRepository;
@@ -141,14 +183,14 @@ class FileManagementSystem {
 }
 
 relation FileManagementTemplates {
-	FileManagementSystem playsRole ;
+	FileManagementSystem playsRole fileManagementSystem;
 	MetadataTemplate playsRole metadataTemplates {
 		multiplicity *;
 	}
 }
 
 relation FileManagementMetadataKeys {
-	FileManagementSystem playsRole ;
+	FileManagementSystem playsRole  fileManagementSystem;
 	MetadataKey playsRole metadataKeys {
 		multiplicity *;
 	}

@@ -7,7 +7,7 @@ import org.apache.commons.io.FileUtils;
 
 public class VersionedFile extends VersionedFile_Base {
 
-    private static enum FILE_SIZE_UNIT {
+    public static enum FILE_SIZE_UNIT {
 
 	B, KB, MB, GB, TB, PB;
 
@@ -30,7 +30,7 @@ public class VersionedFile extends VersionedFile_Base {
 		    Long.toString(roundedValue), toString());
 	}
 
-	private static String prettyPring(final double bytes) {
+	public static String prettyPring(final double bytes) {
 	    for (final FILE_SIZE_UNIT unit : FILE_SIZE_UNIT.values()) {
 		if (unit.units > bytes) {
 		    return unit.toPresentationString(bytes);
@@ -73,5 +73,5 @@ public class VersionedFile extends VersionedFile_Base {
     public Document getConnectedDocument() {
 	return hasDocument() ? getDocument() : (hasNextVersion() ? getNextVersion().getDocument() : null);
     }
-
+    
 }

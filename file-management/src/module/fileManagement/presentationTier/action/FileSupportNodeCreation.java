@@ -3,8 +3,10 @@ package module.fileManagement.presentationTier.action;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import myorg.domain.RoleType;
 import myorg.domain.VirtualHost;
 import myorg.domain.contents.Node;
+import myorg.domain.groups.Role;
 import myorg.domain.groups.UserGroup;
 import myorg.presentationTier.actions.ContextBaseAction;
 
@@ -24,13 +26,25 @@ public class FileSupportNodeCreation extends ContextBaseAction {
 	    final HttpServletRequest request, final HttpServletResponse response) throws Exception {
 	final VirtualHost virtualHost = getDomainObject(request, "virtualHostToManageId");
 	final Node node = getDomainObject(request, "parentOfNodesToManageId");
+	final String FILEMANAGEMENT_RESOURCES = "resources.FileManagementResources";
 
+	final VaadinNode documentHome = VaadinNode.createVaadinNode(virtualHost, node,
+		FILEMANAGEMENT_RESOURCES, "label.link.documents", "DocumentHome", UserGroup.getInstance());
 
-	final VaadinNode documentNode = VaadinNode.createVaadinNode(virtualHost, node,
-		"resources.FileManagementResources", "label.link.documents", "DocumentFrontPage-", UserGroup.getInstance());
-
-//	VaadinNode.createVaadinNode(virtualHost, documentNode, "resources.FileManagementResources", "add.node.file.management.interface",
-//		"FileRepositoryView-", UserGroup.getInstance());
+	VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.home",
+		"DocumentHome", UserGroup.getInstance());
+	
+	VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.browse",
+		"DocumentBrowse", UserGroup.getInstance());
+	
+	VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.search",
+		"DocumentSearch", UserGroup.getInstance());
+	
+	VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.old.documents",
+		"DocumentFrontPage", UserGroup.getInstance());
+	
+	VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.metadata.templates",
+		"ManageMetadataTemplates", Role.getRole(RoleType.MANAGER));
 
 	return forwardToMuneConfiguration(request, virtualHost, node);
     }

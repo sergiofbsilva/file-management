@@ -62,7 +62,7 @@ public class DownloadDocumentServlet extends HttpServlet {
     private void process(final HttpServletRequest request, final HttpServletResponse response,
 	    final Document document, final VersionedFile versionedFile) throws IOException {
 	for (final FileNode fileNode : document.getFileNodeSet()) {
-	    if (fileNode.isAccessible()) {
+	    if (fileNode.isAccessible() /*|| fileNode instanceof SharedFileNode*/) {
 		process(request, response, versionedFile);
 	    } else {
 		final User user = UserView.getCurrentUser();

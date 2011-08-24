@@ -1,7 +1,11 @@
 package module.fileManagement.domain;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
 
+import module.organization.domain.Party;
 import myorg.domain.User;
 import myorg.domain.groups.EmptyGroup;
 import myorg.domain.groups.PersistentGroup;
@@ -12,14 +16,27 @@ import pt.ist.fenixWebFramework.services.Service;
 public class DirNode extends DirNode_Base {
 
     private static final long USER_REPOSITORY_QUOTA = 50 * 1024 * 1024;
-
+    public static final String SHARED_DIR_NAME = "Ficheiros Partilhados";
+    public static final String TRASH_DIR_NAME = "Lixo";
+    
+    public DirNode() {
+	super();
+    }
+    
+    public boolean isSharedFilesDirectory() {
+	return getName().equals(SHARED_DIR_NAME);
+    }
+    
     public DirNode(final User user) {
         super();
         setUser(user);
-        setName(user.getPresentationName());
-        final PersistentGroup group = SingleUserGroup.getOrCreateGroup(user);
+        final String dirName = user.getPresentationName();
+	setName(dirName);
+	createSharedFolder();
+	final PersistentGroup group = SingleUserGroup.getOrCreateGroup(user);
         setReadGroup(group);
         setWriteGroup(group);
+        createTrashFolder(user);
     }
 
     /*public DirNode(final Unit unit) {
@@ -39,12 +56,41 @@ public class DirNode extends DirNode_Base {
         setWriteGroup(UnitGroup.getOrCreateGroup(unit, memberTypes, null ));
     }*/
 
+    private void createTrashFolder(User user) {
+	DirNode trash = new DirNode();
+	trash.setName(TRASH_DIR_NAME);
+	trash.setReadGroup(getReadGroup());
+	trash.setWriteGroup(getWriteGroup());
+	user.setTrash(trash);
+    }
+
     public DirNode(final DirNode dirNode, final String name) {
 	super();
 	setParent(dirNode);
 	setName(name);
     }
-
+    
+    private DirNode createSharedFolder() {
+	DirNode sharedDir = new DirNode(this,SHARED_DIR_NAME);
+	addChild(sharedDir);
+	return sharedDir;
+    }
+    
+    public DirNode getSharedFolder() {
+	if (!hasParent()) { // is root
+	    for(AbstractFileNode node : getChildSet()) {
+		if (node instanceof DirNode) {
+		    DirNode dirNode = (DirNode)node;
+		    if (SHARED_DIR_NAME.equals(dirNode.getName())) {
+			return dirNode;
+		    }
+		}
+	    }
+	    return createSharedFolder();
+	}
+	return getParent().getSharedFolder();
+    }
+    
     public String getRepositoryName() {
 	return hasParent() ? getParent().getRepositoryName() : getName();
     }
@@ -87,7 +133,7 @@ public class DirNode extends DirNode_Base {
     public boolean isDir() {
         return true;
     }
-
+    
     @Service
     public DirNode createDir(final String dirName) {
 	return new DirNode(this, dirName);
@@ -101,6 +147,7 @@ public class DirNode extends DirNode_Base {
 	return dirNode;
     }
 
+    @Override
     public void delete() {
 	removeUser();
 //	removeUnit();
@@ -109,7 +156,7 @@ public class DirNode extends DirNode_Base {
 	}
 	super.delete();
     }
-
+    
     @Service
     public void edit(final String name) {
 	setName(name);
@@ -118,13 +165,17 @@ public class DirNode extends DirNode_Base {
     public int countFiles() {
 	int result = 0;
 	for (final AbstractFileNode node : getChildSet()) {
-	    if (node.isFile()) {
+	    if (node.isFile() || node.isShared()) {
 		result++;
 	    } else {
 		result += ((DirNode) node).countFiles();
 	    }
 	}
 	return result;
+    }
+    
+    public int getCountFiles() {
+	return countFiles();
     }
 
     public long countFilesSize() {
@@ -145,7 +196,7 @@ public class DirNode extends DirNode_Base {
     }
 
     @Override
-    protected void setDisplayName(final String displayName) {
+    public void setDisplayName(final String displayName) {
 	setName(displayName);
     }
 
@@ -163,9 +214,27 @@ public class DirNode extends DirNode_Base {
 
     @Service
     public FileNode createFile(final File file, final String fileName) {
-	return new FileNode(this, file, fileName);
+	FileNode fileNode = searchFile(fileName);
+	if (fileNode != null) {
+	    fileNode.getDocument().addVersion(file, fileName);
+	    return fileNode;
+	}
+	fileNode = new FileNode(this, file, fileName);
+	return fileNode;
     }
-
+    
+    
+    public FileNode searchFile(final String fileName) {
+	for(AbstractFileNode node : getChildSet()) {
+	    if (node instanceof FileNode) {
+		if (node.getDisplayName().equals(fileName)) {
+		    return (FileNode) node;
+		}
+	    }
+	}
+	return null;
+    }
+    
     @Service
     public FileNode createFile(final File file, final String fileName,
 	    final PersistentGroup readGroup, final PersistentGroup writeGroup) {
@@ -174,7 +243,7 @@ public class DirNode extends DirNode_Base {
 	fileNode.setWriteGroup(writeGroup);
 	return fileNode;
     }
-
+    
     @Override
     public int compareTo(final AbstractFileNode node) {
 	return node.isFile() ? -1 : super.compareTo(node);
@@ -182,7 +251,18 @@ public class DirNode extends DirNode_Base {
 
     @Override
     public String getPresentationFilesize() {
-	return null;
+	return VersionedFile.FILE_SIZE_UNIT.prettyPring(getFilesize());
+    }
+    
+    @Override
+    public int getFilesize() {
+	int sum = 0;
+	for (AbstractFileNode node : getChild()) {
+	    if (!node.isShared()) {
+		sum += node.getFilesize();
+	    }
+	}
+	return sum;
     }
 
     public boolean hasAvailableQuota(final long length) {
@@ -210,5 +290,48 @@ public class DirNode extends DirNode_Base {
 	}
 	return result;
     }
-
+    
+    private void calculatePaths(List<String> paths) {
+	if (!hasParent()) {
+	    paths.add(getUser().getUsername());
+	} else {
+	    paths.add(getDisplayName());
+	    getParent().calculatePaths(paths);
+	}
+    }
+    
+    public String getAbsolutePath() {
+	String ret = new String();
+	ArrayList<String> paths = new ArrayList<String>();
+	calculatePaths(paths);
+	final ListIterator<String> iterator = paths.listIterator(paths.size());
+	while(iterator.hasPrevious()) {
+	    ret += iterator.previous();
+	    if (iterator.hasPrevious()) {
+		ret += " > ";
+	    }
+	}
+	return ret;
+    }
+    
+    public List<DirNode> getAllDirs() {
+	List<DirNode> nodes = new ArrayList<DirNode>();
+	nodes.add(this);
+	for(AbstractFileNode node : getChildSet()) {
+	    if (node.isDir()) {
+		final DirNode dirNode = (DirNode) node;
+		nodes.addAll(dirNode.getAllDirs());
+	    }
+	}
+	return nodes;
+    }
+    
+    @Override
+    public Party getOwner() {
+	if (!hasParent()) {
+	    return getUser().getPerson();
+	}
+	return getParent().getOwner();
+    }
 }
+

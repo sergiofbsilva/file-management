@@ -23,5 +23,9 @@ public class FileRepository {
     private static DirNode createFileRepository(final User user) {
 	return user.hasFileRepository() ? user.getFileRepository() : new DirNode(user);
     }
-
+    
+//    public static DirNode getOrCreateTrash(final User user) {
+//   	return user.hasTrash() ? user.getTrash() : createFileRepository(user);
+//    }
+    
 }

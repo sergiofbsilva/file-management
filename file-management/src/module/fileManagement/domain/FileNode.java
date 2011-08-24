@@ -9,24 +9,32 @@ import pt.ist.fenixWebFramework.services.Service;
 public class FileNode extends FileNode_Base {
 
     public FileNode(final DirNode dirNode, final File file, final String fileName) {
+	super();
 	if (dirNode == null) {
 	    throw new DomainException("must.specify.a.dir.node.when.creating.a.file.node");
 	}
 	setParent(dirNode);
 	setDocument(new Document(file, fileName));
     }
-
+    
+    public FileNode() {
+	super();
+    }
+    
     @Override
     public boolean isFile() {
         return true;
     }
 
     @Override
+    @Service
     public void delete() {
 	final Document document = getDocument();
 	document.delete();
+	getParent().removeChild(this);
+	deleteDomainObject();
     }
-
+    
     void deleteFromDocument() {
 	removeDocument();
         super.delete();
@@ -36,7 +44,14 @@ public class FileNode extends FileNode_Base {
     public void deleteService() {
 	delete();
     }
-
+    
+    
+    @Override
+    public void trash() {
+        super.trash();
+    }
+    
+    
     @Override
     public PersistentGroup getReadGroup() {
 	final PersistentGroup group = getDocument().getReadGroup();
@@ -82,6 +97,11 @@ public class FileNode extends FileNode_Base {
     public String getPresentationFilesize() {
 	final Document document = getDocument();
 	return document.getPresentationFilesize();
+    }
+    
+    @Override
+    public int getFilesize() {
+	return getDocument().getFilesize();
     }
 
 }
