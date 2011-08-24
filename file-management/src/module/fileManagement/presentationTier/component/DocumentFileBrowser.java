@@ -23,14 +23,11 @@ import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
 
 import com.vaadin.data.Container.Sortable;
 import com.vaadin.data.Item;
-import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.Property.ValueChangeNotifier;
 import com.vaadin.data.util.ItemSorter;
-import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
-import com.vaadin.terminal.Resource;
 import com.vaadin.terminal.Sizeable;
 import com.vaadin.terminal.StreamResource;
 import com.vaadin.terminal.ThemeResource;
@@ -122,7 +119,7 @@ public class DocumentFileBrowser extends CustomComponent implements EmbeddedComp
 	    setPageLength(25);
 
 	    setSelectable(true);
-	    setMultiSelect(true);
+	    setMultiSelect(false);
 	    setImmediate(true);
 	    setSortDisabled(false);
 	    setColumnReorderingAllowed(true);
@@ -182,28 +179,28 @@ public class DocumentFileBrowser extends CustomComponent implements EmbeddedComp
 	    removeAllItems();
 	}
 
-	public void addContainerProperty(final Object propertyId, Class<?> type, final Object defaultValue,
-		final boolean collapseColumn, final String headerKey) throws UnsupportedOperationException {
-	    addContainerProperty(propertyId, type, null);
-	    setColumnCollapsed(propertyId, collapseColumn);
-	    if (headerKey != null) {
-		setColumnHeader(propertyId, getMessage(headerKey));
-	    }
-	}
+//	public void addContainerProperty(final Object propertyId, Class<?> type, final Object defaultValue,
+//		final boolean collapseColumn, final String headerKey) throws UnsupportedOperationException {
+//	    addContainerProperty(propertyId, type, null);
+//	    setColumnCollapsed(propertyId, collapseColumn);
+//	    if (headerKey != null) {
+//		setColumnHeader(propertyId, getMessage(headerKey));
+//	    }
+//	}
 
-	public void addAbstractFileNode(final AbstractFileNode abstractFileNode) {
-	    final Item item = addItem(abstractFileNode);
-
-	    final String displayName = abstractFileNode.getDisplayName();
-	    item.getItemProperty("displayName").setValue(displayName);
-
-	    final String visibility = abstractFileNode.getVisibility();
-	    item.getItemProperty("visibility").setValue(visibility);
-
-	    item.getItemProperty("icon").setValue(getThemeResource(abstractFileNode));
-
-	    sort(new Object[] { "displayName" }, new boolean[] { true });
-	}
+//	public void addAbstractFileNode(final AbstractFileNode abstractFileNode) {
+//	    final Item item = addItem(abstractFileNode);
+//
+//	    final String displayName = abstractFileNode.getDisplayName();
+//	    item.getItemProperty("displayName").setValue(displayName);
+//
+//	    final String visibility = abstractFileNode.getVisibility();
+//	    item.getItemProperty("visibility").setValue(visibility);
+//
+//	    item.getItemProperty("icon").setValue(getThemeResource(abstractFileNode));
+//
+//	    sort(new Object[] { "displayName" }, new boolean[] { true });
+//	}
 
 //	@Override
 //	public void valueChange(final com.vaadin.data.Property.ValueChangeEvent event) {
@@ -314,15 +311,16 @@ public class DocumentFileBrowser extends CustomComponent implements EmbeddedComp
 
     private void changeDir(final DirNode dirNode) {
 	if (dirNode != null && !dirNode.equals(this.dirNode)) {
-	    DomainItem<AbstractFileNode> item = new DomainItem<AbstractFileNode>(dirNode) {
-		@Override
-		public Property getItemProperty(Object propertyId) {
-		    if ("icon".equals(propertyId)) {
-			return new ObjectProperty<Resource>(getThemeResource(getValue()));
-		    }
-		    return super.getItemProperty(propertyId);
-		}
-	    };
+//	    DomainItem<AbstractFileNode> item = new DomainItem<AbstractFileNode>(dirNode) {
+//		@Override
+//		public Property getItemProperty(Object propertyId) {
+//		    if ("icon".equals(propertyId)) {
+//			return new ObjectProperty<Resource>(getThemeResource(getValue()));
+//		    }
+//		    return super.getItemProperty(propertyId);
+//		}
+//	    };
+	    DomainItem<AbstractFileNode> item = new DomainItem<AbstractFileNode>(dirNode);
 	    final DomainContainer<AbstractFileNode> childs = (DomainContainer<AbstractFileNode>)item.getItemProperty("child");
 	    childs.setContainerProperties("displayName","visibility","icon");
 	    childs.setItemSorter(new ItemSorter() {
@@ -342,7 +340,7 @@ public class DocumentFileBrowser extends CustomComponent implements EmbeddedComp
 
 	    });
 	    documentTable.setContainerDataSource(childs);
-//	    documentTable.setVisibleColumns(new String[] {"displayName", "visibility"});
+	    documentTable.setVisibleColumns(new String[] {"displayName", "visibility"});
 	    documentTable.setSortContainerPropertyId("displayName");
 	    documentTable.setRowHeaderMode(Table.ROW_HEADER_MODE_ICON_ONLY);
 	    documentTable.setItemIconPropertyId("icon");
