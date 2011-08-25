@@ -342,6 +342,7 @@ public class DocumentFileBrowser extends CustomComponent implements EmbeddedComp
 	    documentTable.setContainerDataSource(childs);
 	    documentTable.setVisibleColumns(new String[] {"displayName", "visibility"});
 	    documentTable.setSortContainerPropertyId("displayName");
+	    documentTable.setColumnHeaderMode(Table.COLUMN_HEADER_MODE_HIDDEN);
 	    documentTable.setRowHeaderMode(Table.ROW_HEADER_MODE_ICON_ONLY);
 	    documentTable.setItemIconPropertyId("icon");
 	    documentTable.setColumnReorderingAllowed(false);
