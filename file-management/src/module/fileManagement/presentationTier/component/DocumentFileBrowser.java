@@ -1,8 +1,8 @@
 package module.fileManagement.presentationTier.component;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import module.fileManagement.domain.AbstractFileNode;
 import module.fileManagement.domain.DirNode;
@@ -11,18 +11,20 @@ import module.fileManagement.domain.FileManagementSystem;
 import module.fileManagement.domain.FileNode;
 import module.fileManagement.domain.FileRepository;
 import module.fileManagement.domain.VersionedFile;
+import module.fileManagement.presentationTier.component.viewers.VisibilityListViewer;
 import myorg.applicationTier.Authenticate.UserView;
-import myorg.domain.MyOrg;
 import myorg.domain.User;
-import myorg.domain.groups.PersistentGroup;
-import pt.ist.fenixframework.DomainObject;
-import pt.ist.fenixframework.pstm.AbstractDomainObject;
+import pt.ist.vaadinframework.data.VBoxProperty;
 import pt.ist.vaadinframework.data.reflect.DomainContainer;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
 
+import com.vaadin.data.Container;
+import com.vaadin.data.Container.Filter;
 import com.vaadin.data.Container.Sortable;
 import com.vaadin.data.Item;
+import com.vaadin.data.Property;
+import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.Property.ValueChangeNotifier;
 import com.vaadin.data.util.ItemSorter;
@@ -32,8 +34,6 @@ import com.vaadin.terminal.Sizeable;
 import com.vaadin.terminal.StreamResource;
 import com.vaadin.terminal.ThemeResource;
 import com.vaadin.ui.AbstractLayout;
-import com.vaadin.ui.AbstractOrderedLayout;
-import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.MenuBar;
@@ -41,69 +41,12 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
-public class DocumentFileBrowser extends CustomComponent implements EmbeddedComponentContainer, ValueChangeNotifier {
+public class DocumentFileBrowser extends CustomComponent implements EmbeddedComponentContainer, ValueChangeNotifier, ValueChangeListener {
 
     public Component getCurrent() {
 	return this;
     }
 
-    private static class PersistentGroupHolder implements HasPersistentGroup {
-
-	private final PersistentGroup persistentGroup;
-
-	private PersistentGroupHolder(final PersistentGroup persistentGroup) {
-	    this.persistentGroup = persistentGroup;
-	}
-
-	@Override
-	public PersistentGroup getPersistentGroup() {
-	    return persistentGroup;
-	}
-
-	@Override
-	public void renderGroupSpecificLayout(final AbstractOrderedLayout abstractOrderedLayout) {
-	    // nothing to do, we already have a group :o)
-	}
-
-    }
-
-    private static class PersistentGroupCreator implements HasPersistentGroupCreator {
-
-	@Override
-	public HasPersistentGroup createGroupFor(final Object itemId) {
-	    if (itemId != null && itemId instanceof String) {
-		final String externalId = (String) itemId;
-		final DomainObject domainObject = AbstractDomainObject.fromExternalId(externalId);
-		if (domainObject != null && domainObject instanceof PersistentGroup) {
-		    final PersistentGroup persistentGroup = (PersistentGroup) domainObject;
-		    return new PersistentGroupHolder(persistentGroup);
-		}
-	    }
-	    return null;
-	}
-
-	@Override
-	public void addItems(final ComboBox comboBox, final String displayItemProperty) {
-	    for (final PersistentGroup persistentGroup : MyOrg.getInstance().getSystemGroupsSet()) {
-		final String externalId = persistentGroup.getExternalId();
-		final String name = persistentGroup.getName();
-
-		final Item comboItem = comboBox.addItem(externalId);
-		comboItem.getItemProperty(displayItemProperty).setValue(name);
-	    }
-	}
-
-    }
-
-    private static final Set<HasPersistentGroupCreator> persistentGroupCreators = new HashSet<HasPersistentGroupCreator>();
-
-    static {
-	registerPersistentGroupCreator(new PersistentGroupCreator());
-    }
-
-    public static synchronized void registerPersistentGroupCreator(final HasPersistentGroupCreator hasPersistentGroupCreator) {
-	persistentGroupCreators.add(hasPersistentGroupCreator);
-    }
 
     protected String getMessage(final String key, String... args) {
 	return FileManagementSystem.getMessage(key, args);
@@ -122,105 +65,31 @@ public class DocumentFileBrowser extends CustomComponent implements EmbeddedComp
 	    setMultiSelect(false);
 	    setImmediate(true);
 	    setSortDisabled(false);
-	    setColumnReorderingAllowed(true);
 	    setColumnCollapsingAllowed(true);
-
-//	    addContainerProperty("displayName", String.class, null, false, "label.file.displayName");
-//	    addContainerProperty("visibility", String.class, null, false, "label.file.visibility");
-	    // addContainerProperty("filesize", String.class, null, true,
-	    // "label.file.size");
-//	    addContainerProperty("icon", Resource.class, null, true, null);
-	    
-	    // setColumnAlignment("filesize", Table.ALIGN_RIGHT);
-
-	    // setColumnExpandRatio("displayName", 1);
-
-//	    final IndexedContainer indexedContainer = (IndexedContainer) getContainerDataSource();
-//	    indexedContainer.setItemSorter(new ItemSorter() {
-//
-//		@Override
-//		public void setSortProperties(final Sortable container, final Object[] propertyId, final boolean[] ascending) {
-//		}
-//
-//		@Override
-//		public int compare(final Object itemId1, final Object itemId2) {
-//		   
-//		    final AbstractFileNode node1 = (AbstractFileNode) itemId1;
-//		    final AbstractFileNode node2 = (AbstractFileNode) itemId2;
-//
-//		    return node1.compareTo(node2);
-//		}
-//
-//	    });
-
-//	    final Table.ValueChangeListener valueChangeListener = this;
-//	    addListener(valueChangeListener);
 
 	    final ItemClickListener itemClickListener = this;
 	    addListener(itemClickListener);
+	    addGeneratedColumn("cenas", new ColumnGenerator() {
+	        
+	        @Override
+	        public Component generateCell(Table source, Object itemId, Object columnId) {
+	        	VisibilityListViewer viewer = new VisibilityListViewer();
+	        	final DomainItem<AbstractFileNode> fileNode = (DomainItem<AbstractFileNode>) source.getItem(itemId);
+	        	final Property itemProperty = fileNode.getItemProperty("visibilityGroups");
+	        	viewer.setPropertyDataSource(itemProperty);
+	        	return viewer;
+	        }
+	    });
 	}
-
-	@Override
-	public void attach() {
-	    super.attach();
-
-//	    if (dirNode != null) {
-//		for (final AbstractFileNode abstractFileNode : dirNode.getChildSet()) {
-//		    if (abstractFileNode.isAccessible()) {
-//			addAbstractFileNode(abstractFileNode);
-//		    }
-//		}
-//	    }
-	}
-
-	@Override
-	public void detach() {
-	    super.detach();
-	    removeAllItems();
-	}
-
-//	public void addContainerProperty(final Object propertyId, Class<?> type, final Object defaultValue,
-//		final boolean collapseColumn, final String headerKey) throws UnsupportedOperationException {
-//	    addContainerProperty(propertyId, type, null);
-//	    setColumnCollapsed(propertyId, collapseColumn);
-//	    if (headerKey != null) {
-//		setColumnHeader(propertyId, getMessage(headerKey));
-//	    }
-//	}
-
-//	public void addAbstractFileNode(final AbstractFileNode abstractFileNode) {
-//	    final Item item = addItem(abstractFileNode);
-//
-//	    final String displayName = abstractFileNode.getDisplayName();
-//	    item.getItemProperty("displayName").setValue(displayName);
-//
-//	    final String visibility = abstractFileNode.getVisibility();
-//	    item.getItemProperty("visibility").setValue(visibility);
-//
-//	    item.getItemProperty("icon").setValue(getThemeResource(abstractFileNode));
-//
-//	    sort(new Object[] { "displayName" }, new boolean[] { true });
-//	}
-
-//	@Override
-//	public void valueChange(final com.vaadin.data.Property.ValueChangeEvent event) {
-//	    if (event instanceof ValueChangeEvent) {
-//		final AbstractFileNode selectedNode = (AbstractFileNode) event.getProperty().getValue();
-//		if (selectedNode != null) {
-//		    changeSelectedNode(selectedNode);
-//		}
-//	    }
-//	}
-
+	
 	@Override
 	public void itemClick(final ItemClickEvent event) {
 
-	    AbstractFileNode abstractFileNode = ((AbstractFileNode) event.getItemId());
+	    AbstractFileNode abstractFileNode = getNodeFromItemId(event.getItemId());
 
 	    if (event.isDoubleClick()) {
 		if (abstractFileNode.isDir()) {
-		    final DirNode dirNode = (DirNode) abstractFileNode;
-		    changeDir(dirNode);
+		    nodeItem.setValue(abstractFileNode);
 		} else if (abstractFileNode.isFile()) {
 		    final FileNode fileNode = (FileNode) abstractFileNode;
 		    final Document document = fileNode.getDocument();
@@ -244,26 +113,13 @@ public class DocumentFileBrowser extends CustomComponent implements EmbeddedComp
     }
 
     private class DocumentMenu extends MenuBar {
-
 	DocumentMenu() {
 	    setWidth(100, Sizeable.UNITS_PERCENTAGE);
-	}
-
-	@Override
-	public void attach() {
-	    super.attach();
-	    addDirNode(dirNode);
-	}
-
-	@Override
-	public void detach() {
-	    super.detach();
-	    removeItems();
 	}
 	
 	public void refresh() {
 	    removeItems();
-	    addDirNode(dirNode);
+	    addDirNode((DirNode) nodeItem.getValue());
 	}
 
 	private void addDirNode(final DirNode dirNode) {
@@ -275,7 +131,7 @@ public class DocumentFileBrowser extends CustomComponent implements EmbeddedComp
 		addItem(label + "  »", new Command() {
 		    @Override
 		    public void menuSelected(final MenuItem selectedItem) {
-			changeDir(dirNode);
+			nodeItem.setValue(dirNode);
 		    }
 		});
 	    }
@@ -286,7 +142,7 @@ public class DocumentFileBrowser extends CustomComponent implements EmbeddedComp
     private final DocumentTable documentTable = new DocumentTable();
     private final DocumentMenu documentMenu = new DocumentMenu();
 
-    private DirNode dirNode = null;
+    private DomainItem<AbstractFileNode> nodeItem;
 
     @Override
     public void setArguments(final String... arg0) {
@@ -305,51 +161,59 @@ public class DocumentFileBrowser extends CustomComponent implements EmbeddedComp
 	setCompositionRoot(layout);
     }
 
-    protected DirNode getInitialDirNode() {
+    
+    public DirNode getInitialDirNode() {
 	return FileRepository.getOrCreateFileRepository(UserView.getCurrentUser());
     }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public void valueChange(ValueChangeEvent event) {
+//	DomainItem<AbstractFileNode> item = (DomainItem<AbstractFileNode>) event.getProperty();
+	DomainItem<AbstractFileNode> item = getNodeItem();
+	final DomainContainer<AbstractFileNode> childs = (DomainContainer<AbstractFileNode>) item.getItemProperty("child");
+	childs.addContainerFilter(new Filter() {
 
-    private void changeDir(final DirNode dirNode) {
-	if (dirNode != null && !dirNode.equals(this.dirNode)) {
-//	    DomainItem<AbstractFileNode> item = new DomainItem<AbstractFileNode>(dirNode) {
-//		@Override
-//		public Property getItemProperty(Object propertyId) {
-//		    if ("icon".equals(propertyId)) {
-//			return new ObjectProperty<Resource>(getThemeResource(getValue()));
-//		    }
-//		    return super.getItemProperty(propertyId);
-//		}
-//	    };
-	    DomainItem<AbstractFileNode> item = new DomainItem<AbstractFileNode>(dirNode);
-	    final DomainContainer<AbstractFileNode> childs = (DomainContainer<AbstractFileNode>)item.getItemProperty("child");
-	    childs.setContainerProperties("displayName","visibility","icon");
-	    childs.setItemSorter(new ItemSorter() {
-		
-		@Override
-		public void setSortProperties(final Sortable container, final Object[] propertyId, final boolean[] ascending) {
-		}
+	    @Override
+	    public boolean passesFilter(Object itemId, Item item) throws UnsupportedOperationException {
+		AbstractFileNode node = getNodeFromItemId(itemId);
+		return node != null ? node.isAccessible() : false;
+	    }
 
-		@Override
-		public int compare(final Object itemId1, final Object itemId2) {
-		   
-		    final AbstractFileNode node1 = (AbstractFileNode) itemId1;
-		    final AbstractFileNode node2 = (AbstractFileNode) itemId2;
+	    @Override
+	    public boolean appliesToProperty(Object propertyId) {
+		return true;
+	    }
 
-		    return node1.compareTo(node2);
-		}
+	});
 
-	    });
-	    documentTable.setContainerDataSource(childs);
-	    documentTable.setVisibleColumns(new String[] {"displayName", "visibility"});
-	    documentTable.setSortContainerPropertyId("displayName");
-	    documentTable.setColumnHeaderMode(Table.COLUMN_HEADER_MODE_HIDDEN);
-	    documentTable.setRowHeaderMode(Table.ROW_HEADER_MODE_ICON_ONLY);
-	    documentTable.setItemIconPropertyId("icon");
-	    documentTable.setColumnReorderingAllowed(false);
-	    documentTable.sort();
-	    this.dirNode = dirNode;
-	    documentMenu.refresh();
-	}
+	childs.setContainerProperties("displayName", "icon");
+	childs.setItemSorter(new ItemSorter() {
+
+	    @Override
+	    public void setSortProperties(final Sortable container, final Object[] propertyId, final boolean[] ascending) {
+	    }
+
+	    @Override
+	    public int compare(final Object itemId1, final Object itemId2) {
+
+		final AbstractFileNode node1 = getNodeFromItemId(itemId1);
+		final AbstractFileNode node2 = getNodeFromItemId(itemId2);
+
+		return node1.compareTo(node2);
+	    }
+
+	});
+	documentTable.setContainerDataSource(childs);
+	documentTable.setVisibleColumns(new String[] { "displayName", "cenas" });
+	documentTable.setSortContainerPropertyId("displayName");
+	documentTable.setColumnHeaderMode(Table.COLUMN_HEADER_MODE_HIDDEN);
+	documentTable.setRowHeaderMode(Table.ROW_HEADER_MODE_ICON_ONLY);
+	documentTable.setItemIconPropertyId("icon");
+	documentTable.setColumnReorderingAllowed(false);
+	documentTable.sort();
+//	this.dirNode.setValue(dirNode);
+	documentMenu.refresh();
     }
     
     private ThemeResource getThemeResource(AbstractFileNode abstractFileNode) {
@@ -370,10 +234,14 @@ public class DocumentFileBrowser extends CustomComponent implements EmbeddedComp
 	return fileRepository == node ? getMessage("label.menu.home") : node.getDisplayName();
     }
 
-    public DirNode getDirNode() {
-	return dirNode;
+    public DomainItem<AbstractFileNode> getNodeItem() {
+	return nodeItem;
     }
-
+    
+    public DirNode getDirNode() {
+	return (DirNode) nodeItem.getValue();
+    }
+    
     public DocumentTable getDocumentTable() {
 	return documentTable;
     }
@@ -392,8 +260,44 @@ public class DocumentFileBrowser extends CustomComponent implements EmbeddedComp
 	documentTable.removeListener(listener);
     }
     
-    public DocumentFileBrowser() {
-	changeDir(getInitialDirNode());
+    public void setValue(DirNode dirNode) {
+	nodeItem.setValue(dirNode);
     }
-
+    
+    public DocumentFileBrowser() {
+	nodeItem = new DomainItem<AbstractFileNode>(DirNode.class);
+	nodeItem.addListener(this);
+	setValue(getInitialDirNode());
+    }
+    
+    public DomainContainer<AbstractFileNode> getContainer() {
+	return (DomainContainer<AbstractFileNode>) documentTable.getContainerDataSource();
+    }
+    
+    public void addDirChangedListener(ValueChangeListener listener) {
+	nodeItem.addListener(listener);
+    }
+    
+    private static AbstractFileNode getNodeFromItemId(Object itemId) {
+	AbstractFileNode node = null;
+	if (itemId instanceof VBoxProperty) {
+	    node = (AbstractFileNode) ((VBoxProperty)itemId).getValue();
+	} else if (itemId instanceof AbstractFileNode) {
+	    node = (AbstractFileNode) itemId;
+	}
+	return node;
+    }
+    
+    public void removeNodeAndSelectNext(Object itemId) {
+	final Container containerDataSource = documentTable.getContainerDataSource();
+	List<Object> itemIds = new ArrayList<Object>(containerDataSource.getItemIds());
+	Object nextItemId = null;
+	int pos = itemIds.indexOf(itemId);
+	if (pos != -1 && itemIds.size() > 1) {
+	    nextItemId = itemIds.get(pos + (pos == itemIds.size() - 1 ? -1 : 1)); 
+	}
+	containerDataSource.removeItem(itemId);
+	documentTable.select(nextItemId);
+    }
+    
 }

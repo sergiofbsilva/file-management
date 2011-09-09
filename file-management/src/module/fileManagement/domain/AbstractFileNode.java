@@ -1,8 +1,8 @@
 package module.fileManagement.domain;
 
 import java.text.Collator;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import module.organization.domain.Party;
 import myorg.applicationTier.Authenticate.UserView;
@@ -11,13 +11,19 @@ import myorg.domain.exceptions.DomainException;
 import myorg.domain.groups.AnyoneGroup;
 import myorg.domain.groups.PersistentGroup;
 import myorg.domain.groups.SingleUserGroup;
-import myorg.domain.groups.UnionGroup;
+
+import org.apache.commons.lang.StringUtils;
+
 import pt.ist.fenixWebFramework.services.Service;
 
 import com.vaadin.terminal.Resource;
 import com.vaadin.terminal.ThemeResource;
 
 public abstract class AbstractFileNode extends AbstractFileNode_Base implements Comparable<AbstractFileNode> {
+
+    public enum VisibilityState {
+	PRIVATE, SHARED, PUBLIC;
+    }
 
     public AbstractFileNode() {
 	super();
@@ -44,12 +50,36 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
     public void deleteService() {
 	delete();
     }
-
-    @Service
+    
     public void trash() {
-	setParent(UserView.getCurrentUser().getTrash());
+	trash(false);
     }
+    
+    @Service
+    public void trash(Boolean checkLinks) {
+	if (checkLinks != null && checkLinks) {
 
+	    if (this instanceof FileNode) {
+		Collection<SharedFileNode> shared = new ArrayList<SharedFileNode>(((FileNode) this).getSharedFileNodes());
+		for(SharedFileNode node : shared) {
+		    node.deleteLink();
+		}
+	    }
+	    if (this instanceof DirNode) {
+		Collection<SharedDirNode> shared = new ArrayList<SharedDirNode>(((DirNode) this).getSharedDirNodes());
+		for(SharedDirNode node : shared) {
+		    node.deleteLink();
+		}
+	    }
+	    final SingleUserGroup currentUserGroup = UserView.getCurrentUser().getSingleUserGroup();
+	    setReadGroup(currentUserGroup);
+	    setWriteGroup(currentUserGroup);
+	}
+
+	setParent(UserView.getCurrentUser().getTrash());
+
+    }
+    
     public abstract PersistentGroup getReadGroup();
 
     public abstract PersistentGroup getWriteGroup();
@@ -77,11 +107,14 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 
     public abstract String getDisplayName();
 
-    public String getVisibility() {
+    public VisibilityState getVisibilityState() {
 	final PersistentGroup readGroup = getReadGroup();
-	final String key = readGroup instanceof SingleUserGroup ? "label.visibility.private"
-		: readGroup instanceof AnyoneGroup ? "label.visibility.public" : "label.visibility.shared";
-	return FileManagementSystem.getMessage(key);
+	return readGroup instanceof SingleUserGroup ? VisibilityState.PRIVATE
+		: readGroup instanceof AnyoneGroup ? VisibilityState.PUBLIC : VisibilityState.SHARED;
+    }
+
+    public String getVisibility() {
+	return FileManagementSystem.getMessage("label.visibility." + getVisibilityState().toString().toLowerCase());
     }
 
     public int compareTo(final AbstractFileNode node) {
@@ -117,30 +150,36 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 
     public abstract int getFilesize();
 
-    protected abstract void setDisplayName(final String displayName);
-
-    @Service
-    public void updateDisplayName(final String displayName) {
-	setDisplayName(displayName);
+    public void addVisibilityGroup(VisibilityGroup group) {
+	final VisibilityList visibilityList = getVisibilityGroups();
+	visibilityList.add(group);
+	setVisibility(visibilityList);
     }
 
     @Service
-    public void share(User user) {
+    public void share(User user, VisibilityGroup group, boolean createLink) {
 	if (isShared()) {
 	    return;
 	}
 	final DirNode userRootDir = FileRepository.getOrCreateFileRepository(user);
-	final AbstractFileNode sharedNode = makeSharedNode();
-	userRootDir.getSharedFolder().addChild(sharedNode);
-	Set<PersistentGroup> readGroupSet = new HashSet<PersistentGroup>();
-	final PersistentGroup readGroup = getReadGroup();
-	if (readGroup instanceof UnionGroup) {
-	    for(PersistentGroup group : ((UnionGroup)readGroup).getPersistentGroups()) {
-		readGroupSet.add(group);
+	if (createLink) {
+	    final DirNode sharedFolder = userRootDir.getSharedFolder();
+	    if (!sharedFolder.hasSharedNode(this)) {
+		final AbstractFileNode sharedNode = makeSharedNode();
+		sharedFolder.addChild(sharedNode);
 	    }
 	}
-	readGroupSet.add(user.getSingleUserGroup());
-	setReadGroup(new UnionGroup(readGroupSet));
+	addVisibilityGroup(group);
+	// Set<PersistentGroup> readGroupSet = new HashSet<PersistentGroup>();
+	// final PersistentGroup readGroup = getReadGroup();
+	// if (readGroup instanceof UnionGroup) {
+	// for(PersistentGroup group :
+	// ((UnionGroup)readGroup).getPersistentGroups()) {
+	// readGroupSet.add(group);
+	// }
+	// }
+	// readGroupSet.add(user.getSingleUserGroup());
+	// setReadGroup(new UnionGroup(readGroupSet));
     }
 
     private AbstractFileNode makeSharedNode() {
@@ -161,7 +200,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 	Party owner = getOwner();
 	return owner != null ? owner.getPartyName().getContent() : "-";
     }
-    
+
     private ThemeResource getThemeResource(AbstractFileNode abstractFileNode) {
 	final String iconFile = abstractFileNode.isDir() ? "folder1_16x16.gif" : getIconFile(((FileNode) abstractFileNode)
 		.getDocument().getLastVersionedFile().getFilename());
@@ -171,9 +210,9 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
     private String getIconFile(final String filename) {
 	final int lastDot = filename.lastIndexOf('.');
 	final String fileSuffix = lastDot < 0 ? "file" : filename.substring(lastDot + 1);
-	return "fileicons/" + fileSuffix + ".png";
+	return "fileicons/" + StringUtils.lowerCase(fileSuffix) + ".png";
     }
-    
+
     public Resource getIcon() {
 	return getThemeResource(this);
     }

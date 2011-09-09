@@ -3,47 +3,122 @@ package module.fileManagement.presentationTier.pages;
 import static module.fileManagement.domain.FileManagementSystem.getMessage;
 
 import java.util.HashSet;
+import java.util.Set;
 
 import module.fileManagement.domain.AbstractFileNode;
+import module.fileManagement.domain.VisibilityGroup;
+import module.fileManagement.domain.VisibilityGroup.VisibilityOperation;
+import module.fileManagement.domain.VisibilityList;
 import module.fileManagement.presentationTier.component.NodeDetails;
-import module.organization.domain.Person;
-import myorg.domain.User;
+import module.fileManagement.presentationTier.component.groups.GroupCreatorRegistry;
+import module.fileManagement.presentationTier.component.groups.HasPersistentGroup;
+import module.fileManagement.presentationTier.component.groups.HasPersistentGroupCreator;
+import module.fileManagement.presentationTier.data.GroupContainer;
+import myorg.applicationTier.Authenticate.UserView;
+import myorg.domain.Presentable;
+import myorg.domain.groups.SingleUserGroup;
+
+import org.apache.poi.openxml4j.exceptions.InvalidOperationException;
+
+import pt.ist.bennu.ui.BennuConstants;
+import pt.ist.bennu.ui.TimeoutSelect;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
-import pt.ist.vaadinframework.data.DomainLuceneContainer;
-import pt.ist.vaadinframework.data.reflect.DomainContainer;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
-import pt.ist.vaadinframework.ui.fields.LuceneSelect;
 
+import com.vaadin.data.Container.ItemSetChangeEvent;
+import com.vaadin.data.Container.ItemSetChangeListener;
+import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.terminal.ThemeResource;
+import com.vaadin.data.util.BeanContainer;
+import com.vaadin.data.util.BeanItem;
+import com.vaadin.event.FieldEvents.TextChangeEvent;
+import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.GridLayout;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Layout;
+import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.BaseTheme;
 import com.vaadin.ui.themes.Reindeer;
 
 @EmbeddedComponent(path = { "DocumentShare-(.*)" })
 public class DocumentShare extends CustomComponent implements EmbeddedComponentContainer {
     
     private AbstractFileNode fileNode;
-    private DomainContainer<Person> personsToShareWith; 
+    private GroupContainer groupContainer;
+    private VerticalLayout groupSpecificLayout;
+    private HasPersistentGroup currentPersistentGroupHolder;
+    private VisibilityOperation currentVisibilityOperation;
+    
+    private Set<HasPersistentGroup> fileNodeGroups;
+    private Table fileNodeGroupsTable;
+    private BeanContainer<VisibilityGroup,VisibilityGroupBean> visibilityGroupContainer;
+    
+    
+    public class VisibilityGroupBean extends BeanItem<VisibilityGroup> {
+
+	public VisibilityGroupBean(VisibilityGroup bean) {
+	    super(bean);
+	}
+	
+	public String getPresentationName() {
+	    return getBean().persistentGroup.getPresentationName();
+	}
+	
+	public void setPresentationName () {
+	    
+	}
+	
+	public String getVisibilityName() {
+	    return getBean().visibilityOperation.getDescription();
+	}
+	
+	public void setVisibilityName() {
+	    
+	}
+    }
+    
     
     @Override
     public void setArguments(String... args) {
 	String fileExternalId = args[1];
 	fileNode = AbstractFileNode.fromExternalId(fileExternalId);
+	if (fileNode == null || !fileNode.isWriteGroupMember()) {
+	    throw new InvalidOperationException("É necessário seleccionar um ficheiro");
+	}
+	updateGroupTable();
     }
-
+    
+    private void updateGroupTable() {
+	for(VisibilityGroup visibilityGroup : fileNode.getVisibilityGroups()) {
+	    if (visibilityGroup.persistentGroup instanceof SingleUserGroup) {
+		final SingleUserGroup singleUserGroup = (SingleUserGroup) visibilityGroup.persistentGroup;
+		if (singleUserGroup.isMember(UserView.getCurrentUser())) {
+		    continue;
+		}
+	    }
+	    visibilityGroupContainer.addBean(new VisibilityGroupBean(visibilityGroup));
+	}
+    }
+    
+    private void removeGroup(VisibilityGroup group) {
+	final VisibilityList visibilityGroups = fileNode.getVisibilityGroups();
+	visibilityGroups.remove(group);
+	visibilityGroupContainer.removeItem(group);
+	fileNode.setVisibility(visibilityGroups);
+    }
+    
+    
     public Component createHeaderPanel() {
 	Panel welcomePanel = new Panel();
 	welcomePanel.setStyleName(Reindeer.PANEL_LIGHT);
@@ -56,109 +131,197 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
 	return welcomePanel;
     }
     
+        
+    private class VisibilityOperationSelect extends NativeSelect {
+
+	    private VisibilityOperationSelect() {
+		addContainerProperty("description", String.class, null);
+		for (final VisibilityOperation operation : VisibilityOperation.values()) {
+		    final Item item = addItem(operation);
+		    item.getItemProperty("description").setValue(operation.getDescription());
+		}
+		setNullSelectionAllowed(false);
+		setImmediate(true);
+		setItemCaptionMode(ITEM_CAPTION_MODE_PROPERTY);
+		setItemCaptionPropertyId("description");
+		select(VisibilityOperation.READ);
+	    }
+
+	}
+    
+    
     private Component createSharePanel() {
-	final Panel pnlSelectShare = new Panel(getMessage("document.share.with"));
+	final Panel pnlShare = new Panel(getMessage("document.share.with"));
+	final HorizontalLayout hlVisibilityGroup = new HorizontalLayout(); 
+	hlVisibilityGroup.setSpacing(true);
 	
-	pnlSelectShare.setSizeFull();
-	((VerticalLayout)pnlSelectShare.getContent()).setSpacing(true);
+	final TimeoutSelect selectGroupToMake = new TimeoutSelect();
+	selectGroupToMake.setContainerDataSource(groupContainer);
+	selectGroupToMake.setItemCaptionPropertyId("presentationName");
+	selectGroupToMake.addListener(new TextChangeListener() {
+	    
+	    @Override
+	    public void textChange(TextChangeEvent event) {
+		groupContainer.search(event.getText());
+	    }
+	});
 	
-	final DomainLuceneContainer<Person> luceneContainer = new DomainLuceneContainer<Person>(Person.class);
-//	final LuceneSelect selectPerson = new LuceneSelect();
-//	selectPerson.setFilteringMode(Select.FILTERINGMODE_CONTAINS);
-//	selectPerson.setImmediate(true);
-	final LuceneSelect selectPerson = new LuceneSelect();
-	selectPerson.setSizeFull();
-	selectPerson.setNullSelectionAllowed(true);
-//	selectPerson.setNullSelectionItemId(null);
-	selectPerson.setItemCaptionPropertyId("presentationString");
-	selectPerson.addListener(new ValueChangeListener() {
+	final VisibilityOperationSelect operationSelect = new VisibilityOperationSelect();
+	operationSelect.addListener(new ValueChangeListener() {
 	    
 	    @Override
 	    public void valueChange(ValueChangeEvent event) {
-//		final Person person = (Person) selectPerson.getValue();
-		final Person person = (Person) event.getProperty().getValue();
-		if (person != null) {
-		    personsToShareWith.addItem(person);
-		}
-		selectPerson.select(null);
+		final VisibilityOperation operation = (VisibilityOperation) event.getProperty().getValue();
+		currentVisibilityOperation = operation;
 	    }
 	});
-	selectPerson.setContainerDataSource(luceneContainer);
-	pnlSelectShare.addComponent(selectPerson);
-	pnlSelectShare.addComponent(createSharedWithTable());
-	pnlSelectShare.addComponent(createShareButtonLink());
-	return pnlSelectShare;
-    }
-    
-    
-    
-    private Component createShareButtonLink() {
-	return new Button(getMessage("document.share.title"), new Button.ClickListener() {
+	
+	final Button btShare = new Button("Partilhar", new ClickListener() {
 	    
 	    @Override
 	    public void buttonClick(ClickEvent event) {
-		for(Object itemId : personsToShareWith.getItemIds()) {
-		    DomainItem<Person> person = personsToShareWith.getItem(itemId);
-		    DomainItem<User> user = (DomainItem<User>) person.getItemProperty("user");
-		    fileNode.share(user.getValue());
+		if (fileNodeGroups.add(currentPersistentGroupHolder)) {
+		    final VisibilityGroup group = new VisibilityGroup(currentPersistentGroupHolder.getPersistentGroup(), currentVisibilityOperation);
+		    final VisibilityGroupBean groupBean = new VisibilityGroupBean(group);
+		    visibilityGroupContainer.addBean(groupBean);
+		    updateFileVisibility(group);
+		} else {
+		    getWindow().showNotification("Elemento já se encontra atribuído");
 		}
+		currentVisibilityOperation = VisibilityOperation.READ;
+		selectGroupToMake.discard();
+		groupSpecificLayout.removeAllComponents();
 	    }
 	});
-    }
-
-    private Component createSharedWithTable() {
-	Table tb = new Table();
-	tb.setSizeFull();
-	tb.setContainerDataSource(personsToShareWith);
-	tb.setVisibleColumns(new String[] { "presentationString"});
-	tb.setColumnHeaders(new String[] { "Utilizador"} );
-	tb.addGeneratedColumn("remove", new ColumnGenerator() {
+	
+	selectGroupToMake.addListener(new ValueChangeListener() {
 	    
 	    @Override
-	    public Component generateCell(final Table source, final Object itemId, Object columnId) {
-		    Button btRemovePerson = new Button("",  new Button.ClickListener() {
-		        
-		        @Override
-		        public void buttonClick(ClickEvent event) {
-		            source.getContainerDataSource().removeItem(itemId);
-		        }
-		    });
-		    btRemovePerson.addStyleName(BaseTheme.BUTTON_LINK);
-		    btRemovePerson.setIcon(new ThemeResource("../default/icons/delete.png"));
-		    return btRemovePerson;
+	    public void valueChange(ValueChangeEvent event) {
+		groupSpecificLayout.removeAllComponents();
+		Presentable presentable = (Presentable) event.getProperty().getValue();
+		
+		for (final HasPersistentGroupCreator hasPersistentGroupCreator : GroupCreatorRegistry.getPersistentGroupCreators()) {
+		    final HasPersistentGroup groupHolder = hasPersistentGroupCreator.createGroupFor(presentable);
+		    if (groupHolder != null) {
+			setCurrentPersistentGroupHolder(groupHolder);
+			groupHolder.renderGroupSpecificLayout(groupSpecificLayout);
+			groupSpecificLayout.addComponent(btShare);
+		    }
 		}
+	
+	    }
 	});
-	return tb;
+	
+	hlVisibilityGroup.addComponent(selectGroupToMake);
+	hlVisibilityGroup.addComponent(operationSelect);
+	
+	pnlShare.addComponent(hlVisibilityGroup);
+	pnlShare.addComponent(groupSpecificLayout);
+	return pnlShare;
+    }
+    
+    protected void updateFileVisibility(VisibilityGroup group) {
+	if (currentPersistentGroupHolder.shouldCreateLink()) {
+	    fileNode.share(currentPersistentGroupHolder.getUser(), group, currentPersistentGroupHolder.shouldCreateLink());
+	    return ;
+	}
+	fileNode.addVisibilityGroup(group);
+    }
+
+    protected void setCurrentPersistentGroupHolder(HasPersistentGroup groupHolder) {
+	this.currentPersistentGroupHolder = groupHolder;
     }
 
     private Panel createFileDetails() {
-	return NodeDetails.makeDetails(fileNode, false);
+	return NodeDetails.makeDetails(new DomainItem<AbstractFileNode>(fileNode), false, true);
     }
     
     public GridLayout createGrid() {
 	GridLayout grid = new GridLayout(2,1);
 	grid.setSizeFull();
 	grid.setMargin(true,true,true,false);
-	grid.setSpacing(true);
 	grid.addComponent(createSharePanel(), 0, 0);
 	grid.addComponent(createFileDetails(), 1, 0);
 	return grid;
     }
     
+    
+
     public Component createPage() {
 	VerticalLayout mainLayout = new VerticalLayout();
-	mainLayout.setMargin(true);
 	mainLayout.setSizeFull();
+	mainLayout.setMargin(true);
 	mainLayout.setSpacing(true);
 	mainLayout.addComponent(createHeaderPanel());
 	mainLayout.addComponent(createGrid());
+	mainLayout.addComponent(fileNodeGroupsTable);
 	return mainLayout;
     }
     
     public DocumentShare() {
 	fileNode = null;
-	personsToShareWith = new DomainContainer(new HashSet<Person>(), Person.class);
-	personsToShareWith.setContainerProperties("presentationString");
+	groupContainer = new GroupContainer();
+	groupSpecificLayout = new VerticalLayout();
+	groupSpecificLayout.setSpacing(true);
+	visibilityGroupContainer = new BeanContainer<VisibilityGroup,VisibilityGroupBean>(VisibilityGroupBean.class);
+	visibilityGroupContainer.setBeanIdProperty("bean");
+	
+	currentVisibilityOperation = VisibilityOperation.READ;
+	
+	fileNodeGroupsTable = new Table();
+	fileNodeGroupsTable.addStyleName("shareTable");
+	fileNodeGroupsTable.setVisible(false);
+	fileNodeGroupsTable.setImmediate(true);
+	fileNodeGroupsTable.setWidth("100%");
+	fileNodeGroupsTable.setPageLength(0);
+	fileNodeGroupsTable.setContainerDataSource(visibilityGroupContainer);
+	fileNodeGroups = new HashSet<HasPersistentGroup>();
+	fileNodeGroupsTable.addListener(new ItemSetChangeListener() {
+	    
+	    @Override
+	    public void containerItemSetChange(ItemSetChangeEvent event) {
+		fileNodeGroupsTable.setVisible(event.getContainer().size() > 0);
+	    }
+	});
+	fileNodeGroupsTable.addGeneratedColumn("Nome", new ColumnGenerator() {
+
+	    @Override
+	    public Component generateCell(Table source, Object itemId, Object columnId) {
+		final VisibilityGroup visibilityGroup = (VisibilityGroup) itemId; 
+		final Label lblName = new Label(visibilityGroup.persistentGroup.getPresentationName());
+		lblName.setHeight("30px");
+		return lblName;
+	    }
+	    
+	});
+
+	
+	fileNodeGroupsTable.addGeneratedColumn("Remover", new ColumnGenerator() {
+
+	    @Override
+	    public Component generateCell(Table source, Object itemId, Object columnId) {
+		final VisibilityGroup visibilityGroup = (VisibilityGroup) itemId; 
+		Button btRemoveGroup = new Button("Remover", new ClickListener() {
+		    
+		    @Override
+		    public void buttonClick(ClickEvent event) {
+			removeGroup(visibilityGroup);
+			
+		    }
+		});
+		btRemoveGroup.setStyleName(BennuConstants.BUTTON_LINK);
+		return btRemoveGroup;
+	    }
+	    
+	});
+	
+	fileNodeGroupsTable.setVisibleColumns(new String[] {"Nome", "visibilityName", "Remover"});
+	fileNodeGroupsTable.setColumnHeaders(new String[] {"Nome", "Visibilidade", "Acções"});
+	fileNodeGroupsTable.setColumnWidth("Nome", 670);
+	fileNodeGroupsTable.setColumnReorderingAllowed(false);
+	fileNodeGroupsTable.setColumnCollapsingAllowed(false);
+	fileNodeGroupsTable.setSortDisabled(true);
     }
     
     @Override

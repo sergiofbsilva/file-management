@@ -48,5 +48,14 @@ public class VisibilityGroup implements Serializable {
     public void setVisibilityOperation(final VisibilityOperation visibilityOperation) {
         this.visibilityOperation = visibilityOperation;
     }
+    
+    @Override
+    public boolean equals(Object obj) {
+	if (obj instanceof VisibilityGroup) {
+	    final VisibilityGroup group = (VisibilityGroup) obj;
+	    return group.persistentGroup == persistentGroup;
+	}
+	return false;
+    }
 
 }

@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 import module.fileManagement.domain.Document;
 import module.fileManagement.domain.MetadataKey;
@@ -80,13 +81,13 @@ public class TemplateItem extends BufferedItem<MetadataKey, MetadataTemplate> im
 		    removeItemProperty(key);
 		}
 	    }
-	    for (MetadataKey key : template.getKeys()) {
+	    for (MetadataKey key : template.getAlfabeticallyOrderedKeys()) {
 		getItemProperty(key);
 	    }
 	}
 
 	public Collection<?> getVisibleItemProperties() {
-	    HashSet<MetadataKey> propIds = new HashSet<MetadataKey>(getItemPropertyIds());
+	    TreeSet<MetadataKey> propIds = new TreeSet<MetadataKey>(getItemPropertyIds());
 	    propIds.remove(MetadataKey.getTemplateKey());
 	    return Collections.unmodifiableCollection(propIds);
 	}

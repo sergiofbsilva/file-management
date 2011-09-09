@@ -7,28 +7,31 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import module.fileManagement.domain.DirNode;
-import module.fileManagement.domain.FileManagementSystem;
 import module.fileManagement.domain.FileNode;
 import myorg.applicationTier.Authenticate.UserView;
 
 import org.vaadin.easyuploads.DirectoryFileFactory;
 
+import pt.ist.fenixframework.FFDomainException;
+
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.Window.Notification;
-
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Layout;
+import com.vaadin.ui.VerticalLayout;
 
 public class UploadFileArea extends CustomComponent {
 
     private UploadArea uploadArea;
     private DirNode uploadDir;
-    
+    private VerticalLayout vlError;
+
     private static Method UPLOAD_FILE_METHOD;
-    
+
     static {
 	try {
-	    UPLOAD_FILE_METHOD = FileUploadListener.class.getDeclaredMethod(
-	            "uploadedFile", new Class[] { OnFileUploadEvent.class });
+	    UPLOAD_FILE_METHOD = FileUploadListener.class.getDeclaredMethod("uploadedFile",
+		    new Class[] { OnFileUploadEvent.class });
 	} catch (SecurityException e) {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
@@ -37,15 +40,21 @@ public class UploadFileArea extends CustomComponent {
 	    e.printStackTrace();
 	}
     }
-    
-    
+
     private class UploadArea extends MultiFileUpload {
 
 	public UploadArea() {
 	    final DirectoryFileFactory directoryFileFactory = new DirectoryFileFactory(new File("/tmp"));
 	    setFileFactory(directoryFileFactory);
-	    setWidth(75, UNITS_PERCENTAGE);
 	    setMargin(true);
+	    setSizeFull();
+	}
+
+	private Component newError(String message) {
+	    Label label = new Label();
+	    label.setStyleName("v-upload-error-message");
+	    label.setValue(message);
+	    return label;
 	}
 
 	@Override
@@ -53,15 +62,11 @@ public class UploadFileArea extends CustomComponent {
 	    final DirNode destination = uploadDir == null || !uploadDir.isWriteGroupMember() ? UserView.getCurrentUser()
 		    .getFileRepository() : uploadDir;
 	    if (destination != null) {
-		if (destination.hasAvailableQuota(length)) {
-		    final FileNode fileNode = destination.createFile(file, fileName);
-		    // if (destination == uploadDir) {
-		    //
-		    // }
+		try {
+		    final FileNode fileNode = destination.createFile(file, fileName, length);
 		    fireFileUploaded(fileNode);
-		} else {
-		    getWindow().showNotification(FileManagementSystem.getMessage("message.file.upload.failled"),
-			    FileManagementSystem.getMessage("message.file.upload.failled.exceeded.quota"), Notification.TYPE_ERROR_MESSAGE);
+		} catch (FFDomainException ffde) {
+		    vlError.addComponent(newError(ffde.getMessage()));
 		}
 	    }
 	}
@@ -80,8 +85,11 @@ public class UploadFileArea extends CustomComponent {
     public UploadFileArea() {
 	super();
 	uploadArea = new UploadArea();
+	vlError = new VerticalLayout();
+	vlError.setSizeFull();
+	vlError.setSpacing(true);
     }
-    
+
     public UploadFileArea(DirNode dirNode) {
 	this();
 	setUploadDir(dirNode);
@@ -94,28 +102,28 @@ public class UploadFileArea extends CustomComponent {
     public DirNode getUploadDir() {
 	return uploadDir;
     }
-    
+
     public class OnFileUploadEvent extends Component.Event {
 	private FileNode node;
-	
+
 	public OnFileUploadEvent(Component source) {
 	    super(source);
 	}
-	
+
 	public OnFileUploadEvent(Component source, FileNode node) {
 	    this(source);
 	    this.node = node;
 	}
-	
+
 	public FileNode getUploadedFileNode() {
 	    return node;
 	}
     }
-    
+
     public interface FileUploadListener extends Serializable {
 	public void uploadedFile(OnFileUploadEvent event);
     }
-    
+
     public void addListener(FileUploadListener listener) {
 	addListener(OnFileUploadEvent.class, listener, UPLOAD_FILE_METHOD);
     }
@@ -123,12 +131,14 @@ public class UploadFileArea extends CustomComponent {
     public void setUploadDir(DirNode uploadDir) {
 	this.uploadDir = uploadDir;
     }
-    
+
     @Override
     public void attach() {
-        super.attach();
-        setCompositionRoot(uploadArea);
+	setCompositionRoot(uploadArea);
     }
-    
+
+    public Layout getErrorLayout() {
+	return vlError;
+    }
 
 }

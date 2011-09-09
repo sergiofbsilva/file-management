@@ -72,5 +72,4 @@ public class VisibilityList extends ArrayList<VisibilityGroup> {
 	}
 	return result.size() == 0 ? null : new UnionGroup(result);
     }
-
 }

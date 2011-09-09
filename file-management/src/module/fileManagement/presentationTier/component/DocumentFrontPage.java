@@ -2,8 +2,6 @@ package module.fileManagement.presentationTier.component;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 import module.fileManagement.domain.AbstractFileNode;
 import module.fileManagement.domain.DirNode;
@@ -15,15 +13,18 @@ import module.fileManagement.domain.VersionedFile;
 import module.fileManagement.domain.VisibilityGroup;
 import module.fileManagement.domain.VisibilityGroup.VisibilityOperation;
 import module.fileManagement.domain.VisibilityList;
+import module.fileManagement.domain.exception.NodeDuplicateNameException;
 import module.fileManagement.presentationTier.DownloadUtil;
+import module.fileManagement.presentationTier.component.groups.GroupCreatorRegistry;
+import module.fileManagement.presentationTier.component.groups.HasPersistentGroup;
+import module.fileManagement.presentationTier.component.groups.HasPersistentGroupCreator;
 import myorg.applicationTier.Authenticate.UserView;
-import myorg.domain.MyOrg;
+import myorg.domain.Presentable;
 import myorg.domain.User;
-import myorg.domain.groups.PersistentGroup;
+import myorg.domain.exceptions.DomainException;
 
 import org.vaadin.easyuploads.DirectoryFileFactory;
 
-import pt.ist.fenixframework.DomainObject;
 import pt.ist.fenixframework.pstm.AbstractDomainObject;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
@@ -68,64 +69,6 @@ import com.vaadin.ui.themes.Reindeer;
 @SuppressWarnings("serial")
 @EmbeddedComponent(path = { "DocumentFrontPage-(.*)" })
 public class DocumentFrontPage extends CustomComponent implements EmbeddedComponentContainer {
-
-     private static class PersistentGroupHolder implements HasPersistentGroup {
-
-	private final PersistentGroup persistentGroup;
-
-	private PersistentGroupHolder(final PersistentGroup persistentGroup) {
-	    this.persistentGroup = persistentGroup;
-	}
-	
-	@Override
-	public PersistentGroup getPersistentGroup() {
-	    return persistentGroup;
-	}
-	
-	@Override
-	public void renderGroupSpecificLayout(final AbstractOrderedLayout abstractOrderedLayout) {
-	    // nothing to do, we already have a group :o)
-	}
-	
-    }
-
-    private static class PersistentGroupCreator implements HasPersistentGroupCreator {
-
-	@Override
-	public HasPersistentGroup createGroupFor(final Object itemId) {
-	    if (itemId != null && itemId instanceof String) {
-		final String externalId = (String) itemId;
-		final DomainObject domainObject = AbstractDomainObject.fromExternalId(externalId);
-		if (domainObject != null && domainObject instanceof PersistentGroup) {
-		    final PersistentGroup persistentGroup = (PersistentGroup) domainObject;
-		    return new PersistentGroupHolder(persistentGroup);
-		}
-	    }
-	    return null;
-	}
-
-	@Override
-	public void addItems(final ComboBox comboBox, final String displayItemProperty) {
-	    for (final PersistentGroup persistentGroup : MyOrg.getInstance().getSystemGroupsSet()) {
-		final String externalId = persistentGroup.getExternalId();
-		final String name = persistentGroup.getName();
-
-		final Item comboItem = comboBox.addItem(externalId);
-		comboItem.getItemProperty(displayItemProperty).setValue(name);
-	    }
-	}
-
-    }
-
-    private static final Set<HasPersistentGroupCreator> persistentGroupCreators = new HashSet<HasPersistentGroupCreator>();
-
-    static {
-	registerPersistentGroupCreator(new PersistentGroupCreator());
-    }
-
-    public static synchronized void registerPersistentGroupCreator(final HasPersistentGroupCreator hasPersistentGroupCreator) {
-	persistentGroupCreators.add(hasPersistentGroupCreator);
-    }
 
     protected String getMessage(final String key, String... args) {
 	return FileManagementSystem.getMessage(key, args);
@@ -362,10 +305,15 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 		    UserView.getCurrentUser().getFileRepository() : dirNode;
 	    if (destination != null) {
 		if (destination.hasAvailableQuota(length)) {
-		    final FileNode fileNode = destination.createFile(file, fileName);
+		    try  {
+			final FileNode fileNode = destination.createFile(file, fileName,length);
+			
 		    if (destination == dirNode) {
 			documentTable.addAbstractFileNode(fileNode);
 		    }
+		    }catch(DomainException ccfe) {
+			FileManagementSystem.showException(getApplication(), ccfe);
+		    };
 		} else {
 		    getWindow().showNotification(getMessage("message.file.upload.failled"),
 			    getMessage("message.file.upload.failled.exceeded.quota"),
@@ -609,7 +557,14 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 		    @Override
 		    public void handleAction(final Object sender, final Object target) {
 			final String nodeDisplayName = (String) textField.getValue();
-			selectedNode.updateDisplayName(nodeDisplayName);
+			if (selectedNode instanceof DirNode) {
+			    try {
+				((DirNode) selectedNode).setDisplayName(nodeDisplayName);
+			    } catch (NodeDuplicateNameException e) {
+				FileManagementSystem.showException(getApplication(), e);
+			    }
+			}
+			    
 			textField.setVisible(false);
 			updateNodePanelCaption(nodeDisplayName);
 			if (dirNode == selectedNode) {
@@ -844,8 +799,11 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 				public void attach() {
 				    super.attach();
 
-				    for (final HasPersistentGroupCreator hasPersistentGroupCreator : persistentGroupCreators) {
-					hasPersistentGroupCreator.addItems(this, "name");
+				    for (final HasPersistentGroupCreator hasPersistentGroupCreator : GroupCreatorRegistry.getPersistentGroupCreators()) {
+//					hasPersistentGroupCreator.addItems(this, "name");
+					for(Presentable presentable : hasPersistentGroupCreator.getElements(null)) {
+					    addItem(presentable);
+					}
 				    }
 				    /*for (final Party party : MyOrg.getInstance().getPartiesSet()) {
 					if (party.isUnit() || (party.isPerson() && ((Person) party).hasUser())) {
@@ -864,7 +822,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 
 				    final Object itemId = event.getProperty().getValue();
 				    if (itemId != null) {
-					for (final HasPersistentGroupCreator hasPersistentGroupCreator : persistentGroupCreators) {
+					for (final HasPersistentGroupCreator hasPersistentGroupCreator : GroupCreatorRegistry.getPersistentGroupCreators()) {
 					    final HasPersistentGroup groupHolder = hasPersistentGroupCreator.createGroupFor(itemId);
 					    if (groupHolder != null) {
 						hasPersistentGroup = groupHolder; 

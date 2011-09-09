@@ -21,12 +21,13 @@ public class CreateDefaultMetadataTemplates extends CreateDefaultMetadataTemplat
     @Service
     public void resetTemplatesAndKeys() {
 	for (MetadataTemplate template : FileManagementSystem.getInstance().getMetadataTemplatesSet()) {
+	    for(MetadataKey key : template.getKeys()) {
+		key.delete();
+	    }
 	    template.delete();
 	}
-	for(MetadataKey key : FileManagementSystem.getInstance().getMetadataKeys()) {
-	    key.delete();
-	}
     }
+    
     @Service
     public void executeTask() {
 	resetTemplatesAndKeys();

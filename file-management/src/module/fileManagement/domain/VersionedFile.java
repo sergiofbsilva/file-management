@@ -30,7 +30,7 @@ public class VersionedFile extends VersionedFile_Base {
 		    Long.toString(roundedValue), toString());
 	}
 
-	public static String prettyPring(final double bytes) {
+	public static String prettyPrint(final double bytes) {
 	    for (final FILE_SIZE_UNIT unit : FILE_SIZE_UNIT.values()) {
 		if (unit.units > bytes) {
 		    return unit.toPresentationString(bytes);
@@ -59,7 +59,7 @@ public class VersionedFile extends VersionedFile_Base {
 
     public String getPresentationFilesize() {
 	final int filesize = getFilesize();
-	return FILE_SIZE_UNIT.prettyPring(filesize);
+	return FILE_SIZE_UNIT.prettyPrint(filesize);
     }
 
     @Override

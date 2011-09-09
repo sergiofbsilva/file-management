@@ -13,6 +13,8 @@ import com.vaadin.data.Item.PropertySetChangeNotifier;
 import com.vaadin.data.Item.Viewer;
 import com.vaadin.data.Property;
 import com.vaadin.ui.AbstractComponent;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
@@ -86,34 +88,73 @@ public class TabularViewer extends VerticalLayout implements Viewer, PropertySet
     public void itemPropertySetChange(PropertySetChangeEvent event) {
 	updateContent();
     }
+    
+//    private Label makeCaption(Component valueComponent) {
+//	final Label label = new Label(valueComponent.getCaption());
+//	label.addStyleName(CAPTION_CSS);
+//	label.setSizeFull();
+//	
+//	valueComponent.setCaption(null);
+//	valueComponent.setSizeUndefined();
+//	return label;
+//    }
+//    
+//    public HorizontalLayout addLine(Component valueComponent)  {
+//	final HorizontalLayout line = new HorizontalLayout();
+//	line.setSpacing(true);
+//	line.addStyleName(BennuConstants.PROPERTIES);
+//	line.setWidth("100%");
+//	
+//	final Label label = makeCaption(valueComponent);
+//
+//	line.addComponent(label);
+//	line.addComponent(valueComponent);
+//	line.setExpandRatio(valueComponent, 1f);
+//	addComponent(line);
+//	return line;
+//    }
+    
+    public HorizontalLayout addLine(Component valueComponent)  {
+	final HorizontalLayout line = new HorizontalLayout();
+	line.setSpacing(true);
+	line.addStyleName(BennuConstants.PROPERTIES);
+	line.setWidth("100%");
+	
+	final Label label = new Label(valueComponent.getCaption());
+	label.addStyleName(CAPTION_CSS);
+	label.setSizeUndefined();
+	
+	valueComponent.setCaption(null);
+	valueComponent.setSizeUndefined();
+
+	line.addComponent(label);
+	line.addComponent(valueComponent);
+	line.setExpandRatio(valueComponent, 1f);
+	addComponent(line);
+	return line;
+    }
 
     private void updateContent() {
 	removeAllComponents();
 	HorizontalLayout line = null;
+//	GridLayout grid = new GridLayout(2,propertyIds.size());
+//	grid.setSizeFull();
+//	grid.setSpacing(true);
+//	grid.setMargin(true);
+//	int i = 0;
 	for (Object propertyId : propertyIds) {
-	    line = new HorizontalLayout();
-	    line.setSpacing(true);
-	    line.addStyleName(BennuConstants.PROPERTIES);
-	    line.setWidth("100%");
 	    Property.Viewer value = viewerFactory.createViewer(itemDatasource, propertyId, this);
 	    final Property itemProperty = itemDatasource.getItemProperty(propertyId);
 	    value.setPropertyDataSource(itemProperty);
 	    AbstractComponent valueComponent = (AbstractComponent) value;
-	    Label label = new Label(valueComponent.getCaption());
-	    label.addStyleName(CAPTION_CSS);
-	    
-	    valueComponent.setCaption(null);
-	    
-	    valueComponent.setSizeUndefined();
-	    label.setSizeUndefined();
-	    line.addComponent(label);
-	    line.addComponent(valueComponent);
-//	    line.setExpandRatio(label, 0.3f);
-	    line.setExpandRatio(valueComponent, 1f);
-	    addComponent(line);
+	    line = addLine(valueComponent);
+//	    grid.addComponent(makeCaption(valueComponent), 0, i);
+//	    grid.addComponent(valueComponent, 1, i++);
 	}
+	
 	if (line != null) {
 	    line.addStyleName(BennuConstants.PROPERTIES_LAST);
 	}
+//	addComponent(grid);
     }
 }

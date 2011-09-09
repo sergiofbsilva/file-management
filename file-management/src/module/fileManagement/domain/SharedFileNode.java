@@ -7,6 +7,7 @@ import java.util.Set;
 import module.organization.domain.Party;
 import myorg.domain.User;
 import myorg.domain.groups.PersistentGroup;
+import pt.ist.fenixWebFramework.services.Service;
 
 
 public class SharedFileNode extends SharedFileNode_Base {
@@ -26,11 +27,7 @@ public class SharedFileNode extends SharedFileNode_Base {
 	return true;
     }
     
-    @Override
-    public void delete() {
-	getNode().delete();
-    }
-
+    
     @Override
     public void deleteService() {
 	getNode().deleteService();
@@ -93,7 +90,7 @@ public class SharedFileNode extends SharedFileNode_Base {
 
     @Override
     public boolean hasAnySharedFileNodes() {
-	return getNode().hasAnySharedFileNodes();
+	return getNode() == null ? super.hasAnySharedFileNodes() : getNode().hasAnySharedFileNodes();
     }
 
     @Override
@@ -102,45 +99,27 @@ public class SharedFileNode extends SharedFileNode_Base {
     }
 
     @Override
-    public DirNode getParent() {
-	return getNode().getParent();
-    }
-
-    @Override
     public Set<SharedFileNode> getSharedFileNodesSet() {
 	return getNode().getSharedFileNodesSet();
     }
 
-    @Override
-    public void setParent(DirNode parent) {
-	getNode().setParent(parent);
-    }
-
-    @Override
+        @Override
     public void addSharedFileNodes(SharedFileNode sharedFileNodes) {
 	getNode().addSharedFileNodes(sharedFileNodes);
     }
 
     @Override
-    public void share(User user) {
-	getNode().share(user);
+    public void share(User user, VisibilityGroup group, boolean createLink) {
+	getNode().share(user, group, createLink);
     }
-
-    @Override
-    public boolean hasParent() {
-	return getNode().hasParent();
-    }
-
+    
+    
     @Override
     public void removeSharedFileNodes(SharedFileNode sharedFileNodes) {
 	getNode().removeSharedFileNodes(sharedFileNodes);
     }
 
-    @Override
-    public void removeParent() {
-	getNode().removeParent();
-    }
-
+    
     @Override
     public List<SharedFileNode> getSharedFileNodes() {
 	return getNode().getSharedFileNodes();
@@ -173,7 +152,7 @@ public class SharedFileNode extends SharedFileNode_Base {
 
     @Override
     public boolean hasDocument() {
-	return getNode().hasDocument();
+	return getNode() == null ? super.hasDocument() : getNode().hasDocument();
     }
 
     @Override
@@ -205,10 +184,49 @@ public class SharedFileNode extends SharedFileNode_Base {
     public void trash() {
 	getNode().trash();
     }
-
+    
     @Override
-    public void updateDisplayName(String displayName) {
-	getNode().updateDisplayName(displayName);
+    protected void setReadGroup(PersistentGroup persistentGroup) {
+        getNode().setReadGroup(persistentGroup);
     }
+    
+    @Override
+    protected void setWriteGroup(PersistentGroup persistentGroup) {
+	getNode().setWriteGroup(persistentGroup);
+    }
+    
+    //TODO: check if this makes sense, never moves target file to this user target dir
+    @Override
+    public void setParent(DirNode parent) {
+        super.setParent(parent);
+    }
+    
+    @Override
+    public DirNode getParent() {
+	return getNode().getParent();
+    }
+    
+    @Override
+    public boolean hasParent() {
+	return getNode().hasParent();
+    }
+    
+    @Override
+    public void removeParent() {
+       getNode().removeParent();
+    }
+    
+    @Service
+    public void deleteLink() {
+	super.setParent(null);
+	super.setNode(null);
+	deleteDomainObject();
+    }
+    
+    @Override
+    protected boolean checkDisconnected() {
+        return super.getParent() == null  && super.getNode() == null;
+    }
+    
     
 }

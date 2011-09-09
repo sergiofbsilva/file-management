@@ -1,11 +1,13 @@
 package module.fileManagement.domain;
 
+import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import module.organization.domain.Party;
 import myorg.domain.groups.PersistentGroup;
+import pt.ist.fenixWebFramework.services.Service;
 
 
 
@@ -23,6 +25,21 @@ public class SharedDirNode extends SharedDirNode_Base {
     @Override
     public boolean isShared() {
 	return true;
+    }
+    
+    @Override
+    public Long getQuota() {
+	return getNode().getQuota();
+    }
+    
+    @Override
+    public Long getSize() {
+	return getNode().getSize();
+    }
+    
+    @Override
+    public FileNode createFile(File file, String fileName, long filesize) {
+        return getNode().createFile(file, fileName, filesize);
     }
 
     @Override
@@ -46,18 +63,8 @@ public class SharedDirNode extends SharedDirNode_Base {
     }
 
     @Override
-    public int countFiles() {
-	return getNode().countFiles();
-    }
-
-    @Override
     public int getCountFiles() {
 	return getNode().getCountFiles();
-    }
-
-    @Override
-    public long countFilesSize() {
-	return getNode().countFilesSize();
     }
 
     @Override
@@ -67,37 +74,47 @@ public class SharedDirNode extends SharedDirNode_Base {
 
     @Override
     public PersistentGroup getReadGroup() {
-	return getNode().getReadGroup();
+	return getNode() != null ? getNode().getReadGroup() : super.getReadGroup();
     }
 
     @Override
     public PersistentGroup getWriteGroup() {
-	return getNode().getWriteGroup();
+	return getNode() != null ? getNode().getWriteGroup() : super.getWriteGroup();
     }
 
     @Override
     public String getName() {
 	return getNode().getName();
     }
-
+    
+    @Override
+    public boolean hasAvailableQuota(long length) {
+	return getNode().hasAvailableQuota(length);
+    }
+    
+    @Override
+    public boolean hasAvailableQuota(long length, FileNode fileNode) {
+        return getNode().hasAvailableQuota(length, fileNode);
+    }
+    
     @Override
     public String getPresentationFilesize() {
 	return getNode().getPresentationFilesize();
+    }
+    
+    @Override
+    public String getPresentationTotalUsedSpace() {
+	return getNode().getPresentationTotalUsedSpace();
+    }
+    
+    @Override
+    public String getPercentOfTotalUsedSpace() {
+	return getNode().getPercentOfTotalUsedSpace();
     }
 
     @Override
     public int getFilesize() {
 	return getNode().getFilesize();
-    }
-
-    @Override
-    public String getAbsolutePath() {
-	return getNode().getAbsolutePath();
-    }
-
-    @Override
-    public List<DirNode> getAllDirs() {
-	return getNode().getAllDirs();
     }
 
     @Override
@@ -107,7 +124,7 @@ public class SharedDirNode extends SharedDirNode_Base {
 
     @Override
     public boolean hasReadGroup() {
-	return getNode().hasReadGroup();
+	return getNode() == null ? super.hasReadGroup() : getNode().hasReadGroup();
     }
 
     @Override
@@ -129,5 +146,11 @@ public class SharedDirNode extends SharedDirNode_Base {
     public Iterator<AbstractFileNode> getChildIterator() {
 	return getNode().getChildIterator();
     }
-
+    
+    @Service
+    public void deleteLink() {
+	super.setParent(null);
+	super.setNode(null);
+	deleteDomainObject();
+    }
 }

@@ -16,14 +16,11 @@ import com.vaadin.terminal.ExternalResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
-import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.BaseTheme;
 
 public class UploadFilePanel extends CustomComponent implements ValueChangeNotifier {
     
@@ -36,34 +33,8 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
     
     public UploadFilePanel() {
 	super();
-	
 	documentContainer = new DocumentContainer();
-	
 	selectedDocumentsProperty = new ObjectHintedProperty<Collection>(new HashSet<Document>(), Collection.class);
-//	selectedDocumentsProperty.addListener(new ValueChangeListener() {
-//	    
-//	    @Override
-//	    public void valueChange(ValueChangeEvent event) {
-//		System.out.println(event.getProperty().getValue());
-//		
-//	    }
-//	});
-//	selectedDocumentsContainer = new DocumentContainer();
-//	selectedDocumentsContainer.addListener(new ItemSetChangeListener() {
-//	    
-//	    @Override
-//	    public void containerItemSetChange(ItemSetChangeEvent event) {
-//		// TODO Auto-generated method stub
-//		final Collection<Document> value = (Collection<Document>) event.getContainer().getItemIds();
-//		System.out.println("---");
-//		for(Document doc : value) {
-//		    System.out.println(doc.getDisplayName());
-//		}
-//
-//	    }
-//	});
-	
-	    
 	this.documents = createDocumentTable();
 	
 	uploadArea = new UploadFileArea();
@@ -91,15 +62,18 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
 	vl.addComponent(new Label("<h3> Documentos Submetidos </h3>", Label.CONTENT_XHTML));
 	vl.addComponent(documents);
 	HorizontalLayout hlUploadArea = new HorizontalLayout();
+	hlUploadArea.setSizeFull();
+	hlUploadArea.setSpacing(true);
 	hlUploadArea.addComponent(uploadArea);
 	hlUploadArea.addComponent(new Button("Finalizar Upload", new ClickListener() {
 	    
 	    @Override
 	    public void buttonClick(ClickEvent event) {
 		documentContainer.commit();
-		getWindow().open(new ExternalResource("#DocumentBrowse"));
+		getWindow().open(new ExternalResource("#DocumentBrowse-" + uploadArea.getUploadDir().getExternalId()));
 	    }
 	}));
+	vl.addComponent(uploadArea.getErrorLayout());
 	vl.addComponent(hlUploadArea);
 	setCompositionRoot(vl);
     }
@@ -117,23 +91,23 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
 //	table.setPropertyDataSource(selectedDocumentsContainer);
 	table.setPropertyDataSource(selectedDocumentsProperty);
 	table.setVisibleColumns(new Object[] {"displayName"});
-	table.addGeneratedColumn("ops", new ColumnGenerator() {
-
-	    @Override
-	    public Component generateCell(Table source, final Object itemId, Object columnId) {
-		HorizontalLayout hl = new HorizontalLayout();
-		Button button = new Button("Remover", new ClickListener() {
-		    @Override
-		    public void buttonClick(ClickEvent event) {
-			table.removeItem(itemId);
-			forceDocumentVisibility();
-		    }
-		});
-		button.setStyleName(BaseTheme.BUTTON_LINK);
-		hl.addComponent(button);
-		return hl;
-	    }
-	});
+//	table.addGeneratedColumn("ops", new ColumnGenerator() {
+//
+//	    @Override
+//	    public Component generateCell(Table source, final Object itemId, Object columnId) {
+//		HorizontalLayout hl = new HorizontalLayout();
+//		Button button = new Button("Remover", new ClickListener() {
+//		    @Override
+//		    public void buttonClick(ClickEvent event) {
+//			table.removeItem(itemId);
+//			forceDocumentVisibility();
+//		    }
+//		});
+//		button.setStyleName(BaseTheme.BUTTON_LINK);
+//		hl.addComponent(button);
+//		return hl;
+//	    }
+//	});
 	return table;
     }
 

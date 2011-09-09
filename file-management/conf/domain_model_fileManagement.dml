@@ -4,8 +4,8 @@ package module.fileManagement.domain;
 external class .pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile;
 
 class task.CreateDefaultMetadataTemplates extends .myorg.domain.scheduler.Task {
-
 }
+
 
 class AbstractFileNode {
 	String ojbConcreteClass;
@@ -16,6 +16,8 @@ class AbstractFileNode {
 
 	class DirNode extends AbstractFileNode {
 		String name;
+		Long size;
+		Long quota;
 	}
 	
 	class SharedFileNode extends FileNode {
@@ -25,7 +27,16 @@ class AbstractFileNode {
 	class SharedDirNode extends DirNode {
 	
 	}
-	
+
+
+/*class OperationLog {
+	DateTime timestamp;	
+}
+
+relation OperationLogUser {
+	.myorg.User playsRole user;
+	OperationLog playsRole ;
+}*/
 	
 
 class Document {
@@ -168,7 +179,7 @@ relation UserAbstractFileNode {
 }
 
 relation UserTrash {
-	.myorg.domain.User playsRole ;
+	.myorg.domain.User playsRole trashUser;
 	DirNode playsRole trash;
 }
 

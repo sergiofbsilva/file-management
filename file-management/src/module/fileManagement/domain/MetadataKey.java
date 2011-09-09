@@ -3,7 +3,7 @@ package module.fileManagement.domain;
 import myorg.domain.exceptions.DomainException;
 import pt.ist.fenixWebFramework.services.Service;
 
-public class MetadataKey extends MetadataKey_Base {
+public class MetadataKey extends MetadataKey_Base implements Comparable<MetadataKey> {
     
     public static final String TEMPLATE_KEY_VALUE = "Tipologia";
     public static final String FILENAME_KEY_VALUE = "Nome do Ficheiro";
@@ -41,6 +41,11 @@ public class MetadataKey extends MetadataKey_Base {
 	}
 	FileManagementSystem.getInstance().removeMetadataKeys(this);
 	deleteDomainObject();
+    }
+
+    @Override
+    public int compareTo(MetadataKey o) {
+	return getKeyValue().compareTo(o.getKeyValue());
     }
     
 }

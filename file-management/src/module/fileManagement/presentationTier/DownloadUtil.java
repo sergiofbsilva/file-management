@@ -1,10 +1,12 @@
 package module.fileManagement.presentationTier;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.servlet.http.HttpServletRequest;
 
 import module.fileManagement.domain.Document;
+import module.fileManagement.domain.FileManagementSystem;
 import module.fileManagement.domain.VersionedFile;
 import pt.ist.fenixframework.DomainObject;
 
@@ -44,5 +46,14 @@ public class DownloadUtil {
 	url.append("/download/");
 	url.append(domainObject.getExternalId());
 	return url.toString();
+    }
+    
+    public URL getURL(final Application application, final DomainObject domainObject) {
+	try {
+	    return new URL(getDownloadUrl(application, domainObject));
+	} catch (MalformedURLException e) {
+	    FileManagementSystem.getLogger().error(e);
+	}
+	return null;
     }
 }

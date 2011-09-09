@@ -273,4 +273,8 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
 	}
 
     }
+    
+    public void hideProgressBars() {
+	progressBars.setVisible(false);
+    }
 }

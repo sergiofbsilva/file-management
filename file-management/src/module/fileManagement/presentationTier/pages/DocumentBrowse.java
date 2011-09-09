@@ -2,13 +2,16 @@ package module.fileManagement.presentationTier.pages;
 
 import static module.fileManagement.domain.FileManagementSystem.getMessage;
 import module.fileManagement.domain.AbstractFileNode;
-import module.fileManagement.presentationTier.component.AddDirWindow;
+import module.fileManagement.domain.DirNode;
 import module.fileManagement.presentationTier.component.DocumentFileBrowser;
+import module.fileManagement.presentationTier.component.NewDirWindow;
 import module.fileManagement.presentationTier.component.NodeDetails;
 import pt.ist.bennu.ui.FlowLayout;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
+import pt.ist.vaadinframework.data.reflect.DomainItem;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
 
+import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.terminal.ExternalResource;
@@ -23,18 +26,24 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Layout;
 import com.vaadin.ui.VerticalLayout;
 
-@EmbeddedComponent(path = { "DocumentBrowse" })
+@EmbeddedComponent(path = { "DocumentBrowse-(.*)" })
 public class DocumentBrowse extends CustomComponent implements EmbeddedComponentContainer {
     
     NodeDetails fileDetails;
     DocumentFileBrowser browser;
     Layout mainLayout;
     GridLayout mainGrid;
+    Button btUpload;
     
     @Override
     public void setArguments(String... arg0) {
-	// TODO Auto-generated method stub
-
+	String dirExternalId = arg0[1];
+	if (!dirExternalId.trim().isEmpty()) {
+	    DirNode dirNode = DirNode.fromExternalId(dirExternalId);
+	    if (dirNode.isAccessible()) {
+		browser.setValue(dirNode);
+	    }
+	}
     }
     
     public HorizontalLayout createButtons() {
@@ -47,7 +56,7 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
 	    @Override
 	    public void buttonClick(ClickEvent event) {
 		if (browser.getDirNode().isWriteGroupMember()) {
-		    final AddDirWindow addDirWindow = new AddDirWindow(browser);
+		    final NewDirWindow addDirWindow = new NewDirWindow(browser.getNodeItem());
 		    getWindow().addWindow(addDirWindow);
 		} else {
                     getWindow().showNotification(getMessage("message.dir.cannot.write"));
@@ -57,7 +66,7 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
 	layout.addComponent(btNewFolder);
 	
 	
-	Button btUpload = new Button(getMessage("button.upload"));
+	btUpload = new Button(getMessage("button.upload"));
 	
 	btUpload.addListener(new ClickListener() {
 	    public void buttonClick(ClickEvent event) {
@@ -79,9 +88,6 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
 	grid.setSpacing(true);
 	browser.setSizeFull();
 	grid.addComponent(browser, 0, 0);
-//	grid.setColumnExpandRatio(0, 1f);
-//	grid.addComponent(fileDetails,1,0);
-//	grid.setColumnExpandRatio(1, 1f);
 	return grid;
     }
     
@@ -101,13 +107,14 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
     
     public DocumentFileBrowser createBrowser() {
 	DocumentFileBrowser browser = new DocumentFileBrowser();
-//	VerticalLayout layout = new VerticalLayout();
-//	layout.setSizeFull();
-//	layout.addComponent(createNavigationLink("/home/sfbs/sparta/benfica/is/the/best/SLB"));
-//	Table tbBrowser = new Table();
-//	tbBrowser.setSizeFull();
-//	layout.addComponent(tbBrowser);
-//	return layout;
+//	browser.addDirChangedListener(new ValueChangeListener() {
+//	    
+//	    @Override
+//	    public void valueChange(ValueChangeEvent event) {
+//		final DirNode dirNode = (DirNode)event.getProperty().getValue();
+//		btUpload.setEnabled(dirNode.isWriteGroupMember());
+//	    }
+//	});
 	return browser;
     }
     
@@ -116,17 +123,19 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
 	layout.setSizeFull();
 	layout.setMargin(true,true,false,false);
 	layout.setSpacing(true);
-	layout.addComponent(createButtons());
 	browser = createBrowser();
+	layout.addComponent(createButtons());
+	layout.addComponent(new QuotaLabel(browser.getNodeItem()));
+	
 	mainGrid = createGrid(browser);
-	setFileDetails((AbstractFileNode)browser.getDirNode());
+	setFileDetails(browser.getNodeItem());
 	layout.addComponent(mainGrid);
 	return layout;
     }
     
-    public void setFileDetails(AbstractFileNode absFileNode) {
+    public void setFileDetails(DomainItem<AbstractFileNode> nodeItem) {
 	mainGrid.removeComponent(fileDetails);
-	fileDetails = NodeDetails.makeDetails(absFileNode);
+	fileDetails = NodeDetails.makeDetails(nodeItem);
 	fileDetails.setDocumentBrowse(this);
 	fileDetails.setSizeFull();
 	mainGrid.addComponent(fileDetails,1,0);
@@ -137,21 +146,66 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
 	browser.addListener(new ValueChangeListener() {
 	    @Override
 	    public void valueChange(ValueChangeEvent event) {
-		final AbstractFileNode absFileNode = (AbstractFileNode) event.getProperty().getValue();
+		Object absFileNode = event.getProperty().getValue();
 		if (absFileNode != null) {
-		    setFileDetails(absFileNode);
+		    DomainItem<AbstractFileNode> nodeItem = browser.getContainer().getItem(absFileNode);
+		    setFileDetails(nodeItem);
 		}
 	    }
 	});
 	setCompositionRoot(mainLayout);
     }
     
+    
+    @SuppressWarnings("unused")
+    private class QuotaLabel extends Label {
+	
+	private String quotaContent = null;
+	
+	public QuotaLabel(DomainItem<AbstractFileNode> item) {
+	    setPropertyDataSource(item);
+	    setContentMode(Label.CONTENT_XHTML);
+	    setContent();
+	    Property.ValueChangeListener listener = new Property.ValueChangeListener() {
+		    
+		    @SuppressWarnings("unchecked")
+		    @Override
+		    public void valueChange(com.vaadin.data.Property.ValueChangeEvent event) {
+			setContent();
+		    }
+
+		};
+	    getItem().addListener(listener);
+	}
+	
+	@SuppressWarnings("unchecked")
+	private DomainItem<AbstractFileNode> getItem() {
+	    return (DomainItem<AbstractFileNode>) getPropertyDataSource();
+	}
+	
+	
+	private void setContent() {
+	    DomainItem<AbstractFileNode> dirNode = getItem();
+	    final String percentTotalUsedSpace = dirNode.getItemProperty("percentOfTotalUsedSpace").toString();
+	    final String totalUsedSpace = dirNode.getItemProperty("presentationTotalUsedSpace").toString();
+	    final String quota = dirNode.getItemProperty("presentationQuota").toString();
+	    quotaContent = String.format("%s espaco utilizado</br>A utilizar %s dos seus %s", percentTotalUsedSpace, totalUsedSpace , quota);
+	}
+	
+	@Override
+	public String toString() {
+	    return quotaContent;
+	}
+    }
+    
+    
+    
     public void refresh() {
 	fileDetails.updateFilePanel();
     }
     
-    public void removeNode(AbstractFileNode node) {
-	browser.getDocumentTable().getContainerDataSource().removeItem(node);
+    public void removeNode(DomainItem<AbstractFileNode> nodeItem) {
+	browser.removeNodeAndSelectNext(nodeItem.getValue());
     }
 
 }

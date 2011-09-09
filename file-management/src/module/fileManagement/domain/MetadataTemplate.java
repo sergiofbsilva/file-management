@@ -2,6 +2,7 @@ package module.fileManagement.domain;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 import pt.ist.fenixWebFramework.services.Service;
 import pt.ist.fenixframework.pstm.AbstractDomainObject;
@@ -62,5 +63,9 @@ public class MetadataTemplate extends MetadataTemplate_Base {
 	    return AbstractDomainObject.fromExternalId(templateOid);
 	}
     }
+
+    public TreeSet<MetadataKey> getAlfabeticallyOrderedKeys() {
+	return new TreeSet<MetadataKey>(getKeys());
+    } 
     
 }

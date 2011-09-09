@@ -1,6 +1,7 @@
 package module.fileManagement.presentationTier.pages;
 
 import static module.fileManagement.domain.FileManagementSystem.getMessage;
+import static module.fileManagement.domain.VersionedFile.FILE_SIZE_UNIT.prettyPrint;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -8,25 +9,23 @@ import java.util.HashSet;
 import module.fileManagement.domain.DirNode;
 import module.fileManagement.domain.Document;
 import module.fileManagement.domain.FileManagementSystem;
-import module.fileManagement.domain.FileRepository;
 import module.fileManagement.domain.Metadata;
 import module.fileManagement.domain.MetadataKey;
 import module.fileManagement.domain.MetadataTemplate;
 import module.fileManagement.presentationTier.component.UploadFilePanel;
 import module.fileManagement.presentationTier.data.FMSFieldFactory;
 import module.fileManagement.presentationTier.data.TemplateItem;
-import myorg.applicationTier.Authenticate.UserView;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
-import pt.ist.vaadinframework.data.reflect.DomainContainer;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
 import pt.ist.vaadinframework.ui.TransactionalForm;
 
 import com.vaadin.data.Container;
+import com.vaadin.data.Container.ItemSetChangeEvent;
+import com.vaadin.data.Container.ItemSetChangeListener;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.Form;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Layout;
@@ -42,47 +41,60 @@ public class UploadPage extends CustomComponent implements EmbeddedComponentCont
     private Panel metadataPanel;
     private Select selectTemplate;
     private VerticalLayout leftPanel;
-    private Select selectDir;
+//    private Select selectDir;
+    private Label uploadDirLabel;
     protected TemplateItem metadataTemplateItem;
     private TransactionalForm metadataForm;
-
+    private Label lblQuotaText;
+    
     public Panel createQuotaPanel() {
 	Panel messagePanel = new Panel();
 	messagePanel.setStyleName(Reindeer.PANEL_LIGHT);
 	messagePanel.setCaption(getMessage("upload.title"));
 	messagePanel.setScrollable(false);
 	final Layout hlQuotaContent = new VerticalLayout();
-	Label lblQuotaText = new Label(getMessage("upload.quota"), Label.CONTENT_TEXT);
+	lblQuotaText = new Label();
+	lblQuotaText.setContentMode(Label.CONTENT_TEXT);
 	hlQuotaContent.addComponent(lblQuotaText);
 	messagePanel.setContent(hlQuotaContent);
 	return messagePanel;
     }
-
-    public Form createSelectUploadDir() {
-	Form hl = new Form();
-
-	final DirNode dir = FileRepository.getOrCreateFileRepository(UserView.getCurrentUser());
-
-	selectDir = new Select(getMessage("label.select.upload.dir"));
-	selectDir.setImmediate(true);
-	selectDir.setNullSelectionAllowed(false);
-	final HashSet<DirNode> dirsSet = new HashSet<DirNode>();
-	dirsSet.addAll(dir.getAllDirs());
-	DomainContainer dirs = new DomainContainer(dirsSet, DirNode.class);
-	dirs.setContainerProperties("absolutePath");
-	selectDir.setContainerDataSource(dirs);
-	selectDir.setItemCaptionPropertyId("absolutePath");
-	selectDir.addListener(new ValueChangeListener() {
-
-	    @Override
-	    public void valueChange(ValueChangeEvent event) {
-		uploadArea.setUploadDir((DirNode) event.getProperty().getValue());
-	    }
-	});
-
-	hl.addField("select", selectDir);
-	return hl;
+    
+    private void updateQuotaLabel() {
+	DirNode uploadDir = uploadArea.getUploadDir();
+	final String usedSpacePerc = uploadDir.getPercentOfTotalUsedSpace();
+	final String usedSpace = uploadDir.getPresentationTotalUsedSpace();
+	final String quota = uploadDir.getPresentationQuota();
+	final String availableSpace = prettyPrint(uploadDir.getAvailableSpace());
+	lblQuotaText.setValue(getMessage("upload.quota", usedSpace ,usedSpacePerc,quota, availableSpace));
     }
+
+    
+//    public Form createSelectUploadDir() {
+//	Form hl = new Form();
+//
+//	final DirNode dir = FileRepository.getOrCreateFileRepository(UserView.getCurrentUser());
+//
+//	selectDir = new Select(getMessage("label.select.upload.dir"));
+//	selectDir.setImmediate(true);
+//	selectDir.setNullSelectionAllowed(false);
+//	final HashSet<DirNode> dirsSet = new HashSet<DirNode>();
+//	dirsSet.addAll(dir.getAllDirs());
+//	DomainContainer dirs = new DomainContainer(dirsSet, DirNode.class);
+//	dirs.setContainerProperties("absolutePath");
+//	selectDir.setContainerDataSource(dirs);
+//	selectDir.setItemCaptionPropertyId("absolutePath");
+//	selectDir.addListener(new ValueChangeListener() {
+//
+//	    @Override
+//	    public void valueChange(ValueChangeEvent event) {
+//		uploadArea.setUploadDir((DirNode) event.getProperty().getValue());
+//	    }
+//	});
+//
+//	hl.addField("select", selectDir);
+//	return hl;
+//    }
 
     @Override
     public void attach() {
@@ -144,6 +156,8 @@ public class UploadPage extends CustomComponent implements EmbeddedComponentCont
 
     @SuppressWarnings("serial")
     public UploadPage() {
+	uploadDirLabel = new Label();
+	uploadDirLabel.setCaption("Upload para :");
 	GridLayout mainLayout = new GridLayout(2, 1);
 	mainLayout.setSizeFull();
 	mainLayout.setSpacing(true);
@@ -152,10 +166,9 @@ public class UploadPage extends CustomComponent implements EmbeddedComponentCont
 	leftPanel.setSizeFull();
 	leftPanel.setSpacing(true);
 	leftPanel.addComponent(createQuotaPanel());
-	leftPanel.addComponent(createSelectUploadDir());
-
+//	leftPanel.addComponent(createSelectUploadDir());
+	leftPanel.addComponent(uploadDirLabel);
 	mainLayout.addComponent(leftPanel, 0, 0);
-
 	setCompositionRoot(mainLayout);
     }
 
@@ -164,6 +177,16 @@ public class UploadPage extends CustomComponent implements EmbeddedComponentCont
 	    leftPanel.removeComponent(uploadArea);
 	}
 	uploadArea = new UploadFilePanel(node);
+	uploadArea.getDocumentContainer().addListener(new ItemSetChangeListener() {
+	    
+	    @Override
+	    public void containerItemSetChange(ItemSetChangeEvent event) {
+		updateQuotaLabel();
+	    }
+	});
+	
+	updateQuotaLabel();
+	
 	uploadArea.addListener(new ValueChangeListener() {
 
 	    @Override
@@ -186,7 +209,8 @@ public class UploadPage extends CustomComponent implements EmbeddedComponentCont
 	leftPanel.addComponent(uploadArea);
 	this.metadataPanel = createMetadataPanel();
 	((GridLayout) getCompositionRoot()).addComponent(metadataPanel, 1, 0);
-	selectDir.select(uploadArea.getUploadDir());
+	uploadDirLabel.setValue(uploadArea.getUploadDir().getDisplayName());
+//	selectDir.select(uploadArea.getUploadDir());
     }
 
     @Override

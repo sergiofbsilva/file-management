@@ -1,16 +1,17 @@
 package module.fileManagement.presentationTier.component;
 
-import module.fileManagement.domain.SharedDirNode;
+import module.fileManagement.domain.AbstractFileNode;
+import pt.ist.vaadinframework.data.reflect.DomainItem;
 
 public class SharedDirDetails extends DirDetails {
 
-    public SharedDirDetails(SharedDirNode sharedDirNode, boolean operationsVisible) {
-	super(sharedDirNode, operationsVisible);
+    public SharedDirDetails(DomainItem<AbstractFileNode> nodeItem, boolean operationsVisible, boolean infoVisible) {
+	super(nodeItem, operationsVisible,infoVisible);
 	addVisibleProperty("ownerName");
     }
     
-    public SharedDirDetails(SharedDirNode sharedDirNode) {
-	this(sharedDirNode,true);
+    public SharedDirDetails(DomainItem<AbstractFileNode> nodeItem) {
+	this(nodeItem,true,true);
     }
     
     

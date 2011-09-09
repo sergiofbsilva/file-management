@@ -3,19 +3,24 @@ package module.fileManagement.domain;
 import java.util.ResourceBundle;
 
 import myorg.domain.MyOrg;
+import myorg.domain.exceptions.DomainException;
 import myorg.util.BundleUtil;
 
 import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import pt.ist.fenixWebFramework.services.Service;
 import pt.ist.vaadinframework.VaadinFrameworkLogger;
+
+import com.vaadin.Application;
+import com.vaadin.ui.Window;
 
 public class FileManagementSystem extends FileManagementSystem_Base {
     
     private static FileManagementSystem system;
     private static final String BUNDLE  = "resources.FileManagementResources";
     
-//    private static final Logger logger = Logger.getLogger(FileManagementSystem.class);
+    private static final Logger logger = Logger.getLogger(FileManagementSystem.class);
     
     static {
 	VaadinFrameworkLogger.getLogger().setLevel(Level.ALL);
@@ -62,6 +67,10 @@ public class FileManagementSystem extends FileManagementSystem_Base {
 	return ResourceBundle.getBundle(BUNDLE);
     }
     
+    public static Logger getLogger() {
+	return logger;
+    }
+    
 //    public static void goTo(Class clazz) {
 //	
 //	for(Annotation anot : clazz.getAnnotations()) {
@@ -71,5 +80,14 @@ public class FileManagementSystem extends FileManagementSystem_Base {
 //	    }
 //	}
 //    }
+    
+    public static void showException(Application app, DomainException e) {
+	Window.Notification notif = new Window.Notification(
+	        "Operação não permitida",
+	        e.getMessage(),
+	        Window.Notification.TYPE_TRAY_NOTIFICATION);
+	notif.setDelayMsec(-1);
+	app.getMainWindow().showNotification(notif);
+    }
     
 }

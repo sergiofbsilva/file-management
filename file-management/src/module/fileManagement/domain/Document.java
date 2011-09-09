@@ -2,7 +2,13 @@ package module.fileManagement.domain;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.TreeSet;
+
+import myorg.applicationTier.Authenticate.UserView;
 
 import org.joda.time.DateTime;
 
@@ -10,14 +16,14 @@ import pt.ist.fenixWebFramework.services.Service;
 
 public class Document extends Document_Base {
     
+    public static String DOCUMENT_NEW_VERSION_KEY = "document.new.version.key.value";
     
     public Document() {
         super();
-        setModifiedDateNow();
+        addNewVersionMetadata();
     }
     
-
-    public Document(final File file, final String fileName) {
+        public Document(final File file, final String fileName) {
 	this();
 	setLastVersionedFile(new VersionedFile(file, fileName));
 	addMetadata(MetadataKey.FILENAME_KEY_VALUE, fileName);
@@ -79,11 +85,17 @@ public class Document extends Document_Base {
 	final VersionedFile newVersion = new VersionedFile(file, filename);
 	newVersion.setPreviousVersion(versionedFile);
 	setLastVersionedFile(newVersion);
-	setModifiedDateNow();
+	addNewVersionMetadata();
     }
     
-    public void setModifiedDateNow() {
-	setLastModifiedDate(new DateTime());
+    private DateTime now() {
+	return new DateTime();
+    }
+    
+    public DateTime setModifiedDateNow() {
+	final DateTime now = now();
+	setLastModifiedDate(now);
+	return now;
     }
     
     @Service
@@ -127,6 +139,69 @@ public class Document extends Document_Base {
 	return null;
     }
     
+    private TreeSet<Metadata> getMetadataUntil(DateTime endDate) {
+	final TreeSet<Metadata> metadataByTimestamp = new TreeSet<Metadata>(Metadata.TIMESTAMP_DESC_COMPARATOR);
+	final TreeSet<Metadata> metadataUntil = new TreeSet<Metadata>(Metadata.TIMESTAMP_DESC_COMPARATOR);
+	metadataByTimestamp.addAll(getMetadata());
+	metadataUntil.addAll(getMetadata());
+	
+	for(Metadata metadata : metadataByTimestamp) {
+	    if (metadata.getTimestamp().compareTo(endDate) > 0) {
+		metadataUntil.remove(metadata);
+	    }
+	}
+	cleanup(metadataUntil);
+	return metadataUntil;
+    }
+    
+    public Collection<Metadata> getRecentMetadata() {
+	final TreeSet<Metadata> metadataUntil = getMetadataUntil(now());
+	Iterator<Metadata> iter = metadataUntil.iterator();
+	final Set<String> keysToFilter = new HashSet<String>();
+	keysToFilter.add(DOCUMENT_NEW_VERSION_KEY);
+	keysToFilter.add(MetadataKey.FILENAME_KEY_VALUE);
+	while(iter.hasNext()) {
+	    Metadata metadata = iter.next();
+	    if (keysToFilter.contains(metadata.getKeyValue())) {
+		iter.remove();
+	    }
+	}
+	final TreeSet<Metadata> metadataByKeyValue = new TreeSet<Metadata>(Metadata.KEYVALUE_COMPARATOR);
+	metadataByKeyValue.addAll(metadataUntil);
+	return metadataByKeyValue;
+    }
+    
+    public TreeSet<Metadata> getVersions() {
+	final TreeSet<Metadata> metadataSet = new TreeSet<Metadata>(Metadata.TIMESTAMP_DESC_COMPARATOR);
+	final TreeSet<Metadata> resultingSet = new TreeSet<Metadata>(Metadata.TIMESTAMP_DESC_COMPARATOR); 
+	metadataSet.addAll(getMetadata());
+	for(Metadata metadata : metadataSet) {
+	    if (DOCUMENT_NEW_VERSION_KEY.equals(metadata.getKeyValue())) {
+		resultingSet.add(metadata);
+	    }
+	}
+	return resultingSet;
+    }
+    
+    private void cleanup(TreeSet<Metadata> metadataSet) {
+	HashMap<MetadataKey, Metadata> metadataMap = new HashMap<MetadataKey, Metadata>();
+	for(Metadata metadataIter : metadataSet) {
+	    final MetadataKey metadataKey = metadataIter.getMetadataKey();
+	    final Metadata metadata = metadataMap.get(metadataKey);
+	    if (metadata == null) {
+		metadataMap.put(metadataKey, metadataIter);
+	    }
+	}
+	metadataSet.clear();
+	metadataSet.addAll(metadataMap.values());
+    }
+    
+    private void addNewVersionMetadata() {
+	addMetadata(DOCUMENT_NEW_VERSION_KEY,UserView.getCurrentUser().getPresentationName());
+	setModifiedDateNow();
+    }
+
+
     /**
      * replace metadata value. If metadata value is not present the metadata value is added.
      * 

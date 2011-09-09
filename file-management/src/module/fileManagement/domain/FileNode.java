@@ -13,8 +13,8 @@ public class FileNode extends FileNode_Base {
 	if (dirNode == null) {
 	    throw new DomainException("must.specify.a.dir.node.when.creating.a.file.node");
 	}
-	setParent(dirNode);
 	setDocument(new Document(file, fileName));
+	setParent(dirNode);
     }
     
     public FileNode() {
@@ -68,12 +68,6 @@ public class FileNode extends FileNode_Base {
     public String getDisplayName() {
 	final Document document = getDocument();
 	return document.getDisplayName();
-    }
-
-    @Override
-    protected void setDisplayName(final String displayName) {
-	final Document document = getDocument();
-	document.setDisplayName(displayName);
     }
 
     @Override

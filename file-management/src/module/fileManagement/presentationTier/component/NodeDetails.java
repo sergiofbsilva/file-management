@@ -6,54 +6,96 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.Set;
 
 import module.fileManagement.domain.AbstractFileNode;
-import module.fileManagement.domain.DirNode;
-import module.fileManagement.domain.FileManagementSystem;
-import module.fileManagement.domain.FileNode;
-import module.fileManagement.domain.SharedDirNode;
-import module.fileManagement.domain.SharedFileNode;
+import module.fileManagement.domain.AbstractFileNode.VisibilityState;
+import module.fileManagement.presentationTier.component.viewers.FMSViewerFactory;
 import module.fileManagement.presentationTier.pages.DocumentBrowse;
 
-import org.joda.time.DateTime;
+import org.vaadin.dialogs.ConfirmDialog;
+import org.vaadin.dialogs.DefaultConfirmDialogFactory;
 
-import pt.ist.bennu.ui.viewers.ViewerFactory;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
-import pt.ist.vaadinframework.ui.DefaultViewerFactory;
 
-import com.vaadin.data.Item;
-import com.vaadin.data.Property;
-import com.vaadin.data.Property.Viewer;
 import com.vaadin.terminal.ExternalResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.BaseTheme;
 
 public abstract class NodeDetails extends Panel {
 
-    protected AbstractFileNode absFileNode;
+    protected DomainItem<AbstractFileNode> nodeItem;
     protected DocumentBrowse documentBrowse;
     private Set<String> visibleProperties;
     private VerticalLayout vlOperations;
+    private final boolean operationsVisible;
+    private final boolean infoVisible;
 
-    public NodeDetails(AbstractFileNode absFileNode, boolean operationsVisible) {
-	super(getMessage("label.file.details"));
-	this.absFileNode = absFileNode;
+    
+    public void showDeleteDialog() {
+	final CheckBox chkDeleteAll = new CheckBox(
+		    "Este ficheiro encontra-se partilhado. Deseja apagá-lo para todos os outros utilizadores?");
+	final String windowTitle = String.format("Apagar - %s", getNode().getDisplayName());
+	final String message = String.format("Deseja apagar %s ? ", getNode().getDisplayName());
+	ConfirmDialog confirm = new DefaultConfirmDialogFactory().create(windowTitle, message, "Sim", "Não");
+	
+	if (getNode().isWriteGroupMember()) {
+	    if (getNode().getVisibilityState() != VisibilityState.PRIVATE) {
+		    VerticalLayout vl = (VerticalLayout) confirm.getContent();
+		    final Panel panel = (Panel) vl.getComponent(0);
+		    panel.addComponent(chkDeleteAll);
+	    }
+	}
+	
+
+	ConfirmDialog.Listener listener = new ConfirmDialog.Listener() {
+
+	    @Override
+	    public void onClose(ConfirmDialog dialog) {
+		if (dialog.isConfirmed()) {
+		    getNode().trash((Boolean) chkDeleteAll.getValue());
+		    documentBrowse.removeNode(getNodeItem());
+		}
+	    }
+	};
+	confirm.show(getWindow(), listener, true);
+    }
+    
+    
+    public NodeDetails(DomainItem<AbstractFileNode> nodeItem, boolean operationsVisible, boolean infoVisible) {
+	super();
+	this.nodeItem = nodeItem;
+	this.nodeItem.setWriteThrough(true);
+	this.operationsVisible = operationsVisible;
+	this.infoVisible = infoVisible;
+	
+	updateCaption();
 	VerticalLayout content = (VerticalLayout) getContent();
 	content.setSpacing(true);
 	visibleProperties = new HashSet<String>();
-	vlOperations = new VerticalLayout();
-	vlOperations.setVisible(operationsVisible);
+	if (operationsVisible) {
+	    vlOperations = new VerticalLayout();
+	}
     }
-
-    public NodeDetails(AbstractFileNode absFileNode) {
-	this(absFileNode, true);
+    
+    private void updateCaption() {
+	if (infoVisible) {
+	    setCaption(getMessage("label.file.details"));
+	    return;
+	}
+	if (operationsVisible) {
+	    setCaption(getMessage("label.file.operations"));
+	    return;
+	}
+    }
+    
+    public NodeDetails(DomainItem<AbstractFileNode> nodeItem) {
+	this(nodeItem, true,true);
     }
 
     public Button createShareLink() {
@@ -69,30 +111,11 @@ public abstract class NodeDetails extends Panel {
     }
 
     public Component updateDetails() {
-	final ResourceBundle bundle = FileManagementSystem.getBundle();
-	final ViewerFactory defaultViewerFactory = new DefaultViewerFactory(bundle) {
-	    @Override
-	    protected Viewer makeViewer(Item item, Object propertyId, Component uiContext) {
-		final Property itemProperty = item.getItemProperty(propertyId);
-		if (DateTime.class.isAssignableFrom(itemProperty.getType())) {
-		    final Label lbl = new Label() {
-			@Override
-			public String toString() {
-			    final DateTime datetime = (DateTime) getPropertyDataSource().getValue();
-			    return datetime.toString("yyyy/MM/dd HH:mm");
-			}
-		    };
-		    return lbl;
-		}
-		return super.makeViewer(item, propertyId, uiContext);
-	    }
-	};
-	TabularViewer viewer = new TabularViewer(defaultViewerFactory);
-
+	TabularViewer viewer = new TabularViewer(FMSViewerFactory.getInstance());
 	List<String> propertyIds = new ArrayList<String>();
-	propertyIds.addAll(Arrays.asList(new String[] { "displayName", "presentationFilesize" }));
+	propertyIds.addAll(Arrays.asList(new String[] { "displayName", "presentationFilesize", "visibilityGroups" }));
 	propertyIds.addAll(visibleProperties);
-	viewer.setItemDataSource(new DomainItem(getNode()), propertyIds);
+	viewer.setItemDataSource(nodeItem, propertyIds);
 	return viewer;
     }
 
@@ -106,35 +129,39 @@ public abstract class NodeDetails extends Panel {
      * @param absFileNode
      * @return
      */
-    public static NodeDetails makeDetails(AbstractFileNode absFileNode, boolean operationsVisible) {
+    public static NodeDetails makeDetails(DomainItem<AbstractFileNode> nodeItem, boolean operationsVisible, boolean infoVisible) {
+	final AbstractFileNode absFileNode = nodeItem.getValue();
+	if (absFileNode == null) {
+	    return null;
+	}
 	if (absFileNode.isShared()) {
 	    if (absFileNode.isDir()) {
-		return new SharedDirDetails((SharedDirNode) absFileNode, operationsVisible);
+		return new SharedDirDetails(nodeItem, operationsVisible,infoVisible);
 	    }
 	    if (absFileNode.isFile()) {
-		return new SharedFileDetails((SharedFileNode) absFileNode, operationsVisible);
+		return new SharedFileDetails(nodeItem, operationsVisible,infoVisible);
 	    }
 	}
 	if (absFileNode.isFile()) {
-	    return new FileDetails((FileNode) absFileNode, operationsVisible);
+	    return new FileDetails(nodeItem, operationsVisible,infoVisible);
 	}
 	if (absFileNode.isDir()) {
-	    return new DirDetails((DirNode) absFileNode, operationsVisible);
+	    return new DirDetails(nodeItem, operationsVisible,infoVisible);
 	}
 
 	return null;
     }
 
-    public static NodeDetails makeDetails(AbstractFileNode absFileNode) {
-	return makeDetails(absFileNode, true);
+    public static NodeDetails makeDetails(DomainItem<AbstractFileNode> nodeItem) {
+	return makeDetails(nodeItem, true,true);
     }
 
     public AbstractFileNode getNode() {
-	return absFileNode;
+	return nodeItem != null ? nodeItem.getValue() : null;
     }
-
-    public void setFileNode(final AbstractFileNode absFileNode) {
-	this.absFileNode = absFileNode;
+    
+    public void setFileNode(final DomainItem<AbstractFileNode> nodeItem) {
+	this.nodeItem = nodeItem;
 	updateFilePanel();
     }
 
@@ -145,13 +172,17 @@ public abstract class NodeDetails extends Panel {
     }
 
     public void updateFilePanel() {
+	removeAllComponents();
 	if (getNode() == null) {
 	    return;
 	}
-	removeAllComponents();
-	addComponent(updateDetails());
-	addComponent(vlOperations);
-	updateOperations();
+	if(infoVisible) {
+	    addComponent(updateDetails());
+	}
+	if (operationsVisible) {
+	    addComponent(vlOperations);
+	    updateOperations();
+	}
     }
 
     public abstract void updateOperations();
@@ -171,5 +202,9 @@ public abstract class NodeDetails extends Panel {
     public void addOperation(Component component) {
 	vlOperations.addComponent(component);
     }
-
+    
+    public DomainItem<AbstractFileNode> getNodeItem() {
+	return nodeItem;
+    };
+    
 }
