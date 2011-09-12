@@ -29,7 +29,7 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
     private DocumentContainer documentContainer;
 //    private DocumentContainer selectedDocumentsContainer;
     private ObjectHintedProperty<Collection> selectedDocumentsProperty;
-    
+    private String contextPath;
     
     public UploadFilePanel() {
 	super();
@@ -70,7 +70,7 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
 	    @Override
 	    public void buttonClick(ClickEvent event) {
 		documentContainer.commit();
-		getWindow().open(new ExternalResource("#DocumentBrowse-" + uploadArea.getUploadDir().getExternalId()));
+		getWindow().open(new ExternalResource("#DocumentBrowse-" + contextPath));
 	    }
 	}));
 	vl.addComponent(uploadArea.getErrorLayout());
@@ -88,7 +88,6 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
 	table.setColumnHeaderMode(Table.COLUMN_HEADER_MODE_HIDDEN);
 	table.setSortDisabled(true);
 	table.setContainerDataSource(documentContainer);
-//	table.setPropertyDataSource(selectedDocumentsContainer);
 	table.setPropertyDataSource(selectedDocumentsProperty);
 	table.setVisibleColumns(new Object[] {"displayName"});
 //	table.addGeneratedColumn("ops", new ColumnGenerator() {
@@ -143,12 +142,15 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
     }
     
     public DocumentContainer getDocumentContainer() {
-//	return selectedDocumentsContainer;
 	return documentContainer;
     }
     
     public ObjectHintedProperty<Collection> getSelectedDocumentsProperty() {
 	return selectedDocumentsProperty;
+    }
+    
+    public void setContextPath(String contextPath) {
+	this.contextPath = contextPath;
     }
 
 }

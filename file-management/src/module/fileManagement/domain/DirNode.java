@@ -242,7 +242,7 @@ public class DirNode extends DirNode_Base {
 	} else {
 
 	    if (!isWriteGroupMember()) {
-		throw new CannotCreateFileException(fileName);
+		throw new WriteDeniedException();
 	    }
 
 	    if (!hasAvailableQuota(filesize)) {
@@ -329,7 +329,7 @@ public class DirNode extends DirNode_Base {
 	    if (!node.isShared() && node.isDir()) {
 		if (!((DirNode) node).hasQuotaDefined()) {
 		    final long usedSpace = ((DirNode) node).getDirUsedSpace();
-		    System.out.println("used space of " + node.getDisplayName() + " is " + usedSpace);
+//		    System.out.println("used space of " + node.getDisplayName() + " is " + usedSpace);
 		    size += usedSpace;
 		}
 	    }
@@ -382,6 +382,7 @@ public class DirNode extends DirNode_Base {
 	final AbstractFileNode searchNode = searchNode(dirName);
 	return searchNode != null && searchNode instanceof DirNode ? (DirNode) searchNode : null;
     }
+    
 
     /*
      * private boolean hasAvailableQuotaInRepository(final long length) { final

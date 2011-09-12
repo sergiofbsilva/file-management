@@ -14,10 +14,12 @@ import module.fileManagement.domain.VersionedFile;
 import module.fileManagement.presentationTier.component.viewers.VisibilityListViewer;
 import myorg.applicationTier.Authenticate.UserView;
 import myorg.domain.User;
+
+import org.apache.commons.lang.StringUtils;
+
 import pt.ist.vaadinframework.data.VBoxProperty;
 import pt.ist.vaadinframework.data.reflect.DomainContainer;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
-import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Container.Filter;
@@ -41,7 +43,7 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
-public class DocumentFileBrowser extends CustomComponent implements EmbeddedComponentContainer, ValueChangeNotifier, ValueChangeListener {
+public class DocumentFileBrowser extends CustomComponent implements ValueChangeNotifier, ValueChangeListener {
 
     public Component getCurrent() {
 	return this;
@@ -69,7 +71,7 @@ public class DocumentFileBrowser extends CustomComponent implements EmbeddedComp
 
 	    final ItemClickListener itemClickListener = this;
 	    addListener(itemClickListener);
-	    addGeneratedColumn("cenas", new ColumnGenerator() {
+	    addGeneratedColumn("visibilidade", new ColumnGenerator() {
 	        
 	        @Override
 	        public Component generateCell(Table source, Object itemId, Object columnId) {
@@ -90,6 +92,7 @@ public class DocumentFileBrowser extends CustomComponent implements EmbeddedComp
 	    if (event.isDoubleClick()) {
 		if (abstractFileNode.isDir()) {
 		    nodeItem.setValue(abstractFileNode);
+		    documentMenu.addDirNode((DirNode) abstractFileNode);
 		} else if (abstractFileNode.isFile()) {
 		    final FileNode fileNode = (FileNode) abstractFileNode;
 		    final Document document = fileNode.getDocument();
@@ -112,41 +115,98 @@ public class DocumentFileBrowser extends CustomComponent implements EmbeddedComp
 
     }
 
-    private class DocumentMenu extends MenuBar {
+//    private class DocumentMenu extends MenuBar {
+//	
+//	DocumentMenu() {
+//	    setWidth(100, Sizeable.UNITS_PERCENTAGE);
+//	}
+//	
+//	public void refresh() {
+//	    removeItems();
+//	    addDirNode((DirNode) nodeItem.getValue());
+//	}
+//
+//	private void addDirNode(final DirNode dirNode) {
+//	    if (dirNode != null) {
+//		final DirNode parent = dirNode.getParent();
+//		addDirNode(parent);
+//
+//		final String label = getNodeName(dirNode);
+//		addItem(label + "  »", new Command() {
+//		    @Override
+//		    public void menuSelected(final MenuItem selectedItem) {
+//			nodeItem.setValue(dirNode);
+//		    }
+//		});
+//	    }
+//	}
+//
+//    }
+    
+    public class DocumentMenu extends MenuBar {
+	
 	DocumentMenu() {
 	    setWidth(100, Sizeable.UNITS_PERCENTAGE);
 	}
 	
-	public void refresh() {
-	    removeItems();
-	    addDirNode((DirNode) nodeItem.getValue());
+	private class DirNodeCommand implements Command {
+	    
+	    final private DirNode dirNode;
+	    
+	    public DirNodeCommand(DirNode dirNode) {
+		super();
+		this.dirNode = dirNode;
+	    }
+	    
+	    @Override
+	    public void menuSelected(MenuItem selectedItem) {
+		removeAllItemsAfter(selectedItem);
+		nodeItem.setValue(dirNode);
+	    }
+	    
 	}
-
-	private void addDirNode(final DirNode dirNode) {
-	    if (dirNode != null) {
-		final DirNode parent = dirNode.getParent();
-		addDirNode(parent);
-
-		final String label = getNodeName(dirNode);
-		addItem(label + "  »", new Command() {
-		    @Override
-		    public void menuSelected(final MenuItem selectedItem) {
-			nodeItem.setValue(dirNode);
-		    }
-		});
+	
+	private void removeAllItemsAfter(MenuItem menuItem) {
+	    final int index = getItems().indexOf(menuItem);
+	    if (index != -1) {
+		setItems(new ArrayList<MenuItem>(getItems().subList(0, index + 1)));
 	    }
 	}
+	
+	private void setItems(List<MenuItem> items2) {
+	    getItems().clear();
+	    getItems().addAll(items2);
+	    requestRepaint();
+	}
 
+	public void addDirNode(final DirNode dirNode) {
+	    if (dirNode.isAccessible()) {
+		addItem(getNodeName(dirNode) + "  »", new DirNodeCommand(dirNode));
+	    }
+	}
+	
+	@Override
+	public String toString() {
+	    final List<String> oids = new ArrayList<String>();
+	    for(MenuItem item : getItems()) {
+		oids.add(((DirNodeCommand)item.getCommand()).dirNode.getExternalId());
+	    }
+	    return StringUtils.join(oids, '/');
+	}
+	
+	public void setDirNodes(List<DirNode> dirNodes) {
+	    getItems().clear();
+	    for (DirNode dirNode : dirNodes) {
+		    addDirNode(dirNode);
+	    }
+	}
     }
 
     private final DocumentTable documentTable = new DocumentTable();
     private final DocumentMenu documentMenu = new DocumentMenu();
 
     private DomainItem<AbstractFileNode> nodeItem;
-
-    @Override
-    public void setArguments(final String... arg0) {
-    }
+   
 
     @Override
     public void attach() {
@@ -205,15 +265,19 @@ public class DocumentFileBrowser extends CustomComponent implements EmbeddedComp
 
 	});
 	documentTable.setContainerDataSource(childs);
-	documentTable.setVisibleColumns(new String[] { "displayName", "cenas" });
+	documentTable.setVisibleColumns(new String[] { "displayName", "visibilidade" });
 	documentTable.setSortContainerPropertyId("displayName");
 	documentTable.setColumnHeaderMode(Table.COLUMN_HEADER_MODE_HIDDEN);
 	documentTable.setRowHeaderMode(Table.ROW_HEADER_MODE_ICON_ONLY);
 	documentTable.setItemIconPropertyId("icon");
 	documentTable.setColumnReorderingAllowed(false);
+	documentTable.setColumnExpandRatio("icon", 0.15f);
+	documentTable.setColumnExpandRatio("displayName", 0.60f);
+	documentTable.setColumnExpandRatio("visibilidade", 0.25f);
 	documentTable.sort();
+	
 //	this.dirNode.setValue(dirNode);
-	documentMenu.refresh();
+//	documentMenu.refresh();
     }
     
     private ThemeResource getThemeResource(AbstractFileNode abstractFileNode) {
@@ -267,7 +331,9 @@ public class DocumentFileBrowser extends CustomComponent implements EmbeddedComp
     public DocumentFileBrowser() {
 	nodeItem = new DomainItem<AbstractFileNode>(DirNode.class);
 	nodeItem.addListener(this);
-	setValue(getInitialDirNode());
+	final DirNode initialDirNode = getInitialDirNode();
+	setValue(initialDirNode);
+	documentMenu.addDirNode(initialDirNode);
     }
     
     public DomainContainer<AbstractFileNode> getContainer() {
@@ -298,6 +364,25 @@ public class DocumentFileBrowser extends CustomComponent implements EmbeddedComp
 	}
 	containerDataSource.removeItem(itemId);
 	documentTable.select(nextItemId);
+    }
+    
+    public void setContextPath(String contextPath) {
+	final String[] split = StringUtils.split(contextPath,"/");
+	final List<DirNode> dirNodes = new ArrayList<DirNode>();
+	for(String dirNodeOID : split) {
+	    final DirNode dirNode = (DirNode) DirNode.fromExternalId(dirNodeOID);
+	    if (dirNode.isAccessible()) {
+		dirNodes.add(dirNode);
+	    }
+	}
+	if (!dirNodes.isEmpty()) {
+	    documentMenu.setDirNodes(dirNodes);
+	    nodeItem.setValue(dirNodes.get(dirNodes.size() - 1));
+	}
+    }
+    
+    public DocumentMenu getDocumentMenu() {
+	return documentMenu;
     }
     
 }

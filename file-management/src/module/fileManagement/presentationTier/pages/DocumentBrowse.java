@@ -2,7 +2,6 @@ package module.fileManagement.presentationTier.pages;
 
 import static module.fileManagement.domain.FileManagementSystem.getMessage;
 import module.fileManagement.domain.AbstractFileNode;
-import module.fileManagement.domain.DirNode;
 import module.fileManagement.presentationTier.component.DocumentFileBrowser;
 import module.fileManagement.presentationTier.component.NewDirWindow;
 import module.fileManagement.presentationTier.component.NodeDetails;
@@ -36,14 +35,9 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
     Button btUpload;
     
     @Override
-    public void setArguments(String... arg0) {
-	String dirExternalId = arg0[1];
-	if (!dirExternalId.trim().isEmpty()) {
-	    DirNode dirNode = DirNode.fromExternalId(dirExternalId);
-	    if (dirNode.isAccessible()) {
-		browser.setValue(dirNode);
-	    }
-	}
+    // format a1.parent.parent/a1.parent/a1
+    public void setArguments(String... args) {
+	browser.setContextPath(args[1]);
     }
     
     public HorizontalLayout createButtons() {
@@ -71,9 +65,7 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
 	btUpload.addListener(new ClickListener() {
 	    public void buttonClick(ClickEvent event) {
 		final AbstractFileNode dirNode = browser.getDirNode();
-		if (dirNode.isDir()) {
-		    getWindow().open(new ExternalResource("#UploadPage-" + dirNode.getExternalId()));
-		}
+		getWindow().open(new ExternalResource("#UploadPage-" + dirNode.getExternalId() + "," + browser.getDocumentMenu().toString()));
 	    }
 	});
 	

@@ -34,9 +34,9 @@ import com.vaadin.ui.Select;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.Reindeer;
 
-@EmbeddedComponent(path = { "UploadPage-(.*)" })
+@EmbeddedComponent(path = { "UploadPage-(.*),(.*)" })
 public class UploadPage extends CustomComponent implements EmbeddedComponentContainer {
-
+    
     private UploadFilePanel uploadArea;
     private Panel metadataPanel;
     private Select selectTemplate;
@@ -217,5 +217,6 @@ public class UploadPage extends CustomComponent implements EmbeddedComponentCont
     public void setArguments(String... arguments) {
 	DirNode dir = DirNode.fromExternalId(arguments[1]);
 	setUploadArea(dir);
+	uploadArea.setContextPath(arguments[2]);
     }
 }

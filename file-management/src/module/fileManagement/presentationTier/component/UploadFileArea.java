@@ -8,7 +8,6 @@ import java.lang.reflect.Method;
 
 import module.fileManagement.domain.DirNode;
 import module.fileManagement.domain.FileNode;
-import myorg.applicationTier.Authenticate.UserView;
 
 import org.vaadin.easyuploads.DirectoryFileFactory;
 
@@ -59,11 +58,11 @@ public class UploadFileArea extends CustomComponent {
 
 	@Override
 	protected void handleFile(final File file, final String fileName, final String mimeType, final long length) {
-	    final DirNode destination = uploadDir == null || !uploadDir.isWriteGroupMember() ? UserView.getCurrentUser()
-		    .getFileRepository() : uploadDir;
-	    if (destination != null) {
+//	    final DirNode destination = uploadDir == null || !uploadDir.isWriteGroupMember() ? UserView.getCurrentUser()
+//		    .getFileRepository() : uploadDir;
+	    if (uploadDir != null) {
 		try {
-		    final FileNode fileNode = destination.createFile(file, fileName, length);
+		    final FileNode fileNode = uploadDir.createFile(file, fileName, length);
 		    fireFileUploaded(fileNode);
 		} catch (FFDomainException ffde) {
 		    vlError.addComponent(newError(ffde.getMessage()));

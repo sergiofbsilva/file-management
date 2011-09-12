@@ -110,7 +110,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
     public VisibilityState getVisibilityState() {
 	final PersistentGroup readGroup = getReadGroup();
 	return readGroup instanceof SingleUserGroup ? VisibilityState.PRIVATE
-		: readGroup instanceof AnyoneGroup ? VisibilityState.PUBLIC : VisibilityState.SHARED;
+		: (readGroup instanceof AnyoneGroup ? VisibilityState.PUBLIC : VisibilityState.SHARED);
     }
 
     public String getVisibility() {
