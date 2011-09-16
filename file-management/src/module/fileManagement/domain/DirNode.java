@@ -266,7 +266,15 @@ public class DirNode extends DirNode_Base {
 	    return fileNode;
 	}
     }
-
+    @Service
+    public FileNode createFile(final File file, final String fileName, final PersistentGroup readGroup,
+	    final PersistentGroup writeGroup) {
+	final FileNode fileNode = createFile(file, fileName, file.length(), new ContextPath(this));
+	fileNode.setReadGroup(readGroup);
+	fileNode.setWriteGroup(writeGroup);
+	return fileNode;
+    }
+    
     @Service
     public FileNode createFile(final File file, final String fileName, final PersistentGroup readGroup,
 	    final PersistentGroup writeGroup, final ContextPath contextPath) {
