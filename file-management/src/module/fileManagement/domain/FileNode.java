@@ -47,12 +47,6 @@ public class FileNode extends FileNode_Base {
     
     
     @Override
-    public void trash() {
-        super.trash();
-    }
-    
-    
-    @Override
     public PersistentGroup getReadGroup() {
 	final PersistentGroup group = getDocument().getReadGroup();
 	return group == null && hasParent() ? getParent().getReadGroup() : group;
@@ -94,8 +88,15 @@ public class FileNode extends FileNode_Base {
     }
     
     @Override
-    public int getFilesize() {
-	return getDocument().getFilesize();
+    public long getFilesize() {
+	return Long.valueOf(getDocument().getFilesize());
     }
-
+    
+    @Override
+    public void unshare(VisibilityGroup group) {
+        super.unshare(group);
+        for(SharedFileNode sharedNode : getSharedFileNodes()) {
+            sharedNode.deleteLink(new ContextPath(getParent()));
+        }
+    }
 }

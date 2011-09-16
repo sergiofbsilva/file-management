@@ -2,8 +2,9 @@ package module.fileManagement.presentationTier.pages;
 
 import static module.fileManagement.domain.FileManagementSystem.getMessage;
 import module.fileManagement.domain.AbstractFileNode;
+import module.fileManagement.domain.ContextPath;
+import module.fileManagement.presentationTier.component.AddDirWindow;
 import module.fileManagement.presentationTier.component.DocumentFileBrowser;
-import module.fileManagement.presentationTier.component.NewDirWindow;
 import module.fileManagement.presentationTier.component.NodeDetails;
 import pt.ist.bennu.ui.FlowLayout;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
@@ -37,7 +38,9 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
     @Override
     // format a1.parent.parent/a1.parent/a1
     public void setArguments(String... args) {
-	browser.setContextPath(args[1]);
+	if (!args[1].trim().isEmpty()) {
+	    browser.setContextPath(args[1]);
+	}
     }
     
     public HorizontalLayout createButtons() {
@@ -50,7 +53,7 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
 	    @Override
 	    public void buttonClick(ClickEvent event) {
 		if (browser.getDirNode().isWriteGroupMember()) {
-		    final NewDirWindow addDirWindow = new NewDirWindow(browser.getNodeItem());
+		    final AddDirWindow addDirWindow = new AddDirWindow(browser);
 		    getWindow().addWindow(addDirWindow);
 		} else {
                     getWindow().showNotification(getMessage("message.dir.cannot.write"));
@@ -64,8 +67,7 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
 	
 	btUpload.addListener(new ClickListener() {
 	    public void buttonClick(ClickEvent event) {
-		final AbstractFileNode dirNode = browser.getDirNode();
-		getWindow().open(new ExternalResource("#UploadPage-" + dirNode.getExternalId() + "," + browser.getDocumentMenu().toString()));
+		getWindow().open(new ExternalResource("#UploadPage-" + browser.getContextPath()));
 	    }
 	});
 	
@@ -198,6 +200,10 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
     
     public void removeNode(DomainItem<AbstractFileNode> nodeItem) {
 	browser.removeNodeAndSelectNext(nodeItem.getValue());
+    }
+    
+    public ContextPath getContextPath() {
+	return browser.getContextPath();
     }
 
 }

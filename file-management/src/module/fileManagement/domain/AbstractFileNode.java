@@ -4,7 +4,12 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import module.organization.domain.Party;
+import module.fileManagement.domain.log.CreateShareDirLinkLog;
+import module.fileManagement.domain.log.CreateShareFileLinkLog;
+import module.fileManagement.domain.log.DeleteDirLog;
+import module.fileManagement.domain.log.DeleteFileLog;
+import module.fileManagement.domain.log.ShareDirLog;
+import module.fileManagement.domain.log.ShareFileLog;
 import myorg.applicationTier.Authenticate.UserView;
 import myorg.domain.User;
 import myorg.domain.exceptions.DomainException;
@@ -40,7 +45,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
     public boolean isShared() {
 	return false;
     }
-
+    
     public void delete() {
 	removeParent();
 	deleteDomainObject();
@@ -51,33 +56,45 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 	delete();
     }
     
-    public void trash() {
-	trash(false);
+    private void createDirLogs(User user, ContextPath contextPath, DirNode dirNode) {
+	for (AbstractFileNode node : dirNode.getChild()) {
+	    if (node.isDir()) {
+		createDirLogs(user, contextPath.concat((DirNode)node), (DirNode) node);
+	    }
+	    if (node.isFile()) {
+		new DeleteFileLog(user, contextPath, (FileNode) node);
+	    }
+	}
     }
     
     @Service
-    public void trash(Boolean checkLinks) {
-	if (checkLinks != null && checkLinks) {
-
-	    if (this instanceof FileNode) {
-		Collection<SharedFileNode> shared = new ArrayList<SharedFileNode>(((FileNode) this).getSharedFileNodes());
-		for(SharedFileNode node : shared) {
-		    node.deleteLink();
-		}
+    public void trash(ContextPath contextPath) {
+	if (this instanceof FileNode) {
+	    Collection<SharedFileNode> shared = new ArrayList<SharedFileNode>(((FileNode) this).getSharedFileNodes());
+	    for (SharedFileNode node : shared) {
+		node.deleteLink(contextPath);
 	    }
-	    if (this instanceof DirNode) {
-		Collection<SharedDirNode> shared = new ArrayList<SharedDirNode>(((DirNode) this).getSharedDirNodes());
-		for(SharedDirNode node : shared) {
-		    node.deleteLink();
-		}
-	    }
-	    final SingleUserGroup currentUserGroup = UserView.getCurrentUser().getSingleUserGroup();
-	    setReadGroup(currentUserGroup);
-	    setWriteGroup(currentUserGroup);
 	}
+	
+	if (this instanceof DirNode) {
+	    Collection<SharedDirNode> shared = new ArrayList<SharedDirNode>(((DirNode)this).getSharedDirNodes());
+	    for (SharedDirNode node : shared) {
+		node.deleteLink(contextPath);
+	    }
+	}
+	final User currentUser = UserView.getCurrentUser();
+//	final SingleUserGroup currentUserGroup = currentUser.getSingleUserGroup();
+//	setReadGroup(currentUserGroup);
+//	setWriteGroup(currentUserGroup);
 
-	setParent(UserView.getCurrentUser().getTrash());
-
+	if (isFile()) {
+	    new DeleteFileLog(currentUser, contextPath, (FileNode) this);
+	} else if (isDir()) {
+	    final DirNode dirNode = (DirNode)this;
+	    createDirLogs(currentUser, contextPath.concat(dirNode), dirNode);
+	    new DeleteDirLog(currentUser, contextPath, dirNode);
+	}
+	setParent(currentUser.getTrash());
     }
     
     public abstract PersistentGroup getReadGroup();
@@ -128,6 +145,12 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 	final PersistentGroup readGroup = getReadGroup();
 	return new VisibilityList(writeGroup, readGroup);
     }
+    
+    public void removeVisibilityGroup(VisibilityGroup group) {
+	final VisibilityList visibilityGroups = getVisibilityGroups();
+	visibilityGroups.remove(group);
+	setVisibility(visibilityGroups);
+    }
 
     @Service
     public void setVisibility(final VisibilityList visibilityList) {
@@ -148,7 +171,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 
     public abstract String getPresentationFilesize();
 
-    public abstract int getFilesize();
+    public abstract long getFilesize();
 
     public void addVisibilityGroup(VisibilityGroup group) {
 	final VisibilityList visibilityList = getVisibilityGroups();
@@ -157,19 +180,20 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
     }
 
     @Service
-    public void share(User user, VisibilityGroup group, boolean createLink) {
+    public void share(User user, VisibilityGroup group,ContextPath contextPath) {
 	if (isShared()) {
 	    return;
 	}
 	final DirNode userRootDir = FileRepository.getOrCreateFileRepository(user);
-	if (createLink) {
-	    final DirNode sharedFolder = userRootDir.getSharedFolder();
-	    if (!sharedFolder.hasSharedNode(this)) {
-		final AbstractFileNode sharedNode = makeSharedNode();
+	
+	final DirNode sharedFolder = userRootDir.getSharedFolder();
+	if (!sharedFolder.hasSharedNode(this)) { // TODO: deal with same name when shared later
+		final AbstractFileNode sharedNode = makeSharedNode(UserView.getCurrentUser(), contextPath,group, sharedFolder);
 		sharedFolder.addChild(sharedNode);
-	    }
 	}
+	
 	addVisibilityGroup(group);
+//	final User currentUser = UserView.getCurrentUser();
 	// Set<PersistentGroup> readGroupSet = new HashSet<PersistentGroup>();
 	// final PersistentGroup readGroup = getReadGroup();
 	// if (readGroup instanceof UnionGroup) {
@@ -182,23 +206,27 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 	// setReadGroup(new UnionGroup(readGroupSet));
     }
 
-    private AbstractFileNode makeSharedNode() {
+    private AbstractFileNode makeSharedNode(User user, ContextPath contextPath, VisibilityGroup group, DirNode targetSharedFolder) {
+	
 	if (isDir()) {
-	    return new SharedDirNode((DirNode) this);
+	    final SharedDirNode sharedDirNode = new SharedDirNode((DirNode) this);
+//	    final ShareDirLog log = new ShareDirLog(user, contextPath, sharedDirNode);
+	    final ShareDirLog log = new CreateShareDirLinkLog(user,contextPath,sharedDirNode, targetSharedFolder);
+	    log.setVisibilityGroup(group.getDescription());
+	    return sharedDirNode;
 	}
 	if (isFile()) {
-	    return new SharedFileNode((FileNode) this);
+	    final SharedFileNode sharedFileNode = new SharedFileNode((FileNode) this);
+//	    final ShareFileLog log = new ShareFileLog(user, contextPath, sharedFileNode);
+	    final ShareFileLog log = new CreateShareFileLinkLog(user,contextPath,sharedFileNode, targetSharedFolder);
+	    log.setVisibilityGroup(group.getDescription());
+	    return sharedFileNode;
 	}
 	throw new UnsupportedOperationException("File can't be shared");
     }
-
-    public Party getOwner() {
+    
+    public User getOwner() {
 	return hasParent() ? getParent().getOwner() : null;
-    }
-
-    public String getOwnerName() {
-	Party owner = getOwner();
-	return owner != null ? owner.getPartyName().getContent() : "-";
     }
 
     private ThemeResource getThemeResource(AbstractFileNode abstractFileNode) {
@@ -215,5 +243,9 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 
     public Resource getIcon() {
 	return getThemeResource(this);
+    }
+    
+    public void unshare(VisibilityGroup group) {
+	removeVisibilityGroup(group);
     }
 }

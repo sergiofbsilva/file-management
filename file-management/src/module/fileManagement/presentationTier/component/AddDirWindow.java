@@ -42,7 +42,7 @@ public class AddDirWindow extends Window {
 
 	@Override
 	public void buttonClick(final ClickEvent event) {
-	    final DirNode newDirNode = browser.getDirNode().createDir((String) editor.getValue());
+	    final DirNode newDirNode = browser.getDirNode().createDir((String) editor.getValue(), browser.getContextPath());
 	    browser.getContainer().addItem(newDirNode);
 	    super.buttonClick(event);
 	}

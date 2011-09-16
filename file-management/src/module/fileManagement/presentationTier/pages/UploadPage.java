@@ -6,6 +6,7 @@ import static module.fileManagement.domain.VersionedFile.FILE_SIZE_UNIT.prettyPr
 import java.util.Collection;
 import java.util.HashSet;
 
+import module.fileManagement.domain.ContextPath;
 import module.fileManagement.domain.DirNode;
 import module.fileManagement.domain.Document;
 import module.fileManagement.domain.FileManagementSystem;
@@ -34,10 +35,10 @@ import com.vaadin.ui.Select;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.Reindeer;
 
-@EmbeddedComponent(path = { "UploadPage-(.*),(.*)" })
+@EmbeddedComponent(path = { "UploadPage-(.*)" })
 public class UploadPage extends CustomComponent implements EmbeddedComponentContainer {
     
-    private UploadFilePanel uploadArea;
+    private UploadFilePanel uploadFilePanel;
     private Panel metadataPanel;
     private Select selectTemplate;
     private VerticalLayout leftPanel;
@@ -61,7 +62,7 @@ public class UploadPage extends CustomComponent implements EmbeddedComponentCont
     }
     
     private void updateQuotaLabel() {
-	DirNode uploadDir = uploadArea.getUploadDir();
+	DirNode uploadDir = uploadFilePanel.getUploadDir();
 	final String usedSpacePerc = uploadDir.getPercentOfTotalUsedSpace();
 	final String usedSpace = uploadDir.getPresentationTotalUsedSpace();
 	final String quota = uploadDir.getPresentationQuota();
@@ -110,13 +111,13 @@ public class UploadPage extends CustomComponent implements EmbeddedComponentCont
 	}
 	if (metadataTemplateItem == null) {
 	    selectTemplate.setEnabled(true);
-	    metadataTemplateItem = new TemplateItem(template, uploadArea.getDocumentContainer(),
-		    uploadArea.getSelectedDocumentsProperty());
+	    metadataTemplateItem = new TemplateItem(template, uploadFilePanel.getDocumentContainer(),
+		    uploadFilePanel.getSelectedDocumentsProperty());
 	    metadataForm.setItemDataSource(metadataTemplateItem);
 	    metadataForm.setVisibleItemProperties(metadataTemplateItem.getVisibleItemProperties());
 	    metadataForm.setImmediate(true);
 	    metadataForm.setWriteThrough(true);
-	    uploadArea.getSelectedDocumentsProperty().addListener(new ValueChangeListener() {
+	    uploadFilePanel.getSelectedDocumentsProperty().addListener(new ValueChangeListener() {
 
 		@Override
 		public void valueChange(ValueChangeEvent event) {
@@ -172,12 +173,12 @@ public class UploadPage extends CustomComponent implements EmbeddedComponentCont
 	setCompositionRoot(mainLayout);
     }
 
-    public void setUploadArea(DirNode node) {
-	if (uploadArea != null) {
-	    leftPanel.removeComponent(uploadArea);
+    public void setUploadArea(ContextPath contextPath) {
+	if (uploadFilePanel != null) {
+	    leftPanel.removeComponent(uploadFilePanel);
 	}
-	uploadArea = new UploadFilePanel(node);
-	uploadArea.getDocumentContainer().addListener(new ItemSetChangeListener() {
+	uploadFilePanel = new UploadFilePanel(contextPath);
+	uploadFilePanel.getDocumentContainer().addListener(new ItemSetChangeListener() {
 	    
 	    @Override
 	    public void containerItemSetChange(ItemSetChangeEvent event) {
@@ -187,7 +188,7 @@ public class UploadPage extends CustomComponent implements EmbeddedComponentCont
 	
 	updateQuotaLabel();
 	
-	uploadArea.addListener(new ValueChangeListener() {
+	uploadFilePanel.addListener(new ValueChangeListener() {
 
 	    @Override
 	    public void valueChange(ValueChangeEvent event) {
@@ -206,17 +207,16 @@ public class UploadPage extends CustomComponent implements EmbeddedComponentCont
 		}
 	    }
 	});
-	leftPanel.addComponent(uploadArea);
+	leftPanel.addComponent(uploadFilePanel);
 	this.metadataPanel = createMetadataPanel();
 	((GridLayout) getCompositionRoot()).addComponent(metadataPanel, 1, 0);
-	uploadDirLabel.setValue(uploadArea.getUploadDir().getDisplayName());
+	uploadDirLabel.setValue(uploadFilePanel.getUploadDir().getDisplayName());
 //	selectDir.select(uploadArea.getUploadDir());
     }
 
     @Override
     public void setArguments(String... arguments) {
-	DirNode dir = DirNode.fromExternalId(arguments[1]);
-	setUploadArea(dir);
-	uploadArea.setContextPath(arguments[2]);
+	final ContextPath contextPath = new ContextPath(arguments[1]);
+	setUploadArea(contextPath);
     }
 }

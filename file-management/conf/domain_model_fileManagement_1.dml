@@ -1,5 +1,6 @@
 package module.fileManagement.domain;
 
+enum module.fileManagement.domain.OperationLogType as OperationLogType;
 
 external class .pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile;
 
@@ -29,16 +30,6 @@ class AbstractFileNode {
 	}
 
 
-/*class OperationLog {
-	DateTime timestamp;	
-}
-
-relation OperationLogUser {
-	.myorg.User playsRole user;
-	OperationLog playsRole ;
-}*/
-	
-
 class Document {
 	DateTime lastModifiedDate;
 }
@@ -66,6 +57,7 @@ class MetadataTemplate {
 	String name;
 }
 
+// RELATIONS
 
 
 relation MetadataKeysTemplate {

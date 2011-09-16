@@ -6,9 +6,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import module.fileManagement.domain.AbstractFileNode;
+import module.fileManagement.domain.ContextPath;
 import module.fileManagement.domain.VisibilityGroup;
 import module.fileManagement.domain.VisibilityGroup.VisibilityOperation;
-import module.fileManagement.domain.VisibilityList;
 import module.fileManagement.presentationTier.component.NodeDetails;
 import module.fileManagement.presentationTier.component.groups.GroupCreatorRegistry;
 import module.fileManagement.presentationTier.component.groups.HasPersistentGroup;
@@ -51,7 +51,7 @@ import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.Reindeer;
 
-@EmbeddedComponent(path = { "DocumentShare-(.*)" })
+@EmbeddedComponent(path = { "DocumentShare-(.*),(.*)" })
 public class DocumentShare extends CustomComponent implements EmbeddedComponentContainer {
     
     private AbstractFileNode fileNode;
@@ -59,7 +59,7 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
     private VerticalLayout groupSpecificLayout;
     private HasPersistentGroup currentPersistentGroupHolder;
     private VisibilityOperation currentVisibilityOperation;
-    
+    private ContextPath contextPath;
     private Set<HasPersistentGroup> fileNodeGroups;
     private Table fileNodeGroupsTable;
     private BeanContainer<VisibilityGroup,VisibilityGroupBean> visibilityGroupContainer;
@@ -91,11 +91,13 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
     
     @Override
     public void setArguments(String... args) {
-	String fileExternalId = args[1];
+	final String fileExternalId = args[1];
+	final String contextPath = args[2];
 	fileNode = AbstractFileNode.fromExternalId(fileExternalId);
 	if (fileNode == null || !fileNode.isWriteGroupMember()) {
 	    throw new InvalidOperationException("É necessário seleccionar um ficheiro");
 	}
+	this.contextPath = new ContextPath(contextPath);
 	updateGroupTable();
     }
     
@@ -111,11 +113,8 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
 	}
     }
     
-    private void removeGroup(VisibilityGroup group) {
-	final VisibilityList visibilityGroups = fileNode.getVisibilityGroups();
-	visibilityGroups.remove(group);
-	visibilityGroupContainer.removeItem(group);
-	fileNode.setVisibility(visibilityGroups);
+    private void unshare(VisibilityGroup group) {
+	fileNode.unshare(group);
     }
     
     
@@ -222,11 +221,7 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
     }
     
     protected void updateFileVisibility(VisibilityGroup group) {
-	if (currentPersistentGroupHolder.shouldCreateLink()) {
-	    fileNode.share(currentPersistentGroupHolder.getUser(), group, currentPersistentGroupHolder.shouldCreateLink());
-	    return ;
-	}
-	fileNode.addVisibilityGroup(group);
+	fileNode.share(currentPersistentGroupHolder.getUser(), group, contextPath);
     }
 
     protected void setCurrentPersistentGroupHolder(HasPersistentGroup groupHolder) {
@@ -306,8 +301,7 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
 		    
 		    @Override
 		    public void buttonClick(ClickEvent event) {
-			removeGroup(visibilityGroup);
-			
+			unshare(visibilityGroup);
 		    }
 		});
 		btRemoveGroup.setStyleName(BennuConstants.BUTTON_LINK);

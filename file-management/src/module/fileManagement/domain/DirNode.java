@@ -9,7 +9,10 @@ import jvstm.cps.ConsistencyPredicate;
 import module.fileManagement.domain.exception.CannotCreateFileException;
 import module.fileManagement.domain.exception.NoAvailableQuotaException;
 import module.fileManagement.domain.exception.NodeDuplicateNameException;
-import module.organization.domain.Party;
+import module.fileManagement.domain.log.CreateDirLog;
+import module.fileManagement.domain.log.CreateFileLog;
+import module.fileManagement.domain.log.CreateNewVersionLog;
+import myorg.applicationTier.Authenticate.UserView;
 import myorg.domain.User;
 import myorg.domain.groups.EmptyGroup;
 import myorg.domain.groups.PersistentGroup;
@@ -37,19 +40,21 @@ public class DirNode extends DirNode_Base {
 
 	    @Override
 	    public void afterAdd(Relation<AbstractFileNode, DirNode> arg0, AbstractFileNode arg1, DirNode arg2) {
-//		System.out.println(String.format("added child %s to %s", arg1 != null ? arg1.getDisplayName() : "null",
-//			arg2 != null ? arg2.getDisplayName() : "null"));
+		System.out.println(String.format("added child %s to %s", arg1 != null ? arg1.getDisplayName() : "null",
+			arg2 != null ? arg2.getDisplayName() : "null"));
+		if (arg1 != null && arg2 != null && !arg1.isShared()) {
+		    arg2.addUsedSpace(arg1.getFilesize());
+		}
+		    
 	    }
 
 	    @Override
 	    public void afterRemove(Relation<AbstractFileNode, DirNode> arg0, AbstractFileNode arg1, DirNode arg2) {
-//		System.out.println(String.format("remove child %s from %s", (arg1 != null ? arg1.getDisplayName() : "null"),
-//			(arg2 != null ? arg2.getDisplayName() : "null")));
-//		if (arg1 != null && arg2 != null) {
-//		    if (arg1 instanceof FileNode && !arg1.isShared()) {
-//			arg2.removeUsedSpace(arg1.getFilesize());
-//		    }
-//		}
+		System.out.println(String.format("remove child %s from %s", (arg1 != null ? arg1.getDisplayName() : "null"),
+			(arg2 != null ? arg2.getDisplayName() : "null")));
+		if (arg1 != null && arg2 != null && !arg1.isShared()) {
+			arg2.removeUsedSpace(arg1.getFilesize());
+		}
 	    }
 
 	    @Override
@@ -142,6 +147,10 @@ public class DirNode extends DirNode_Base {
 	}
 	return getParent().getSharedFolder();
     }
+    
+    public DirNode getTrash() {
+	return getOwner().getTrash();
+    }
 
     public String getRepositoryName() {
 	return hasParent() ? getParent().getRepositoryName() : getName();
@@ -167,17 +176,19 @@ public class DirNode extends DirNode_Base {
     }
 
     @Service
-    public DirNode createDir(final String dirName) {
+    public DirNode createDir(final String dirName, ContextPath contextPath) {
 	final DirNode searchDir = searchDir(dirName);
 	if (searchDir != null) {
 	    throw new NodeDuplicateNameException();
 	}
-	return new DirNode(this, dirName);
+	final DirNode resultNode = new DirNode(this, dirName);
+	new CreateDirLog(UserView.getCurrentUser(),contextPath, resultNode);
+	return resultNode;
     }
 
     @Service
-    public DirNode createDir(final String dirName, final PersistentGroup readGroup, final PersistentGroup writeGroup) {
-	final DirNode dirNode = createDir(dirName);
+    public DirNode createDir(final String dirName, final PersistentGroup readGroup, final PersistentGroup writeGroup, ContextPath contextPath) {
+	final DirNode dirNode = createDir(dirName, contextPath);
 	dirNode.setReadGroup(readGroup);
 	dirNode.setWriteGroup(writeGroup);
 	return dirNode;
@@ -185,7 +196,7 @@ public class DirNode extends DirNode_Base {
 
     @Override
     public String getDisplayName() {
-	return getName();
+	return hasUser() ? FileManagementSystem.getMessage("label.menu.home") : getName();
     }
 
     @Service
@@ -219,7 +230,7 @@ public class DirNode extends DirNode_Base {
     // file creation
 
     @Service
-    public FileNode createFile(final File file, final String fileName, final long filesize) {
+    public FileNode createFile(final File file, final String fileName, final long filesize, final ContextPath contextPath) {
 
 	FileNode fileNode = searchFile(fileName);
 
@@ -232,11 +243,12 @@ public class DirNode extends DirNode_Base {
 	    if (!hasAvailableQuota(filesize, fileNode)) {
 		throw new NoAvailableQuotaException();
 	    }
-	    // TODO : check case when fileNode isShared
-	    final DirNode targetDir = fileNode.isShared() ? fileNode.getParent() : this;
+	    final DirNode targetDir = fileNode.isShared() ? ((SharedFileNode)fileNode).getNode().getParent() : this;
 	    targetDir.removeUsedSpace(fileNode.getFilesize());
-	    fileNode.getDocument().addVersion(file, fileName);
+	    final Document document = fileNode.getDocument();
+	    document.addVersion(file, fileName);
 	    targetDir.addUsedSpace(filesize);
+	    new CreateNewVersionLog(UserView.getCurrentUser(), contextPath, fileNode);
 	    return fileNode;
 
 	} else {
@@ -250,15 +262,15 @@ public class DirNode extends DirNode_Base {
 	    }
 
 	    fileNode = new FileNode(this, file, fileName);
-	    addUsedSpace(filesize);
+	    new CreateFileLog(UserView.getCurrentUser(), contextPath, fileNode);
 	    return fileNode;
 	}
     }
 
     @Service
     public FileNode createFile(final File file, final String fileName, final PersistentGroup readGroup,
-	    final PersistentGroup writeGroup) throws CannotCreateFileException {
-	final FileNode fileNode = createFile(file, fileName, file.length());
+	    final PersistentGroup writeGroup, final ContextPath contextPath) {
+	final FileNode fileNode = createFile(file, fileName, file.length(), contextPath);
 	fileNode.setReadGroup(readGroup);
 	fileNode.setWriteGroup(writeGroup);
 	return fileNode;
@@ -280,11 +292,17 @@ public class DirNode extends DirNode_Base {
 
     @Service
     private void addUsedSpace(long filesize) {
+	if (hasParent()) {
+	    getParent().addUsedSpace(filesize);
+	}
 	setSize(getSize() + filesize);
     }
 
     @Service
     private void removeUsedSpace(long filesize) {
+	if (hasParent()) {
+	    getParent().removeUsedSpace(filesize);
+	}
 	setSize(getSize() - filesize);
     }
 
@@ -325,15 +343,15 @@ public class DirNode extends DirNode_Base {
     private long getDirUsedSpace() {
 	long size = getSize();
 
-	for (AbstractFileNode node : getChild()) {
-	    if (!node.isShared() && node.isDir()) {
-		if (!((DirNode) node).hasQuotaDefined()) {
-		    final long usedSpace = ((DirNode) node).getDirUsedSpace();
+	//for (AbstractFileNode node : getChild()) {
+	//    if (!node.isShared() && node.isDir()) {
+	//	if (!((DirNode) node).hasQuotaDefined()) {
+	//	    final long usedSpace = ((DirNode) node).getDirUsedSpace();
 //		    System.out.println("used space of " + node.getDisplayName() + " is " + usedSpace);
-		    size += usedSpace;
-		}
-	    }
-	}
+	//	    size += usedSpace;
+	//	}
+	//    }
+	//}
 	return size;
     }
 
@@ -347,8 +365,8 @@ public class DirNode extends DirNode_Base {
     }
 
     @Override
-    public int getFilesize() {
-	return 0;
+    public long getFilesize() {
+	    return getSize();
     }
 
     public boolean hasAvailableQuota(final long length) {
@@ -360,7 +378,7 @@ public class DirNode extends DirNode_Base {
 	    return fileNode.getParent().hasAvailableQuota(length, fileNode);
 	}
 	final Long quota = getQuota();
-	final int fileNodeSize = fileNode != null ? fileNode.getFilesize() : 0;
+	final long fileNodeSize = fileNode != null ? fileNode.getFilesize() : 0;
 	return (getUsedSpace() + length) <= (quota + fileNodeSize);
     }
 
@@ -409,13 +427,6 @@ public class DirNode extends DirNode_Base {
      * getChildSet()) { if (node.isDir()) { final DirNode dirNode = (DirNode)
      * node; nodes.addAll(dirNode.getAllDirs()); } } return nodes; }
      */
-    @Override
-    public Party getOwner() {
-	if (!hasParent()) {
-	    return (TRASH_DIR_NAME.equals(getName()) ? getTrashUser() : getUser()).getPerson();
-	}
-	return getParent().getOwner();
-    }
 
     public boolean hasSharedNode(AbstractFileNode selectedNode) {
 	for (AbstractFileNode node : getChild()) {
@@ -475,20 +486,34 @@ public class DirNode extends DirNode_Base {
 	super.delete();
     }
 
-    @ConsistencyPredicate
-    protected final boolean hasParentOrUser() {
-	// return getParent() != null || getUser() != null;
-	return true;
-    }
+    
     
     @Override
-    public void setSize(Long size) {
-	super.setSize(size);
+    public User getOwner() {
+        if (hasParent()) {
+            return getParent().getOwner();
+        }
+        return hasTrashUser() ? getTrashUser() : getUser();
     }
     
 //    @ConsistencyPredicate
 //    protected final boolean checkSize() {
 //	return getSize() >= 0;
 //    }
-
+    
+    	/* the top level dirs are the root dir or the trash bin.
+    	 *  
+    	 */
+    @ConsistencyPredicate
+      protected final boolean checkParent() {
+	  return !hasParent() ? hasTrashUser() || hasUser() : true;
+      }
+    
+    @Override
+    public void unshare(VisibilityGroup group) {
+	super.unshare(group);
+	for(SharedDirNode sharedNode : getSharedDirNodes()) {
+            sharedNode.deleteLink(new ContextPath(getParent()));
+        }
+    }
 }

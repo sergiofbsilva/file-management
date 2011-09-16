@@ -7,7 +7,6 @@ public class SharedDirDetails extends DirDetails {
 
     public SharedDirDetails(DomainItem<AbstractFileNode> nodeItem, boolean operationsVisible, boolean infoVisible) {
 	super(nodeItem, operationsVisible,infoVisible);
-	addVisibleProperty("ownerName");
     }
     
     public SharedDirDetails(DomainItem<AbstractFileNode> nodeItem) {

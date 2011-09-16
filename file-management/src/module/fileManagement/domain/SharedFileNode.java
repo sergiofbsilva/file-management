@@ -1,10 +1,11 @@
 package module.fileManagement.domain;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import module.organization.domain.Party;
+import module.fileManagement.domain.log.FileLog;
 import myorg.domain.User;
 import myorg.domain.groups.PersistentGroup;
 import pt.ist.fenixWebFramework.services.Service;
@@ -72,10 +73,10 @@ public class SharedFileNode extends SharedFileNode_Base {
     public VisibilityList getVisibilityGroups() {
 	return getNode().getVisibilityGroups();
     }
-
+    
     @Override
-    public int getFilesize() {
-	return getNode().getFilesize();
+    public long getFilesize() {
+        return getNode().getFilesize();
     }
 
     @Override
@@ -109,8 +110,8 @@ public class SharedFileNode extends SharedFileNode_Base {
     }
 
     @Override
-    public void share(User user, VisibilityGroup group, boolean createLink) {
-	getNode().share(user, group, createLink);
+    public void share(User user, VisibilityGroup group, ContextPath contextPath) {
+	getNode().share(user, group, contextPath);
     }
     
     
@@ -136,13 +137,8 @@ public class SharedFileNode extends SharedFileNode_Base {
     }
 
     @Override
-    public Party getOwner() {
-	return getNode().getOwner();
-    }
-
-    @Override
-    public String getOwnerName() {
-	return getNode().getOwnerName();
+    public User getOwner() {
+	return super.getOwner();
     }
 
     @Override
@@ -181,11 +177,6 @@ public class SharedFileNode extends SharedFileNode_Base {
     }
 
     @Override
-    public void trash() {
-	getNode().trash();
-    }
-    
-    @Override
     protected void setReadGroup(PersistentGroup persistentGroup) {
         getNode().setReadGroup(persistentGroup);
     }
@@ -203,30 +194,34 @@ public class SharedFileNode extends SharedFileNode_Base {
     
     @Override
     public DirNode getParent() {
-	return getNode().getParent();
+	return super.getParent();
     }
     
     @Override
     public boolean hasParent() {
-	return getNode().hasParent();
+	return super.hasParent();
     }
     
     @Override
     public void removeParent() {
-       getNode().removeParent();
+       super.removeParent();
     }
     
     @Service
-    public void deleteLink() {
-	super.setParent(null);
-	super.setNode(null);
-	deleteDomainObject();
+    public void deleteLink(ContextPath contextPath) {
+	final DirNode trash = super.getParent().getTrash();
+	super.setParent(trash);
     }
     
     @Override
-    protected boolean checkDisconnected() {
-        return super.getParent() == null  && super.getNode() == null;
+    public void trash(ContextPath contextPath) {
+        deleteLink(contextPath);
     }
     
-    
+    @Override
+    public Set<FileLog> getFileLogSet() {
+	final Set<FileLog> fileLog = new HashSet<FileLog>(super.getFileLogSet());
+	fileLog.addAll(getNode().getFileLog());
+	return fileLog;
+    }
 }

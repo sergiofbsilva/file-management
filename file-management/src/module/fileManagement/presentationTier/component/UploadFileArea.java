@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
+import module.fileManagement.domain.ContextPath;
 import module.fileManagement.domain.DirNode;
 import module.fileManagement.domain.FileNode;
 
@@ -22,9 +23,9 @@ import com.vaadin.ui.VerticalLayout;
 public class UploadFileArea extends CustomComponent {
 
     private UploadArea uploadArea;
-    private DirNode uploadDir;
     private VerticalLayout vlError;
-
+    private ContextPath contextPath;
+    
     private static Method UPLOAD_FILE_METHOD;
 
     static {
@@ -60,9 +61,10 @@ public class UploadFileArea extends CustomComponent {
 	protected void handleFile(final File file, final String fileName, final String mimeType, final long length) {
 //	    final DirNode destination = uploadDir == null || !uploadDir.isWriteGroupMember() ? UserView.getCurrentUser()
 //		    .getFileRepository() : uploadDir;
+	    final DirNode uploadDir = getUploadDir();
 	    if (uploadDir != null) {
 		try {
-		    final FileNode fileNode = uploadDir.createFile(file, fileName, length);
+		    final FileNode fileNode = uploadDir.createFile(file, fileName, length,contextPath);
 		    fireFileUploaded(fileNode);
 		} catch (FFDomainException ffde) {
 		    vlError.addComponent(newError(ffde.getMessage()));
@@ -89,17 +91,12 @@ public class UploadFileArea extends CustomComponent {
 	vlError.setSpacing(true);
     }
 
-    public UploadFileArea(DirNode dirNode) {
-	this();
-	setUploadDir(dirNode);
-    }
-
     public void fireFileUploaded(FileNode fileNode) {
 	fireEvent(new OnFileUploadEvent(this, fileNode));
     }
 
     public DirNode getUploadDir() {
-	return uploadDir;
+	return contextPath.getLastDirNode();
     }
 
     public class OnFileUploadEvent extends Component.Event {
@@ -127,10 +124,6 @@ public class UploadFileArea extends CustomComponent {
 	addListener(OnFileUploadEvent.class, listener, UPLOAD_FILE_METHOD);
     }
 
-    public void setUploadDir(DirNode uploadDir) {
-	this.uploadDir = uploadDir;
-    }
-
     @Override
     public void attach() {
 	setCompositionRoot(uploadArea);
@@ -139,5 +132,8 @@ public class UploadFileArea extends CustomComponent {
     public Layout getErrorLayout() {
 	return vlError;
     }
-
+    
+    public void setContextPath(ContextPath contextPath) {
+	this.contextPath = contextPath;
+    }
 }

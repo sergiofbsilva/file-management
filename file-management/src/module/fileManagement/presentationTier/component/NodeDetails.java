@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import module.fileManagement.domain.AbstractFileNode;
-import module.fileManagement.domain.AbstractFileNode.VisibilityState;
+import module.fileManagement.domain.ContextPath;
 import module.fileManagement.presentationTier.component.viewers.FMSViewerFactory;
 import module.fileManagement.presentationTier.pages.DocumentBrowse;
 
@@ -21,7 +21,6 @@ import pt.ist.vaadinframework.data.reflect.DomainItem;
 import com.vaadin.terminal.ExternalResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
@@ -38,19 +37,22 @@ public abstract class NodeDetails extends Panel {
 
     
     public void showDeleteDialog() {
-	final CheckBox chkDeleteAll = new CheckBox(
-		    "Este ficheiro encontra-se partilhado. Deseja apagá-lo para todos os outros utilizadores?");
-	final String windowTitle = String.format("Apagar - %s", getNode().getDisplayName());
-	final String message = String.format("Deseja apagar %s ? ", getNode().getDisplayName());
-	ConfirmDialog confirm = new DefaultConfirmDialogFactory().create(windowTitle, message, "Sim", "Não");
+	final String displayName = getNode().getDisplayName();
+//	final CheckBox chkDeleteAll = new CheckBox(
+//		    "Este ficheiro encontra-se partilhado. Deseja apagá-lo para todos os outros utilizadores?");
+	final String windowTitle = getMessage("label.node.delete.title",displayName);
+	final String message = getMessage("label.node.delete.message", displayName);
+	final String yes = getMessage("label.yes");
+	final String no = getMessage("label.no");
+	ConfirmDialog confirm = new DefaultConfirmDialogFactory().create(windowTitle, message, yes, no);
 	
-	if (getNode().isWriteGroupMember()) {
-	    if (getNode().getVisibilityState() != VisibilityState.PRIVATE) {
-		    VerticalLayout vl = (VerticalLayout) confirm.getContent();
-		    final Panel panel = (Panel) vl.getComponent(0);
-		    panel.addComponent(chkDeleteAll);
-	    }
-	}
+//	if (getNode().isWriteGroupMember()) {
+//	    if (getNode().getVisibilityState() != VisibilityState.PRIVATE) {
+//		    VerticalLayout vl = (VerticalLayout) confirm.getContent();
+//		    final Panel panel = (Panel) vl.getComponent(0);
+//		    panel.addComponent(chkDeleteAll);
+//	    }
+//	}
 	
 
 	ConfirmDialog.Listener listener = new ConfirmDialog.Listener() {
@@ -58,10 +60,12 @@ public abstract class NodeDetails extends Panel {
 	    @Override
 	    public void onClose(ConfirmDialog dialog) {
 		if (dialog.isConfirmed()) {
-		    getNode().trash((Boolean) chkDeleteAll.getValue());
+//		    getNode().trash((Boolean)chkDeleteAll.getValue());
+		    getNode().trash(getContextPath());
 		    documentBrowse.removeNode(getNodeItem());
 		}
 	    }
+	    
 	};
 	confirm.show(getWindow(), listener, true);
     }
@@ -103,7 +107,7 @@ public abstract class NodeDetails extends Panel {
 
 	    @Override
 	    public void buttonClick(ClickEvent event) {
-		getWindow().open(new ExternalResource("#DocumentShare-" + getNode().getExternalId()));
+		getWindow().open(new ExternalResource("#DocumentShare-" + getNode().getExternalId() + "," + documentBrowse.getContextPath()));
 	    }
 	});
 	btShareLink.setStyleName(BaseTheme.BUTTON_LINK);
@@ -206,5 +210,9 @@ public abstract class NodeDetails extends Panel {
     public DomainItem<AbstractFileNode> getNodeItem() {
 	return nodeItem;
     };
+    
+    private ContextPath getContextPath() {
+	return documentBrowse.getContextPath();
+    }
     
 }

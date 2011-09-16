@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import module.fileManagement.domain.AbstractFileNode;
+import module.fileManagement.domain.ContextPath;
 import module.fileManagement.domain.DirNode;
 import module.fileManagement.domain.Document;
 import module.fileManagement.domain.FileManagementSystem;
@@ -13,10 +14,9 @@ import module.fileManagement.domain.FileRepository;
 import module.fileManagement.domain.VersionedFile;
 import module.fileManagement.presentationTier.component.viewers.VisibilityListViewer;
 import myorg.applicationTier.Authenticate.UserView;
+import myorg.domain.RoleType;
 import myorg.domain.User;
-
-import org.apache.commons.lang.StringUtils;
-
+import myorg.domain.groups.Role;
 import pt.ist.vaadinframework.data.VBoxProperty;
 import pt.ist.vaadinframework.data.reflect.DomainContainer;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
@@ -41,10 +41,13 @@ import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window.Notification;
 
 @SuppressWarnings("serial")
 public class DocumentFileBrowser extends CustomComponent implements ValueChangeNotifier, ValueChangeListener {
-
+    
+    private boolean accessDenied = false;
+    
     public Component getCurrent() {
 	return this;
     }
@@ -187,18 +190,30 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 	
 	@Override
 	public String toString() {
-	    final List<String> oids = new ArrayList<String>();
+	    final List<DirNode> dirNodes = new ArrayList<DirNode>();
 	    for(MenuItem item : getItems()) {
-		oids.add(((DirNodeCommand)item.getCommand()).dirNode.getExternalId());
+		dirNodes.add(((DirNodeCommand)item.getCommand()).dirNode);
 	    }
-	    return StringUtils.join(oids, '/');
+	    return new ContextPath(dirNodes).toString();
 	}
 	
-	public void setDirNodes(List<DirNode> dirNodes) {
+	public void setDirNodes(ContextPath contextPath) {
 	    getItems().clear();
-	    for (DirNode dirNode : dirNodes) {
+	    for (DirNode dirNode : contextPath.getDirNodes()) {
 		    addDirNode(dirNode);
 	    }
+	}
+	
+	private List<DirNode> getDirNodes() {
+	    final List<DirNode> dirNodes = new ArrayList<DirNode>();
+	    for(MenuItem item : getItems()) {
+		dirNodes.add(((DirNodeCommand)item.getCommand()).dirNode);
+	    }
+	    return dirNodes;
+	}
+
+	public ContextPath getContextPath() {
+	    return new ContextPath(getDirNodes());
 	}
     }
 
@@ -219,6 +234,10 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 	layout.addComponent(documentMenu);
 	layout.addComponent(documentTable);
 	setCompositionRoot(layout);
+	if (accessDenied) {
+	    getWindow().showNotification("Access Denied.", Notification.TYPE_ERROR_MESSAGE);
+	    return;
+	}
     }
 
     
@@ -366,23 +385,30 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 	documentTable.select(nextItemId);
     }
     
-    public void setContextPath(String contextPath) {
-	final String[] split = StringUtils.split(contextPath,"/");
-	final List<DirNode> dirNodes = new ArrayList<DirNode>();
-	for(String dirNodeOID : split) {
-	    final DirNode dirNode = (DirNode) DirNode.fromExternalId(dirNodeOID);
-	    if (dirNode.isAccessible()) {
-		dirNodes.add(dirNode);
-	    }
-	}
-	if (!dirNodes.isEmpty()) {
-	    documentMenu.setDirNodes(dirNodes);
-	    nodeItem.setValue(dirNodes.get(dirNodes.size() - 1));
+    public void setContextPath(String pathString) {
+	final ContextPath contextPath = new ContextPath(pathString);
+	final DirNode lastDirNode = contextPath.getLastDirNode();
+	if (lastLineOfDefense(lastDirNode)) {
+	    documentMenu.setDirNodes(contextPath);
+	    nodeItem.setValue(lastDirNode);
+	} else {
+	    accessDenied = true;
 	}
     }
     
+    
+    
+    private boolean lastLineOfDefense(DirNode lastDirNode) {
+	return (lastDirNode.isAccessible() && !lastDirNode.hasTrashUser()) || Role.getRole(RoleType.MANAGER).isMember(UserView.getCurrentUser());
+    }
+
+
     public DocumentMenu getDocumentMenu() {
 	return documentMenu;
+    }
+    
+    public ContextPath getContextPath() {
+	return documentMenu.getContextPath();
     }
     
 }

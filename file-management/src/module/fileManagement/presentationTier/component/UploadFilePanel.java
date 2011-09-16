@@ -3,6 +3,7 @@ package module.fileManagement.presentationTier.component;
 import java.util.Collection;
 import java.util.HashSet;
 
+import module.fileManagement.domain.ContextPath;
 import module.fileManagement.domain.DirNode;
 import module.fileManagement.domain.Document;
 import module.fileManagement.presentationTier.component.UploadFileArea.FileUploadListener;
@@ -29,7 +30,7 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
     private DocumentContainer documentContainer;
 //    private DocumentContainer selectedDocumentsContainer;
     private ObjectHintedProperty<Collection> selectedDocumentsProperty;
-    private String contextPath;
+    private ContextPath contextPath;
     
     public UploadFilePanel() {
 	super();
@@ -47,9 +48,10 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
 	});
     }
     
-    public UploadFilePanel(DirNode dirNode) {
+    public UploadFilePanel(ContextPath contextPath) {
 	this();
-	uploadArea.setUploadDir(dirNode);
+	this.contextPath = contextPath;
+	uploadArea.setContextPath(contextPath);
     }
 
     @Override
@@ -137,10 +139,6 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
 	return uploadArea.getUploadDir();
     }
     
-    public void setUploadDir(DirNode uploadDir) {
-	uploadArea.setUploadDir(uploadDir);
-    }
-    
     public DocumentContainer getDocumentContainer() {
 	return documentContainer;
     }
@@ -149,8 +147,8 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
 	return selectedDocumentsProperty;
     }
     
-    public void setContextPath(String contextPath) {
-	this.contextPath = contextPath;
+    public void setContextPath(ContextPath ContextPath) {
+	uploadArea.setContextPath(contextPath);
     }
 
 }

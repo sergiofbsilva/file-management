@@ -1,11 +1,14 @@
 package module.fileManagement.domain;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import module.organization.domain.Party;
+import module.fileManagement.domain.log.AbstractLog;
+import module.fileManagement.domain.log.DirLog;
+import myorg.domain.User;
 import myorg.domain.groups.PersistentGroup;
 import pt.ist.fenixWebFramework.services.Service;
 
@@ -38,8 +41,8 @@ public class SharedDirNode extends SharedDirNode_Base {
     }
     
     @Override
-    public FileNode createFile(File file, String fileName, long filesize) {
-        return getNode().createFile(file, fileName, filesize);
+    public FileNode createFile(File file, String fileName, long filesize, ContextPath currentPath) {
+        return getNode().createFile(file, fileName, filesize, currentPath);
     }
 
     @Override
@@ -55,11 +58,6 @@ public class SharedDirNode extends SharedDirNode_Base {
     @Override
     public boolean isWriteGroupMember() {
 	return getNode().isWriteGroupMember();
-    }
-
-    @Override
-    public String getOwnerName() {
-	return getNode().getOwnerName();
     }
 
     @Override
@@ -113,15 +111,15 @@ public class SharedDirNode extends SharedDirNode_Base {
     }
 
     @Override
-    public int getFilesize() {
+    public long getFilesize() {
 	return getNode().getFilesize();
     }
 
     @Override
-    public Party getOwner() {
-	return getNode().getOwner();
+    public User getOwner() {
+        return super.getOwner();
     }
-
+    
     @Override
     public boolean hasReadGroup() {
 	return getNode() == null ? super.hasReadGroup() : getNode().hasReadGroup();
@@ -153,4 +151,30 @@ public class SharedDirNode extends SharedDirNode_Base {
 	super.setNode(null);
 	deleteDomainObject();
     }
+    
+    @Service
+    public void deleteLink(ContextPath currentPath) {
+	final DirNode trash = super.getParent().getTrash();
+	setParent(trash);
+    }
+    
+    @Override
+    public void trash(ContextPath currentPath) {
+	deleteLink(currentPath);
+    }
+    
+    @Override
+    public Set<DirLog> getDirLogSet() {
+	final Set<DirLog> dirLog = new HashSet<DirLog>(super.getDirLogSet());
+	dirLog.addAll(getNode().getDirLogSet());
+	return dirLog;
+    }
+    
+    @Override
+    public Set<AbstractLog> getTargetLogSet() {
+	final Set<AbstractLog> fileLog = new HashSet<AbstractLog>(super.getTargetLogSet());
+	fileLog.addAll(getNode().getTargetLogSet());
+	return fileLog;
+    }
+    
 }

@@ -2,8 +2,10 @@ package module.fileManagement.presentationTier.component;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Collections;
 
 import module.fileManagement.domain.AbstractFileNode;
+import module.fileManagement.domain.ContextPath;
 import module.fileManagement.domain.DirNode;
 import module.fileManagement.domain.Document;
 import module.fileManagement.domain.FileManagementSystem;
@@ -306,7 +308,8 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 	    if (destination != null) {
 		if (destination.hasAvailableQuota(length)) {
 		    try  {
-			final FileNode fileNode = destination.createFile(file, fileName,length);
+			final ContextPath contextPath = new ContextPath(Collections.singletonList(dirNode));
+			final FileNode fileNode = destination.createFile(file, fileName,length, contextPath);
 			
 		    if (destination == dirNode) {
 			documentTable.addAbstractFileNode(fileNode);
@@ -367,7 +370,8 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 
 		    @Override
 		    public void buttonClick(final ClickEvent event) {
-			final DirNode newDirNode = dirNode.createDir((String) editor.getValue());
+			final ContextPath contextPath = new ContextPath(Collections.singletonList(dirNode));
+			final DirNode newDirNode = dirNode.createDir((String) editor.getValue(), contextPath);
 			documentTable.addAbstractFileNode(newDirNode);
 			super.buttonClick(event);
 		    }
