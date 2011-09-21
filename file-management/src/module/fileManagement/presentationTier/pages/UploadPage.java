@@ -4,24 +4,15 @@ import static module.fileManagement.domain.FileManagementSystem.getMessage;
 import static module.fileManagement.domain.VersionedFile.FILE_SIZE_UNIT.prettyPrint;
 
 import java.util.Collection;
-import java.util.HashSet;
 
 import module.fileManagement.domain.ContextPath;
 import module.fileManagement.domain.DirNode;
 import module.fileManagement.domain.Document;
-import module.fileManagement.domain.FileManagementSystem;
-import module.fileManagement.domain.Metadata;
-import module.fileManagement.domain.MetadataKey;
-import module.fileManagement.domain.MetadataTemplate;
+import module.fileManagement.presentationTier.component.MetadataPanel;
 import module.fileManagement.presentationTier.component.UploadFilePanel;
-import module.fileManagement.presentationTier.data.FMSFieldFactory;
-import module.fileManagement.presentationTier.data.TemplateItem;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
-import pt.ist.vaadinframework.data.reflect.DomainItem;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
-import pt.ist.vaadinframework.ui.TransactionalForm;
 
-import com.vaadin.data.Container;
 import com.vaadin.data.Container.ItemSetChangeEvent;
 import com.vaadin.data.Container.ItemSetChangeListener;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -31,21 +22,17 @@ import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Layout;
 import com.vaadin.ui.Panel;
-import com.vaadin.ui.Select;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.Reindeer;
 
 @EmbeddedComponent(path = { "UploadPage-(.*)" })
 public class UploadPage extends CustomComponent implements EmbeddedComponentContainer {
     
+    private MetadataPanel metadataPanel;
     private UploadFilePanel uploadFilePanel;
-    private Panel metadataPanel;
-    private Select selectTemplate;
     private VerticalLayout leftPanel;
 //    private Select selectDir;
     private Label uploadDirLabel;
-    protected TemplateItem metadataTemplateItem;
-    private TransactionalForm metadataForm;
     private Label lblQuotaText;
     
     public Panel createQuotaPanel() {
@@ -102,63 +89,12 @@ public class UploadPage extends CustomComponent implements EmbeddedComponentCont
 	super.attach();
     }
 
-    private void setMetadataItem(MetadataTemplate template) {
-	if (template == null) {
-	    metadataForm.setEnabled(false);
-	    metadataForm.setItemDataSource(null);
-	    metadataTemplateItem = null;
-	    return;
-	}
-	if (metadataTemplateItem == null) {
-	    selectTemplate.setEnabled(true);
-	    metadataTemplateItem = new TemplateItem(template, uploadFilePanel.getDocumentContainer(),
-		    uploadFilePanel.getSelectedDocumentsProperty());
-	    metadataForm.setItemDataSource(metadataTemplateItem);
-	    metadataForm.setVisibleItemProperties(metadataTemplateItem.getVisibleItemProperties());
-	    metadataForm.setImmediate(true);
-	    metadataForm.setWriteThrough(true);
-	    uploadFilePanel.getSelectedDocumentsProperty().addListener(new ValueChangeListener() {
-
-		@Override
-		public void valueChange(ValueChangeEvent event) {
-		    metadataForm.discard();
-		}
-	    });
-
-	} else {
-	    metadataTemplateItem.setValue(template);
-	}
-
-    }
-
-    @SuppressWarnings("serial")
-    private Panel createMetadataPanel() {
-	final Panel panel = new Panel("Metadata");
-
-	selectTemplate = new Select("Template");
-	selectTemplate.setImmediate(true);
-	selectTemplate.setEnabled(false);
-	selectTemplate.setContainerDataSource((Container) new DomainItem(FileManagementSystem.getInstance())
-		.getItemProperty("metadataTemplates"));
-	selectTemplate.setItemCaptionPropertyId("name");
-	selectTemplate.addListener(new ValueChangeListener() {
-	    @Override
-	    public void valueChange(ValueChangeEvent event) {
-		final MetadataTemplate template = (MetadataTemplate) event.getProperty().getValue();
-		setMetadataItem(template);
-	    }
-	});
-	panel.addComponent(selectTemplate);
-	metadataForm = new TransactionalForm(FileManagementSystem.getBundle());
-	metadataForm.setFormFieldFactory(new FMSFieldFactory(FileManagementSystem.getBundle()));
-	panel.addComponent(metadataForm);
-	return panel;
-    }
+    
 
     @SuppressWarnings("serial")
     public UploadPage() {
-	uploadDirLabel = new Label();
-	uploadDirLabel.setCaption("Upload para :");
+	uploadDirLabel = new Label("Upload para : ");
+	
 	GridLayout mainLayout = new GridLayout(2, 1);
 	mainLayout.setSizeFull();
 	mainLayout.setSpacing(true);
@@ -192,25 +128,13 @@ public class UploadPage extends CustomComponent implements EmbeddedComponentCont
 
 	    @Override
 	    public void valueChange(ValueChangeEvent event) {
-		selectTemplate.setEnabled(true);
-		if (selectTemplate.getValue() == null) {
-		    Collection<Document> selectedDocuments = (Collection<Document>) event.getProperty().getValue();
-		    Collection<String> templateNames = new HashSet<String>();
-		    for (Document doc : selectedDocuments) {
-			Metadata templateMetadata = doc.getMetadata(MetadataKey.getTemplateKey());
-			if (templateMetadata != null) {
-			    templateNames.add(templateMetadata.getValue());
-			}
-		    }
-		    final String templateName = templateNames.size() < 1 ? null : templateNames.iterator().next();
-		    selectTemplate.select(templateName == null ? null : MetadataTemplate.getMetadataTemplate(templateName));
-		}
+		metadataPanel.selectDocuments((Collection<Document>) event.getProperty().getValue());
 	    }
 	});
 	leftPanel.addComponent(uploadFilePanel);
-	this.metadataPanel = createMetadataPanel();
+	this.metadataPanel = new MetadataPanel(uploadFilePanel.getDocumentContainer(), uploadFilePanel.getSelectedDocumentsProperty());
 	((GridLayout) getCompositionRoot()).addComponent(metadataPanel, 1, 0);
-	uploadDirLabel.setValue(uploadFilePanel.getUploadDir().getDisplayName());
+	uploadDirLabel.setValue(uploadDirLabel.getValue() + uploadFilePanel.getUploadDir().getDisplayName());
 //	selectDir.select(uploadArea.getUploadDir());
     }
 

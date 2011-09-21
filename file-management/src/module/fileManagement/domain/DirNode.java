@@ -389,7 +389,10 @@ public class DirNode extends DirNode_Base {
 	final long fileNodeSize = fileNode != null ? fileNode.getFilesize() : 0;
 	return (getUsedSpace() + length) <= (quota + fileNodeSize);
     }
-
+    
+    
+    
+    
     public AbstractFileNode searchNode(final String displayName) {
 	for (AbstractFileNode node : getChildSet()) {
 	    if (node.getDisplayName().equals(displayName)) {
@@ -437,14 +440,13 @@ public class DirNode extends DirNode_Base {
      */
 
     public boolean hasSharedNode(AbstractFileNode selectedNode) {
-	for (AbstractFileNode node : getChild()) {
-	    if (selectedNode.isFile() && node instanceof SharedFileNode) {
-		if (((SharedFileNode) node).getNode().equals(selectedNode)) {
-		    return true;
+	for(AbstractFileNode node : getChild()) {
+	    if (!(node instanceof SharedNode)) {
+		if (node.isDir()) {
+		    return ((DirNode)node).hasSharedNode(selectedNode);
 		}
-	    }
-	    if (selectedNode.isDir() && node instanceof SharedDirNode) {
-		if (((SharedDirNode) node).getNode().equals(selectedNode)) {
+	    } else {
+		if (selectedNode.equals(((SharedNode)node).getNode())) {
 		    return true;
 		}
 	    }
@@ -494,8 +496,13 @@ public class DirNode extends DirNode_Base {
 	super.delete();
     }
 
-    
-    
+    public boolean isInTrash() {
+        if (hasParent()) {
+            return getParent().isInTrash();
+        }
+        return hasTrashUser();
+    }
+
     @Override
     public User getOwner() {
         if (hasParent()) {
@@ -513,7 +520,7 @@ public class DirNode extends DirNode_Base {
     	 *  
     	 */
     @ConsistencyPredicate
-      protected final boolean checkParent() {
+      public boolean checkParent() {
 	  return !hasParent() ? hasTrashUser() || hasUser() : true;
       }
     

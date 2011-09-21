@@ -11,7 +11,7 @@ import myorg.domain.groups.PersistentGroup;
 import pt.ist.fenixWebFramework.services.Service;
 
 
-public class SharedFileNode extends SharedFileNode_Base {
+public class SharedFileNode extends SharedFileNode_Base implements SharedNode {
     
     public SharedFileNode(FileNode fileNode) {
 	super();
@@ -209,8 +209,10 @@ public class SharedFileNode extends SharedFileNode_Base {
     
     @Service
     public void deleteLink(ContextPath contextPath) {
-	final DirNode trash = super.getParent().getTrash();
-	super.setParent(trash);
+	if (!isInTrash()) {
+	    final DirNode trash = super.getParent().getTrash();
+	    super.setParent(trash);    
+	}
     }
     
     @Override
@@ -220,7 +222,7 @@ public class SharedFileNode extends SharedFileNode_Base {
     
     @Override
     public Set<FileLog> getFileLogSet() {
-	final Set<FileLog> fileLog = new HashSet<FileLog>(super.getFileLogSet());
+	final Set<FileLog> fileLog = new HashSet<FileLog>(super.getFileLog());
 	fileLog.addAll(getNode().getFileLog());
 	return fileLog;
     }

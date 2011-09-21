@@ -115,6 +115,7 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
     
     private void unshare(VisibilityGroup group) {
 	fileNode.unshare(group);
+	fileNodeGroupsTable.removeItem(group);
     }
     
     

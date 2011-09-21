@@ -35,6 +35,17 @@ public class DirNodePath extends DirNodePath_Base {
 	return start;
     }
     
+    public ContextPath createContextPath() {
+	DirNodePath curr = this;
+	final List<DirNode> dirNodes = new ArrayList<DirNode>();
+	while(curr != null) {
+	    dirNodes.add((DirNode) curr.getNode());
+	    curr = curr.getNextPath();
+	}
+	return new ContextPath(dirNodes);
+    }
+	
+    
     @Override
     public String toString() {
 	final List<DirNode> paths = new ArrayList<DirNode>();

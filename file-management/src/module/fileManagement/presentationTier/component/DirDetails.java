@@ -16,7 +16,6 @@ public class DirDetails extends NodeDetails {
     public DirDetails(DomainItem<AbstractFileNode> nodeItem, boolean operationsVisible, boolean infoVisible) {
 	super(nodeItem,operationsVisible, infoVisible);
 	addVisibleProperty("countFiles");
-	addVisibleProperty("presentationQuota");
     }
     
     public DirDetails(DomainItem<AbstractFileNode> nodeItem) {

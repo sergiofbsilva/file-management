@@ -5,9 +5,6 @@ import java.util.Collection;
 import module.fileManagement.presentationTier.component.groups.GroupCreatorRegistry;
 import module.fileManagement.presentationTier.component.groups.HasPersistentGroupCreator;
 import myorg.domain.Presentable;
-
-import org.apache.commons.lang.StringUtils;
-
 import pt.ist.fenixframework.pstm.AbstractDomainObject;
 import pt.ist.vaadinframework.data.BufferedContainer;
 import pt.ist.vaadinframework.data.HintedProperty;
@@ -23,7 +20,7 @@ public class GroupContainer extends BufferedContainer<Presentable, String, Domai
     }
     
     {
-	addContainerProperty("presentationName", String.class, StringUtils.EMPTY);
+//	addContainerProperty("presentationName", String.class, StringUtils.EMPTY);
     }
 
     @Override

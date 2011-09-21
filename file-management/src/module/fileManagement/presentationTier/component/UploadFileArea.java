@@ -67,6 +67,7 @@ public class UploadFileArea extends CustomComponent {
 		    final FileNode fileNode = uploadDir.createFile(file, fileName, length,contextPath);
 		    fireFileUploaded(fileNode);
 		} catch (FFDomainException ffde) {
+		    vlError.removeAllComponents();
 		    vlError.addComponent(newError(ffde.getMessage()));
 		}
 	    }

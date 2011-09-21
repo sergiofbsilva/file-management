@@ -20,7 +20,6 @@ public abstract class FileLog extends FileLog_Base {
 	init(user, contextPath,fileNode);
     }
     
-    
     @Override
     public String toString() {
 	return String.format("(%s) Em %s, %s %s %s", getLogTime() , getTargetDirName(), getUserName(), getOperationString(), getFileNode().getDisplayName());

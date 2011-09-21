@@ -23,6 +23,7 @@ public abstract class AbstractLog extends AbstractLog_Base {
     public  AbstractLog() {
         super();
         setOjbConcreteClass(getClass().getName());
+        
     }
     
     public AbstractLog(User user, ContextPath contextPath) {
@@ -35,10 +36,6 @@ public abstract class AbstractLog extends AbstractLog_Base {
 	setUser(user);
 	setTargetPath(contextPath.createDirNodePath());
 	setTargetDirNode(contextPath.getLastDirNode());
-    }
-    
-    public String getOperationString() {
-	return FileManagementSystem.getMessage("label.log." + getClass().getSimpleName());
     }
     
     public String getOperationString(String... args) {
@@ -55,5 +52,9 @@ public abstract class AbstractLog extends AbstractLog_Base {
     
     public String getUserName() {
 	return getUser().getPresentationName();
+    }
+    
+    public ContextPath getContextPath() {
+   	return getTargetPath().createContextPath();
     }
 }

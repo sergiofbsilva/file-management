@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import module.fileManagement.domain.AbstractFileNode;
@@ -11,9 +12,12 @@ import module.fileManagement.domain.Document;
 import module.fileManagement.domain.FileNode;
 import module.fileManagement.domain.Metadata;
 import module.fileManagement.presentationTier.DownloadUtil;
+import module.fileManagement.presentationTier.component.MetadataPanel;
 import module.fileManagement.presentationTier.component.NodeDetails;
 import module.fileManagement.presentationTier.component.TabularViewer;
 import module.fileManagement.presentationTier.component.viewers.FMSViewerFactory;
+import module.fileManagement.presentationTier.data.DocumentContainer;
+import module.vaadin.data.util.ObjectHintedProperty;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.HintedProperty;
 import pt.ist.vaadinframework.data.reflect.DomainContainer;
@@ -21,18 +25,27 @@ import pt.ist.vaadinframework.data.reflect.DomainItem;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
 
 import com.vaadin.data.util.ObjectProperty;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.GridLayout;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Layout;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.BaseTheme;
 
 @EmbeddedComponent(path = { "DocumentExtendedInfo-(.*)" })
 public class DocumentExtendedInfo extends CustomComponent implements EmbeddedComponentContainer {
     private final GridLayout mainGrid;
     private FileNode fileNode;
-
+    private Component metadataInfoView;
+    private Component editMetadataView;
+    private Layout metadataInfoPanel;
+    
     @Override
     public void setArguments(String... args) {
 	String externalId = args[1];
@@ -40,6 +53,7 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
     }
 
     public void update() {
+	mainGrid.removeAllComponents();
 	mainGrid.addComponent(createExtendedInfo(), 0, 0);
 	mainGrid.addComponent(createDocumentOperations(), 1, 0);
     }
@@ -68,12 +82,12 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
     }
 
     private Component createExtendedInfo() {
+	final DomainItem<FileNode> item = new DomainItem<FileNode>(fileNode);
 	final VerticalLayout vlayout = new VerticalLayout();
 	vlayout.setSpacing(true);
-
-	final DomainItem<FileNode> item = new DomainItem<FileNode>(fileNode);
 	vlayout.addComponent(createInfoPanel(item));
-	vlayout.addComponent(createMetadataInfoPanel(item));
+	metadataInfoPanel = createMetadataInfoPanel(item);
+	vlayout.addComponent(metadataInfoPanel);
 	return vlayout;
     }
 
@@ -91,8 +105,57 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
 	}
 	return versions;
     }
+    
+    private Component editMetadataPanel() {
+	final Document document = fileNode.getDocument();
+	final ObjectHintedProperty<Collection> selectedDocuments = new ObjectHintedProperty<Collection>(new HashSet<Document>(), Collection.class);
+	final DocumentContainer documentContainer = new DocumentContainer();
+	documentContainer.addItem(document);
+	final Collection docs = selectedDocuments.getValue();
+	docs.add(document);
+	selectedDocuments.setValue(docs);
+	
+	final Button btSubmit = new Button("Guardar");
+	btSubmit.addListener(new ClickListener() {
+	    
+	    @Override
+	    public void buttonClick(ClickEvent event) {
+		documentContainer.commit();
+//		metadataInfoPanel.replaceComponent(editMetadataView, metadataInfoView);
+		update();
+	    }
+	});
+	
+	VerticalLayout vlEditMetadata = new VerticalLayout();
+	vlEditMetadata.setSizeFull();
+	vlEditMetadata.setSpacing(true);
+	final MetadataPanel metadataPanel = new MetadataPanel(documentContainer, selectedDocuments);
+	metadataPanel.setCaption("");
+	metadataPanel.selectDocuments(selectedDocuments.getValue());
+	vlEditMetadata.addComponent(metadataPanel);
+	vlEditMetadata.addComponent(btSubmit);
+	return vlEditMetadata;
+    }
 
-    private Component createMetadataInfoPanel(DomainItem<FileNode> item) {
+    private Layout createMetadataInfoPanel(DomainItem<FileNode> item) {
+	final VerticalLayout vl = new VerticalLayout();
+	final HorizontalLayout hl = new HorizontalLayout();
+	hl.addComponent(new Label(String.format("<h3>Metadata Versão %s</h3>", item.getItemProperty("document.versionNumber").toString()), Label.CONTENT_XHTML));
+	
+	final Button btEditMetadata = new Button("editar");
+	btEditMetadata.setStyleName(BaseTheme.BUTTON_LINK);
+	btEditMetadata.addListener(new ClickListener() {
+	    
+	    @Override
+	    public void buttonClick(ClickEvent event) {
+		editMetadataView = editMetadataPanel();
+		vl.replaceComponent(metadataInfoView, editMetadataView);
+	    }
+	});
+	
+	hl.addComponent(btEditMetadata);
+	vl.addComponent(hl);
+	
 	final HintedProperty recentMetadata = (HintedProperty) item.getItemProperty("document.recentMetadata");
 	final DomainContainer<Metadata> metadataContainer = new DomainContainer<Metadata>(
 		(Collection<Metadata>) recentMetadata.getValue(), Metadata.class);
@@ -102,11 +165,13 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
 	    table.setContainerDataSource(metadataContainer);
 	    table.setVisibleColumns(new Object[] { "keyValue", "value" });
 	    table.setColumnHeaderMode(Table.COLUMN_HEADER_MODE_HIDDEN);
-	    table.setCaption("Metadata");
-	    return table;
+//	    table.setCaption("Metadata");
+	    metadataInfoView = table;
 	} else {
-	    return new Label("Documento sem metadata");
+	    metadataInfoView = new Label("Documento sem metadata");
 	}
+	vl.addComponent(metadataInfoView);
+	return vl;
     }
 
     private Component createInfoPanel(DomainItem<FileNode> item) {

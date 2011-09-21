@@ -1,3 +1,4 @@
+
 package module.fileManagement.presentationTier.pages;
 
 import java.util.HashSet;
@@ -9,6 +10,7 @@ import module.fileManagement.domain.DirNode;
 import module.fileManagement.domain.FileNode;
 import module.fileManagement.domain.FileRepository;
 import module.fileManagement.domain.log.AbstractLog;
+import module.fileManagement.presentationTier.component.viewers.LogViewerFactory;
 import myorg.applicationTier.Authenticate.UserView;
 import myorg.domain.User;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
@@ -16,7 +18,6 @@ import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
 
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.Layout;
 import com.vaadin.ui.VerticalLayout;
 
@@ -28,9 +29,6 @@ public class LogPage extends CustomComponent implements EmbeddedComponentContain
 	// TODO Auto-generated method stub
 
     }
-    
-    
-    
     
     public LogPage() {
 	final long start = System.currentTimeMillis();
@@ -78,7 +76,7 @@ public class LogPage extends CustomComponent implements EmbeddedComponentContain
 	for(AbstractLog log : logs) {
 	    HorizontalLayout hl = new HorizontalLayout();
 	    hl.setSizeFull();
-	    hl.addComponent(new Label(log.toString(), Label.CONTENT_TEXT));
+	    hl.addComponent(LogViewerFactory.createViewer(log));
 	    layout.addComponent(hl);
 	}
     }

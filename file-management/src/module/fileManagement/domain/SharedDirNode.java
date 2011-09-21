@@ -14,7 +14,7 @@ import pt.ist.fenixWebFramework.services.Service;
 
 
 
-public class SharedDirNode extends SharedDirNode_Base {
+public class SharedDirNode extends SharedDirNode_Base implements SharedNode {
     
     public SharedDirNode() {
         super();
@@ -154,8 +154,7 @@ public class SharedDirNode extends SharedDirNode_Base {
     
     @Service
     public void deleteLink(ContextPath currentPath) {
-	final DirNode trash = super.getParent().getTrash();
-	setParent(trash);
+	setParent(getTrash());
     }
     
     @Override
@@ -175,6 +174,11 @@ public class SharedDirNode extends SharedDirNode_Base {
 	final Set<AbstractLog> fileLog = new HashSet<AbstractLog>(super.getTargetLogSet());
 	fileLog.addAll(getNode().getTargetLogSet());
 	return fileLog;
+    }
+    
+    @Override
+    public boolean checkParent() {
+	return true;
     }
     
 }
