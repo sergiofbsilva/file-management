@@ -12,13 +12,14 @@ import module.fileManagement.domain.AbstractFileNode;
 import module.fileManagement.domain.ContextPath;
 import module.fileManagement.presentationTier.component.viewers.FMSViewerFactory;
 import module.fileManagement.presentationTier.pages.DocumentBrowse;
+import module.fileManagement.presentationTier.pages.DocumentShare;
 
 import org.vaadin.dialogs.ConfirmDialog;
 import org.vaadin.dialogs.DefaultConfirmDialogFactory;
 
+import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
 
-import com.vaadin.terminal.ExternalResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
@@ -35,49 +36,46 @@ public abstract class NodeDetails extends Panel {
     private final boolean operationsVisible;
     private final boolean infoVisible;
 
-    
     public void showDeleteDialog() {
 	final String displayName = getNode().getDisplayName();
-//	final CheckBox chkDeleteAll = new CheckBox(
-//		    "Este ficheiro encontra-se partilhado. Deseja apagá-lo para todos os outros utilizadores?");
-	final String windowTitle = getMessage("label.node.delete.title",displayName);
+	// final CheckBox chkDeleteAll = new CheckBox(
+	// "Este ficheiro encontra-se partilhado. Deseja apagá-lo para todos os outros utilizadores?");
+	final String windowTitle = getMessage("label.node.delete.title", displayName);
 	final String message = getMessage("label.node.delete.message", displayName);
 	final String yes = getMessage("label.yes");
 	final String no = getMessage("label.no");
 	ConfirmDialog confirm = new DefaultConfirmDialogFactory().create(windowTitle, message, yes, no);
-	
-//	if (getNode().isWriteGroupMember()) {
-//	    if (getNode().getVisibilityState() != VisibilityState.PRIVATE) {
-//		    VerticalLayout vl = (VerticalLayout) confirm.getContent();
-//		    final Panel panel = (Panel) vl.getComponent(0);
-//		    panel.addComponent(chkDeleteAll);
-//	    }
-//	}
-	
+
+	// if (getNode().isWriteGroupMember()) {
+	// if (getNode().getVisibilityState() != VisibilityState.PRIVATE) {
+	// VerticalLayout vl = (VerticalLayout) confirm.getContent();
+	// final Panel panel = (Panel) vl.getComponent(0);
+	// panel.addComponent(chkDeleteAll);
+	// }
+	// }
 
 	ConfirmDialog.Listener listener = new ConfirmDialog.Listener() {
 
 	    @Override
 	    public void onClose(ConfirmDialog dialog) {
 		if (dialog.isConfirmed()) {
-//		    getNode().trash((Boolean)chkDeleteAll.getValue());
+		    // getNode().trash((Boolean)chkDeleteAll.getValue());
 		    getNode().trash(getContextPath());
 		    documentBrowse.removeNode(getNodeItem());
 		}
 	    }
-	    
+
 	};
 	confirm.show(getWindow(), listener, true);
     }
-    
-    
+
     public NodeDetails(DomainItem<AbstractFileNode> nodeItem, boolean operationsVisible, boolean infoVisible) {
 	super();
 	this.nodeItem = nodeItem;
 	this.nodeItem.setWriteThrough(true);
 	this.operationsVisible = operationsVisible;
 	this.infoVisible = infoVisible;
-	
+
 	updateCaption();
 	VerticalLayout content = (VerticalLayout) getContent();
 	content.setSpacing(true);
@@ -86,7 +84,7 @@ public abstract class NodeDetails extends Panel {
 	    vlOperations = new VerticalLayout();
 	}
     }
-    
+
     private void updateCaption() {
 	if (infoVisible) {
 	    setCaption(getMessage("label.file.details"));
@@ -97,9 +95,9 @@ public abstract class NodeDetails extends Panel {
 	    return;
 	}
     }
-    
+
     public NodeDetails(DomainItem<AbstractFileNode> nodeItem) {
-	this(nodeItem, true,true);
+	this(nodeItem, true, true);
     }
 
     public Button createShareLink() {
@@ -107,7 +105,11 @@ public abstract class NodeDetails extends Panel {
 
 	    @Override
 	    public void buttonClick(ClickEvent event) {
-		getWindow().open(new ExternalResource("#DocumentShare-" + getNode().getExternalId() + "," + documentBrowse.getContextPath()));
+		EmbeddedApplication.open(getApplication(), DocumentShare.class, getNode().getExternalId(), documentBrowse
+			.getContextPath().toString());
+		// getWindow().open(new ExternalResource("#DocumentShare-" +
+		// getNode().getExternalId() + "," +
+		// documentBrowse.getContextPath()));
 	    }
 	});
 	btShareLink.setStyleName(BaseTheme.BUTTON_LINK);
@@ -140,30 +142,30 @@ public abstract class NodeDetails extends Panel {
 	}
 	if (absFileNode.isShared()) {
 	    if (absFileNode.isDir()) {
-		return new SharedDirDetails(nodeItem, operationsVisible,infoVisible);
+		return new SharedDirDetails(nodeItem, operationsVisible, infoVisible);
 	    }
 	    if (absFileNode.isFile()) {
-		return new SharedFileDetails(nodeItem, operationsVisible,infoVisible);
+		return new SharedFileDetails(nodeItem, operationsVisible, infoVisible);
 	    }
 	}
 	if (absFileNode.isFile()) {
-	    return new FileDetails(nodeItem, operationsVisible,infoVisible);
+	    return new FileDetails(nodeItem, operationsVisible, infoVisible);
 	}
 	if (absFileNode.isDir()) {
-	    return new DirDetails(nodeItem, operationsVisible,infoVisible);
+	    return new DirDetails(nodeItem, operationsVisible, infoVisible);
 	}
 
 	return null;
     }
 
     public static NodeDetails makeDetails(DomainItem<AbstractFileNode> nodeItem) {
-	return makeDetails(nodeItem, true,true);
+	return makeDetails(nodeItem, true, true);
     }
 
     public AbstractFileNode getNode() {
 	return nodeItem != null ? nodeItem.getValue() : null;
     }
-    
+
     public void setFileNode(final DomainItem<AbstractFileNode> nodeItem) {
 	this.nodeItem = nodeItem;
 	updateFilePanel();
@@ -180,7 +182,7 @@ public abstract class NodeDetails extends Panel {
 	if (getNode() == null) {
 	    return;
 	}
-	if(infoVisible) {
+	if (infoVisible) {
 	    addComponent(updateDetails());
 	}
 	if (operationsVisible) {
@@ -206,13 +208,13 @@ public abstract class NodeDetails extends Panel {
     public void addOperation(Component component) {
 	vlOperations.addComponent(component);
     }
-    
+
     public DomainItem<AbstractFileNode> getNodeItem() {
 	return nodeItem;
     };
-    
+
     private ContextPath getContextPath() {
 	return documentBrowse.getContextPath();
     }
-    
+
 }

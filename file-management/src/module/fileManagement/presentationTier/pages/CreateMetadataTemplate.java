@@ -8,11 +8,11 @@ import module.fileManagement.domain.MetadataTemplate;
 import org.apache.commons.lang.StringUtils;
 
 import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
 
 import com.vaadin.data.Validator.InvalidValueException;
-import com.vaadin.terminal.ExternalResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -26,17 +26,17 @@ import com.vaadin.ui.Window.Notification;
 import com.vaadin.ui.themes.BaseTheme;
 
 @SuppressWarnings("serial")
-@EmbeddedComponent(path = { "CreateMetadataTemplate" } , args = {"template", "readOnly"} )
+@EmbeddedComponent(path = { "CreateMetadataTemplate" }, args = { "template", "readOnly" })
 public class CreateMetadataTemplate extends CustomComponent implements EmbeddedComponentContainer {
 
     private int keyIndex = 1;
     private MetadataTemplate template;
     private boolean readOnly = false;
-    
+
     public String getNextKeyIndex() {
 	return "key_" + keyIndex++;
     }
-    
+
     @Service
     private void editOrCreateTemplate(Form form) {
 	final String templateName = (String) form.getItemProperty("name").getValue();
@@ -44,7 +44,7 @@ public class CreateMetadataTemplate extends CustomComponent implements EmbeddedC
 	if (template != null) {
 	    currentTemplate = template;
 	    currentTemplate.setName(templateName);
-	    for(MetadataKey key : template.getKeys()) {
+	    for (MetadataKey key : template.getKeys()) {
 		currentTemplate.removeKeys(key);
 	    }
 	} else {
@@ -69,7 +69,7 @@ public class CreateMetadataTemplate extends CustomComponent implements EmbeddedC
 	    this.underlingForm = form;
 	    this.propId = id;
 	    fieldKey = new TextField();
-	    
+
 	    HorizontalLayout hl = new HorizontalLayout();
 	    hl.setSpacing(true);
 	    hl.addComponent(fieldKey);
@@ -97,7 +97,7 @@ public class CreateMetadataTemplate extends CustomComponent implements EmbeddedC
 	public String getCaption() {
 	    return "Chave";
 	}
-	
+
 	@Override
 	public Object getValue() {
 	    return fieldKey.getValue();
@@ -119,36 +119,34 @@ public class CreateMetadataTemplate extends CustomComponent implements EmbeddedC
 	public Class<?> getType() {
 	    return String.class;
 	}
-	
+
 	@Override
 	public void setReadOnly(boolean readOnly) {
 	    fieldKey.setReadOnly(readOnly);
 	}
 
     }
-    
-    
+
     @Override
     public void attach() {
 	VerticalLayout layout = new VerticalLayout();
 
 	final Form form = new Form();
 	form.setReadOnly(readOnly);
-	
+
 	final TextField txtName = new TextField("Nome");
 	form.addItemProperty("name", txtName);
-	
+
 	if (template != null) {
 	    txtName.setValue(template.getName());
-	    for(MetadataKey key : template.getKeys()) {
+	    for (MetadataKey key : template.getKeys()) {
 		String propId = getNextKeyIndex();
-		final KeyField keyField = new KeyField(form,propId);
+		final KeyField keyField = new KeyField(form, propId);
 		keyField.setValue(key.getKeyValue());
 		form.addField(propId, keyField);
 	    }
 	}
-	
-	
+
 	layout.addComponent(form);
 	Button btAddField = new Button("Adicionar Chave");
 	btAddField.addListener(new ClickListener() {
@@ -167,21 +165,22 @@ public class CreateMetadataTemplate extends CustomComponent implements EmbeddedC
 	    public void buttonClick(ClickEvent event) {
 		form.commit();
 		editOrCreateTemplate(form);
-		Notification not = new Notification("Sucesso", "Template criado com sucesso!",Notification.TYPE_TRAY_NOTIFICATION);
+		Notification not = new Notification("Sucesso", "Template criado com sucesso!",
+			Notification.TYPE_TRAY_NOTIFICATION);
 		not.setDelayMsec(500);
 		getWindow().showNotification(not);
 		goToManageTemplates();
 	    }
 	});
 
-	Button btCancel = new Button ("Voltar", new ClickListener() {
-	    
+	Button btCancel = new Button("Voltar", new ClickListener() {
+
 	    @Override
 	    public void buttonClick(ClickEvent event) {
 		goToManageTemplates();
 	    }
 	});
-	
+
 	HorizontalLayout hl = new HorizontalLayout();
 	hl.setSpacing(true);
 	if (!readOnly) {
@@ -194,7 +193,7 @@ public class CreateMetadataTemplate extends CustomComponent implements EmbeddedC
     }
 
     @Override
-    public void setArguments(Map<String,String> arguments) {
+    public void setArguments(Map<String, String> arguments) {
 	final String templateOid = arguments.get("template");
 	final String readOnly = arguments.get("readOnly");
 	setTemplate(templateOid);
@@ -202,12 +201,13 @@ public class CreateMetadataTemplate extends CustomComponent implements EmbeddedC
 	    this.readOnly = true;
 	}
     }
-    
+
     private void setTemplate(String templateOid) {
 	template = MetadataTemplate.fromExternalId(templateOid);
     }
-    
+
     private void goToManageTemplates() {
-	getWindow().open(new ExternalResource("#ManageMetadataTemplates"));
+	EmbeddedApplication.open(getApplication(), ManageMetadataTemplates.class);
+	// getWindow().open(new ExternalResource("#ManageMetadataTemplates"));
     }
 }

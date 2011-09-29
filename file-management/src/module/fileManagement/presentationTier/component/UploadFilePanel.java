@@ -9,11 +9,12 @@ import module.fileManagement.domain.Document;
 import module.fileManagement.presentationTier.component.UploadFileArea.FileUploadListener;
 import module.fileManagement.presentationTier.component.UploadFileArea.OnFileUploadEvent;
 import module.fileManagement.presentationTier.data.DocumentContainer;
+import module.fileManagement.presentationTier.pages.DocumentBrowse;
 import module.vaadin.data.util.ObjectHintedProperty;
+import pt.ist.vaadinframework.EmbeddedApplication;
 
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.Property.ValueChangeNotifier;
-import com.vaadin.terminal.ExternalResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -24,30 +25,30 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 
 public class UploadFilePanel extends CustomComponent implements ValueChangeNotifier {
-    
+
     private final UploadFileArea uploadArea;
     private final Table documents;
     private DocumentContainer documentContainer;
-//    private DocumentContainer selectedDocumentsContainer;
+    // private DocumentContainer selectedDocumentsContainer;
     private ObjectHintedProperty<Collection> selectedDocumentsProperty;
     private ContextPath contextPath;
-    
+
     public UploadFilePanel() {
 	super();
 	documentContainer = new DocumentContainer();
 	selectedDocumentsProperty = new ObjectHintedProperty<Collection>(new HashSet<Document>(), Collection.class);
 	this.documents = createDocumentTable();
-	
+
 	uploadArea = new UploadFileArea();
 	uploadArea.addListener(new FileUploadListener() {
-	    
+
 	    @Override
 	    public void uploadedFile(OnFileUploadEvent event) {
 		addDocument(event.getUploadedFileNode().getDocument());
 	    }
 	});
     }
-    
+
     public UploadFilePanel(ContextPath contextPath) {
 	this();
 	this.contextPath = contextPath;
@@ -68,11 +69,13 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
 	hlUploadArea.setSpacing(true);
 	hlUploadArea.addComponent(uploadArea);
 	hlUploadArea.addComponent(new Button("Finalizar Upload", new ClickListener() {
-	    
+
 	    @Override
 	    public void buttonClick(ClickEvent event) {
 		documentContainer.commit();
-		getWindow().open(new ExternalResource("#DocumentBrowse-" + contextPath));
+		// getWindow().open(new ExternalResource("#DocumentBrowse-" +
+		// contextPath));
+		EmbeddedApplication.open(getApplication(), DocumentBrowse.class, contextPath.toString());
 	    }
 	}));
 	vl.addComponent(uploadArea.getErrorLayout());
@@ -91,24 +94,25 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
 	table.setSortDisabled(true);
 	table.setContainerDataSource(documentContainer);
 	table.setPropertyDataSource(selectedDocumentsProperty);
-	table.setVisibleColumns(new Object[] {"displayName"});
-//	table.addGeneratedColumn("ops", new ColumnGenerator() {
-//
-//	    @Override
-//	    public Component generateCell(Table source, final Object itemId, Object columnId) {
-//		HorizontalLayout hl = new HorizontalLayout();
-//		Button button = new Button("Remover", new ClickListener() {
-//		    @Override
-//		    public void buttonClick(ClickEvent event) {
-//			table.removeItem(itemId);
-//			forceDocumentVisibility();
-//		    }
-//		});
-//		button.setStyleName(BaseTheme.BUTTON_LINK);
-//		hl.addComponent(button);
-//		return hl;
-//	    }
-//	});
+	table.setVisibleColumns(new Object[] { "displayName" });
+	// table.addGeneratedColumn("ops", new ColumnGenerator() {
+	//
+	// @Override
+	// public Component generateCell(Table source, final Object itemId,
+	// Object columnId) {
+	// HorizontalLayout hl = new HorizontalLayout();
+	// Button button = new Button("Remover", new ClickListener() {
+	// @Override
+	// public void buttonClick(ClickEvent event) {
+	// table.removeItem(itemId);
+	// forceDocumentVisibility();
+	// }
+	// });
+	// button.setStyleName(BaseTheme.BUTTON_LINK);
+	// hl.addComponent(button);
+	// return hl;
+	// }
+	// });
 	return table;
     }
 
@@ -134,19 +138,19 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
     public void removeListener(ValueChangeListener listener) {
 	selectedDocumentsProperty.removeListener(listener);
     }
-    
+
     public DirNode getUploadDir() {
 	return uploadArea.getUploadDir();
     }
-    
+
     public DocumentContainer getDocumentContainer() {
 	return documentContainer;
     }
-    
+
     public ObjectHintedProperty<Collection> getSelectedDocumentsProperty() {
 	return selectedDocumentsProperty;
     }
-    
+
     public void setContextPath(ContextPath ContextPath) {
 	uploadArea.setContextPath(contextPath);
     }

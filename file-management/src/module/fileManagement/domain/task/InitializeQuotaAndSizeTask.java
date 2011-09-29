@@ -1,60 +1,30 @@
 package module.fileManagement.domain.task;
 
-import java.util.HashSet;
-
-import module.fileManagement.domain.AbstractFileNode;
-import module.fileManagement.domain.DirNode;
-import module.fileManagement.domain.FileNode;
-import module.fileManagement.domain.VersionedFile;
 import myorg.domain.MyOrg;
-import myorg.domain.User;
+import myorg.domain.contents.Node;
 import myorg.domain.scheduler.WriteCustomTask;
+import pt.ist.bennu.vaadin.domain.contents.VaadinNode;
 
 public class InitializeQuotaAndSizeTask extends WriteCustomTask {
-    
-    public void executeTask() {
-	HashSet<User> usersWithRepository = new HashSet<User>();
-	for(User user : MyOrg.getInstance().getUser()) {
-		if (user.hasFileRepository()) {
-		    final DirNode repository = user.getFileRepository();
-		    repository.setQuota(DirNode.USER_REPOSITORY_QUOTA);
-		    if (!user.hasTrash()) {
-			repository.createTrashFolder(user);
-		    }
-		    //creates if it doesnt exists.
-		    repository.getSharedFolder();
-		    out.printf("User %s , trash : %s , shared : %s, quota : %s\n", user.getUsername(), user.getTrash().getDisplayName(), repository.getSharedFolder().getDisplayName(), repository.getQuota());
-		    usersWithRepository.add(user);
-		}
-		
-	}
-	
-	out.printf("Users processed : %s\n", usersWithRepository.size());
-	
-	for(User user : usersWithRepository) {
-	    final long repositorySize = updateFileRepositorySize(user.getFileRepository());
-	    out.printf("User : %s Size: %s\n", user.getUsername() , VersionedFile.FILE_SIZE_UNIT.prettyPrint(repositorySize));
-	}
-    }
-
-    private long updateFileRepositorySize(DirNode repository) {
-	long size = 0;
-	for(AbstractFileNode node : repository.getChild()) {
-	    if (node instanceof DirNode) {
-		size += updateFileRepositorySize((DirNode) node); 
-	    }
-	    if (node instanceof FileNode) {
-//		size += node.getFilesize();
-		size += 1024;
-	    }
-	}
-	repository.setSize(size);
-	return size;
-    }
-
-    @Override
     protected void doService() {
-	executeTask();
+	for (Node node : MyOrg.getInstance().getNodes()) {
+	    if (node instanceof VaadinNode) {
+		final VaadinNode vaadinNode = (VaadinNode) node;
+		final String argument = vaadinNode.getArgument();
+		String replace = "";
+		if (argument.startsWith("PageView")) {
+		    final String[] split = argument.split("-");
+		    replace = "PageView?page=" + split[1];
+		} else {
+		    if (argument.endsWith("-")) {
+			replace = argument.substring(0, argument.length() - 1);
+		    }
+		}
+		if (!replace.isEmpty()) {
+		    // vaadinNode.setArgument(replace);
+		    out.printf("arg %s replaced by %s\n", argument, replace);
+		}
+	    }
+	}
     }
-    
 }
