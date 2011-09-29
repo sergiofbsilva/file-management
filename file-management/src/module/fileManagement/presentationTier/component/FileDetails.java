@@ -37,8 +37,7 @@ public class FileDetails extends NodeDetails {
 
 	    @Override
 	    public void buttonClick(ClickEvent event) {
-		final String fragment = "DocumentExtendedInfo-" + getNode().getExternalId();
-		((EmbeddedApplication) getApplication()).open(DocumentExtendedInfo.class, fragment);
+		EmbeddedApplication.open(getApplication(), DocumentExtendedInfo.class, getNode().getExternalId());
 	    }
 	});
 	btExtendedInfoLink.setStyleName(BaseTheme.BUTTON_LINK);
@@ -53,7 +52,7 @@ public class FileDetails extends NodeDetails {
 
     public Button createDeleteFileLink() {
 	Button btDeleteFileLink = new Button(getMessage("label.delete"), new Button.ClickListener() {
-	    
+
 	    @Override
 	    public void buttonClick(ClickEvent event) {
 		showDeleteDialog();
