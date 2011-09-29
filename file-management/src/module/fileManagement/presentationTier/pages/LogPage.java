@@ -2,6 +2,7 @@
 package module.fileManagement.presentationTier.pages;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -21,11 +22,11 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Layout;
 import com.vaadin.ui.VerticalLayout;
 
-@EmbeddedComponent(path="LogPage")
+@EmbeddedComponent(path= { "LogPage" } )
 public class LogPage extends CustomComponent implements EmbeddedComponentContainer {
 
     @Override
-    public void setArguments(String... arg0) {
+    public void setArguments(Map<String,String> arguments) {
 	// TODO Auto-generated method stub
 
     }

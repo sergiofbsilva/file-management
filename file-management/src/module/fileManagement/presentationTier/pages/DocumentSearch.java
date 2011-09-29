@@ -1,5 +1,7 @@
 package module.fileManagement.presentationTier.pages;
 
+import java.util.Map;
+
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
 
@@ -9,7 +11,7 @@ import com.vaadin.ui.CustomComponent;
 public class DocumentSearch extends CustomComponent implements EmbeddedComponentContainer {
 
     @Override
-    public void setArguments(String... arg0) {
+    public void setArguments(Map<String,String> arguments) {
 	// TODO Auto-generated method stub
 
     }

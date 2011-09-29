@@ -59,8 +59,8 @@ public class DirDetails extends NodeDetails {
     public void updateOperations() {
 	if (getNode().hasParent() && getNode().isWriteGroupMember()) {
 	    addOperation(createRenameDirLink());
-	    addOperation(createDeleteDirLink());
 	    addOperation(createShareLink());
+	    addOperation(createDeleteDirLink());
 	} else {
 	    if (getNode().isShared()) {
 		addOperation(createDeleteDirLink());

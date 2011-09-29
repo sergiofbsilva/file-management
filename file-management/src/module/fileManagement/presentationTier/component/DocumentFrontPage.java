@@ -3,6 +3,7 @@ package module.fileManagement.presentationTier.component;
 import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 import module.fileManagement.domain.AbstractFileNode;
 import module.fileManagement.domain.ContextPath;
@@ -69,7 +70,7 @@ import com.vaadin.ui.themes.BaseTheme;
 import com.vaadin.ui.themes.Reindeer;
 
 @SuppressWarnings("serial")
-@EmbeddedComponent(path = { "DocumentFrontPage-(.*)" })
+@EmbeddedComponent(path = { "DocumentFrontPage" }, args = {"dirNode"} )
 public class DocumentFrontPage extends CustomComponent implements EmbeddedComponentContainer {
 
     protected String getMessage(final String key, String... args) {
@@ -1042,7 +1043,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
     private AbstractFileNode selectedNode = dirNode;
 
     @Override
-    public void setArguments(final String... arg0) {
+    public void setArguments(Map<String,String> arguments) {
     }
 
     @Override

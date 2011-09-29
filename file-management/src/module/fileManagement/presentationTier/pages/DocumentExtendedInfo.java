@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import module.fileManagement.domain.AbstractFileNode;
 import module.fileManagement.domain.Document;
@@ -38,7 +39,7 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.BaseTheme;
 
-@EmbeddedComponent(path = { "DocumentExtendedInfo-(.*)" })
+@EmbeddedComponent(path = { "DocumentExtendedInfo" } , args = {"node"} )
 public class DocumentExtendedInfo extends CustomComponent implements EmbeddedComponentContainer {
     private final GridLayout mainGrid;
     private FileNode fileNode;
@@ -47,9 +48,8 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
     private Layout metadataInfoPanel;
     
     @Override
-    public void setArguments(String... args) {
-	String externalId = args[1];
-	fileNode = Document.fromExternalId(externalId);
+    public void setArguments(Map<String,String> arguments) {
+	fileNode = Document.fromExternalId(arguments.get("node"));
     }
 
     public void update() {

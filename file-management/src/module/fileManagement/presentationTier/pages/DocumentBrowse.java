@@ -1,12 +1,16 @@
 package module.fileManagement.presentationTier.pages;
 
 import static module.fileManagement.domain.FileManagementSystem.getMessage;
+
+import java.util.Map;
+
 import module.fileManagement.domain.AbstractFileNode;
 import module.fileManagement.domain.ContextPath;
 import module.fileManagement.presentationTier.component.AddDirWindow;
 import module.fileManagement.presentationTier.component.DocumentFileBrowser;
 import module.fileManagement.presentationTier.component.NodeDetails;
 import pt.ist.bennu.ui.FlowLayout;
+import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
@@ -14,7 +18,6 @@ import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.terminal.ExternalResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -26,7 +29,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Layout;
 import com.vaadin.ui.VerticalLayout;
 
-@EmbeddedComponent(path = { "DocumentBrowse-(.*)" })
+@EmbeddedComponent(path = { "DocumentBrowse"} , args = { "contextPath" })
 public class DocumentBrowse extends CustomComponent implements EmbeddedComponentContainer {
     
     NodeDetails fileDetails;
@@ -37,10 +40,8 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
     
     @Override
     // format a1.parent.parent/a1.parent/a1
-    public void setArguments(String... args) {
-	if (!args[1].trim().isEmpty()) {
-	    browser.setContextPath(args[1]);
-	}
+    public void setArguments(Map<String,String> arguments) {
+	    browser.setContextPath(arguments.get("contextPath"));
     }
     
     public HorizontalLayout createButtons() {
@@ -67,7 +68,8 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
 	
 	btUpload.addListener(new ClickListener() {
 	    public void buttonClick(ClickEvent event) {
-		getWindow().open(new ExternalResource("#UploadPage-" + browser.getContextPath()));
+		final String contextPath = browser.getContextPath().toString();
+		((EmbeddedApplication)getApplication()).open(UploadPage.class, contextPath);
 	    }
 	});
 	

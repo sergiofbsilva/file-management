@@ -57,4 +57,5 @@ public abstract class AbstractLog extends AbstractLog_Base {
     public ContextPath getContextPath() {
    	return getTargetPath().createContextPath();
     }
+    
 }

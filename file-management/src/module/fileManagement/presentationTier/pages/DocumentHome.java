@@ -1,6 +1,9 @@
 package module.fileManagement.presentationTier.pages;
 
 import static module.fileManagement.domain.FileManagementSystem.getMessage;
+
+import java.util.Map;
+
 import module.fileManagement.domain.FileNode;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
@@ -20,7 +23,7 @@ import com.vaadin.ui.themes.Reindeer;
 public class DocumentHome extends CustomComponent implements EmbeddedComponentContainer {
 
     @Override
-    public void setArguments(String... arg0) {
+    public void setArguments(Map<String,String> arguments) {
 	// TODO Auto-generated method stub
 
     }

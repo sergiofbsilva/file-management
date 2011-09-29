@@ -4,6 +4,8 @@ import static module.fileManagement.domain.FileManagementSystem.getMessage;
 import module.fileManagement.domain.AbstractFileNode;
 import module.fileManagement.domain.FileNode;
 import module.fileManagement.presentationTier.DownloadUtil;
+import module.fileManagement.presentationTier.pages.DocumentExtendedInfo;
+import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
 
 import com.vaadin.terminal.ExternalResource;
@@ -35,7 +37,8 @@ public class FileDetails extends NodeDetails {
 
 	    @Override
 	    public void buttonClick(ClickEvent event) {
-		getWindow().open(new ExternalResource("#DocumentExtendedInfo-" + getNode().getExternalId()));
+		final String fragment = "DocumentExtendedInfo-" + getNode().getExternalId();
+		((EmbeddedApplication) getApplication()).open(DocumentExtendedInfo.class, fragment);
 	    }
 	});
 	btExtendedInfoLink.setStyleName(BaseTheme.BUTTON_LINK);

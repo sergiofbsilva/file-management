@@ -1,7 +1,12 @@
 package module.fileManagement.presentationTier.pages;
 
+import java.util.Map;
+
 import module.fileManagement.domain.MetadataKey;
 import module.fileManagement.domain.MetadataTemplate;
+
+import org.apache.commons.lang.StringUtils;
+
 import pt.ist.fenixWebFramework.services.Service;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
@@ -21,7 +26,7 @@ import com.vaadin.ui.Window.Notification;
 import com.vaadin.ui.themes.BaseTheme;
 
 @SuppressWarnings("serial")
-@EmbeddedComponent(path = { "CreateMetadataTemplate-(.*)-(.*)" })
+@EmbeddedComponent(path = { "CreateMetadataTemplate" } , args = {"template", "readOnly"} )
 public class CreateMetadataTemplate extends CustomComponent implements EmbeddedComponentContainer {
 
     private int keyIndex = 1;
@@ -189,11 +194,12 @@ public class CreateMetadataTemplate extends CustomComponent implements EmbeddedC
     }
 
     @Override
-    public void setArguments(String... args) {
-	String templateOid = args[1];
+    public void setArguments(Map<String,String> arguments) {
+	final String templateOid = arguments.get("template");
+	final String readOnly = arguments.get("readOnly");
 	setTemplate(templateOid);
-	if (!args[2].isEmpty()) {
-	    readOnly = true;
+	if (!StringUtils.isEmpty(readOnly)) {
+	    this.readOnly = true;
 	}
     }
     

@@ -3,6 +3,7 @@ package module.fileManagement.presentationTier.pages;
 import static module.fileManagement.domain.FileManagementSystem.getMessage;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import module.fileManagement.domain.AbstractFileNode;
@@ -51,7 +52,7 @@ import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.Reindeer;
 
-@EmbeddedComponent(path = { "DocumentShare-(.*),(.*)" })
+@EmbeddedComponent(path = { "DocumentShare" } , args = { "fileNode" , "args" })
 public class DocumentShare extends CustomComponent implements EmbeddedComponentContainer {
     
     private AbstractFileNode fileNode;
@@ -90,9 +91,9 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
     
     
     @Override
-    public void setArguments(String... args) {
-	final String fileExternalId = args[1];
-	final String contextPath = args[2];
+    public void setArguments(Map<String,String> arguments) {
+	final String fileExternalId = arguments.get("fileNode");
+	final String contextPath = arguments.get("contextPath");
 	fileNode = AbstractFileNode.fromExternalId(fileExternalId);
 	if (fileNode == null || !fileNode.isWriteGroupMember()) {
 	    throw new InvalidOperationException("É necessário seleccionar um ficheiro");

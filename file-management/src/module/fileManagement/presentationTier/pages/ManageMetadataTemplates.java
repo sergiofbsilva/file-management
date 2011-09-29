@@ -1,5 +1,7 @@
 package module.fileManagement.presentationTier.pages;
 
+import java.util.Map;
+
 import module.fileManagement.domain.FileManagementSystem;
 import module.fileManagement.domain.MetadataKey;
 import module.fileManagement.domain.MetadataTemplate;
@@ -26,7 +28,7 @@ public class ManageMetadataTemplates extends CustomComponent implements Embedded
 
     
     @Override
-    public void setArguments(String... arg0) {
+    public void setArguments(Map<String,String> arguments) {
 	// TODO Auto-generated method stub
 	
     }

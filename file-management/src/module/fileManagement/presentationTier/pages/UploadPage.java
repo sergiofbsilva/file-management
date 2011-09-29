@@ -4,6 +4,7 @@ import static module.fileManagement.domain.FileManagementSystem.getMessage;
 import static module.fileManagement.domain.VersionedFile.FILE_SIZE_UNIT.prettyPrint;
 
 import java.util.Collection;
+import java.util.Map;
 
 import module.fileManagement.domain.ContextPath;
 import module.fileManagement.domain.DirNode;
@@ -25,7 +26,7 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.Reindeer;
 
-@EmbeddedComponent(path = { "UploadPage-(.*)" })
+@EmbeddedComponent(path = { "UploadPage-(.*)" } , args = { "contextPath" })
 public class UploadPage extends CustomComponent implements EmbeddedComponentContainer {
     
     private MetadataPanel metadataPanel;
@@ -139,8 +140,8 @@ public class UploadPage extends CustomComponent implements EmbeddedComponentCont
     }
 
     @Override
-    public void setArguments(String... arguments) {
-	final ContextPath contextPath = new ContextPath(arguments[1]);
+    public void setArguments(Map<String,String> arguments) {
+	final ContextPath contextPath = new ContextPath(arguments.get("contextPath"));
 	setUploadArea(contextPath);
     }
 }
