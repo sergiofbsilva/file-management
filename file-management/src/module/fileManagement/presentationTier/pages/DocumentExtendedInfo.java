@@ -39,16 +39,16 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.BaseTheme;
 
-@EmbeddedComponent(path = { "DocumentExtendedInfo" } , args = {"node"} )
+@EmbeddedComponent(path = { "DocumentExtendedInfo" }, args = { "node" })
 public class DocumentExtendedInfo extends CustomComponent implements EmbeddedComponentContainer {
     private final GridLayout mainGrid;
     private FileNode fileNode;
     private Component metadataInfoView;
     private Component editMetadataView;
     private Layout metadataInfoPanel;
-    
+
     @Override
-    public void setArguments(Map<String,String> arguments) {
+    public void setArguments(Map<String, String> arguments) {
 	fileNode = Document.fromExternalId(arguments.get("node"));
     }
 
@@ -105,27 +105,29 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
 	}
 	return versions;
     }
-    
+
     private Component editMetadataPanel() {
 	final Document document = fileNode.getDocument();
-	final ObjectHintedProperty<Collection> selectedDocuments = new ObjectHintedProperty<Collection>(new HashSet<Document>(), Collection.class);
+	final ObjectHintedProperty<Collection> selectedDocuments = new ObjectHintedProperty<Collection>(new HashSet<Document>(),
+		Collection.class);
 	final DocumentContainer documentContainer = new DocumentContainer();
 	documentContainer.addItem(document);
 	final Collection docs = selectedDocuments.getValue();
 	docs.add(document);
 	selectedDocuments.setValue(docs);
-	
+
 	final Button btSubmit = new Button("Guardar");
 	btSubmit.addListener(new ClickListener() {
-	    
+
 	    @Override
 	    public void buttonClick(ClickEvent event) {
 		documentContainer.commit();
-//		metadataInfoPanel.replaceComponent(editMetadataView, metadataInfoView);
+		// metadataInfoPanel.replaceComponent(editMetadataView,
+		// metadataInfoView);
 		update();
 	    }
 	});
-	
+
 	VerticalLayout vlEditMetadata = new VerticalLayout();
 	vlEditMetadata.setSizeFull();
 	vlEditMetadata.setSpacing(true);
@@ -140,22 +142,25 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
     private Layout createMetadataInfoPanel(DomainItem<FileNode> item) {
 	final VerticalLayout vl = new VerticalLayout();
 	final HorizontalLayout hl = new HorizontalLayout();
-	hl.addComponent(new Label(String.format("<h3>Metadata Versão %s</h3>", item.getItemProperty("document.versionNumber").toString()), Label.CONTENT_XHTML));
-	
-	final Button btEditMetadata = new Button("editar");
-	btEditMetadata.setStyleName(BaseTheme.BUTTON_LINK);
-	btEditMetadata.addListener(new ClickListener() {
-	    
-	    @Override
-	    public void buttonClick(ClickEvent event) {
-		editMetadataView = editMetadataPanel();
-		vl.replaceComponent(metadataInfoView, editMetadataView);
-	    }
-	});
-	
-	hl.addComponent(btEditMetadata);
+	hl.addComponent(new Label(String.format("<h3>Metadata Versão %s</h3>", item.getItemProperty("document.versionNumber")
+		.toString()), Label.CONTENT_XHTML));
+
+	if (fileNode.isWriteGroupMember()) {
+	    final Button btEditMetadata = new Button("editar");
+	    btEditMetadata.setStyleName(BaseTheme.BUTTON_LINK);
+	    btEditMetadata.addListener(new ClickListener() {
+
+		@Override
+		public void buttonClick(ClickEvent event) {
+		    editMetadataView = editMetadataPanel();
+		    vl.replaceComponent(metadataInfoView, editMetadataView);
+		}
+	    });
+	    hl.addComponent(btEditMetadata);
+	}
+
 	vl.addComponent(hl);
-	
+
 	final HintedProperty recentMetadata = (HintedProperty) item.getItemProperty("document.recentMetadata");
 	final DomainContainer<Metadata> metadataContainer = new DomainContainer<Metadata>(
 		(Collection<Metadata>) recentMetadata.getValue(), Metadata.class);
@@ -165,7 +170,6 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
 	    table.setContainerDataSource(metadataContainer);
 	    table.setVisibleColumns(new Object[] { "keyValue", "value" });
 	    table.setColumnHeaderMode(Table.COLUMN_HEADER_MODE_HIDDEN);
-//	    table.setCaption("Metadata");
 	    metadataInfoView = table;
 	} else {
 	    metadataInfoView = new Label("Documento sem metadata");
@@ -187,5 +191,5 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
 	}
 	return viewer;
     }
-    
+
 }

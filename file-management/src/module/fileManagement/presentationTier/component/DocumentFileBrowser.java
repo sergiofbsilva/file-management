@@ -45,22 +45,23 @@ import com.vaadin.ui.Window.Notification;
 
 @SuppressWarnings("serial")
 public class DocumentFileBrowser extends CustomComponent implements ValueChangeNotifier, ValueChangeListener {
-    
+
     private boolean accessDenied = false;
-    
+
     public Component getCurrent() {
 	return this;
     }
-
 
     protected String getMessage(final String key, String... args) {
 	return FileManagementSystem.getMessage(key, args);
     }
 
     public class DocumentTable extends Table implements Table.ValueChangeListener, ItemClickListener {
-	
-	public java.util.Collection<?> getSortableContainerPropertyIds() {return Collections.EMPTY_SET;};
-	
+
+	public java.util.Collection<?> getSortableContainerPropertyIds() {
+	    return Collections.EMPTY_SET;
+	};
+
 	DocumentTable() {
 	    super();
 	    setSizeFull();
@@ -75,18 +76,18 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 	    final ItemClickListener itemClickListener = this;
 	    addListener(itemClickListener);
 	    addGeneratedColumn("visibilidade", new ColumnGenerator() {
-	        
-	        @Override
-	        public Component generateCell(Table source, Object itemId, Object columnId) {
-	        	VisibilityListViewer viewer = new VisibilityListViewer();
-	        	final DomainItem<AbstractFileNode> fileNode = (DomainItem<AbstractFileNode>) source.getItem(itemId);
-	        	final Property itemProperty = fileNode.getItemProperty("visibilityGroups");
-	        	viewer.setPropertyDataSource(itemProperty);
-	        	return viewer;
-	        }
+
+		@Override
+		public Component generateCell(Table source, Object itemId, Object columnId) {
+		    VisibilityListViewer viewer = new VisibilityListViewer();
+		    final DomainItem<AbstractFileNode> fileNode = (DomainItem<AbstractFileNode>) source.getItem(itemId);
+		    final Property itemProperty = fileNode.getItemProperty("visibilityGroups");
+		    viewer.setPropertyDataSource(itemProperty);
+		    return viewer;
+		}
 	    });
 	}
-	
+
 	@Override
 	public void itemClick(final ItemClickEvent event) {
 
@@ -118,64 +119,66 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 
     }
 
-//    private class DocumentMenu extends MenuBar {
-//	
-//	DocumentMenu() {
-//	    setWidth(100, Sizeable.UNITS_PERCENTAGE);
-//	}
-//	
-//	public void refresh() {
-//	    removeItems();
-//	    addDirNode((DirNode) nodeItem.getValue());
-//	}
-//
-//	private void addDirNode(final DirNode dirNode) {
-//	    if (dirNode != null) {
-//		final DirNode parent = dirNode.getParent();
-//		addDirNode(parent);
-//
-//		final String label = getNodeName(dirNode);
-//		addItem(label + "  »", new Command() {
-//		    @Override
-//		    public void menuSelected(final MenuItem selectedItem) {
-//			nodeItem.setValue(dirNode);
-//		    }
-//		});
-//	    }
-//	}
-//
-//    }
-    
+    // private class DocumentMenu extends MenuBar {
+    //
+    // DocumentMenu() {
+    // setWidth(100, Sizeable.UNITS_PERCENTAGE);
+    // }
+    //
+    // public void refresh() {
+    // removeItems();
+    // addDirNode((DirNode) nodeItem.getValue());
+    // }
+    //
+    // private void addDirNode(final DirNode dirNode) {
+    // if (dirNode != null) {
+    // final DirNode parent = dirNode.getParent();
+    // addDirNode(parent);
+    //
+    // final String label = getNodeName(dirNode);
+    // addItem(label + "  »", new Command() {
+    // @Override
+    // public void menuSelected(final MenuItem selectedItem) {
+    // nodeItem.setValue(dirNode);
+    // }
+    // });
+    // }
+    // }
+    //
+    // }
+
     public class DocumentMenu extends MenuBar {
-	
+
 	DocumentMenu() {
 	    setWidth(100, Sizeable.UNITS_PERCENTAGE);
 	}
-	
+
 	private class DirNodeCommand implements Command {
-	    
+
 	    final private DirNode dirNode;
-	    
+
 	    public DirNodeCommand(DirNode dirNode) {
 		super();
 		this.dirNode = dirNode;
 	    }
-	    
+
 	    @Override
 	    public void menuSelected(MenuItem selectedItem) {
-		removeAllItemsAfter(selectedItem);
-		nodeItem.setValue(dirNode);
+		if (!nodeItem.getValue().equals(dirNode)) {
+		    removeAllItemsAfter(selectedItem);
+		    nodeItem.setValue(dirNode);
+		}
 	    }
-	    
+
 	}
-	
+
 	private void removeAllItemsAfter(MenuItem menuItem) {
 	    final int index = getItems().indexOf(menuItem);
 	    if (index != -1) {
 		setItems(new ArrayList<MenuItem>(getItems().subList(0, index + 1)));
 	    }
 	}
-	
+
 	private void setItems(List<MenuItem> items2) {
 	    getItems().clear();
 	    getItems().addAll(items2);
@@ -187,27 +190,27 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 		addItem(getNodeName(dirNode) + "  »", new DirNodeCommand(dirNode));
 	    }
 	}
-	
+
 	@Override
 	public String toString() {
 	    final List<DirNode> dirNodes = new ArrayList<DirNode>();
-	    for(MenuItem item : getItems()) {
-		dirNodes.add(((DirNodeCommand)item.getCommand()).dirNode);
+	    for (MenuItem item : getItems()) {
+		dirNodes.add(((DirNodeCommand) item.getCommand()).dirNode);
 	    }
 	    return new ContextPath(dirNodes).toString();
 	}
-	
+
 	public void setDirNodes(ContextPath contextPath) {
 	    getItems().clear();
 	    for (DirNode dirNode : contextPath.getDirNodes()) {
-		    addDirNode(dirNode);
+		addDirNode(dirNode);
 	    }
 	}
-	
+
 	private List<DirNode> getDirNodes() {
 	    final List<DirNode> dirNodes = new ArrayList<DirNode>();
-	    for(MenuItem item : getItems()) {
-		dirNodes.add(((DirNodeCommand)item.getCommand()).dirNode);
+	    for (MenuItem item : getItems()) {
+		dirNodes.add(((DirNodeCommand) item.getCommand()).dirNode);
 	    }
 	    return dirNodes;
 	}
@@ -221,12 +224,11 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
     private final DocumentMenu documentMenu = new DocumentMenu();
 
     private DomainItem<AbstractFileNode> nodeItem;
-   
 
     @Override
     public void attach() {
 	super.attach();
-//	outerWindow = getWindow();
+	// outerWindow = getWindow();
 	final AbstractLayout layout = new VerticalLayout();
 	layout.setSizeFull();
 	documentMenu.setSizeFull();
@@ -240,16 +242,15 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 	}
     }
 
-    
     public DirNode getInitialDirNode() {
 	return FileRepository.getOrCreateFileRepository(UserView.getCurrentUser());
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
     public void valueChange(ValueChangeEvent event) {
-//	DomainItem<AbstractFileNode> item = (DomainItem<AbstractFileNode>) event.getProperty();
 	DomainItem<AbstractFileNode> item = getNodeItem();
+	FileManagementSystem.getLogger().warn("DFB [valueChange] : parent is " + item.getItemProperty("displayName").toString());
 	final DomainContainer<AbstractFileNode> childs = (DomainContainer<AbstractFileNode>) item.getItemProperty("child");
 	childs.addContainerFilter(new Filter() {
 
@@ -294,11 +295,11 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 	documentTable.setColumnExpandRatio("displayName", 0.60f);
 	documentTable.setColumnExpandRatio("visibilidade", 0.25f);
 	documentTable.sort();
-	
-//	this.dirNode.setValue(dirNode);
-//	documentMenu.refresh();
+
+	// this.dirNode.setValue(dirNode);
+	// documentMenu.refresh();
     }
-    
+
     private ThemeResource getThemeResource(AbstractFileNode abstractFileNode) {
 	final String iconFile = abstractFileNode.isDir() ? "folder1_16x16.gif" : getIconFile(((FileNode) abstractFileNode)
 		.getDocument().getLastVersionedFile().getFilename());
@@ -320,11 +321,11 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
     public DomainItem<AbstractFileNode> getNodeItem() {
 	return nodeItem;
     }
-    
+
     public DirNode getDirNode() {
 	return (DirNode) nodeItem.getValue();
     }
-    
+
     public DocumentTable getDocumentTable() {
 	return documentTable;
     }
@@ -342,11 +343,11 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
     public void removeListener(ValueChangeListener listener) {
 	documentTable.removeListener(listener);
     }
-    
+
     public void setValue(DirNode dirNode) {
 	nodeItem.setValue(dirNode);
     }
-    
+
     public DocumentFileBrowser() {
 	nodeItem = new DomainItem<AbstractFileNode>(DirNode.class);
 	nodeItem.addListener(this);
@@ -354,37 +355,37 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 	setValue(initialDirNode);
 	documentMenu.addDirNode(initialDirNode);
     }
-    
+
     public DomainContainer<AbstractFileNode> getContainer() {
 	return (DomainContainer<AbstractFileNode>) documentTable.getContainerDataSource();
     }
-    
+
     public void addDirChangedListener(ValueChangeListener listener) {
 	nodeItem.addListener(listener);
     }
-    
+
     private static AbstractFileNode getNodeFromItemId(Object itemId) {
 	AbstractFileNode node = null;
 	if (itemId instanceof VBoxProperty) {
-	    node = (AbstractFileNode) ((VBoxProperty)itemId).getValue();
+	    node = (AbstractFileNode) ((VBoxProperty) itemId).getValue();
 	} else if (itemId instanceof AbstractFileNode) {
 	    node = (AbstractFileNode) itemId;
 	}
 	return node;
     }
-    
+
     public void removeNodeAndSelectNext(Object itemId) {
 	final Container containerDataSource = documentTable.getContainerDataSource();
 	List<Object> itemIds = new ArrayList<Object>(containerDataSource.getItemIds());
 	Object nextItemId = null;
 	int pos = itemIds.indexOf(itemId);
 	if (pos != -1 && itemIds.size() > 1) {
-	    nextItemId = itemIds.get(pos + (pos == itemIds.size() - 1 ? -1 : 1)); 
+	    nextItemId = itemIds.get(pos + (pos == itemIds.size() - 1 ? -1 : 1));
 	}
 	containerDataSource.removeItem(itemId);
 	documentTable.select(nextItemId);
     }
-    
+
     public void setContextPath(String pathString) {
 	final ContextPath contextPath = new ContextPath(pathString);
 	final DirNode lastDirNode = contextPath.getLastDirNode();
@@ -395,20 +396,18 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 	    accessDenied = true;
 	}
     }
-    
-    
-    
-    private boolean lastLineOfDefense(DirNode lastDirNode) {
-	return (lastDirNode.isAccessible() && !lastDirNode.hasTrashUser()) || Role.getRole(RoleType.MANAGER).isMember(UserView.getCurrentUser());
-    }
 
+    private boolean lastLineOfDefense(DirNode lastDirNode) {
+	return (lastDirNode.isAccessible() && !lastDirNode.hasTrashUser())
+		|| Role.getRole(RoleType.MANAGER).isMember(UserView.getCurrentUser());
+    }
 
     public DocumentMenu getDocumentMenu() {
 	return documentMenu;
     }
-    
+
     public ContextPath getContextPath() {
 	return documentMenu.getContextPath();
     }
-    
+
 }

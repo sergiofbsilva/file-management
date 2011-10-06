@@ -36,12 +36,19 @@ public abstract class NodeDetails extends Panel {
     private final boolean operationsVisible;
     private final boolean infoVisible;
 
+    public String getDeleteDialogMessage() {
+	return getMessage("label.node.delete.message", getNode().getDisplayName());
+    }
+
+    public String getDeleteDialogTitle() {
+	return getMessage("label.node.delete.title", getNode().getDisplayName());
+    }
+
     public void showDeleteDialog() {
-	final String displayName = getNode().getDisplayName();
 	// final CheckBox chkDeleteAll = new CheckBox(
 	// "Este ficheiro encontra-se partilhado. Deseja apagá-lo para todos os outros utilizadores?");
-	final String windowTitle = getMessage("label.node.delete.title", displayName);
-	final String message = getMessage("label.node.delete.message", displayName);
+	final String windowTitle = getDeleteDialogTitle();
+	final String message = getDeleteDialogMessage();
 	final String yes = getMessage("label.yes");
 	final String no = getMessage("label.no");
 	ConfirmDialog confirm = new DefaultConfirmDialogFactory().create(windowTitle, message, yes, no);
@@ -66,6 +73,7 @@ public abstract class NodeDetails extends Panel {
 	    }
 
 	};
+	confirm.setContentMode(ConfirmDialog.CONTENT_TEXT_WITH_NEWLINES);
 	confirm.show(getWindow(), listener, true);
     }
 
@@ -119,7 +127,7 @@ public abstract class NodeDetails extends Panel {
     public Component updateDetails() {
 	TabularViewer viewer = new TabularViewer(FMSViewerFactory.getInstance());
 	List<String> propertyIds = new ArrayList<String>();
-	propertyIds.addAll(Arrays.asList(new String[] { "displayName", "presentationFilesize", "visibilityGroups" }));
+	propertyIds.addAll(Arrays.asList(new String[] { "type", "displayName", "presentationFilesize", "visibilityGroups" }));
 	propertyIds.addAll(visibleProperties);
 	viewer.setItemDataSource(nodeItem, propertyIds);
 	return viewer;

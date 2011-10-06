@@ -11,46 +11,53 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.themes.BaseTheme;
 
 public class DirDetails extends NodeDetails {
-    
-    
+
     public DirDetails(DomainItem<AbstractFileNode> nodeItem, boolean operationsVisible, boolean infoVisible) {
-	super(nodeItem,operationsVisible, infoVisible);
+	super(nodeItem, operationsVisible, infoVisible);
 	addVisibleProperty("countFiles");
     }
-    
+
     public DirDetails(DomainItem<AbstractFileNode> nodeItem) {
-	this(nodeItem,true,true);
+	this(nodeItem, true, true);
     }
-    
+
     @Override
     public DirNode getNode() {
-        return (DirNode) super.getNode();
+	return (DirNode) super.getNode();
     }
-    
+
     private Button createRenameDirLink() {
 	Button btRenameDir = new Button(getMessage("label.rename"), new Button.ClickListener() {
-	    
+
 	    @Override
 	    public void buttonClick(ClickEvent event) {
 		final RenameDirWindow renameDirWindow = new RenameDirWindow(getNodeItem());
 		getWindow().addWindow(renameDirWindow);
 	    }
 	});
-	
+
 	btRenameDir.setStyleName(BaseTheme.BUTTON_LINK);
-	return btRenameDir;  
+	return btRenameDir;
     }
-    
-    
+
+    @Override
+    public String getDeleteDialogMessage() {
+	if (getNode().hasAnyChild()) {
+	    return getMessage("label.node.notempty.delete.message", getNode().getDisplayName());
+	} else {
+	    return super.getDeleteDialogMessage();
+	}
+    }
+
     private Button createDeleteDirLink() {
 	Button btDeleteDir = new Button(getMessage("label.delete"), new ClickListener() {
-	    
+
 	    @Override
 	    public void buttonClick(ClickEvent event) {
 		showDeleteDialog();
 	    }
 	});
-	
+
 	btDeleteDir.setStyleName(BaseTheme.BUTTON_LINK);
 	return btDeleteDir;
     }
