@@ -1,2 +1,2 @@
 name=fileManagement
-depends=core,fileSupport,bennu-vaadin, organization
+depends=core,fileSupport,bennu-vaadin, organization, scheduler
