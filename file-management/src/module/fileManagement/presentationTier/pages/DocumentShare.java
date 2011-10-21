@@ -123,7 +123,7 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
 	welcomePanel.setCaption(getMessage("document.share.title"));
 	welcomePanel.setScrollable(false);
 	final Layout hlWelcomeContent = new VerticalLayout();
-	Label lblWelcomeText = new Label(getMessage("welcome.content"), Label.CONTENT_TEXT);
+	Label lblWelcomeText = new Label(getMessage("welcome.share.content"), Label.CONTENT_XHTML);
 	hlWelcomeContent.addComponent(lblWelcomeText);
 	welcomePanel.setContent(hlWelcomeContent);
 	return welcomePanel;

@@ -5,6 +5,7 @@ import static module.fileManagement.domain.FileManagementSystem.getMessage;
 import java.util.Map;
 
 import module.fileManagement.domain.FileNode;
+import pt.ist.bennu.ui.GridSystemLayout;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
@@ -72,13 +73,20 @@ public class DocumentHome extends CustomComponent implements EmbeddedComponentCo
     }
 
     public Component createPage() {
-	VerticalLayout mainLayout = new VerticalLayout();
-	mainLayout.setMargin(true);
-	mainLayout.setSizeFull();
-	mainLayout.setSpacing(true);
-	mainLayout.addComponent(createWelcomePanel());
+	// VerticalLayout mainLayout = new VerticalLayout();
+	// mainLayout.setMargin(true);
+	// mainLayout.setSizeFull();
+	// mainLayout.setSpacing(true);
+	// mainLayout.addComponent(createWelcomePanel());
+	// //
 	// mainLayout.addComponent(createGrid(createRecentlyShared(),createFileDetails()));
-	return mainLayout;
+	// return mainLayout;
+	GridSystemLayout gsl = new GridSystemLayout();
+	gsl.setCell("welcome", 16, createWelcomePanel());
+	// gsl.setCell("recentlyShared", 8, createRecentlyShared());
+	// gsl.setCell("dirDetails", 8, createDirDetails());
+
+	return gsl;
     }
 
     @Override

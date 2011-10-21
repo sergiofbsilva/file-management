@@ -45,7 +45,7 @@ public class VisibilityList extends ArrayList<VisibilityGroup> {
 		return true;
 	    }
 	}
-        return false;
+	return false;
     }
 
     public PersistentGroup getWriteGroup() {
@@ -72,4 +72,14 @@ public class VisibilityList extends ArrayList<VisibilityGroup> {
 	}
 	return result.size() == 0 ? null : new UnionGroup(result);
     }
+
+    public boolean contains(Class clazz) {
+	for (VisibilityGroup group : this) {
+	    if (group.persistentGroup.getClass().isAssignableFrom(clazz)) {
+		return true;
+	    }
+	}
+	return false;
+    }
+
 }

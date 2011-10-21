@@ -57,7 +57,7 @@ public abstract class NodeDetails extends Panel {
 	// if (getNode().getVisibilityState() != VisibilityState.PRIVATE) {
 	// VerticalLayout vl = (VerticalLayout) confirm.getContent();
 	// final Panel panel = (Panel) vl.getComponent(0);
-	// panel.addComponent(chkDeleteAll);
+	// panel.addComponent( chkDeleteAll);
 	// }
 	// }
 
@@ -73,7 +73,6 @@ public abstract class NodeDetails extends Panel {
 	    }
 
 	};
-	confirm.setContentMode(ConfirmDialog.CONTENT_TEXT_WITH_NEWLINES);
 	confirm.show(getWindow(), listener, true);
     }
 

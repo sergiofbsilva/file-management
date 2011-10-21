@@ -10,6 +10,7 @@ import module.fileManagement.presentationTier.component.AddDirWindow;
 import module.fileManagement.presentationTier.component.DocumentFileBrowser;
 import module.fileManagement.presentationTier.component.NodeDetails;
 import pt.ist.bennu.ui.FlowLayout;
+import pt.ist.bennu.ui.GridSystemLayout;
 import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
@@ -27,7 +28,6 @@ import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Layout;
-import com.vaadin.ui.VerticalLayout;
 
 @EmbeddedComponent(path = { "DocumentBrowse" }, args = { "contextPath" })
 public class DocumentBrowse extends CustomComponent implements EmbeddedComponentContainer {
@@ -35,7 +35,8 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
     NodeDetails fileDetails;
     DocumentFileBrowser browser;
     Layout mainLayout;
-    GridLayout mainGrid;
+    // GridLayout mainGrid;
+    GridSystemLayout gsl;
     Button btUpload;
 
     @Override
@@ -70,11 +71,38 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
 	btUpload.addListener(new ClickListener() {
 	    public void buttonClick(ClickEvent event) {
 		final String contextPath = browser.getContextPath().toString();
-		((EmbeddedApplication) getApplication()).open(UploadPage.class, contextPath);
+		EmbeddedApplication.open(getApplication(), UploadPage.class, contextPath);
 	    }
 	});
 
 	layout.addComponent(btUpload);
+
+	// Button btOpenDestinationDialog = new Button("dest", new
+	// ClickListener() {
+	//
+	// @Override
+	// public void buttonClick(ClickEvent event) {
+	// final SelectDestinationDialog window = new SelectDestinationDialog();
+	// getWindow().addWindow(window);
+	// window.addListener(new CloseListener() {
+	//
+	// @Override
+	// public void windowClose(CloseEvent e) {
+	// final DirNode selectedDirNode = window.getSelectedDirNode();
+	// if (selectedDirNode == null) {
+	// getWindow().showNotification("Nenhuma directoria seleccionada!");
+	// } else {
+	// getWindow().showNotification("Directoria seleccionada : " +
+	// selectedDirNode.getDisplayName());
+	// }
+	//
+	// }
+	// });
+	// }
+	// });
+	//
+	// layout.addComponent(btOpenDestinationDialog);
+
 	return layout;
     }
 
@@ -114,27 +142,33 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
 	return browser;
     }
 
-    public VerticalLayout createPage() {
-	VerticalLayout layout = new VerticalLayout();
-	layout.setSizeFull();
-	layout.setMargin(true, true, false, false);
-	layout.setSpacing(true);
+    public Layout createPage() {
+	// VerticalLayout layout = new VerticalLayout();
+	// layout.setSizeFull();
+	// layout.setMargin(true, true, false, false);
+	// layout.setSpacing(true);
+	// browser = createBrowser();
+	// layout.addComponent(createButtons());
+	// layout.addComponent(new QuotaLabel(browser.getNodeItem()));
+	//
+	// mainGrid = createGrid(browser);
+	// setFileDetails(browser.getNodeItem());
+	// layout.addComponent(mainGrid);
+	// return layout;
 	browser = createBrowser();
-	layout.addComponent(createButtons());
-	layout.addComponent(new QuotaLabel(browser.getNodeItem()));
-
-	mainGrid = createGrid(browser);
+	gsl = new GridSystemLayout();
+	gsl.setCell("quota", 16, new QuotaLabel(browser.getNodeItem()));
+	gsl.setCell("buttons", 16, createButtons());
+	gsl.setCell("browser", 10, browser);
 	setFileDetails(browser.getNodeItem());
-	layout.addComponent(mainGrid);
-	return layout;
+	return gsl;
     }
 
     public void setFileDetails(DomainItem<AbstractFileNode> nodeItem) {
-	mainGrid.removeComponent(fileDetails);
 	fileDetails = NodeDetails.makeDetails(nodeItem);
 	fileDetails.setDocumentBrowse(this);
-	fileDetails.setSizeFull();
-	mainGrid.addComponent(fileDetails, 1, 0);
+	// fileDetails.setSizeFull();
+	gsl.setCell("info", 6, fileDetails);
     }
 
     public DocumentBrowse() {

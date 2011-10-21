@@ -250,7 +250,8 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
     @Override
     public void valueChange(ValueChangeEvent event) {
 	DomainItem<AbstractFileNode> item = getNodeItem();
-	FileManagementSystem.getLogger().warn("DFB [valueChange] : parent is " + item.getItemProperty("displayName").toString());
+	// FileManagementSystem.getLogger().warn("DFB [valueChange] : parent is "
+	// + item.getItemProperty("displayName").toString());
 	final DomainContainer<AbstractFileNode> childs = (DomainContainer<AbstractFileNode>) item.getItemProperty("child");
 	childs.addContainerFilter(new Filter() {
 

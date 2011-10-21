@@ -38,6 +38,7 @@ import com.vaadin.ui.Layout;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.BaseTheme;
+import com.vaadin.ui.themes.Reindeer;
 
 @EmbeddedComponent(path = { "DocumentExtendedInfo" }, args = { "node" })
 public class DocumentExtendedInfo extends CustomComponent implements EmbeddedComponentContainer {
@@ -141,9 +142,13 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
 
     private Layout createMetadataInfoPanel(DomainItem<FileNode> item) {
 	final VerticalLayout vl = new VerticalLayout();
+	vl.setSpacing(true);
+
 	final HorizontalLayout hl = new HorizontalLayout();
-	hl.addComponent(new Label(String.format("<h3>Metadata Versão %s</h3>", item.getItemProperty("document.versionNumber")
-		.toString()), Label.CONTENT_XHTML));
+	final Label lbl = new Label(
+		String.format("Metadata Versão %s", item.getItemProperty("document.versionNumber").toString()));
+	lbl.addStyleName(Reindeer.LABEL_H2);
+	hl.addComponent(lbl);
 
 	if (fileNode.isWriteGroupMember()) {
 	    final Button btEditMetadata = new Button("editar");
