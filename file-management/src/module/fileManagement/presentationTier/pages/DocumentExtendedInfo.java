@@ -20,11 +20,11 @@ import module.fileManagement.presentationTier.component.viewers.FMSViewerFactory
 import module.fileManagement.presentationTier.data.DocumentContainer;
 import module.vaadin.data.util.ObjectHintedProperty;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
-import pt.ist.vaadinframework.data.HintedProperty;
 import pt.ist.vaadinframework.data.reflect.DomainContainer;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
 
+import com.vaadin.data.Property;
 import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -94,7 +94,7 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
 
     private List<Component> getVersionsEntries(DomainItem<FileNode> item) {
 	final List<Component> versions = new ArrayList<Component>();
-	final HintedProperty recentMetadata = (HintedProperty) item.getItemProperty("document.versions");
+	final Property recentMetadata = item.getItemProperty("document.versions");
 	final Collection<Metadata> itemIds = (Collection<Metadata>) recentMetadata.getValue();
 	int index = itemIds.size();
 	for (Metadata metadata : itemIds) {
@@ -166,7 +166,7 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
 
 	vl.addComponent(hl);
 
-	final HintedProperty recentMetadata = (HintedProperty) item.getItemProperty("document.recentMetadata");
+	final Property recentMetadata = item.getItemProperty("document.recentMetadata");
 	final DomainContainer<Metadata> metadataContainer = new DomainContainer<Metadata>(
 		(Collection<Metadata>) recentMetadata.getValue(), Metadata.class);
 	if (metadataContainer.size() > 0) {
