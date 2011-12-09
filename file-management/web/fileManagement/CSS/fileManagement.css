@@ -1,5 +1,3 @@
-@import url(../reindeer/styles.css);
-
 /* Lay the options horizontally */
 .v-select-optiongroup-horizontal .v-select-option {
 	display: inline-block;
