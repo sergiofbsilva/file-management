@@ -199,6 +199,13 @@ public class DirNode extends DirNode_Base {
 	return dirNode;
     }
 
+    public DirNode createDir(final String dirName, final PersistentGroup readGroup, final PersistentGroup writeGroup) {
+	final DirNode dirNode = createDir(dirName, this.getContextPath());
+	dirNode.setReadGroup(readGroup);
+	dirNode.setWriteGroup(writeGroup);
+	return dirNode;
+    }
+
     @Override
     public String getDisplayName() {
 	return hasUser() ? FileManagementSystem.getMessage("label.menu.home") : getName();
