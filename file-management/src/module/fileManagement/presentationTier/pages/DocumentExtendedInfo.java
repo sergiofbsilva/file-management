@@ -19,6 +19,7 @@ import module.fileManagement.presentationTier.component.TabularViewer;
 import module.fileManagement.presentationTier.component.viewers.FMSViewerFactory;
 import module.fileManagement.presentationTier.data.DocumentContainer;
 import module.vaadin.data.util.ObjectHintedProperty;
+import module.vaadin.ui.BennuTheme;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.reflect.DomainContainer;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
@@ -38,7 +39,6 @@ import com.vaadin.ui.Layout;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.BaseTheme;
-import com.vaadin.ui.themes.Reindeer;
 
 @EmbeddedComponent(path = { "DocumentExtendedInfo" }, args = { "node" })
 public class DocumentExtendedInfo extends CustomComponent implements EmbeddedComponentContainer {
@@ -147,7 +147,7 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
 	final HorizontalLayout hl = new HorizontalLayout();
 	final Label lbl = new Label(
 		String.format("Metadata Versão %s", item.getItemProperty("document.versionNumber").toString()));
-	lbl.addStyleName(Reindeer.LABEL_H2);
+	lbl.addStyleName(BennuTheme.LABEL_H2);
 	hl.addComponent(lbl);
 
 	if (fileNode.isWriteGroupMember()) {

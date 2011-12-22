@@ -21,6 +21,7 @@ import module.fileManagement.presentationTier.DownloadUtil;
 import module.fileManagement.presentationTier.component.groups.GroupCreatorRegistry;
 import module.fileManagement.presentationTier.component.groups.HasPersistentGroup;
 import module.fileManagement.presentationTier.component.groups.HasPersistentGroupCreator;
+import module.vaadin.ui.BennuTheme;
 import myorg.applicationTier.Authenticate.UserView;
 import myorg.domain.Presentable;
 import myorg.domain.User;
@@ -67,10 +68,9 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.Window.Notification;
 import com.vaadin.ui.themes.BaseTheme;
-import com.vaadin.ui.themes.Reindeer;
 
 @SuppressWarnings("serial")
-@EmbeddedComponent(path = { "DocumentFrontPage" }, args = {"dirNode"} )
+@EmbeddedComponent(path = { "DocumentFrontPage" }, args = { "dirNode" })
 public class DocumentFrontPage extends CustomComponent implements EmbeddedComponentContainer {
 
     protected String getMessage(final String key, String... args) {
@@ -92,7 +92,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 	public void buttonClick(final ClickEvent event) {
 	    changeDir(linkDirNode);
 	}
-	
+
     }
 
     private class DocumentTable extends Table implements Table.ValueChangeListener, ItemClickListener {
@@ -110,10 +110,11 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 
 	    addContainerProperty("displayName", String.class, null, false, "label.file.displayName");
 	    addContainerProperty("visibility", String.class, null, false, "label.file.visibility");
-//	    addContainerProperty("filesize", String.class, null, true, "label.file.size");
+	    // addContainerProperty("filesize", String.class, null, true,
+	    // "label.file.size");
 	    addContainerProperty("icon", Resource.class, null, true, null);
 
-//	    setColumnAlignment("filesize", Table.ALIGN_RIGHT);
+	    // setColumnAlignment("filesize", Table.ALIGN_RIGHT);
 
 	    setColumnExpandRatio("displayName", 1);
 
@@ -122,17 +123,17 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 
 	    final IndexedContainer indexedContainer = (IndexedContainer) getContainerDataSource();
 	    indexedContainer.setItemSorter(new ItemSorter() {
-	        
-	        @Override
-	        public void setSortProperties(final Sortable container, final Object[] propertyId, final boolean[] ascending) {
-	        }
-	        
-	        @Override
-	        public int compare(final Object itemId1, final Object itemId2) {
-	            final AbstractFileNode node1 = AbstractDomainObject.fromExternalId((String) itemId1);
-	            final AbstractFileNode node2 = AbstractDomainObject.fromExternalId((String) itemId2);
-	            return node1.compareTo(node2);
-	        }
+
+		@Override
+		public void setSortProperties(final Sortable container, final Object[] propertyId, final boolean[] ascending) {
+		}
+
+		@Override
+		public int compare(final Object itemId1, final Object itemId2) {
+		    final AbstractFileNode node1 = AbstractDomainObject.fromExternalId((String) itemId1);
+		    final AbstractFileNode node2 = AbstractDomainObject.fromExternalId((String) itemId2);
+		    return node1.compareTo(node2);
+		}
 
 	    });
 
@@ -150,7 +151,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 	    if (dirNode != null) {
 		for (final AbstractFileNode abstractFileNode : dirNode.getChildSet()) {
 		    if (abstractFileNode.isAccessible()) {
-		    	addAbstractFileNode(abstractFileNode);
+			addAbstractFileNode(abstractFileNode);
 		    }
 		}
 	    }
@@ -181,8 +182,9 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 	    final String visibility = abstractFileNode.getVisibility();
 	    item.getItemProperty("visibility").setValue(visibility);
 
-//	    final String filesize = abstractFileNode.getPresentationFilesize();
-//	    item.getItemProperty("filesize").setValue(filesize);
+	    // final String filesize =
+	    // abstractFileNode.getPresentationFilesize();
+	    // item.getItemProperty("filesize").setValue(filesize);
 
 	    item.getItemProperty("icon").setValue(getThemeResource(abstractFileNode));
 
@@ -195,8 +197,8 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 		final Object selection = event.getProperty().getValue();
 		if (selection != null && selection instanceof String) {
 		    final String externalId = (String) selection;
-		    final AbstractFileNode abstractFileNode = null != externalId && !externalId.isEmpty() ?
-			    (AbstractFileNode) AbstractDomainObject.fromExternalId(externalId) : null;
+		    final AbstractFileNode abstractFileNode = null != externalId && !externalId.isEmpty() ? (AbstractFileNode) AbstractDomainObject
+			    .fromExternalId(externalId) : null;
 		    changeSelectedNode(abstractFileNode);
 		} else {
 		    changeSelectedNode(dirNode);
@@ -229,9 +231,9 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 		    throw new Error("unknown.file.type: " + abstractFileNode);
 		}
 	    } else {
-//		changeSelectedNode(abstractFileNode);
+		// changeSelectedNode(abstractFileNode);
 	    }
-  	}
+	}
 
     }
 
@@ -301,27 +303,27 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 	protected String getUploadButtonCaption() {
 	    return getMessage("label.file.repository.add.file");
 	}
-    
+
 	@Override
 	protected void handleFile(final File file, final String fileName, final String mimeType, final long length) {
-	    final DirNode destination = dirNode == null || !dirNode.isWriteGroupMember() ?
-		    UserView.getCurrentUser().getFileRepository() : dirNode;
+	    final DirNode destination = dirNode == null || !dirNode.isWriteGroupMember() ? UserView.getCurrentUser()
+		    .getFileRepository() : dirNode;
 	    if (destination != null) {
 		if (destination.hasAvailableQuota(length)) {
-		    try  {
+		    try {
 			final ContextPath contextPath = new ContextPath(Collections.singletonList(dirNode));
-			final FileNode fileNode = destination.createFile(file, fileName,length, contextPath);
-			
-		    if (destination == dirNode) {
-			documentTable.addAbstractFileNode(fileNode);
-		    }
-		    }catch(DomainException ccfe) {
+			final FileNode fileNode = destination.createFile(file, fileName, length, contextPath);
+
+			if (destination == dirNode) {
+			    documentTable.addAbstractFileNode(fileNode);
+			}
+		    } catch (DomainException ccfe) {
 			FileManagementSystem.showException(getApplication(), ccfe);
-		    };
+		    }
+		    ;
 		} else {
 		    getWindow().showNotification(getMessage("message.file.upload.failled"),
-			    getMessage("message.file.upload.failled.exceeded.quota"),
-			    Notification.TYPE_ERROR_MESSAGE);
+			    getMessage("message.file.upload.failled.exceeded.quota"), Notification.TYPE_ERROR_MESSAGE);
 		}
 	    }
 	}
@@ -338,7 +340,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 		setIcon(icon);
 		setDescription(getMessage("label.menu.home"));
 	    }
-	    
+
 	}
 
 	private class NewDirNodeLink extends Button implements ClickListener {
@@ -417,7 +419,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 		    final AddDirWindow addDirWindow = new AddDirWindow();
 		    outerWindow.addWindow(addDirWindow);
 		} else {
-                    getWindow().showNotification(getMessage("message.dir.cannot.write"));
+		    getWindow().showNotification(getMessage("message.dir.cannot.write"));
 		}
 	    }
 	}
@@ -436,12 +438,12 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 	    @Override
 	    public void buttonClick(final ClickEvent event) {
 		outerWindow.showNotification("Esta funcionalidade ainda não foi implementada.");
-	    }	    
+	    }
 	}
 
 	public IconMenu() {
 	    super(5, 1);
-//	    setSizeFull();
+	    // setSizeFull();
 	    setWidth(100, UNITS_PERCENTAGE);
 	    setSpacing(true);
 	    setMargin(true);
@@ -450,7 +452,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 	public void addComponent(final Component component, int column) {
 	    final Panel panel = new Panel();
 	    panel.setSizeFull();
-//	    panel.setStyleName(Reindeer.PANEL_LIGHT);
+	    // panel.setStyleName(BennuTheme.PANEL_LIGHT);
 	    panel.addComponent(component);
 	    super.addComponent(panel, column, 0);
 	    setComponentAlignment(panel, Alignment.MIDDLE_CENTER);
@@ -466,12 +468,13 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 
 	    addComponent(new HomeIconDirNodeLink(), 0);
 	    addComponent(new NewDirNodeLink(), 1);
-/*
- * TODO
-	    addComponent(new IconLink("Search", "SearchesBlack32.png"), 2);
-	    addComponent(new IconLink(getMessage("label.menu.shared.documents"), "FolderContactsBlack32.png"), 3);
-	    addComponent(new IconLink("Trash", "TrashBlack32.png"), 4);
-*/
+	    /*
+	     * TODO addComponent(new IconLink("Search", "SearchesBlack32.png"),
+	     * 2); addComponent(new
+	     * IconLink(getMessage("label.menu.shared.documents"),
+	     * "FolderContactsBlack32.png"), 3); addComponent(new
+	     * IconLink("Trash", "TrashBlack32.png"), 4);
+	     */
 	}
 
     }
@@ -530,25 +533,28 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 		public void attach() {
 		    final FileNode fileNode = (FileNode) selectedNode;
 		    final Document document = fileNode.getDocument();
-//		    final VersionedFile file = document.getLastVersionedFile();
-//		    final String filename = file.getFilename();
-//
-//		    final FileNodeStreamSource streamSource = new FileNodeStreamSource(fileNode);
-//		    final StreamResource resource = new StreamResource(streamSource, filename, getApplication());
-//		    if (filename.endsWith(".pdf")) {
-//			resource.setMIMEType("application/pdf");
-//		    } else {
-//			resource.setMIMEType(file.getContentType());
-//		    }
-////		    resource.setCacheTime(0);
-//		    setResource(resource);
+		    // final VersionedFile file =
+		    // document.getLastVersionedFile();
+		    // final String filename = file.getFilename();
+		    //
+		    // final FileNodeStreamSource streamSource = new
+		    // FileNodeStreamSource(fileNode);
+		    // final StreamResource resource = new
+		    // StreamResource(streamSource, filename, getApplication());
+		    // if (filename.endsWith(".pdf")) {
+		    // resource.setMIMEType("application/pdf");
+		    // } else {
+		    // resource.setMIMEType(file.getContentType());
+		    // }
+		    // // resource.setCacheTime(0);
+		    // setResource(resource);
 
 		    final Application application = getApplication();
 		    final String url = DownloadUtil.getDownloadUrl(application, document);
 		    final ExternalResource externalResource = new ExternalResource(url);
 		    setResource(externalResource);
 		}
-		
+
 	    }
 
 	    private class NodeTextField extends TextField {
@@ -569,7 +575,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 				FileManagementSystem.showException(getApplication(), e);
 			    }
 			}
-			    
+
 			textField.setVisible(false);
 			updateNodePanelCaption(nodeDisplayName);
 			if (dirNode == selectedNode) {
@@ -579,7 +585,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 			documentTable.detach();
 			documentTable.attach();
 		    }
-		    
+
 		}
 
 		private NodeTextField() {
@@ -591,12 +597,12 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 
 	    }
 
-	    private TextField textField = new NodeTextField();
+	    private final TextField textField = new NodeTextField();
 
 	    private NodePanel() {
 		super(getSelectedNodeName());
 		setIcon(getThemeResource(selectedNode));
-		setStyleName(Reindeer.PANEL_LIGHT);
+		setStyleName(BennuTheme.PANEL_LIGHT);
 		final VerticalLayout fileHeaderLayout = ((VerticalLayout) getContent());
 		fileHeaderLayout.setSpacing(true);
 		fileHeaderLayout.setMargin(false);
@@ -608,29 +614,29 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 
 	    @Override
 	    public void attach() {
-	        super.attach();
+		super.attach();
 
-	        final HorizontalLayout horizontalLayout = new HorizontalLayout();
-	        horizontalLayout.setSpacing(true);
-	        addComponent(horizontalLayout);
+		final HorizontalLayout horizontalLayout = new HorizontalLayout();
+		horizontalLayout.setSpacing(true);
+		addComponent(horizontalLayout);
 
-	        if (selectedNode.hasParent() && selectedNode.isWriteGroupMember()) {
-	            horizontalLayout.addComponent(new EditNodeButton());
+		if (selectedNode.hasParent() && selectedNode.isWriteGroupMember()) {
+		    horizontalLayout.addComponent(new EditNodeButton());
 
-	            horizontalLayout.addComponent(new DeleteNodeButton());
-	        }
-	        if (selectedNode.isFile() && selectedNode.isAccessible()) {
-	            horizontalLayout.addComponent(new DownloadButton());
-	        }
-	        if (selectedNode.hasParent() && selectedNode.isWriteGroupMember()) {
-	            addComponent(textField);
-	        }
+		    horizontalLayout.addComponent(new DeleteNodeButton());
+		}
+		if (selectedNode.isFile() && selectedNode.isAccessible()) {
+		    horizontalLayout.addComponent(new DownloadButton());
+		}
+		if (selectedNode.hasParent() && selectedNode.isWriteGroupMember()) {
+		    addComponent(textField);
+		}
 	    }
 
 	}
 
 	private class VisibilityPanel extends Panel {
-	    
+
 	    private class ChangeVisibilityButton extends Button implements ClickListener {
 
 		private class ChangeVisibilityWindow extends Window {
@@ -694,7 +700,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 			private class RemoveVisibilityGroup extends Button implements ClickListener {
 
 			    private final VisibilityGroupLayout visibilityGroupLayout;
-		    
+
 			    private RemoveVisibilityGroup(final VisibilityGroupLayout visibilityGroupLayout) {
 				this.visibilityGroupLayout = visibilityGroupLayout;
 				setStyleName(BaseTheme.BUTTON_LINK);
@@ -776,11 +782,12 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 				@Override
 				public void buttonClick(final ClickEvent event) {
 				    if (hasPersistentGroup != null) {
-					final VisibilityGroup visibilityGroup = new VisibilityGroup(hasPersistentGroup.getPersistentGroup(), VisibilityOperation.READ);
-				    	visibilityGroups.add(visibilityGroup);
-				    	final VerticalLayout layout = (VerticalLayout) changeVisibilityWindow.getContent();
-				    	final int index = layout.getComponentIndex(addGroupButton);
-				    	layout.addComponent(new VisibilityGroupLayout(visibilityGroup), index);
+					final VisibilityGroup visibilityGroup = new VisibilityGroup(
+						hasPersistentGroup.getPersistentGroup(), VisibilityOperation.READ);
+					visibilityGroups.add(visibilityGroup);
+					final VerticalLayout layout = (VerticalLayout) changeVisibilityWindow.getContent();
+					final int index = layout.getComponentIndex(addGroupButton);
+					layout.addComponent(new VisibilityGroupLayout(visibilityGroup), index);
 				    }
 				    super.buttonClick(event);
 				}
@@ -804,21 +811,28 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 				public void attach() {
 				    super.attach();
 
-				    for (final HasPersistentGroupCreator hasPersistentGroupCreator : GroupCreatorRegistry.getPersistentGroupCreators()) {
-//					hasPersistentGroupCreator.addItems(this, "name");
-					for(Presentable presentable : hasPersistentGroupCreator.getElements(null)) {
+				    for (final HasPersistentGroupCreator hasPersistentGroupCreator : GroupCreatorRegistry
+					    .getPersistentGroupCreators()) {
+					// hasPersistentGroupCreator.addItems(this,
+					// "name");
+					for (Presentable presentable : hasPersistentGroupCreator.getElements(null)) {
 					    addItem(presentable);
 					}
 				    }
-				    /*for (final Party party : MyOrg.getInstance().getPartiesSet()) {
-					if (party.isUnit() || (party.isPerson() && ((Person) party).hasUser())) {
-					    final String externalId = party.getExternalId();
-					    final String name = party.getPresentationName();
-
-					    final Item comboItem = addItem(externalId);
-					    comboItem.getItemProperty("name").setValue(name);
-					}
-				    }*/
+				    /*
+				     * for (final Party party :
+				     * MyOrg.getInstance().getPartiesSet()) { if
+				     * (party.isUnit() || (party.isPerson() &&
+				     * ((Person) party).hasUser())) { final
+				     * String externalId =
+				     * party.getExternalId(); final String name
+				     * = party.getPresentationName();
+				     * 
+				     * final Item comboItem =
+				     * addItem(externalId);
+				     * comboItem.getItemProperty
+				     * ("name").setValue(name); } }
+				     */
 				}
 
 				@Override
@@ -827,72 +841,107 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 
 				    final Object itemId = event.getProperty().getValue();
 				    if (itemId != null) {
-					for (final HasPersistentGroupCreator hasPersistentGroupCreator : GroupCreatorRegistry.getPersistentGroupCreators()) {
-					    final HasPersistentGroup groupHolder = hasPersistentGroupCreator.createGroupFor(itemId);
+					for (final HasPersistentGroupCreator hasPersistentGroupCreator : GroupCreatorRegistry
+						.getPersistentGroupCreators()) {
+					    final HasPersistentGroup groupHolder = hasPersistentGroupCreator
+						    .createGroupFor(itemId);
 					    if (groupHolder != null) {
-						hasPersistentGroup = groupHolder; 
+						hasPersistentGroup = groupHolder;
 						select(itemId);
 						hasPersistentGroup.renderGroupSpecificLayout(groupSpecificLayout);
 					    }
 					}
-					
-					    /*} else if (domainObject instanceof Person) {
-					    final Person person = (Person) domainObject;
-					    final User user = person.getUser();
-					    final SingleUserGroup singleUserGroup = SingleUserGroup.getOrCreateGroup(user);
-					    hasPersistentGroup = new HasPersistentGroup() {
-					        @Override
-					        public PersistentGroup getPersistentGroup() {
-					            return singleUserGroup;
-					        }
 
-						@Override
-						public void renderGroupSpecificLayout(final AbstractOrderedLayout abstractOrderedLayout) {
-						}
-					    };
-					    } else if (domainObject instanceof Unit) {
-					    final Unit unit = (Unit) domainObject;
-					    hasPersistentGroup = new HasPersistentGroup() {
-						private Set<AccountabilityType> selectedAccountabilityTypes = new HashSet<AccountabilityType>();
-						private boolean includeSubUnits = false;
-
-					        @Override
-					        public PersistentGroup getPersistentGroup() {
-				        	    final AccountabilityType[] memberTypes = selectedAccountabilityTypes.toArray(new AccountabilityType[0]);
-				        	    final AccountabilityType[] childTypes = includeSubUnits ?
-				        		    new AccountabilityType[] { IstAccountabilityType.ORGANIZATIONAL.readAccountabilityType() } : null;
-				        	    return UnitGroup.getOrCreateGroup(unit, memberTypes, childTypes);
-					        }
-
-						@Override
-						public void renderGroupSpecificLayout(final AbstractOrderedLayout layout) {
-						    final OptionGroup yesNoOptionGroup = new YesNoOptionGroup("label.include.child.unit.members", "label.yes", "label.no");
-						    layout.addComponent(yesNoOptionGroup);
-						    yesNoOptionGroup.addListener(new ValueChangeListener() {
-							@Override
-							public void valueChange(com.vaadin.data.Property.ValueChangeEvent event) {
-							    includeSubUnits = !includeSubUnits;
-							}
-						    });
-
-						    final OptionGroup accountabilityTypeOptions = new MemberAccountabilityTypeOptionGroup();
-						    layout.addComponent(accountabilityTypeOptions);
-
-						    accountabilityTypeOptions.addListener(new ValueChangeListener() {
-							@Override
-							public void valueChange(final com.vaadin.data.Property.ValueChangeEvent event) {
-							    if (event.getProperty().getValue() != null) {
-								selectedAccountabilityTypes.clear();
-								for (Object itemId : (Collection) event.getProperty().getValue()) {
-								    final String accountabilityTypeOid = (String) itemId;
-								    final AccountabilityType accountabilityType = AbstractDomainObject.fromExternalId(accountabilityTypeOid);
-								    selectedAccountabilityTypes.add(accountabilityType);
-								}
-							    }
-							}
-						    });
-						}
-					    };*/
+					/*
+					 * } else if (domainObject instanceof
+					 * Person) { final Person person =
+					 * (Person) domainObject; final User
+					 * user = person.getUser(); final
+					 * SingleUserGroup singleUserGroup =
+					 * SingleUserGroup
+					 * .getOrCreateGroup(user);
+					 * hasPersistentGroup = new
+					 * HasPersistentGroup() {
+					 * 
+					 * @Override public PersistentGroup
+					 * getPersistentGroup() { return
+					 * singleUserGroup; }
+					 * 
+					 * @Override public void
+					 * renderGroupSpecificLayout(final
+					 * AbstractOrderedLayout
+					 * abstractOrderedLayout) { } }; } else
+					 * if (domainObject instanceof Unit) {
+					 * final Unit unit = (Unit)
+					 * domainObject; hasPersistentGroup =
+					 * new HasPersistentGroup() { private
+					 * Set<AccountabilityType>
+					 * selectedAccountabilityTypes = new
+					 * HashSet<AccountabilityType>();
+					 * private boolean includeSubUnits =
+					 * false;
+					 * 
+					 * @Override public PersistentGroup
+					 * getPersistentGroup() { final
+					 * AccountabilityType[] memberTypes =
+					 * selectedAccountabilityTypes
+					 * .toArray(new AccountabilityType[0]);
+					 * final AccountabilityType[] childTypes
+					 * = includeSubUnits ? new
+					 * AccountabilityType[] {
+					 * IstAccountabilityType
+					 * .ORGANIZATIONAL.
+					 * readAccountabilityType () } : null;
+					 * return
+					 * UnitGroup.getOrCreateGroup(unit,
+					 * memberTypes, childTypes); }
+					 * 
+					 * @Override public void
+					 * renderGroupSpecificLayout(final
+					 * AbstractOrderedLayout layout) { final
+					 * OptionGroup yesNoOptionGroup = new
+					 * YesNoOptionGroup
+					 * ("label.include.child.unit.members",
+					 * "label.yes", "label.no");
+					 * layout.addComponent
+					 * (yesNoOptionGroup);
+					 * yesNoOptionGroup.addListener(new
+					 * ValueChangeListener() {
+					 * 
+					 * @Override public void
+					 * valueChange(com.
+					 * vaadin.data.Property.ValueChangeEvent
+					 * event) { includeSubUnits =
+					 * !includeSubUnits; } });
+					 * 
+					 * final OptionGroup
+					 * accountabilityTypeOptions = new
+					 * MemberAccountabilityTypeOptionGroup
+					 * (); layout.addComponent(
+					 * accountabilityTypeOptions);
+					 * 
+					 * accountabilityTypeOptions.addListener(
+					 * new ValueChangeListener() {
+					 * 
+					 * @Override public void
+					 * valueChange(final
+					 * com.vaadin.data.Property
+					 * .ValueChangeEvent event) { if
+					 * (event.getProperty().getValue() !=
+					 * null) {
+					 * selectedAccountabilityTypes.clear();
+					 * for (Object itemId : (Collection)
+					 * event.getProperty().getValue()) {
+					 * final String accountabilityTypeOid =
+					 * (String) itemId; final
+					 * AccountabilityType accountabilityType
+					 * =
+					 * AbstractDomainObject.fromExternalId(
+					 * accountabilityTypeOid);
+					 * selectedAccountabilityTypes
+					 * .add(accountabilityType); } } } }); }
+					 * };
+					 */
 				    }
 				}
 
@@ -900,7 +949,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 
 			    private final AddGroupWindow addGroupWindow;
 			    private HasPersistentGroup hasPersistentGroup;
-			    private AbstractOrderedLayout groupSpecificLayout = new VerticalLayout();
+			    private final AbstractOrderedLayout groupSpecificLayout = new VerticalLayout();
 
 			    private AddGroupWindow() {
 				super(getMessage("label.add.group"));
@@ -912,16 +961,16 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 
 			    @Override
 			    public void attach() {
-			        super.attach();
+				super.attach();
 
-			        addComponent(new GroupComboBox());
+				addComponent(new GroupComboBox());
 
-			        addComponent(groupSpecificLayout);
+				addComponent(groupSpecificLayout);
 
-			        final HorizontalLayout layout = new HorizontalLayout();
-			        addComponent(layout);
-			        layout.addComponent(new AddGroupSaveButton());
-			        layout.addComponent(new AddGroupCloseButton());
+				final HorizontalLayout layout = new HorizontalLayout();
+				addComponent(layout);
+				layout.addComponent(new AddGroupSaveButton());
+				layout.addComponent(new AddGroupCloseButton());
 			    }
 
 			}
@@ -937,7 +986,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 			public void buttonClick(final ClickEvent event) {
 			    outerWindow.addWindow(new AddGroupWindow());
 			}
-			
+
 		    }
 
 		    private final ChangeVisibilityWindow changeVisibilityWindow;
@@ -1000,7 +1049,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 	    super(1, 3);
 	    setWidth(100, UNITS_PERCENTAGE);
 	    setHeight(100, UNITS_PERCENTAGE);
-	    //setMargin(true);
+	    // setMargin(true);
 	    setMargin(true, false, false, true);
 	    setSpacing(true);
 	}
@@ -1017,12 +1066,13 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 	    addComponent(visibilityPanel, 0, 1);
 	    setComponentAlignment(visibilityPanel, Alignment.MIDDLE_CENTER);
 
-/*
-	    final Panel directoryPanel = new Panel("Directories");
-	    addComponent(directoryPanel, 0, 2);
-	    setComponentAlignment(directoryPanel, Alignment.MIDDLE_CENTER);
-	    directoryPanel.addComponent(new Label("TODO: work in progress."));
-*/
+	    /*
+	     * final Panel directoryPanel = new Panel("Directories");
+	     * addComponent(directoryPanel, 0, 2);
+	     * setComponentAlignment(directoryPanel, Alignment.MIDDLE_CENTER);
+	     * directoryPanel.addComponent(new
+	     * Label("TODO: work in progress."));
+	     */
 	}
 
 	@Override
@@ -1043,7 +1093,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
     private AbstractFileNode selectedNode = dirNode;
 
     @Override
-    public void setArguments(Map<String,String> arguments) {
+    public void setArguments(Map<String, String> arguments) {
     }
 
     @Override
@@ -1059,7 +1109,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 	final HorizontalLayout horizontalLayoutMenu = new HorizontalLayout();
 	horizontalLayoutMenu.setWidth(100, UNITS_PERCENTAGE);
 	layout.addComponent(horizontalLayoutMenu);
-	
+
 	horizontalLayoutMenu.addComponent(new IconMenu());
 
 	if (!dirNode.isWriteGroupMember()) {
@@ -1097,10 +1147,10 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 	this.dirNode = dirNode;
 
 	uploadFileArea.setVisible(dirNode.isWriteGroupMember());
-	    
+
 	documentTable.detach();
 	documentTable.attach();
-	    
+
 	documentMenu.detach();
 	documentMenu.attach();
 
@@ -1109,8 +1159,8 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
     }
 
     private ThemeResource getThemeResource(final AbstractFileNode abstractFileNode) {
-	final String iconFile = abstractFileNode.isDir() ? "folder1_16x16.gif" :
-	    	getIconFile(((FileNode) abstractFileNode).getDocument().getLastVersionedFile().getFilename());
+	final String iconFile = abstractFileNode.isDir() ? "folder1_16x16.gif" : getIconFile(((FileNode) abstractFileNode)
+		.getDocument().getLastVersionedFile().getFilename());
 	return new ThemeResource("../../../images/fileManagement/" + iconFile);
     }
 

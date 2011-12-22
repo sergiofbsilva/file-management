@@ -5,6 +5,7 @@ import static module.fileManagement.domain.FileManagementSystem.getMessage;
 import java.util.Map;
 
 import module.fileManagement.domain.FileNode;
+import module.vaadin.ui.BennuTheme;
 import pt.ist.bennu.ui.GridSystemLayout;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
@@ -18,7 +19,6 @@ import com.vaadin.ui.Layout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.Reindeer;
 
 @EmbeddedComponent(path = { "DocumentHome" })
 public class DocumentHome extends CustomComponent implements EmbeddedComponentContainer {
@@ -31,7 +31,7 @@ public class DocumentHome extends CustomComponent implements EmbeddedComponentCo
 
     public Panel createWelcomePanel() {
 	Panel welcomePanel = new Panel();
-	welcomePanel.setStyleName(Reindeer.PANEL_LIGHT);
+	welcomePanel.setStyleName(BennuTheme.PANEL_LIGHT);
 	welcomePanel.setCaption(getMessage("welcome.title"));
 	welcomePanel.setScrollable(false);
 	final Layout hlWelcomeContent = new VerticalLayout();

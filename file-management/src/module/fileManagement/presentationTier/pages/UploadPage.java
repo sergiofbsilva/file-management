@@ -11,6 +11,7 @@ import module.fileManagement.domain.DirNode;
 import module.fileManagement.domain.Document;
 import module.fileManagement.presentationTier.component.MetadataPanel;
 import module.fileManagement.presentationTier.component.UploadFilePanel;
+import module.vaadin.ui.BennuTheme;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
 
@@ -24,21 +25,20 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Layout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.Reindeer;
 
 @EmbeddedComponent(path = { "UploadPage" }, args = { "contextPath" })
 public class UploadPage extends CustomComponent implements EmbeddedComponentContainer {
 
     private MetadataPanel metadataPanel;
     private UploadFilePanel uploadFilePanel;
-    private VerticalLayout leftPanel;
+    private final VerticalLayout leftPanel;
     // private Select selectDir;
-    private Label uploadDirLabel;
+    private final Label uploadDirLabel;
     private Label lblQuotaText;
 
     public Panel createQuotaPanel() {
 	Panel messagePanel = new Panel();
-	messagePanel.setStyleName(Reindeer.PANEL_LIGHT);
+	messagePanel.setStyleName(BennuTheme.PANEL_LIGHT);
 	messagePanel.setCaption(getMessage("upload.title"));
 	messagePanel.setScrollable(false);
 	final Layout hlQuotaContent = new VerticalLayout();

@@ -15,13 +15,13 @@ import module.fileManagement.presentationTier.component.groups.GroupCreatorRegis
 import module.fileManagement.presentationTier.component.groups.HasPersistentGroup;
 import module.fileManagement.presentationTier.component.groups.HasPersistentGroupCreator;
 import module.fileManagement.presentationTier.data.GroupContainer;
+import module.vaadin.ui.BennuTheme;
 import myorg.applicationTier.Authenticate.UserView;
 import myorg.domain.Presentable;
 import myorg.domain.groups.SingleUserGroup;
 
 import org.apache.poi.openxml4j.exceptions.InvalidOperationException;
 
-import pt.ist.bennu.ui.BennuConstants;
 import pt.ist.bennu.ui.TimeoutSelect;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
@@ -50,7 +50,7 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.Reindeer;
+import com.vaadin.ui.themes.BaseTheme;
 
 @EmbeddedComponent(path = { "DocumentShare" }, args = { "fileNode", "contextPath" })
 public class DocumentShare extends CustomComponent implements EmbeddedComponentContainer {
@@ -119,7 +119,7 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
 
     public Component createHeaderPanel() {
 	Panel welcomePanel = new Panel();
-	welcomePanel.setStyleName(Reindeer.PANEL_LIGHT);
+	welcomePanel.setStyleName(BennuTheme.PANEL_LIGHT);
 	welcomePanel.setCaption(getMessage("document.share.title"));
 	welcomePanel.setScrollable(false);
 	final Layout hlWelcomeContent = new VerticalLayout();
@@ -300,7 +300,7 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
 			unshare(visibilityGroup);
 		    }
 		});
-		btRemoveGroup.setStyleName(BennuConstants.BUTTON_LINK);
+		btRemoveGroup.setStyleName(BaseTheme.BUTTON_LINK);
 		return btRemoveGroup;
 	    }
 

@@ -3,7 +3,7 @@ package module.fileManagement.presentationTier.component;
 import java.util.Arrays;
 import java.util.Collection;
 
-import pt.ist.bennu.ui.BennuConstants;
+import module.vaadin.ui.BennuTheme;
 import pt.ist.bennu.ui.viewers.ViewerFactory;
 
 import com.vaadin.data.Item;
@@ -22,19 +22,19 @@ public class TabularViewer extends VerticalLayout implements Viewer, PropertySet
     private Item itemDatasource;
     private ViewerFactory viewerFactory;
     Collection<?> propertyIds;
-    
+
     private static final String CAPTION_CSS = "v-tabularviewer-caption";
-    
+
     public TabularViewer() {
-	addStyleName(BennuConstants.PROPERTIES);
+	addStyleName(BennuTheme.PROPERTIES);
 	propertyIds = null;
     }
-    
+
     public TabularViewer(ViewerFactory viewerFactory) {
 	this();
 	setViewerFactory(viewerFactory);
     }
-    
+
     public TabularViewer(Item newDataSource, ViewerFactory viewerFactory) {
 	this();
 	setItemDataSource(newDataSource);
@@ -49,80 +49,82 @@ public class TabularViewer extends VerticalLayout implements Viewer, PropertySet
 	return viewerFactory;
     }
 
+    @Override
     public void setItemDataSource(Item newDataSource) {
 	setItemDataSource(newDataSource, newDataSource != null ? newDataSource.getItemPropertyIds() : null);
     }
-    
+
     public void setItemDataSource(Item newDataSource, Collection<?> propertyIds) {
-	
+
 	if (itemDatasource != null) {
 	    if (itemDatasource instanceof PropertySetChangeNotifier) {
 		((PropertySetChangeNotifier) itemDatasource).removeListener(this);
 	    }
 	}
-	
+
 	this.itemDatasource = newDataSource;
 	this.propertyIds = propertyIds;
 	updateContent();
-	
+
 	if (itemDatasource instanceof PropertySetChangeNotifier) {
 	    ((PropertySetChangeNotifier) itemDatasource).addListener(this);
 	}
-	
+
     }
-    
+
     public void setVisibleItemProperties(Collection<?> visibleProperties) {
 	setItemDataSource(itemDatasource, visibleProperties);
     }
-    
-    public void setVisibleItemProperties(Object[] visibleProperties) {
-	setItemDataSource(itemDatasource,Arrays.asList(visibleProperties));
-    }
-    
 
+    public void setVisibleItemProperties(Object[] visibleProperties) {
+	setItemDataSource(itemDatasource, Arrays.asList(visibleProperties));
+    }
+
+    @Override
     public Item getItemDataSource() {
 	return itemDatasource;
     }
 
+    @Override
     public void itemPropertySetChange(PropertySetChangeEvent event) {
 	updateContent();
     }
-    
-//    private Label makeCaption(Component valueComponent) {
-//	final Label label = new Label(valueComponent.getCaption());
-//	label.addStyleName(CAPTION_CSS);
-//	label.setSizeFull();
-//	
-//	valueComponent.setCaption(null);
-//	valueComponent.setSizeUndefined();
-//	return label;
-//    }
-//    
-//    public HorizontalLayout addLine(Component valueComponent)  {
-//	final HorizontalLayout line = new HorizontalLayout();
-//	line.setSpacing(true);
-//	line.addStyleName(BennuConstants.PROPERTIES);
-//	line.setWidth("100%");
-//	
-//	final Label label = makeCaption(valueComponent);
-//
-//	line.addComponent(label);
-//	line.addComponent(valueComponent);
-//	line.setExpandRatio(valueComponent, 1f);
-//	addComponent(line);
-//	return line;
-//    }
-    
-    public HorizontalLayout addLine(Component valueComponent)  {
+
+    // private Label makeCaption(Component valueComponent) {
+    // final Label label = new Label(valueComponent.getCaption());
+    // label.addStyleName(CAPTION_CSS);
+    // label.setSizeFull();
+    //
+    // valueComponent.setCaption(null);
+    // valueComponent.setSizeUndefined();
+    // return label;
+    // }
+    //
+    // public HorizontalLayout addLine(Component valueComponent) {
+    // final HorizontalLayout line = new HorizontalLayout();
+    // line.setSpacing(true);
+    // line.addStyleName(BennuTheme.PROPERTIES);
+    // line.setWidth("100%");
+    //
+    // final Label label = makeCaption(valueComponent);
+    //
+    // line.addComponent(label);
+    // line.addComponent(valueComponent);
+    // line.setExpandRatio(valueComponent, 1f);
+    // addComponent(line);
+    // return line;
+    // }
+
+    public HorizontalLayout addLine(Component valueComponent) {
 	final HorizontalLayout line = new HorizontalLayout();
 	line.setSpacing(true);
-	line.addStyleName(BennuConstants.PROPERTIES);
+	line.addStyleName(BennuTheme.PROPERTIES);
 	line.setWidth("100%");
-	
+
 	final Label label = new Label(valueComponent.getCaption());
 	label.addStyleName(CAPTION_CSS);
 	label.setSizeUndefined();
-	
+
 	valueComponent.setCaption(null);
 	valueComponent.setSizeUndefined();
 
@@ -136,24 +138,24 @@ public class TabularViewer extends VerticalLayout implements Viewer, PropertySet
     private void updateContent() {
 	removeAllComponents();
 	HorizontalLayout line = null;
-//	GridLayout grid = new GridLayout(2,propertyIds.size());
-//	grid.setSizeFull();
-//	grid.setSpacing(true);
-//	grid.setMargin(true);
-//	int i = 0;
+	// GridLayout grid = new GridLayout(2,propertyIds.size());
+	// grid.setSizeFull();
+	// grid.setSpacing(true);
+	// grid.setMargin(true);
+	// int i = 0;
 	for (Object propertyId : propertyIds) {
 	    Property.Viewer value = viewerFactory.createViewer(itemDatasource, propertyId, this);
 	    final Property itemProperty = itemDatasource.getItemProperty(propertyId);
 	    value.setPropertyDataSource(itemProperty);
 	    AbstractComponent valueComponent = (AbstractComponent) value;
 	    line = addLine(valueComponent);
-//	    grid.addComponent(makeCaption(valueComponent), 0, i);
-//	    grid.addComponent(valueComponent, 1, i++);
+	    // grid.addComponent(makeCaption(valueComponent), 0, i);
+	    // grid.addComponent(valueComponent, 1, i++);
 	}
-	
+
 	if (line != null) {
-	    line.addStyleName(BennuConstants.PROPERTIES_LAST);
+	    line.addStyleName(BennuTheme.PROPERTIES_LAST);
 	}
-//	addComponent(grid);
+	// addComponent(grid);
     }
 }
