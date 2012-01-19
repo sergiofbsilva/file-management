@@ -139,6 +139,11 @@ public class UploadPage extends CustomComponent implements EmbeddedComponentCont
     }
 
     @Override
+    public boolean isAllowedToOpen(Map<String, String> arguments) {
+	return true;
+    }
+
+    @Override
     public void setArguments(Map<String, String> arguments) {
 	final ContextPath contextPath = new ContextPath(arguments.get("contextPath"));
 	setUploadArea(contextPath);

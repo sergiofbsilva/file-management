@@ -11,7 +11,12 @@ import com.vaadin.ui.CustomComponent;
 public class DocumentSearch extends CustomComponent implements EmbeddedComponentContainer {
 
     @Override
-    public void setArguments(Map<String,String> arguments) {
+    public boolean isAllowedToOpen(Map<String, String> arguments) {
+	return true;
+    }
+
+    @Override
+    public void setArguments(Map<String, String> arguments) {
 	// TODO Auto-generated method stub
 
     }

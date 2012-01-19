@@ -89,6 +89,11 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
     }
 
     @Override
+    public boolean isAllowedToOpen(Map<String, String> arguments) {
+	return true;
+    }
+
+    @Override
     public void setArguments(Map<String, String> arguments) {
 	final String fileExternalId = arguments.get("fileNode");
 	final String contextPath = arguments.get("contextPath");

@@ -26,6 +26,10 @@ import com.vaadin.ui.themes.BaseTheme;
 @SuppressWarnings("serial")
 @EmbeddedComponent(path = { "ManageMetadataTemplates" })
 public class ManageMetadataTemplates extends CustomComponent implements EmbeddedComponentContainer {
+    @Override
+    public boolean isAllowedToOpen(Map<String, String> arguments) {
+	return true;
+    }
 
     @Override
     public void setArguments(Map<String, String> arguments) {

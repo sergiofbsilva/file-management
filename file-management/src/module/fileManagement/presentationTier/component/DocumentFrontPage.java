@@ -1093,6 +1093,11 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
     private AbstractFileNode selectedNode = dirNode;
 
     @Override
+    public boolean isAllowedToOpen(Map<String, String> arguments) {
+	return true;
+    }
+
+    @Override
     public void setArguments(Map<String, String> arguments) {
     }
 

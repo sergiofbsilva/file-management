@@ -193,6 +193,11 @@ public class CreateMetadataTemplate extends CustomComponent implements EmbeddedC
     }
 
     @Override
+    public boolean isAllowedToOpen(Map<String, String> arguments) {
+	return true;
+    }
+
+    @Override
     public void setArguments(Map<String, String> arguments) {
 	final String templateOid = arguments.get("template");
 	final String readOnly = arguments.get("readOnly");

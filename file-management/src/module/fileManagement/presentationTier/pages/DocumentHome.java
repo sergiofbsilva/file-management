@@ -24,6 +24,11 @@ import com.vaadin.ui.VerticalLayout;
 public class DocumentHome extends CustomComponent implements EmbeddedComponentContainer {
 
     @Override
+    public boolean isAllowedToOpen(Map<String, String> arguments) {
+	return true;
+    }
+
+    @Override
     public void setArguments(Map<String, String> arguments) {
 	// TODO Auto-generated method stub
 

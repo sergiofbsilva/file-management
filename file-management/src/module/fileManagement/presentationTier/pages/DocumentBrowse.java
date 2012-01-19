@@ -40,6 +40,11 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
     Button btUpload;
 
     @Override
+    public boolean isAllowedToOpen(Map<String, String> arguments) {
+	return true;
+    }
+
+    @Override
     public void setArguments(Map<String, String> arguments) {
 	final String pathString = arguments.get("contextPath");
 	if (pathString != null) {
@@ -69,6 +74,7 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
 	btUpload = new Button(getMessage("button.upload"));
 
 	btUpload.addListener(new ClickListener() {
+	    @Override
 	    public void buttonClick(ClickEvent event) {
 		final String contextPath = browser.getContextPath().toString();
 		EmbeddedApplication.open(getApplication(), UploadPage.class, contextPath);

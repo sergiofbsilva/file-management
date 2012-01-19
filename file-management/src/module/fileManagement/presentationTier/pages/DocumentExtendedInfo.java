@@ -49,6 +49,11 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
     private Layout metadataInfoPanel;
 
     @Override
+    public boolean isAllowedToOpen(Map<String, String> arguments) {
+	return true;
+    }
+
+    @Override
     public void setArguments(Map<String, String> arguments) {
 	fileNode = Document.fromExternalId(arguments.get("node"));
     }
