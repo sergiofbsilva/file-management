@@ -23,12 +23,11 @@ import com.vaadin.ui.Select;
 
 public class MetadataPanel extends Panel {
 
-    private Select selectTemplate;
+    private final Select selectTemplate;
     protected TemplateItem metadataTemplateItem;
-    private TransactionalForm metadataForm;
-    private DocumentContainer documentContainer;
-    private ObjectHintedProperty<Collection> selectedDocuments;
-    
+    private final TransactionalForm metadataForm;
+    private final DocumentContainer documentContainer;
+    private final ObjectHintedProperty<Collection> selectedDocuments;
 
     private void setMetadataItem(MetadataTemplate template) {
 	if (template == null) {
@@ -39,8 +38,7 @@ public class MetadataPanel extends Panel {
 	}
 	if (metadataTemplateItem == null) {
 	    selectTemplate.setEnabled(true);
-	    metadataTemplateItem = new TemplateItem(template, documentContainer,
-		    selectedDocuments);
+	    metadataTemplateItem = new TemplateItem(template, documentContainer, selectedDocuments);
 	    metadataForm.setItemDataSource(metadataTemplateItem);
 	    metadataForm.setVisibleItemProperties(metadataTemplateItem.getVisibleItemProperties());
 	    metadataForm.setImmediate(true);
@@ -79,8 +77,8 @@ public class MetadataPanel extends Panel {
 	    }
 	});
 	addComponent(selectTemplate);
-	metadataForm = new TransactionalForm(FileManagementSystem.getBundle());
-	metadataForm.setFormFieldFactory(new FMSFieldFactory(FileManagementSystem.getBundle()));
+	metadataForm = new TransactionalForm(FileManagementSystem.BUNDLE);
+	metadataForm.setFormFieldFactory(new FMSFieldFactory(FileManagementSystem.BUNDLE));
 	addComponent(metadataForm);
     }
 
