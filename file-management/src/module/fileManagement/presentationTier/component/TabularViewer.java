@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import module.vaadin.ui.BennuTheme;
-import pt.ist.bennu.ui.viewers.ViewerFactory;
+import pt.ist.vaadinframework.ui.viewers.ViewerFactory;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.Item.PropertySetChangeEvent;

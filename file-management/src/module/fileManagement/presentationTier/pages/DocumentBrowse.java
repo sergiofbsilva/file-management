@@ -9,12 +9,12 @@ import module.fileManagement.domain.ContextPath;
 import module.fileManagement.presentationTier.component.AddDirWindow;
 import module.fileManagement.presentationTier.component.DocumentFileBrowser;
 import module.fileManagement.presentationTier.component.NodeDetails;
-import pt.ist.bennu.ui.FlowLayout;
-import pt.ist.bennu.ui.GridSystemLayout;
 import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
+import pt.ist.vaadinframework.ui.FlowLayout;
+import pt.ist.vaadinframework.ui.GridSystemLayout;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;

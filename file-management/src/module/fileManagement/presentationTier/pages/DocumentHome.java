@@ -6,10 +6,10 @@ import java.util.Map;
 
 import module.fileManagement.domain.FileNode;
 import module.vaadin.ui.BennuTheme;
-import pt.ist.bennu.ui.GridSystemLayout;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
+import pt.ist.vaadinframework.ui.GridSystemLayout;
 
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;

@@ -22,10 +22,10 @@ import myorg.domain.groups.SingleUserGroup;
 
 import org.apache.poi.openxml4j.exceptions.InvalidOperationException;
 
-import pt.ist.bennu.ui.TimeoutSelect;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
+import pt.ist.vaadinframework.ui.TimeoutSelect;
 
 import com.vaadin.data.Container.ItemSetChangeEvent;
 import com.vaadin.data.Container.ItemSetChangeListener;
