@@ -1,3 +1,27 @@
+/*
+ * @(#)ExampleUtil.java
+ *
+ * Copyright 2011 Instituto Superior Tecnico
+ * Founding Authors: Luis Cruz, Sérgio Silva
+ * 
+ *      https://fenix-ashes.ist.utl.pt/
+ * 
+ *   This file is part of the File Management Module.
+ *
+ *   The File Management Module is free software: you can
+ *   redistribute it and/or modify it under the terms of the GNU Lesser General
+ *   Public License as published by the Free Software Foundation, either version 
+ *   3 of the License, or (at your option) any later version.
+ *
+ *   The File Management  Module is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *   GNU Lesser General Public License for more details.
+ *
+ *   You should have received a copy of the GNU Lesser General Public License
+ *   along with the File Management  Module. If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 package module.fileManagement.presentationTier.component;
 
 import java.text.NumberFormat;
@@ -10,6 +34,12 @@ import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.terminal.Resource;
 import com.vaadin.terminal.ThemeResource;
 
+/**
+ * 
+ * @author Sérgio Silva
+ * @author Luis Cruz
+ * 
+ */
 public final class ExampleUtil {
     public static final String lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut ut massa eget erat dapibus sollicitudin. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Pellentesque a augue. Praesent non elit. Duis sapien dolor, cursus eget, pulvinar eget, eleifend a, est. Integer in nunc. Vivamus consequat ipsum id sapien. Duis eu elit vel libero posuere luctus. Aliquam ac turpis. Aenean vitae justo in sem iaculis pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Aliquam sit amet mi. "
             + "<br/>"
