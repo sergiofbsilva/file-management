@@ -93,7 +93,9 @@ public class FileDetails extends NodeDetails {
 
     @Override
     public void updateOperations() {
-	addOperation(createExtendedInfoLink());
+	if (isInfoVisible()) {
+	    addOperation(createExtendedInfoLink());
+	}
 	addOperation(createDownloadLink());
 	if (getNode().isWriteGroupMember()) {
 	    addOperation(createShareLink());

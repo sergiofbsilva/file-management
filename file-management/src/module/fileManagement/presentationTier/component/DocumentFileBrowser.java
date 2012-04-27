@@ -58,6 +58,9 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 
     public class DocumentTable extends Table implements Table.ValueChangeListener, ItemClickListener {
 
+	private static final int MIN = 10;
+	private static final int MAX = 25;
+
 	public java.util.Collection<?> getSortableContainerPropertyIds() {
 	    return Collections.EMPTY_SET;
 	};
@@ -65,7 +68,7 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 	DocumentTable() {
 	    super();
 	    setSizeFull();
-	    setPageLength(25);
+	    setPageLength(MIN);
 
 	    setSelectable(true);
 	    setMultiSelect(false);
@@ -85,6 +88,22 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 		    viewer.setPropertyDataSource(itemProperty);
 		    return viewer;
 		}
+	    });
+
+	    addListener(new ItemSetChangeListener() {
+
+		@Override
+		public void containerItemSetChange(com.vaadin.data.Container.ItemSetChangeEvent event) {
+		    final int size = event.getContainer().size();
+		    if (size < MIN) {
+			setPageLength(MIN);
+		    } else if (size >= MIN && size <= MAX) {
+			setPageLength(0);
+		    } else if (size > MAX) {
+			setPageLength(MAX);
+		    }
+		}
+
 	    });
 	}
 
@@ -118,34 +137,6 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 	}
 
     }
-
-    // private class DocumentMenu extends MenuBar {
-    //
-    // DocumentMenu() {
-    // setWidth(100, Sizeable.UNITS_PERCENTAGE);
-    // }
-    //
-    // public void refresh() {
-    // removeItems();
-    // addDirNode((DirNode) nodeItem.getValue());
-    // }
-    //
-    // private void addDirNode(final DirNode dirNode) {
-    // if (dirNode != null) {
-    // final DirNode parent = dirNode.getParent();
-    // addDirNode(parent);
-    //
-    // final String label = getNodeName(dirNode);
-    // addItem(label + "  »", new Command() {
-    // @Override
-    // public void menuSelected(final MenuItem selectedItem) {
-    // nodeItem.setValue(dirNode);
-    // }
-    // });
-    // }
-    // }
-    //
-    // }
 
     public class DocumentMenu extends MenuBar {
 

@@ -38,7 +38,7 @@ public class SelectDestinationDialog extends Window {
 
 	childs = new DomainContainer<DirNode>(DirNode.class);
 	childs.setContainerProperties("displayName", "icon");
-	childs.setReadOnly(true);
+
 	childs.addItem(dirNode);
 
 	wrapper = new ContainerHierarchicalWrapper(childs);

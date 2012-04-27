@@ -36,7 +36,6 @@ import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
 
-import com.vaadin.terminal.ExternalResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -169,7 +168,7 @@ public class ManageMetadataTemplates extends CustomComponent implements Embedded
 
 	    @Override
 	    public void buttonClick(ClickEvent event) {
-		getWindow().open(new ExternalResource("#CreateMetadataTemplate-"));
+		EmbeddedApplication.open(getApplication(), CreateMetadataTemplate.class);
 	    }
 	});
 	vl.addComponent(btCreateTemplate);

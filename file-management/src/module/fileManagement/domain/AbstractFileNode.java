@@ -56,6 +56,8 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 	delete();
     }
 
+    public abstract int getCountFiles();
+
     private void createDirLogs(User user, ContextPath contextPath, DirNode dirNode) {
 	for (AbstractFileNode node : dirNode.getChild()) {
 	    if (node.isDir()) {

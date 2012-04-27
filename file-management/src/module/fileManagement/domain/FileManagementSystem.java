@@ -96,6 +96,10 @@ public class FileManagementSystem extends FileManagementSystem_Base {
 	return ResourceBundle.getBundle(BUNDLE);
     }
 
+    public static String getBundleName() {
+	return BUNDLE;
+    }
+
     public static Logger getLogger() {
 	return logger;
     }
@@ -111,8 +115,8 @@ public class FileManagementSystem extends FileManagementSystem_Base {
     // }
 
     public static void showException(Application app, DomainException e) {
-	Window.Notification notif = new Window.Notification("Operação não permitida", e.getMessage(),
-		Window.Notification.TYPE_TRAY_NOTIFICATION);
+	Window.Notification notif = new Window.Notification(FileManagementSystem.getMessage("label.operation.not.allowed"),
+		e.getMessage(), Window.Notification.TYPE_TRAY_NOTIFICATION);
 	notif.setDelayMsec(-1);
 	app.getMainWindow().showNotification(notif);
     }

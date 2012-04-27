@@ -129,14 +129,13 @@ public class FileNode extends FileNode_Base {
 
     @Override
     public Set<FileLog> getFileLogSet() {
+	final HashSet<FileLog> logs = new HashSet<FileLog>(super.getFileLogSet());
 	if (hasAnySharedFileNodes()) {
-	    final HashSet<FileLog> logs = new HashSet<FileLog>(super.getFileLogSet());
 	    for (SharedFileNode sharedNode : getSharedFileNodes()) {
 		logs.addAll(sharedNode.getFileLogSet());
 	    }
-	    return logs;
 	}
-	return super.getFileLogSet();
+	return logs;
     }
 
     @Override
@@ -153,5 +152,10 @@ public class FileNode extends FileNode_Base {
     public void recoverTo(DirNode targetDir) {
 	new RecoverFileLog(UserView.getCurrentUser(), targetDir.getContextPath(), this);
 	setParent(targetDir);
+    }
+
+    @Override
+    public int getCountFiles() {
+	return 1;
     }
 }

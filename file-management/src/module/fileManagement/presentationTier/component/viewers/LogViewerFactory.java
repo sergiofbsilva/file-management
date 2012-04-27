@@ -36,6 +36,7 @@ import module.fileManagement.domain.log.DirLog;
 import module.fileManagement.domain.log.FileLog;
 import module.fileManagement.presentationTier.DownloadUtil;
 import module.fileManagement.presentationTier.component.dialog.SelectDestinationDialog;
+import myorg.applicationTier.Authenticate.UserView;
 
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -89,12 +90,17 @@ class DeleteFileLogViewer extends FileLogViewer {
 
     @Override
     public boolean hasOperations() {
-	return getLog().getFileNode().isInTrash();
+	final FileNode fileNode = getLog().getFileNode();
+	return UserView.getCurrentUser().equals(fileNode.getOwner()) && fileNode.isInTrash();
     }
 
     @Override
     public String createTargetNodeLink() {
 	return getLog().getFileNode().getDisplayName();
+    }
+
+    private void updateParent() {
+
     }
 
     @Override
@@ -114,6 +120,7 @@ class DeleteFileLogViewer extends FileLogViewer {
 			final DirNode targetDir = window.getSelectedDirNode();
 			if (targetDir != null) {
 			    getLog().getFileNode().recoverTo(targetDir);
+			    getParentContainer().reloadContent();
 			}
 		    }
 		});

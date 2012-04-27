@@ -30,11 +30,14 @@ import java.util.Map;
 
 import module.fileManagement.domain.FileNode;
 import module.vaadin.ui.BennuTheme;
+import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
-import pt.ist.vaadinframework.data.reflect.DomainItem;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
 import pt.ist.vaadinframework.ui.GridSystemLayout;
 
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.GridLayout;
@@ -96,8 +99,9 @@ public class DocumentHome extends CustomComponent implements EmbeddedComponentCo
 
     public static Panel createFileDetails(FileNode fileNode) {
 	Panel pDetails = new Panel(getMessage("label.file.details"));
-	DomainItem item = new DomainItem(fileNode);
-	return pDetails;
+	/*
+	 * DomainItem item = new DomainItem(fileNode);
+	 */return pDetails;
     }
 
     public static Panel createDirDetails() {
@@ -118,6 +122,15 @@ public class DocumentHome extends CustomComponent implements EmbeddedComponentCo
 	// return mainLayout;
 	GridSystemLayout gsl = new GridSystemLayout();
 	gsl.setCell("welcome", 16, createWelcomePanel());
+	Button btNavigate = new Button("Navegar", new ClickListener() {
+
+	    @Override
+	    public void buttonClick(ClickEvent event) {
+		EmbeddedApplication.open(getApplication(), DocumentBrowse.class);
+	    }
+	});
+	btNavigate .addStyleName(BennuTheme.BUTTON_LINK);
+	gsl.setCell("navigation_link", 16, btNavigate);
 	// gsl.setCell("recentlyShared", 8, createRecentlyShared());
 	// gsl.setCell("dirDetails", 8, createDirDetails());
 

@@ -40,6 +40,20 @@ import com.vaadin.data.Property.ValueChangeListener;
  */
 public class VisibilityListViewer extends com.vaadin.ui.Label implements ValueChangeListener {
 
+    public enum VisibilityType {
+	PRIVATE("label.visibility.private"), SHARED("label.visibility.shared"), PUBLIC("label.visibility.public");
+
+	private final String typeKey;
+
+	VisibilityType(String type) {
+	    typeKey = type;
+	}
+
+	public String getTypeKey() {
+	    return typeKey;
+	}
+    }
+
     public VisibilityListViewer() {
 	addStyleName("visibility-viewer");
     }
@@ -66,21 +80,23 @@ public class VisibilityListViewer extends com.vaadin.ui.Label implements ValueCh
 	return false;
     }
 
-    @Override
-    public String toString() {
-	String key;
+    protected VisibilityType getVisibilityType() {
 	final VisibilityList list = getPropertyValue();
 	if (isPublicAccess()) {
-	    key = "label.visibility.public";
+	    return VisibilityType.PUBLIC;
 	} else {
 	    if ((list.size() == 1 && list.contains(SingleUserGroup.class))
 		    || (list.size() == 2 && list.contains(SingleUserGroup.class) && list.contains(EmptyGroup.class))) {
-		key = "label.visibility.private";
+		return VisibilityType.PRIVATE;
 	    } else {
-		key = "label.visibility.shared";
+		return VisibilityType.SHARED;
 	    }
 	}
-	return FileManagementSystem.getMessage(key);
+    }
+
+    @Override
+    public String toString() {
+	return FileManagementSystem.getMessage(getVisibilityType().getTypeKey());
     }
 
     @Override

@@ -112,33 +112,6 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
 	});
 
 	layout.addComponent(btUpload);
-
-	// Button btOpenDestinationDialog = new Button("dest", new
-	// ClickListener() {
-	//
-	// @Override
-	// public void buttonClick(ClickEvent event) {
-	// final SelectDestinationDialog window = new SelectDestinationDialog();
-	// getWindow().addWindow(window);
-	// window.addListener(new CloseListener() {
-	//
-	// @Override
-	// public void windowClose(CloseEvent e) {
-	// final DirNode selectedDirNode = window.getSelectedDirNode();
-	// if (selectedDirNode == null) {
-	// getWindow().showNotification("Nenhuma directoria seleccionada!");
-	// } else {
-	// getWindow().showNotification("Directoria seleccionada : " +
-	// selectedDirNode.getDisplayName());
-	// }
-	//
-	// }
-	// });
-	// }
-	// });
-	//
-	// layout.addComponent(btOpenDestinationDialog);
-
 	return layout;
     }
 
@@ -167,30 +140,10 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
 
     public DocumentFileBrowser createBrowser() {
 	DocumentFileBrowser browser = new DocumentFileBrowser();
-	// browser.addDirChangedListener(new ValueChangeListener() {
-	//
-	// @Override
-	// public void valueChange(ValueChangeEvent event) {
-	// final DirNode dirNode = (DirNode)event.getProperty().getValue();
-	// btUpload.setEnabled(dirNode.isWriteGroupMember());
-	// }
-	// });
 	return browser;
     }
 
     public Layout createPage() {
-	// VerticalLayout layout = new VerticalLayout();
-	// layout.setSizeFull();
-	// layout.setMargin(true, true, false, false);
-	// layout.setSpacing(true);
-	// browser = createBrowser();
-	// layout.addComponent(createButtons());
-	// layout.addComponent(new QuotaLabel(browser.getNodeItem()));
-	//
-	// mainGrid = createGrid(browser);
-	// setFileDetails(browser.getNodeItem());
-	// layout.addComponent(mainGrid);
-	// return layout;
 	browser = createBrowser();
 	gsl = new GridSystemLayout();
 	gsl.setCell("quota", 16, new QuotaLabel(browser.getNodeItem()));
@@ -203,13 +156,12 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
     public void setFileDetails(DomainItem<AbstractFileNode> nodeItem) {
 	fileDetails = NodeDetails.makeDetails(nodeItem);
 	fileDetails.setDocumentBrowse(this);
-	// fileDetails.setSizeFull();
 	gsl.setCell("info", 6, fileDetails);
     }
 
     public DocumentBrowse() {
 	mainLayout = createPage();
-	browser.addListener(new ValueChangeListener() {
+	final ValueChangeListener itemChanged = new ValueChangeListener() {
 	    @Override
 	    public void valueChange(ValueChangeEvent event) {
 		Object absFileNode = event.getProperty().getValue();
@@ -217,6 +169,15 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
 		    DomainItem<AbstractFileNode> nodeItem = browser.getContainer().getItem(absFileNode);
 		    setFileDetails(nodeItem);
 		}
+	    }
+	};
+	browser.addListener(itemChanged);
+	browser.addDirChangedListener(new ValueChangeListener() {
+
+	    @Override
+	    public void valueChange(ValueChangeEvent event) {
+		final DomainItem<AbstractFileNode> domainItem = (DomainItem<AbstractFileNode>) event.getProperty();
+		setFileDetails(domainItem);
 	    }
 	});
 	setCompositionRoot(mainLayout);

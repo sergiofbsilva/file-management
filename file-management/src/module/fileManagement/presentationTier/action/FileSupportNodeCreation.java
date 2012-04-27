@@ -58,26 +58,27 @@ public class FileSupportNodeCreation extends ContextBaseAction {
 	final Node node = getDomainObject(request, "parentOfNodesToManageId");
 	final String FILEMANAGEMENT_RESOURCES = "resources.FileManagementResources";
 
-	final VaadinNode documentHome = VaadinNode.createVaadinNode(virtualHost, node,
-		FILEMANAGEMENT_RESOURCES, "label.link.documents", "DocumentHome",
-		 UserGroup.getInstance()
-		/*Role.getRole(RoleType.MANAGER)*/);
+	final VaadinNode documentHome = VaadinNode.createVaadinNode(virtualHost, node, FILEMANAGEMENT_RESOURCES,
+		"label.link.documents", "DocumentHome", UserGroup.getInstance()
+	/* Role.getRole(RoleType.MANAGER) */);
 
-	VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.home",
-		"DocumentHome", UserGroup.getInstance());
-	
-	VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.browse",
-		"DocumentBrowse-", UserGroup.getInstance());
-	
-	VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.logs",
-		"LogPage", UserGroup.getInstance());
-	
-//	VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.search",
-//		"DocumentSearch", UserGroup.getInstance());
-	
-//	VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.old.documents",
-//		"DocumentFrontPage", UserGroup.getInstance());
-	
+	VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.home", "DocumentHome",
+		UserGroup.getInstance());
+
+	VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.browse", "DocumentBrowse",
+		UserGroup.getInstance());
+
+	VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.logs", "LogPage",
+		UserGroup.getInstance());
+
+	// VaadinNode.createVaadinNode(virtualHost, documentHome,
+	// FILEMANAGEMENT_RESOURCES, "label.link.search",
+	// "DocumentSearch", UserGroup.getInstance());
+
+	// VaadinNode.createVaadinNode(virtualHost, documentHome,
+	// FILEMANAGEMENT_RESOURCES, "label.link.old.documents",
+	// "DocumentFrontPage", UserGroup.getInstance());
+
 	VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.metadata.templates",
 		"ManageMetadataTemplates", Role.getRole(RoleType.MANAGER));
 

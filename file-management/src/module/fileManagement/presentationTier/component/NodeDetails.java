@@ -26,6 +26,7 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.BaseTheme;
+import com.vaadin.ui.themes.Reindeer;
 
 public abstract class NodeDetails extends Panel {
 
@@ -45,21 +46,11 @@ public abstract class NodeDetails extends Panel {
     }
 
     public void showDeleteDialog() {
-	// final CheckBox chkDeleteAll = new CheckBox(
-	// "Este ficheiro encontra-se partilhado. Deseja apagá-lo para todos os outros utilizadores?");
 	final String windowTitle = getDeleteDialogTitle();
 	final String message = getDeleteDialogMessage();
 	final String yes = getMessage("label.yes");
 	final String no = getMessage("label.no");
 	ConfirmDialog confirm = new DefaultConfirmDialogFactory().create(windowTitle, message, yes, no);
-
-	// if (getNode().isWriteGroupMember()) {
-	// if (getNode().getVisibilityState() != VisibilityState.PRIVATE) {
-	// VerticalLayout vl = (VerticalLayout) confirm.getContent();
-	// final Panel panel = (Panel) vl.getComponent(0);
-	// panel.addComponent( chkDeleteAll);
-	// }
-	// }
 
 	ConfirmDialog.Listener listener = new ConfirmDialog.Listener() {
 
@@ -79,9 +70,9 @@ public abstract class NodeDetails extends Panel {
     public NodeDetails(DomainItem<AbstractFileNode> nodeItem, boolean operationsVisible, boolean infoVisible) {
 	super();
 	this.nodeItem = nodeItem;
-	this.nodeItem.setWriteThrough(true);
 	this.operationsVisible = operationsVisible;
 	this.infoVisible = infoVisible;
+	addStyleName(Reindeer.PANEL_LIGHT);
 
 	updateCaption();
 	VerticalLayout content = (VerticalLayout) getContent();
@@ -112,11 +103,8 @@ public abstract class NodeDetails extends Panel {
 
 	    @Override
 	    public void buttonClick(ClickEvent event) {
-		EmbeddedApplication.open(getApplication(), DocumentShare.class, getNode().getExternalId(), documentBrowse
+		EmbeddedApplication.open(getApplication(), DocumentShare.class, getNode().getExternalId(), getNode().getParent()
 			.getContextPath().toString());
-		// getWindow().open(new ExternalResource("#DocumentShare-" +
-		// getNode().getExternalId() + "," +
-		// documentBrowse.getContextPath()));
 	    }
 	});
 	btShareLink.setStyleName(BaseTheme.BUTTON_LINK);
@@ -124,9 +112,11 @@ public abstract class NodeDetails extends Panel {
     }
 
     public Component updateDetails() {
-	TabularViewer viewer = new TabularViewer(FMSViewerFactory.getInstance());
+	TabularViewer viewer = new TabularViewer(FMSViewerFactory.getDefaultViewerFactory());
 	List<String> propertyIds = new ArrayList<String>();
-	propertyIds.addAll(Arrays.asList(new String[] { "type", "displayName", "presentationFilesize", "visibilityGroups" }));
+	// propertyIds.addAll(Arrays.asList(new String[] { "type",
+	// "displayName", "presentationFilesize" , "visibilityGroups" }));
+	propertyIds.addAll(Arrays.asList(new String[] { "type", "displayName", "presentationFilesize" }));
 	propertyIds.addAll(visibleProperties);
 	viewer.setItemDataSource(nodeItem, propertyIds);
 	return viewer;
@@ -181,11 +171,21 @@ public abstract class NodeDetails extends Panel {
     @Override
     public void attach() {
 	super.attach();
+	((VerticalLayout) getContent()).setMargin(false);
 	updateFilePanel();
+    }
+
+    @Override
+    public void removeAllComponents() {
+	super.removeAllComponents();
+	if (vlOperations != null) {
+	    vlOperations.removeAllComponents();
+	}
     }
 
     public void updateFilePanel() {
 	removeAllComponents();
+
 	if (getNode() == null) {
 	    return;
 	}
@@ -221,7 +221,15 @@ public abstract class NodeDetails extends Panel {
     };
 
     private ContextPath getContextPath() {
-	return documentBrowse.getContextPath();
+	return documentBrowse != null ? documentBrowse.getContextPath() : getNode().getParent().getContextPath();
+    }
+
+    public boolean isOperationsVisible() {
+	return operationsVisible;
+    }
+
+    public boolean isInfoVisible() {
+	return infoVisible;
     }
 
 }

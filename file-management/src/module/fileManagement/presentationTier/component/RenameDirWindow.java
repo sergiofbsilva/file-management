@@ -13,7 +13,7 @@ import com.vaadin.ui.Window;
 
 public class RenameDirWindow extends Window {
 
-    private final DomainItem<AbstractFileNode> dirNodeItem;
+    private DomainItem<AbstractFileNode> dirNodeItem;
     private final RenameDirWindow renameDirWindow;
 
     public RenameDirWindow(DomainItem<AbstractFileNode> nodeItem) {
@@ -28,7 +28,7 @@ public class RenameDirWindow extends Window {
 	layout.setMargin(true);
 	layout.setSpacing(true);
 
-	final TransactionalForm form = new TransactionalForm(FileManagementSystem.BUNDLE);
+	final TransactionalForm form = new TransactionalForm(FileManagementSystem.getBundleName());
 	form.setWriteThrough(false);
 	form.addButton(getMessage("label.save"), new ClickListener() {
 

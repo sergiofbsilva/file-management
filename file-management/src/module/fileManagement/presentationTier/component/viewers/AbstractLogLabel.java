@@ -31,6 +31,7 @@ import module.fileManagement.domain.ContextPath;
 import module.fileManagement.domain.DirNode;
 import module.fileManagement.domain.log.AbstractLog;
 import module.fileManagement.presentationTier.pages.DocumentBrowse;
+import module.fileManagement.presentationTier.pages.LogPage;
 import pt.ist.vaadinframework.fragment.FragmentQuery;
 
 import com.vaadin.ui.Component;
@@ -44,6 +45,7 @@ import com.vaadin.ui.themes.BaseTheme;
  */
 public abstract class AbstractLogLabel<T extends AbstractLog> extends Label implements AbstractLogViewer {
     private final T log;
+    private LogPage parentContainer;
 
     public AbstractLogLabel(T log) {
 	super();
@@ -92,5 +94,13 @@ public abstract class AbstractLogLabel<T extends AbstractLog> extends Label impl
     @Override
     public List<Component> getOperations() {
 	return Collections.EMPTY_LIST;
+    }
+
+    public void setParentContainer(LogPage parent) {
+	this.parentContainer = parent;
+    }
+
+    public LogPage getParentContainer() {
+	return this.parentContainer;
     }
 }

@@ -34,14 +34,14 @@ import myorg.domain.User;
  * 
  */
 public class CreateDirLog extends CreateDirLog_Base {
-    
-    public  CreateDirLog() {
-        super();
+
+    public CreateDirLog() {
+	super();
     }
-    
+
     public CreateDirLog(User user, ContextPath contextPath, DirNode dirNode) {
 	super();
-	init(user,contextPath,dirNode);
+	init(user, contextPath, dirNode);
     }
 
 }

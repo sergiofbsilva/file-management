@@ -43,9 +43,7 @@ import module.vaadin.ui.BennuTheme;
 import myorg.applicationTier.Authenticate.UserView;
 import myorg.domain.Presentable;
 import myorg.domain.groups.SingleUserGroup;
-
-import org.apache.poi.openxml4j.exceptions.InvalidOperationException;
-
+import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
@@ -120,6 +118,11 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
 
     @Override
     public boolean isAllowedToOpen(Map<String, String> arguments) {
+	final String fileExternalId = arguments.get("fileNode");
+	final AbstractFileNode node = AbstractFileNode.fromExternalId(fileExternalId);
+	if (node == null || node.isDir() || !node.isWriteGroupMember()) {
+	    return false;
+	}
 	return true;
     }
 
@@ -128,9 +131,6 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
 	final String fileExternalId = arguments.get("fileNode");
 	final String contextPath = arguments.get("contextPath");
 	fileNode = AbstractFileNode.fromExternalId(fileExternalId);
-	if (fileNode == null || !fileNode.isWriteGroupMember()) {
-	    throw new InvalidOperationException("É necessário seleccionar um ficheiro");
-	}
 	this.contextPath = new ContextPath(contextPath);
 	updateGroupTable();
     }
@@ -184,9 +184,11 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
     private Component createSharePanel() {
 	final Panel pnlShare = new Panel(getMessage("document.share.with"));
 	final HorizontalLayout hlVisibilityGroup = new HorizontalLayout();
+	hlVisibilityGroup.setSizeFull();
 	hlVisibilityGroup.setSpacing(true);
 
 	final TimeoutSelect selectGroupToMake = new TimeoutSelect();
+	selectGroupToMake.setWidth("220px");
 	selectGroupToMake.setContainerDataSource(groupContainer);
 	selectGroupToMake.setItemCaptionPropertyId("presentationName");
 	selectGroupToMake.addListener(new TextChangeListener() {
@@ -270,6 +272,7 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
 	GridLayout grid = new GridLayout(2, 1);
 	grid.setSizeFull();
 	grid.setMargin(true, true, true, false);
+	grid.setSpacing(true);
 	grid.addComponent(createSharePanel(), 0, 0);
 	grid.addComponent(createFileDetails(), 1, 0);
 	return grid;
@@ -283,7 +286,20 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
 	mainLayout.addComponent(createHeaderPanel());
 	mainLayout.addComponent(createGrid());
 	mainLayout.addComponent(fileNodeGroupsTable);
+	mainLayout.addComponent(createBackLink());
 	return mainLayout;
+    }
+
+    private Component createBackLink() {
+	final Button btBack = new Button("Concluir");
+	btBack.addListener(new ClickListener() {
+
+	    @Override
+	    public void buttonClick(ClickEvent event) {
+		EmbeddedApplication.back(getApplication());
+	    }
+	});
+	return btBack;
     }
 
     public DocumentShare() {

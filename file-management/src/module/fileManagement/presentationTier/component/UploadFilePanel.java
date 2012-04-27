@@ -10,9 +10,13 @@ import module.fileManagement.presentationTier.component.UploadFileArea.FileUploa
 import module.fileManagement.presentationTier.component.UploadFileArea.OnFileUploadEvent;
 import module.fileManagement.presentationTier.data.DocumentContainer;
 import module.fileManagement.presentationTier.pages.DocumentBrowse;
+import module.fileManagement.presentationTier.pages.UploadPage;
 import module.vaadin.data.util.ObjectHintedProperty;
+import module.vaadin.ui.BennuTheme;
 import pt.ist.vaadinframework.EmbeddedApplication;
 
+import com.vaadin.data.Container.ItemSetChangeEvent;
+import com.vaadin.data.Container.ItemSetChangeListener;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.Property.ValueChangeNotifier;
 import com.vaadin.ui.Button;
@@ -29,11 +33,13 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
     private final UploadFileArea uploadArea;
     private final Table documents;
     private DocumentContainer documentContainer;
-    // private DocumentContainer selectedDocumentsContainer;
     private ObjectHintedProperty<Collection> selectedDocumentsProperty;
     private ContextPath contextPath;
+    private final UploadPage uploadPage;
+    private final Label submittedDocumentsLabel;
+    private final Label lblOr = new Label("ou");
 
-    public UploadFilePanel() {
+    public UploadFilePanel(final UploadPage uploadPage) {
 	super();
 	documentContainer = new DocumentContainer();
 	selectedDocumentsProperty = new ObjectHintedProperty<Collection>(new HashSet<Document>(), Collection.class);
@@ -47,10 +53,13 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
 		addDocument(event.getUploadedFileNode().getDocument());
 	    }
 	});
+	this.uploadPage = uploadPage;
+	submittedDocumentsLabel = new Label("<h3> Documentos Submetidos </h3>", Label.CONTENT_XHTML);
+	submittedDocumentsLabel.setVisible(false);
     }
 
-    public UploadFilePanel(ContextPath contextPath) {
-	this();
+    public UploadFilePanel(ContextPath contextPath, final UploadPage uploadPage) {
+	this(uploadPage);
 	this.contextPath = contextPath;
 	uploadArea.setContextPath(contextPath);
     }
@@ -62,24 +71,51 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
 	vl.setSizeFull();
 	vl.setSpacing(true);
 	vl.setMargin(true, false, false, false);
-	vl.addComponent(new Label("<h3> Documentos Submetidos </h3>", Label.CONTENT_XHTML));
-	vl.addComponent(documents);
-	HorizontalLayout hlUploadArea = new HorizontalLayout();
-	hlUploadArea.setSizeFull();
-	hlUploadArea.setSpacing(true);
-	hlUploadArea.addComponent(uploadArea);
-	hlUploadArea.addComponent(new Button("Finalizar Upload", new ClickListener() {
+	VerticalLayout vlUpload = new VerticalLayout();
+
+	vlUpload.setSizeFull();
+	vlUpload.setSpacing(true);
+	vlUpload.addComponent(uploadArea);
+
+	HorizontalLayout hlUploadEditMetadata = new HorizontalLayout();
+	final Button btFinishUpload = new Button("Finalizar Upload", new ClickListener() {
 
 	    @Override
 	    public void buttonClick(ClickEvent event) {
 		documentContainer.commit();
-		// getWindow().open(new ExternalResource("#DocumentBrowse-" +
-		// contextPath));
 		EmbeddedApplication.open(getApplication(), DocumentBrowse.class, contextPath.toString());
 	    }
-	}));
+	});
+	hlUploadEditMetadata.addComponent(btFinishUpload);
+
+	Button btEditMetadata = new Button("Editar Metadata", new ClickListener() {
+
+	    @Override
+	    public void buttonClick(ClickEvent event) {
+		uploadPage.metadataPanelVisible(true);
+		lblOr.setVisible(false);
+		event.getButton().setVisible(false);
+	    }
+	});
+
+	btEditMetadata.setStyleName(BennuTheme.BUTTON_LINK);
+	hlUploadEditMetadata.setSpacing(true);
+	hlUploadEditMetadata.addComponent(btFinishUpload);
+	hlUploadEditMetadata.addComponent(lblOr);
+	hlUploadEditMetadata.addComponent(btEditMetadata);
+
 	vl.addComponent(uploadArea.getErrorLayout());
-	vl.addComponent(hlUploadArea);
+	vl.addComponent(vlUpload);
+	vl.addComponent(submittedDocumentsLabel);
+	vl.addComponent(documents);
+	vl.addComponent(hlUploadEditMetadata);
+	documents.addListener(new ItemSetChangeListener() {
+
+	    @Override
+	    public void containerItemSetChange(ItemSetChangeEvent event) {
+		submittedDocumentsLabel.setVisible(event.getContainer().size() > 0);
+	    }
+	});
 	setCompositionRoot(vl);
     }
 
@@ -95,24 +131,6 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
 	table.setContainerDataSource(documentContainer);
 	table.setPropertyDataSource(selectedDocumentsProperty);
 	table.setVisibleColumns(new Object[] { "displayName" });
-	// table.addGeneratedColumn("ops", new ColumnGenerator() {
-	//
-	// @Override
-	// public Component generateCell(Table source, final Object itemId,
-	// Object columnId) {
-	// HorizontalLayout hl = new HorizontalLayout();
-	// Button button = new Button("Remover", new ClickListener() {
-	// @Override
-	// public void buttonClick(ClickEvent event) {
-	// table.removeItem(itemId);
-	// forceDocumentVisibility();
-	// }
-	// });
-	// button.setStyleName(BaseTheme.BUTTON_LINK);
-	// hl.addComponent(button);
-	// return hl;
-	// }
-	// });
 	return table;
     }
 

@@ -79,7 +79,7 @@ public abstract class AbstractLog extends AbstractLog_Base {
     }
 
     public String getUserName() {
-	return getUser().getPresentationName();
+	return getUser() != null ? getUser().getUsername() : FileManagementSystem.getMessage("label.script");
     }
 
     public ContextPath getContextPath() {

@@ -299,6 +299,7 @@ public class DirNode extends DirNode_Base {
 
     // size and quota
 
+    @Override
     public int getCountFiles() {
 	int result = 0;
 	for (final AbstractFileNode node : getChildSet()) {

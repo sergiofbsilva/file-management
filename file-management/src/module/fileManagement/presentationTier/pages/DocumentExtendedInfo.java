@@ -36,18 +36,22 @@ import module.fileManagement.domain.AbstractFileNode;
 import module.fileManagement.domain.Document;
 import module.fileManagement.domain.FileNode;
 import module.fileManagement.domain.Metadata;
+import module.fileManagement.domain.VisibilityList;
 import module.fileManagement.presentationTier.DownloadUtil;
 import module.fileManagement.presentationTier.component.MetadataPanel;
 import module.fileManagement.presentationTier.component.NodeDetails;
 import module.fileManagement.presentationTier.component.TabularViewer;
 import module.fileManagement.presentationTier.component.viewers.FMSViewerFactory;
+import module.fileManagement.presentationTier.component.viewers.VisibilityListViewer;
 import module.fileManagement.presentationTier.data.DocumentContainer;
 import module.vaadin.data.util.ObjectHintedProperty;
 import module.vaadin.ui.BennuTheme;
+import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.reflect.DomainContainer;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
+import pt.ist.vaadinframework.ui.GridSystemLayout;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.util.ObjectProperty;
@@ -56,7 +60,6 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Layout;
@@ -72,14 +75,23 @@ import com.vaadin.ui.themes.BaseTheme;
  * 
  */
 public class DocumentExtendedInfo extends CustomComponent implements EmbeddedComponentContainer {
-    private final GridLayout mainGrid;
+    private final GridSystemLayout mainGrid;
     private FileNode fileNode;
     private Component metadataInfoView;
     private Component editMetadataView;
     private Layout metadataInfoPanel;
+    private static ViewerFactory viewerFactory;
+
+    static {
+	viewerFactory = new ViewerFactory();
+    }
 
     @Override
     public boolean isAllowedToOpen(Map<String, String> arguments) {
+	AbstractFileNode node = Document.fromExternalId(arguments.get("node"));
+	if (node == null || node.isDir() || !(node.isReadGroupMember() || node.isWriteGroupMember())) {
+	    return false;
+	}
 	return true;
     }
 
@@ -89,9 +101,8 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
     }
 
     public void update() {
-	mainGrid.removeAllComponents();
-	mainGrid.addComponent(createExtendedInfo(), 0, 0);
-	mainGrid.addComponent(createDocumentOperations(), 1, 0);
+	mainGrid.setCell("info", 10, createExtendedInfo());
+	mainGrid.setCell("ops", 6, createDocumentOperations());
     }
 
     public DocumentExtendedInfo() {
@@ -99,10 +110,10 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
 	vl.setSizeFull();
 	vl.setSpacing(true);
 	vl.setMargin(false, false, false, true);
-	mainGrid = new GridLayout(2, 1);
-	mainGrid.setSizeFull();
-	mainGrid.setSpacing(true);
-	vl.addComponent(new Label("<h3>Documento</h3>", Label.CONTENT_XHTML));
+	mainGrid = new GridSystemLayout();
+	/*
+	 * mainGrid.setSizeFull(); mainGrid.setSpacing(true);
+	 */vl.addComponent(new Label("<h3>Documento</h3>", Label.CONTENT_XHTML));
 	vl.addComponent(mainGrid);
 	setCompositionRoot(vl);
     }
@@ -124,6 +135,7 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
 	vlayout.addComponent(createInfoPanel(item));
 	metadataInfoPanel = createMetadataInfoPanel(item);
 	vlayout.addComponent(metadataInfoPanel);
+	vlayout.addComponent(createBackLink());
 	return vlayout;
     }
 
@@ -175,6 +187,18 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
 	return vlEditMetadata;
     }
 
+    private Component createBackLink() {
+	final Button btBack = new Button("« voltar");
+	btBack.addListener(new ClickListener() {
+
+	    @Override
+	    public void buttonClick(ClickEvent event) {
+		EmbeddedApplication.back(getApplication());
+	    }
+	});
+	return btBack;
+    }
+
     private Layout createMetadataInfoPanel(DomainItem<FileNode> item) {
 	final VerticalLayout vl = new VerticalLayout();
 	vl.setSpacing(true);
@@ -182,7 +206,7 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
 	final HorizontalLayout hl = new HorizontalLayout();
 	final Label lbl = new Label(
 		String.format("Metadata Versão %s", item.getItemProperty("document.versionNumber").toString()));
-	lbl.addStyleName(BennuTheme.LABEL_H2);
+	lbl.addStyleName(BennuTheme.LABEL_H3);
 	hl.addComponent(lbl);
 
 	if (fileNode.isWriteGroupMember()) {
@@ -206,6 +230,7 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
 		(Collection<Metadata>) recentMetadata.getValue(), Metadata.class);
 	if (metadataContainer.size() > 0) {
 	    final Table table = new Table();
+	    table.setPageLength(0);
 	    metadataContainer.setContainerProperties("keyValue", "value");
 	    table.setContainerDataSource(metadataContainer);
 	    table.setVisibleColumns(new Object[] { "keyValue", "value" });
@@ -218,13 +243,39 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
 	return vl;
     }
 
+    public static class ViewerFactory extends FMSViewerFactory {
+
+	public static class VisibilityCompleteViewer extends VisibilityListViewer {
+
+	    public VisibilityCompleteViewer() {
+		removeStyleName("visibility-viewer");
+		setContentMode(CONTENT_XHTML);
+	    }
+
+	    @Override
+	    public String toString() {
+		if (getVisibilityType().equals(VisibilityListViewer.VisibilityType.SHARED)) {
+		    return super.getDescription();
+		}
+		return super.toString();
+	    }
+	}
+
+	public ViewerFactory() {
+	    super();
+
+	    register(VisibilityList.class, VisibilityCompleteViewer.class);
+	}
+
+    }
+
     private Component createInfoPanel(DomainItem<FileNode> item) {
-	TabularViewer viewer = new TabularViewer(FMSViewerFactory.getInstance());
+	TabularViewer viewer = new TabularViewer(viewerFactory);
 	List<String> propertyIds = new ArrayList<String>();
 	item.addItemProperty("url", new ObjectProperty<URL>(
 		DownloadUtil.getDownloadUrl(getApplication(), fileNode.getDocument()), URL.class));
 	propertyIds.addAll(Arrays.asList(new String[] { "displayName", "url", "document.versionNumber", "presentationFilesize",
-		"document.lastModifiedDate", "parent.displayName" }));
+		"document.lastModifiedDate", "parent.displayName", "visibilityGroups" }));
 	viewer.setItemDataSource(item, propertyIds);
 	for (Component versionEntry : getVersionsEntries(item)) {
 	    viewer.addLine(versionEntry);
