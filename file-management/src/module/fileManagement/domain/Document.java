@@ -1,10 +1,13 @@
 package module.fileManagement.domain;
 
+import static module.fileManagement.tools.StringUtils.matches;
+
 import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -15,15 +18,15 @@ import org.joda.time.DateTime;
 import pt.ist.fenixWebFramework.services.Service;
 
 public class Document extends Document_Base {
-    
+
     public static String DOCUMENT_NEW_VERSION_KEY = "document.new.version.key.value";
-    
+
     public Document() {
-        super();
-        addNewVersionMetadata();
+	super();
+	addNewVersionMetadata();
     }
-    
-        public Document(final File file, final String fileName) {
+
+    public Document(final File file, final String fileName) {
 	this();
 	setLastVersionedFile(new VersionedFile(file, fileName));
 	addMetadata(MetadataKey.FILENAME_KEY_VALUE, fileName);
@@ -38,7 +41,7 @@ public class Document extends Document_Base {
 	final VersionedFile file = getLastVersionedFile();
 	file.setDisplayName(displayName);
     }
-    
+
     @Service
     public void delete() {
 	removeReadGroup();
@@ -54,28 +57,43 @@ public class Document extends Document_Base {
 	}
 	deleteDomainObject();
     }
-    
+
     public void trash() {
-//	setLastVersionedFile(VersionedFile.getEmptyVersionFile());
-//	for (final FileNode fileNode : getFileNodeSet()) {
-//	    fileNode.deleteFromDocument();
-//	}
+	// setLastVersionedFile(VersionedFile.getEmptyVersionFile());
+	// for (final FileNode fileNode : getFileNodeSet()) {
+	// fileNode.deleteFromDocument();
+	// }
+    }
+
+    public boolean search(String searchText) {
+	return /* matches(getDisplayName(), searchText) || */searchMetadata(searchText);
+    }
+
+    private boolean searchMetadata(String searchText) {
+	for (Metadata metadata : getMetadata()) {
+	    final String keyValue = metadata.getKeyValue();
+	    final String value = metadata.getValue();
+	    if (matches(keyValue, searchText) || matches(value, searchText)) {
+		return true;
+	    }
+	}
+	return false;
     }
 
     public String getPresentationFilesize() {
 	final VersionedFile file = getLastVersionedFile();
 	return file.getPresentationFilesize();
     }
-    
-    public int getFilesize() {
+
+    public long getFilesize() {
 	final VersionedFile file = getLastVersionedFile();
 	return file.getFilesize();
     }
-    
+
     private int getVersionNumber(VersionedFile file) {
 	return file.hasPreviousVersion() ? 1 + getVersionNumber(file.getPreviousVersion()) : 1;
     }
-    
+
     public int getVersionNumber() {
 	return getVersionNumber(getLastVersionedFile());
     }
@@ -87,65 +105,72 @@ public class Document extends Document_Base {
 	setLastVersionedFile(newVersion);
 	addNewVersionMetadata();
     }
-    
+
     private DateTime now() {
 	return new DateTime();
     }
-    
+
     public DateTime setModifiedDateNow() {
 	final DateTime now = now();
 	setLastModifiedDate(now);
 	return now;
     }
-    
+
     @Service
     public void addMetadata(Collection<Metadata> metadata) {
-	for(Metadata md : metadata) {
-	  addMetadata(md.hasDocument() ? md.getCopy() : md);
+	for (Metadata md : metadata) {
+	    addMetadata(md.hasDocument() ? md.getCopy() : md);
 	}
     }
-    
+
     @Service
     public void addMetadata(String key, String value) {
-	addMetadata(new Metadata(key,value));
+	addMetadata(new Metadata(key, value));
     }
-    
+
+    @Service
+    public void addMetadata(Map<String, String> keyValueMap) {
+	for (Map.Entry<String, String> entry : keyValueMap.entrySet()) {
+	    addMetadata(entry.getKey(), entry.getValue());
+	}
+    }
+
     @Service
     public void addMetadata(MetadataKey key, String value) {
-	addMetadata(new Metadata(key,value));
+	addMetadata(new Metadata(key, value));
     }
-    
+
     public TreeSet<Metadata> getMetadataOrderedByTimestamp() {
-	return new TreeSet<Metadata>(getMetadata()); 
+	return new TreeSet<Metadata>(getMetadata());
     }
-    
+
     public TreeSet<Metadata> getMetadataOrderedByTimestamp(MetadataKey key) {
 	TreeSet<Metadata> treeSet = new TreeSet<Metadata>();
-	for(Metadata metadata : getMetadata()) {
+	for (Metadata metadata : getMetadata()) {
 	    if (metadata.getMetadataKey().equals(key)) {
 		treeSet.add(metadata);
 	    }
 	}
 	return treeSet;
     }
-    
+
     public Metadata getMetadataRecentlyChanged(MetadataKey key) {
 	final TreeSet<Metadata> metadataByTimestamp = getMetadataOrderedByTimestamp(key);
-	for(Metadata metadata : metadataByTimestamp.descendingSet()) {
+	for (Metadata metadata : metadataByTimestamp.descendingSet()) {
 	    if (metadata.getMetadataKey().equals(key)) {
 		return metadata;
 	    }
 	}
 	return null;
     }
-    
+
     private TreeSet<Metadata> getMetadataUntil(DateTime endDate) {
 	final TreeSet<Metadata> metadataByTimestamp = new TreeSet<Metadata>(Metadata.TIMESTAMP_DESC_COMPARATOR);
 	final TreeSet<Metadata> metadataUntil = new TreeSet<Metadata>(Metadata.TIMESTAMP_DESC_COMPARATOR);
 	metadataByTimestamp.addAll(getMetadata());
 	metadataUntil.addAll(getMetadata());
-	
-	for(Metadata metadata : metadataByTimestamp) {
+
+	for (Metadata metadata : metadataByTimestamp) {
 	    if (metadata.getTimestamp().compareTo(endDate) > 0) {
 		metadataUntil.remove(metadata);
 	    }
@@ -153,14 +178,14 @@ public class Document extends Document_Base {
 	cleanup(metadataUntil);
 	return metadataUntil;
     }
-    
+
     public Collection<Metadata> getRecentMetadata() {
 	final TreeSet<Metadata> metadataUntil = getMetadataUntil(now());
 	Iterator<Metadata> iter = metadataUntil.iterator();
 	final Set<String> keysToFilter = new HashSet<String>();
 	keysToFilter.add(DOCUMENT_NEW_VERSION_KEY);
 	keysToFilter.add(MetadataKey.FILENAME_KEY_VALUE);
-	while(iter.hasNext()) {
+	while (iter.hasNext()) {
 	    Metadata metadata = iter.next();
 	    if (keysToFilter.contains(metadata.getKeyValue())) {
 		iter.remove();
@@ -170,22 +195,22 @@ public class Document extends Document_Base {
 	metadataByKeyValue.addAll(metadataUntil);
 	return metadataByKeyValue;
     }
-    
+
     public TreeSet<Metadata> getVersions() {
 	final TreeSet<Metadata> metadataSet = new TreeSet<Metadata>(Metadata.TIMESTAMP_DESC_COMPARATOR);
-	final TreeSet<Metadata> resultingSet = new TreeSet<Metadata>(Metadata.TIMESTAMP_DESC_COMPARATOR); 
+	final TreeSet<Metadata> resultingSet = new TreeSet<Metadata>(Metadata.TIMESTAMP_DESC_COMPARATOR);
 	metadataSet.addAll(getMetadata());
-	for(Metadata metadata : metadataSet) {
+	for (Metadata metadata : metadataSet) {
 	    if (DOCUMENT_NEW_VERSION_KEY.equals(metadata.getKeyValue())) {
 		resultingSet.add(metadata);
 	    }
 	}
 	return resultingSet;
     }
-    
+
     private void cleanup(TreeSet<Metadata> metadataSet) {
 	HashMap<MetadataKey, Metadata> metadataMap = new HashMap<MetadataKey, Metadata>();
-	for(Metadata metadataIter : metadataSet) {
+	for (Metadata metadataIter : metadataSet) {
 	    final MetadataKey metadataKey = metadataIter.getMetadataKey();
 	    final Metadata metadata = metadataMap.get(metadataKey);
 	    if (metadata == null) {
@@ -195,23 +220,24 @@ public class Document extends Document_Base {
 	metadataSet.clear();
 	metadataSet.addAll(metadataMap.values());
     }
-    
+
     private void addNewVersionMetadata() {
-	addMetadata(DOCUMENT_NEW_VERSION_KEY,UserView.getCurrentUser().getPresentationName());
+	addMetadata(DOCUMENT_NEW_VERSION_KEY, UserView.getCurrentUser().getShortPresentationName());
 	setModifiedDateNow();
     }
 
-
     /**
-     * replace metadata value. If metadata value is not present the metadata value is added.
+     * replace metadata value. If metadata value is not present the metadata
+     * value is added.
      * 
-     * @param key 
-     * @param value if value is empty or null removeMetadata object
+     * @param key
+     * @param value
+     *            if value is empty or null removeMetadata object
      */
     @Service
     public void replaceMetadata(MetadataKey key, String value) {
 	boolean changed = false;
-	for(Metadata metadata : getMetadataSet()) {
+	for (Metadata metadata : getMetadataSet()) {
 	    final MetadataKey metadataKey = metadata.getMetadataKey();
 	    if (metadataKey.equals(key)) {
 		if (value == null || value.isEmpty()) {
@@ -227,28 +253,28 @@ public class Document extends Document_Base {
 	    addMetadata(key, value);
 	}
     }
-    
-    @Service 
+
+    @Service
     public void clearAllMetadata() {
 	for (Metadata md : getMetadata()) {
 	    md.delete();
 	}
     }
-    
+
     public Metadata getMetadata(MetadataKey metadataKey) {
 	if (metadataKey == null) {
 	    return null;
 	}
-	for(Metadata metadata : getMetadata()) {
+	for (Metadata metadata : getMetadata()) {
 	    if (metadataKey.equals(metadata.getMetadataKey())) {
 		return metadata;
 	    }
 	}
 	return null;
     }
-    
+
     public String getTypology() {
 	final Metadata metadataTemplate = getMetadataRecentlyChanged(MetadataKey.getTemplateKey());
-	return metadataTemplate != null ? metadataTemplate.getValue() : "-"; 
+	return metadataTemplate != null ? metadataTemplate.getValue() : "-";
     }
 }

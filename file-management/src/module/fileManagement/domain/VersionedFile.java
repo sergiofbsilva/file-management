@@ -26,8 +26,7 @@ public class VersionedFile extends VersionedFile_Base {
 	private String toPresentationString(final double size) {
 	    final double convertedSize = convert(size);
 	    final long roundedValue = Math.round(convertedSize);
-	    return FileManagementSystem.getMessage("label.file.size.value",
-		    Long.toString(roundedValue), toString());
+	    return FileManagementSystem.getMessage("label.file.size.value", Long.toString(roundedValue), toString());
 	}
 
 	public static String prettyPrint(final double bytes) {
@@ -41,7 +40,7 @@ public class VersionedFile extends VersionedFile_Base {
     }
 
     public VersionedFile() {
-        super();
+	super();
     }
 
     public VersionedFile(final File file, final String fileName) {
@@ -52,13 +51,12 @@ public class VersionedFile extends VersionedFile_Base {
 	}
     }
 
-    public int getFilesize() {
-	final byte[] content = getContent();
-	return content.length;
+    public long getFilesize() {
+	return getSize();
     }
 
     public String getPresentationFilesize() {
-	final int filesize = getFilesize();
+	final long filesize = getFilesize();
 	return FILE_SIZE_UNIT.prettyPrint(filesize);
     }
 
@@ -67,11 +65,11 @@ public class VersionedFile extends VersionedFile_Base {
 	final Document document = getDocument();
 	document.setLastVersionedFile(getPreviousVersion());
 	removePreviousVersion();
-        super.delete();
+	super.delete();
     }
 
     public Document getConnectedDocument() {
 	return hasDocument() ? getDocument() : (hasNextVersion() ? getNextVersion().getDocument() : null);
     }
-    
+
 }

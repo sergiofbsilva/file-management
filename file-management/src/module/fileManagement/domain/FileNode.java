@@ -115,6 +115,11 @@ public class FileNode extends FileNode_Base {
 	final Document document = getDocument();
 	document.setWriteGroup(persistentGroup);
     }
+    
+    @Override
+    public boolean search(String searchText) {
+	return getDocument().search(searchText);
+    }
 
     @Override
     public String getPresentationFilesize() {
@@ -124,7 +129,7 @@ public class FileNode extends FileNode_Base {
 
     @Override
     public long getFilesize() {
-	return Long.valueOf(getDocument().getFilesize());
+	return getDocument().getFilesize();
     }
 
     @Override

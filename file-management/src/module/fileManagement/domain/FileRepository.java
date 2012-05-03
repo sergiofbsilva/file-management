@@ -40,22 +40,29 @@ public class FileRepository {
 	return user.hasFileRepository() ? user.getFileRepository() : createFileRepository(user);
     }
 
-//    public static DirNode getOrCreateFileRepository(final Unit unit) {
-//	return unit.hasFileRepository() ? unit.getFileRepository() : createFileRepository(unit);
-//    }
-//
-//    @Service
-//    private static DirNode createFileRepository(final Unit unit) {
-//	return unit.hasFileRepository() ? unit.getFileRepository() : new DirNode(unit);
-//    }
+    // public static DirNode getOrCreateFileRepository(final Unit unit) {
+    // return unit.hasFileRepository() ? unit.getFileRepository() :
+    // createFileRepository(unit);
+    // }
+    //
+    // @Service
+    // private static DirNode createFileRepository(final Unit unit) {
+    // return unit.hasFileRepository() ? unit.getFileRepository() : new
+    // DirNode(unit);
+    // }
+
+    public static DirNode getTrash(final User user) {
+	final DirNode dirNode = getOrCreateFileRepository(user);
+	return dirNode.getTrash();
+    }
 
     @Service
     private static DirNode createFileRepository(final User user) {
 	return user.hasFileRepository() ? user.getFileRepository() : new DirNode(user);
     }
-    
-//    public static DirNode getOrCreateTrash(final User user) {
-//   	return user.hasTrash() ? user.getTrash() : createFileRepository(user);
-//    }
-    
+
+    // public static DirNode getOrCreateTrash(final User user) {
+    // return user.hasTrash() ? user.getTrash() : createFileRepository(user);
+    // }
+
 }

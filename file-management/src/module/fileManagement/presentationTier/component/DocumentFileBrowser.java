@@ -3,6 +3,7 @@ package module.fileManagement.presentationTier.component;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import module.fileManagement.domain.AbstractFileNode;
 import module.fileManagement.domain.ContextPath;
@@ -215,6 +216,7 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
     private final DocumentMenu documentMenu = new DocumentMenu();
 
     private DomainItem<AbstractFileNode> nodeItem;
+    private DomainContainer<AbstractFileNode> items;
 
     @Override
     public void attach() {
@@ -237,13 +239,28 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 	return FileRepository.getOrCreateFileRepository(UserView.getCurrentUser());
     }
 
+    public DomainContainer<AbstractFileNode> getNodes() {
+	DomainItem<AbstractFileNode> item = getNodeItem();
+	if (item.getValue() != null) {
+	    return (DomainContainer<AbstractFileNode>) item.getItemProperty("child");
+	}
+	return items;
+    }
+
+    public void setNodes(Set<AbstractFileNode> nodes) {
+	if (items == null) {
+	    items = new DomainContainer<AbstractFileNode>(nodes, AbstractFileNode.class);
+	    nodeItem.setValue(null);
+	} else {
+	    items.removeAllItems();
+	    items.addItemBatch(nodes);
+	}
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public void valueChange(ValueChangeEvent event) {
-	DomainItem<AbstractFileNode> item = getNodeItem();
-	// FileManagementSystem.getLogger().warn("DFB [valueChange] : parent is "
-	// + item.getItemProperty("displayName").toString());
-	final DomainContainer<AbstractFileNode> childs = (DomainContainer<AbstractFileNode>) item.getItemProperty("child");
+	final DomainContainer<AbstractFileNode> childs = getNodes();
 	childs.addContainerFilter(new Filter() {
 
 	    @Override

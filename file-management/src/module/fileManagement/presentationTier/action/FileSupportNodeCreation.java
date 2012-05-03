@@ -71,9 +71,8 @@ public class FileSupportNodeCreation extends ContextBaseAction {
 	VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.logs", "LogPage",
 		UserGroup.getInstance());
 
-	// VaadinNode.createVaadinNode(virtualHost, documentHome,
-	// FILEMANAGEMENT_RESOURCES, "label.link.search",
-	// "DocumentSearch", UserGroup.getInstance());
+	VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.search", "DocumentSearch",
+		UserGroup.getInstance());
 
 	// VaadinNode.createVaadinNode(virtualHost, documentHome,
 	// FILEMANAGEMENT_RESOURCES, "label.link.old.documents",

@@ -96,7 +96,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 	    createDirLogs(currentUser, contextPath.concat(dirNode), dirNode);
 	    new DeleteDirLog(currentUser, contextPath, dirNode);
 	}
-	setParent(currentUser.getTrash());
+	setParent(FileRepository.getTrash(currentUser));
     }
 
     public abstract PersistentGroup getReadGroup();
@@ -106,6 +106,8 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
     protected abstract void setReadGroup(final PersistentGroup persistentGroup);
 
     protected abstract void setWriteGroup(final PersistentGroup persistentGroup);
+
+    public abstract boolean search(final String searchText);
 
     public boolean isReadGroupMember() {
 	return isGroupMember(getReadGroup());

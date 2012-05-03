@@ -14,6 +14,7 @@ import module.fileManagement.domain.exception.NodeDuplicateNameException;
 import module.fileManagement.domain.log.CreateDirLog;
 import module.fileManagement.domain.log.CreateFileLog;
 import module.fileManagement.domain.log.CreateNewVersionLog;
+import module.fileManagement.tools.StringUtils;
 import myorg.applicationTier.Authenticate.UserView;
 import myorg.domain.User;
 import myorg.domain.groups.EmptyGroup;
@@ -26,7 +27,7 @@ import dml.runtime.RelationListener;
 
 public class DirNode extends DirNode_Base {
 
-    public static final long USER_REPOSITORY_QUOTA = 50 * 1024 * 1024;
+    public static final long USER_REPOSITORY_QUOTA = 500 * 1024 * 1024;
     private static final long TRASH_REPOSITORY_QUOTA = Long.MAX_VALUE;
     public static final String SHARED_DIR_NAME = "Ficheiros Partilhados";
     public static final String TRASH_DIR_NAME = "Lixo";
@@ -122,7 +123,8 @@ public class DirNode extends DirNode_Base {
 	trash.setName(TRASH_DIR_NAME);
 	trash.setReadGroup(getReadGroup());
 	trash.setWriteGroup(getWriteGroup());
-	trash.setTrashUser(user);
+	/* trash.setTrashUser(user); */
+	setTrash(trash);
     }
 
     // shared
@@ -153,7 +155,7 @@ public class DirNode extends DirNode_Base {
     }
 
     public DirNode getTrash() {
-	return getOwner().getTrash();
+	return hasParent() ? getParent().getTrash() : super.getTrash();
     }
 
     public String getRepositoryName() {
@@ -237,6 +239,31 @@ public class DirNode extends DirNode_Base {
     public PersistentGroup getWriteGroup() {
 	final PersistentGroup group = super.getWriteGroup();
 	return group == null && hasParent() ? getParent().getWriteGroup() : group;
+    }
+
+    @Override
+    public boolean search(String searchText) {
+	return StringUtils.matches(getDisplayName(), searchText);
+    }
+
+    public Set<AbstractFileNode> doSearch(String searchText) {
+	Set<AbstractFileNode> nodes = new HashSet<AbstractFileNode>();
+	/*
+	 * if (search(searchText)) { nodes.add(this); }
+	 */
+
+	for (AbstractFileNode child : getChild()) {
+	    if (child.isDir()) {
+		nodes.addAll(((DirNode) child).doSearch(searchText));
+	    }
+	    if (child.isFile()) {
+		if (((FileNode) child).search(searchText)) {
+		    nodes.add(child);
+		}
+	    }
+	}
+
+	return nodes;
     }
 
     // file creation
@@ -513,7 +540,7 @@ public class DirNode extends DirNode_Base {
 	if (hasParent()) {
 	    return getParent().isInTrash();
 	}
-	return hasTrashUser();
+	return hasRootDirNode();
     }
 
     @Override
@@ -521,7 +548,7 @@ public class DirNode extends DirNode_Base {
 	if (hasParent()) {
 	    return getParent().getOwner();
 	}
-	return hasTrashUser() ? getTrashUser() : getUser();
+	return hasRootDirNode() ? getRootDirNode().getUser() : getUser();
     }
 
     // @ConsistencyPredicate
@@ -534,7 +561,7 @@ public class DirNode extends DirNode_Base {
      */
     @ConsistencyPredicate
     public boolean checkParent() {
-	return !hasParent() ? hasTrashUser() || hasUser() : true;
+	return !hasParent() ? hasTrashUser() || hasUser() || hasRootDirNode() : true;
     }
 
     @Override

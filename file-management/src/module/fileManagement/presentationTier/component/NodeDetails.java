@@ -231,5 +231,4 @@ public abstract class NodeDetails extends Panel {
     public boolean isInfoVisible() {
 	return infoVisible;
     }
-
 }

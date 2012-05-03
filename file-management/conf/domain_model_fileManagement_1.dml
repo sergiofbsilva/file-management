@@ -7,6 +7,8 @@ external class .pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile;
 class task.CreateDefaultMetadataTemplates extends .myorg.domain.scheduler.Task {
 }
 
+class task.PopulateRootDirTask extends .myorg.domain.scheduler.Task { }
+
 
 class AbstractFileNode {
 	String ojbConcreteClass;
@@ -173,6 +175,11 @@ relation UserAbstractFileNode {
 relation UserTrash {
 	.myorg.domain.User playsRole trashUser;
 	DirNode playsRole trash;
+}
+
+relation DirNodeTrashNode {
+	DirNode playsRole trash;
+	DirNode playsRole rootDirNode;
 }
 
 
