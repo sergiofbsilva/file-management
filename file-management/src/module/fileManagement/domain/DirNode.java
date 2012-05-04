@@ -27,7 +27,7 @@ import dml.runtime.RelationListener;
 
 public class DirNode extends DirNode_Base {
 
-    public static final long USER_REPOSITORY_QUOTA = 500 * 1024 * 1024;
+    public static final long USER_REPOSITORY_QUOTA = 50 * 1024 * 1024;
     private static final long TRASH_REPOSITORY_QUOTA = Long.MAX_VALUE;
     public static final String SHARED_DIR_NAME = "Ficheiros Partilhados";
     public static final String TRASH_DIR_NAME = "Lixo";
@@ -557,11 +557,11 @@ public class DirNode extends DirNode_Base {
     // }
 
     /*
-     * the top level dirs are the root dir or the trash bin.
+     * the top level dir is the
      */
     @ConsistencyPredicate
     public boolean checkParent() {
-	return !hasParent() ? hasTrashUser() || hasUser() || hasRootDirNode() : true;
+	return hasParent() ? true : hasUser() || hasRootDirNode();
     }
 
     @Override

@@ -172,11 +172,6 @@ relation UserAbstractFileNode {
 	DirNode playsRole fileRepository;
 }
 
-relation UserTrash {
-	.myorg.domain.User playsRole trashUser;
-	DirNode playsRole trash;
-}
-
 relation DirNodeTrashNode {
 	DirNode playsRole trash;
 	DirNode playsRole rootDirNode;
