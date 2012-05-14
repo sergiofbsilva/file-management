@@ -24,7 +24,9 @@
  */
 package module.fileManagement.domain;
 
+import java.util.HashSet;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import module.fileManagement.presentationTier.action.OrganizationModelPluginAction.FileRepositoryView;
 import module.organization.domain.Party;
@@ -142,26 +144,18 @@ public class FileManagementSystem extends FileManagementSystem_Base implements M
 	VaadinFrameworkLogger.getLogger().debug("Stop processing party <-> dirNode relation");
     }
 
-    private void setReserved(FileManagementSystem root, String value) {
-
-	final MetadataKey metadataKey = root.getMetadataKey(value);
-	if (metadataKey != null) {
-	    final Boolean reserved = metadataKey.getReserved();
-	    if (reserved == null || !reserved) {
-		metadataKey.setReserved(Boolean.TRUE);
-		VaadinFrameworkLogger.getLogger().warn(String.format("set key %s as reserved", value));
-	    }
-	}
-    }
-
     private void checkMetadataKeyReservedValue(FileManagementSystem root) {
-	setReserved(root, MetadataKey.FILENAME_KEY_VALUE);
-	setReserved(root, MetadataKey.TEMPLATE_KEY_VALUE);
-	setReserved(root, Document.DOCUMENT_NEW_VERSION_KEY);
+	final Set<String> reserved = new HashSet<String>();
+	reserved.add(MetadataKey.FILENAME_KEY_VALUE);
+	reserved.add(MetadataKey.TEMPLATE_KEY_VALUE);
+	reserved.add(Document.DOCUMENT_NEW_VERSION_KEY);
+	reserved.add(MetadataKey.SAVE_ACCESS_LOG);
 	for (MetadataKey metadataKey : root.getMetadataKeys()) {
 	    if (metadataKey.getReserved() == null) {
-		metadataKey.setReserved(Boolean.FALSE);
-		VaadinFrameworkLogger.getLogger().warn(String.format("set key %s as not reserved", metadataKey.getKeyValue()));
+		final boolean contains = reserved.contains(metadataKey.getKeyValue());
+		metadataKey.setReserved(contains);
+		VaadinFrameworkLogger.getLogger().warn(
+			String.format("set key %s, reserved : %s", metadataKey.getKeyValue(), contains));
 	    }
 	}
     }
