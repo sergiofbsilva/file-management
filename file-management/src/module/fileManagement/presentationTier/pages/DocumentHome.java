@@ -26,21 +26,45 @@ package module.fileManagement.presentationTier.pages;
 
 import static module.fileManagement.domain.FileManagementSystem.getMessage;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import module.fileManagement.domain.DirNode;
 import module.fileManagement.domain.FileNode;
+import module.fileManagement.presentationTier.data.AbstractSearchContainer;
+import module.fileManagement.tools.StringUtils;
+import module.organization.domain.Accountability;
+import module.organization.domain.Party;
+import module.organization.domain.Person;
+import module.organization.domain.Unit;
 import module.vaadin.ui.BennuTheme;
+import myorg.applicationTier.Authenticate.UserView;
+import myorg.domain.Presentable;
+import myorg.domain.RoleType;
+import pt.ist.fenixframework.plugins.luceneIndexing.queryBuilder.dsl.BuildingState;
+import pt.ist.fenixframework.plugins.luceneIndexing.queryBuilder.dsl.DSLState;
 import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
+import pt.ist.vaadinframework.data.reflect.DomainContainer;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
 import pt.ist.vaadinframework.ui.GridSystemLayout;
+import pt.ist.vaadinframework.ui.TimeoutSelect;
+import pt.utl.ist.fenix.tools.util.StringNormalizer;
 
+import com.vaadin.data.Item;
+import com.vaadin.data.Property;
+import com.vaadin.event.FieldEvents.TextChangeEvent;
+import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.GridLayout;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Layout;
 import com.vaadin.ui.Panel;
@@ -65,6 +89,86 @@ public class DocumentHome extends CustomComponent implements EmbeddedComponentCo
     public void setArguments(Map<String, String> arguments) {
 	// TODO Auto-generated method stub
 
+    }
+
+    private static class UnitContainer extends DomainContainer<Unit> {
+
+	public UnitContainer() {
+	    super(Unit.class);
+	}
+
+	public UnitContainer(Collection<Unit> elements, Class<? extends Unit> elementType,
+		pt.ist.vaadinframework.data.HintedProperty.Hint... hints) {
+	    super(elements, elementType, hints);
+	    // TODO Auto-generated constructor stub
+	}
+
+	public UnitContainer(Property wrapped, Class<? extends Unit> elementType,
+		pt.ist.vaadinframework.data.HintedProperty.Hint... hints) {
+	    super(wrapped, elementType, hints);
+	    // TODO Auto-generated constructor stub
+	}
+
+	public UnitContainer(Class<? extends Unit> elementType, pt.ist.vaadinframework.data.HintedProperty.Hint[] hints) {
+	    super(elementType, hints);
+	}
+
+	@Override
+	protected DSLState createFilterExpression(String filterText) {
+	    filterText = StringNormalizer.normalize(filterText);
+	    if (!StringUtils.isEmpty(filterText)) {
+		final String[] split = filterText.trim().split("\\s+");
+		BuildingState expr = new BuildingState();
+		for (int i = 0; i < split.length; i++) {
+		    final String normalizedSplit = StringNormalizer.normalize(split[i]);
+		    if (i == split.length - 1) {
+			return expr.matches(Unit.IndexableFields.UNIT_NAME, normalizedSplit).or()
+				.matches(Unit.IndexableFields.UNIT_ACRONYM, normalizedSplit);
+		    }
+		    expr = expr.matches(Unit.IndexableFields.UNIT_NAME, normalizedSplit).or()
+			    .matches(Unit.IndexableFields.UNIT_ACRONYM, normalizedSplit).or();
+		}
+	    }
+	    return new BuildingState();
+	}
+    }
+
+    private static class UnitSearchContainer extends AbstractSearchContainer {
+
+	public UnitSearchContainer(Class elementType, pt.ist.vaadinframework.data.HintedProperty.Hint... hints) {
+	    super(elementType, hints);
+	}
+
+	public UnitSearchContainer(List elements, Class elementType, pt.ist.vaadinframework.data.HintedProperty.Hint... hints) {
+	    super(elements, elementType, hints);
+	}
+
+	public UnitSearchContainer(Property wrapped, Class elementType, pt.ist.vaadinframework.data.HintedProperty.Hint... hints) {
+	    super(wrapped, elementType, hints);
+	}
+
+	@Override
+	public void search(String filterText) {
+	    removeAllItems();
+	    final UnitContainer unitContainer = new UnitContainer();
+	    unitContainer.addContainerFilter(new Filter() {
+
+		@Override
+		public boolean passesFilter(Object itemId, Item item) throws UnsupportedOperationException {
+		    final Unit unit = (Unit) itemId;
+		    return unit.hasFileRepository()
+			    && (UserView.getCurrentUser().hasRoleType(RoleType.MANAGER) || unit.getFileRepository()
+				    .isAccessible());
+		}
+
+		@Override
+		public boolean appliesToProperty(Object propertyId) {
+		    return true;
+		}
+	    });
+	    unitContainer.search(filterText);
+	    addItems((Collection<Presentable>) unitContainer.getItemIds());
+	}
     }
 
     public Panel createWelcomePanel() {
@@ -111,29 +215,100 @@ public class DocumentHome extends CustomComponent implements EmbeddedComponentCo
 	return pDetails;
     }
 
-    public Component createPage() {
-	// VerticalLayout mainLayout = new VerticalLayout();
-	// mainLayout.setMargin(true);
-	// mainLayout.setSizeFull();
-	// mainLayout.setSpacing(true);
-	// mainLayout.addComponent(createWelcomePanel());
-	// //
-	// mainLayout.addComponent(createGrid(createRecentlyShared(),createFileDetails()));
-	// return mainLayout;
-	GridSystemLayout gsl = new GridSystemLayout();
-	gsl.setCell("welcome", 16, createWelcomePanel());
+    private Set<Party> getParentUnits(final Party party, Set<Party> processed) {
+	final Set<Party> result = new HashSet<Party>();
+	if (party.hasFileRepository() && party.getFileRepository().isAccessible()) {
+	    result.add(party);
+	}
+	for (Accountability accountability : party.getParentAccountabilities()) {
+	    final Party parent = accountability.getParent();
+	    if (!processed.contains(parent)) {
+		processed.add(parent);
+		result.addAll(getParentUnits(parent, processed));
+	    }
+	}
+	return result;
+    }
+
+    private Set<Party> getAllParentUnits(final Person person) {
+	final Set<Party> processed = new HashSet<Party>();
+	final Set<Party> result = new HashSet<Party>();
+	result.addAll(getParentUnits(person, processed));
+	return result;
+    }
+
+    public Component createRepositorySelect() {
+	final UnitSearchContainer unitSearchContainer = new UnitSearchContainer(Unit.class);
+	HorizontalLayout hl = new HorizontalLayout();
+	hl.setSpacing(Boolean.TRUE);
+	hl.setSizeFull();
+
+	final TimeoutSelect select = new TimeoutSelect();
+	select.setSizeFull();
+	select.setImmediate(true);
+	select.setContainerDataSource(unitSearchContainer);
+	select.setItemCaptionPropertyId("presentationName");
+	select.addListener(new TextChangeListener() {
+
+	    @Override
+	    public void textChange(TextChangeEvent event) {
+		unitSearchContainer.search(event.getText());
+	    }
+
+	});
+
 	Button btNavigate = new Button("Navegar", new ClickListener() {
 
 	    @Override
 	    public void buttonClick(ClickEvent event) {
-		EmbeddedApplication.open(getApplication(), DocumentBrowse.class);
+		final Party party = (Party) select.getValue();
+		if (party != null) {
+		    final DirNode rootDir = party.getFileRepository();
+		    EmbeddedApplication.open(getApplication(), DocumentBrowse.class, rootDir.getContextPath().toString());
+		}
 	    }
 	});
-	btNavigate .addStyleName(BennuTheme.BUTTON_LINK);
-	gsl.setCell("navigation_link", 16, btNavigate);
-	// gsl.setCell("recentlyShared", 8, createRecentlyShared());
-	// gsl.setCell("dirDetails", 8, createDirDetails());
+	// btNavigate.addStyleName(BennuTheme.BUTTON_LINK);
+	btNavigate.setSizeFull();
 
+	hl.addComponent(select);
+	hl.addComponent(btNavigate);
+	hl.setExpandRatio(select, 0.7f);
+	hl.setExpandRatio(btNavigate, 0.3f);
+
+	final Panel panel = new Panel("Procurar Repositório");
+	panel.setContent(hl);
+	panel.setStyleName(BennuTheme.PANEL_LIGHT);
+	return panel;
+    }
+
+    private Component createRepositoryDashboard() {
+	final Panel panel = new Panel("Repositórios Disponíveis");
+
+	panel.setStyleName(BennuTheme.PANEL_LIGHT);
+	((VerticalLayout) panel.getContent()).setSpacing(Boolean.TRUE);
+
+	final Person person = UserView.getCurrentUser().getPerson();
+	for (final Party party : getAllParentUnits(person)) {
+	    final Button btRepository = new Button(party.getPresentationName(), new ClickListener() {
+
+		@Override
+		public void buttonClick(ClickEvent event) {
+		    final DirNode rootDir = party.getFileRepository();
+		    EmbeddedApplication.open(getApplication(), DocumentBrowse.class, rootDir.getContextPath().toString());
+		}
+	    });
+	    btRepository.addStyleName(BennuTheme.BUTTON_LINK);
+	    panel.addComponent(btRepository);
+	}
+	return panel;
+    }
+
+    public Component createPage() {
+	GridSystemLayout gsl = new GridSystemLayout();
+	gsl.setCell("welcome", 16, createWelcomePanel());
+	gsl.setCell("available_repositories", 16, createRepositoryDashboard());
+	gsl.setCell("select_repository", 0, 9, 7, createRepositorySelect());
 	return gsl;
     }
 

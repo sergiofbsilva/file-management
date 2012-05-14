@@ -48,7 +48,7 @@ public class UnshareDirLog extends UnshareDirLog_Base {
     
     @Override
     public String toString() {
-	final DirNode sharedFolder = UserView.getCurrentUser().getFileRepository().getSharedFolder();
+	final DirNode sharedFolder = getCurrentUserFileRepository().getSharedFolder();
 	final String sharedWith = sharedFolder == getTargetDirNode() ? "consigo" : " com " + getTargetDirNode().getOwner().getPresentationName();
 	return String.format("(%s) %s deixou de partilhar %s a pasta %s", getLogTime(), getUserName(), sharedWith, getDirNode().getDisplayName()); 
     }

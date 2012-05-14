@@ -21,6 +21,7 @@ class RecoverFileLog extends FileLog { }
 class ShareFileLog extends FileLog { 
 	String visibilityGroup;
 }
+class AccessFileLog extends FileLog {}
 
 class CreateDirLog extends DirLog { }
 class DeleteDirLog extends DirLog { }

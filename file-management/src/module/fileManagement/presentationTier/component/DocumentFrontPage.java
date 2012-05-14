@@ -337,8 +337,9 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 
 	@Override
 	protected void handleFile(final File file, final String fileName, final String mimeType, final long length) {
-	    final DirNode destination = dirNode == null || !dirNode.isWriteGroupMember() ? UserView.getCurrentUser()
-		    .getFileRepository() : dirNode;
+	    final User user = UserView.getCurrentUser();
+	    final DirNode destination = dirNode == null || !dirNode.isWriteGroupMember() ? FileRepository
+		    .getOrCreateFileRepository(user) : dirNode;
 	    if (destination != null) {
 		if (destination.hasAvailableQuota(length)) {
 		    try {
@@ -366,7 +367,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 	private class HomeIconDirNodeLink extends DirNodeLink {
 
 	    public HomeIconDirNodeLink() {
-		super(UserView.getCurrentUser().getFileRepository(), null);
+		super(FileRepository.getOrCreateFileRepository(UserView.getCurrentUser()), null);
 		final ThemeResource icon = new ThemeResource("../../../images/fileManagement/HomeBlack32.png");
 		setIcon(icon);
 		setDescription(getMessage("label.menu.home"));
@@ -1212,7 +1213,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 
     public String getNodeName(final AbstractFileNode node) {
 	final User user = UserView.getCurrentUser();
-	final DirNode fileRepository = user.getFileRepository();
+	final DirNode fileRepository = FileRepository.getOrCreateFileRepository(user);
 	return fileRepository == node ? getMessage("label.menu.home") : node.getDisplayName();
     }
 

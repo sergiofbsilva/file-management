@@ -37,6 +37,7 @@ class Document {
 
 class MetadataKey {
 	String keyValue;
+	Boolean reserved;
 }
 
 class Metadata {
@@ -170,6 +171,12 @@ relation UserAbstractFileNode {
 	.myorg.domain.User playsRole user;
 	DirNode playsRole fileRepository;
 }
+
+relation PartyFileRepository {
+	.module.organization.domain.Party playsRole party;
+	DirNode playsRole fileRepository;
+}
+
 
 relation DirNodeTrashNode {
 	DirNode playsRole trash;

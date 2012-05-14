@@ -118,9 +118,8 @@ public class DocumentSearch extends CustomComponent implements EmbeddedComponent
 	details.setVisible(false);
     }
 
-    private void updateSearchResultLabel() {
-	lblSearchResult.setValue(String.format("A pesquisa por '%s' resultou em %d ocorrências", txtSearch.getValue(), browser
-		.getContainer().size()));
+    private void updateSearchResultLabel(final int size) {
+	lblSearchResult.setValue(String.format("A pesquisa por '%s' resultou em %d ocorrências", txtSearch.getValue(), size));
 	lblSearchResult.setVisible(true);
     }
 
@@ -130,8 +129,8 @@ public class DocumentSearch extends CustomComponent implements EmbeddedComponent
 	} else {
 	    browser.setNodes(searchResult);
 	    browser.setVisible(true);
-	    updateSearchResultLabel();
-	    final AbstractFileNode selected = (AbstractFileNode) browser.getContainer().getIdByIndex(0);
+	    updateSearchResultLabel(searchResult.size());
+	    final AbstractFileNode selected = (AbstractFileNode) browser.getNodes().getIdByIndex(0);
 	    browser.getDocumentTable().select(selected);
 	}
     }

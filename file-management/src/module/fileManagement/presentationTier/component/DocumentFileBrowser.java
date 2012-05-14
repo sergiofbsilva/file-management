@@ -116,6 +116,7 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 	    if (event.isDoubleClick()) {
 		if (abstractFileNode.isDir()) {
 		    nodeItem.setValue(abstractFileNode);
+		    changeTable();
 		    documentMenu.addDirNode((DirNode) abstractFileNode);
 		} else if (abstractFileNode.isFile()) {
 		    final FileNode fileNode = (FileNode) abstractFileNode;
@@ -235,14 +236,9 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 	}
     }
 
-    public DirNode getInitialDirNode() {
-	return FileRepository.getOrCreateFileRepository(UserView.getCurrentUser());
-    }
-
     public DomainContainer<AbstractFileNode> getNodes() {
-	DomainItem<AbstractFileNode> item = getNodeItem();
-	if (item.getValue() != null) {
-	    return (DomainContainer<AbstractFileNode>) item.getItemProperty("child");
+	if (nodeItem.getValue() != null) {
+	    return (DomainContainer<AbstractFileNode>) nodeItem.getItemProperty("child");
 	}
 	return items;
     }
@@ -250,16 +246,20 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
     public void setNodes(Set<AbstractFileNode> nodes) {
 	if (items == null) {
 	    items = new DomainContainer<AbstractFileNode>(nodes, AbstractFileNode.class);
-	    nodeItem.setValue(null);
 	} else {
 	    items.removeAllItems();
 	    items.addItemBatch(nodes);
 	}
+	changeTable();
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public void valueChange(ValueChangeEvent event) {
+	changeTable();
+    }
+
+    private void changeTable() {
 	final DomainContainer<AbstractFileNode> childs = getNodes();
 	childs.addContainerFilter(new Filter() {
 
@@ -275,7 +275,6 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 	    }
 
 	});
-
 	childs.setContainerProperties("displayName", "icon");
 	childs.setItemSorter(new ItemSorter() {
 
@@ -304,9 +303,6 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 	documentTable.setColumnExpandRatio("displayName", 0.60f);
 	documentTable.setColumnExpandRatio("visibilidade", 0.25f);
 	documentTable.sort();
-
-	// this.dirNode.setValue(dirNode);
-	// documentMenu.refresh();
     }
 
     private ThemeResource getThemeResource(AbstractFileNode abstractFileNode) {
@@ -323,8 +319,11 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 
     public String getNodeName(final AbstractFileNode node) {
 	final User user = UserView.getCurrentUser();
-	final DirNode fileRepository = user.getFileRepository();
-	return fileRepository == node ? getMessage("label.menu.home") : node.getDisplayName();
+	final DirNode fileRepository = FileRepository.getOrCreateFileRepository(user);
+	if (fileRepository == node)
+	    return getMessage("label.menu.home");
+	else
+	    return node.getDisplayName();
     }
 
     public DomainItem<AbstractFileNode> getNodeItem() {
@@ -353,16 +352,18 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 	documentTable.removeListener(listener);
     }
 
-    public void setValue(DirNode dirNode) {
-	nodeItem.setValue(dirNode);
+    private void setValue(DirNode dirNode) {
+	if (nodeItem == null) {
+	    nodeItem = new DomainItem<AbstractFileNode>(dirNode);
+	    nodeItem.addListener(this);
+	} else {
+	    nodeItem.setValue(dirNode);
+	}
     }
 
     public DocumentFileBrowser() {
 	nodeItem = new DomainItem<AbstractFileNode>(DirNode.class);
 	nodeItem.addListener(this);
-	final DirNode initialDirNode = getInitialDirNode();
-	setValue(initialDirNode);
-	documentMenu.addDirNode(initialDirNode);
     }
 
     public DomainContainer<AbstractFileNode> getContainer() {
@@ -395,15 +396,19 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 	documentTable.select(nextItemId);
     }
 
-    public void setContextPath(String pathString) {
-	final ContextPath contextPath = new ContextPath(pathString);
+    public void setContextPath(ContextPath contextPath) {
 	final DirNode lastDirNode = contextPath.getLastDirNode();
 	if (lastLineOfDefense(lastDirNode)) {
 	    documentMenu.setDirNodes(contextPath);
-	    nodeItem.setValue(lastDirNode);
+	    setValue(lastDirNode);
 	} else {
 	    accessDenied = true;
 	}
+    }
+
+    public void setContextPath(String pathString) {
+	final ContextPath contextPath = new ContextPath(pathString);
+	setContextPath(contextPath);
     }
 
     private boolean lastLineOfDefense(DirNode lastDirNode) {

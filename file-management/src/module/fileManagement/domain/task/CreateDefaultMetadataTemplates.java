@@ -33,9 +33,6 @@ public class CreateDefaultMetadataTemplates extends CreateDefaultMetadataTemplat
     public void executeTask() {
 	resetTemplatesAndKeys();
 	MetadataTemplate template = new MetadataTemplate("Documento");
-	for (String key : KEYS) {
-	    template.addKeys(MetadataKey.getOrCreateInstance(key));
-	}
     }
 
 }

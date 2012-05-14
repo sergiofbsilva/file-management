@@ -38,6 +38,7 @@ import module.fileManagement.presentationTier.component.NodeDetails;
 import module.fileManagement.presentationTier.component.groups.GroupCreatorRegistry;
 import module.fileManagement.presentationTier.component.groups.HasPersistentGroup;
 import module.fileManagement.presentationTier.component.groups.HasPersistentGroupCreator;
+import module.fileManagement.presentationTier.data.AbstractSearchContainer;
 import module.fileManagement.presentationTier.data.GroupContainer;
 import module.vaadin.ui.BennuTheme;
 import myorg.applicationTier.Authenticate.UserView;
@@ -84,7 +85,7 @@ import com.vaadin.ui.themes.BaseTheme;
 public class DocumentShare extends CustomComponent implements EmbeddedComponentContainer {
 
     private AbstractFileNode fileNode;
-    private GroupContainer groupContainer;
+    private AbstractSearchContainer groupContainer;
     private VerticalLayout groupSpecificLayout;
     private HasPersistentGroup currentPersistentGroupHolder;
     private VisibilityOperation currentVisibilityOperation;

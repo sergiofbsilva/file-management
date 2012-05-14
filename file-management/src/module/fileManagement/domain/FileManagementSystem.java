@@ -26,7 +26,12 @@ package module.fileManagement.domain;
 
 import java.util.ResourceBundle;
 
+import module.fileManagement.presentationTier.action.OrganizationModelPluginAction.FileRepositoryView;
+import module.organization.domain.Party;
+import module.organization.presentationTier.actions.OrganizationModelAction;
+import myorg.domain.ModuleInitializer;
 import myorg.domain.MyOrg;
+import myorg.domain.User;
 import myorg.domain.exceptions.DomainException;
 import myorg.util.BundleUtil;
 
@@ -45,7 +50,7 @@ import com.vaadin.ui.Window;
  * @author Sérgio Silva
  * 
  */
-public class FileManagementSystem extends FileManagementSystem_Base {
+public class FileManagementSystem extends FileManagementSystem_Base implements ModuleInitializer {
 
     private static FileManagementSystem system;
     public static final String BUNDLE = "resources.FileManagementResources";
@@ -121,4 +126,57 @@ public class FileManagementSystem extends FileManagementSystem_Base {
 	app.getMainWindow().showNotification(notif);
     }
 
+    private void checkUserPartyRelation(MyOrg myOrg) {
+	VaadinFrameworkLogger.getLogger().debug("Start processing party <-> dirNode relation");
+	for (User user : myOrg.getUser()) {
+	    Party person = user.getPerson();
+	    if (person != null) {
+		if (!person.hasFileRepository()) {
+		    person.setFileRepository(user.getFileRepository());
+		} else {
+		    VaadinFrameworkLogger.getLogger().debug("Assume that if a person already has root dir everybody has");
+		    break;
+		}
+	    }
+	}
+	VaadinFrameworkLogger.getLogger().debug("Stop processing party <-> dirNode relation");
+    }
+
+    private void setReserved(FileManagementSystem root, String value) {
+
+	final MetadataKey metadataKey = root.getMetadataKey(value);
+	if (metadataKey != null) {
+	    final Boolean reserved = metadataKey.getReserved();
+	    if (reserved == null || !reserved) {
+		metadataKey.setReserved(Boolean.TRUE);
+		VaadinFrameworkLogger.getLogger().warn(String.format("set key %s as reserved", value));
+	    }
+	}
+    }
+
+    private void checkMetadataKeyReservedValue(FileManagementSystem root) {
+	setReserved(root, MetadataKey.FILENAME_KEY_VALUE);
+	setReserved(root, MetadataKey.TEMPLATE_KEY_VALUE);
+	setReserved(root, Document.DOCUMENT_NEW_VERSION_KEY);
+	for (MetadataKey metadataKey : root.getMetadataKeys()) {
+	    if (metadataKey.getReserved() == null) {
+		metadataKey.setReserved(Boolean.FALSE);
+		VaadinFrameworkLogger.getLogger().warn(String.format("set key %s as not reserved", metadataKey.getKeyValue()));
+	    }
+	}
+    }
+
+    @Override
+    public void init(MyOrg root) {
+	checkUserPartyRelation(root);
+	checkMetadataKeyReservedValue(root.getFileManagementSystem());
+    }
+
+    static {
+	initDocumentOrganizationModelView();
+    }
+
+    private static void initDocumentOrganizationModelView() {
+	OrganizationModelAction.partyViewHookManager.register(new FileRepositoryView());
+    }
 }

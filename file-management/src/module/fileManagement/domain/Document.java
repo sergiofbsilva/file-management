@@ -277,4 +277,17 @@ public class Document extends Document_Base {
 	final Metadata metadataTemplate = getMetadataRecentlyChanged(MetadataKey.getTemplateKey());
 	return metadataTemplate != null ? metadataTemplate.getValue() : "-";
     }
+
+    public void setSaveAccessLog(final Boolean shouldSave) {
+	addMetadata(getSaveAccessLogKey(), shouldSave.toString());
+    }
+
+    private MetadataKey getSaveAccessLogKey() {
+	return MetadataKey.getOrCreateInstance(MetadataKey.SAVE_ACCESS_LOG, Boolean.TRUE);
+    }
+
+    public boolean mustSaveAccessLog() {
+	final Metadata metadata = getMetadata(getSaveAccessLogKey());
+	return metadata != null ? metadata.getValue().equals(Boolean.TRUE.toString()) : false;
+    }
 }

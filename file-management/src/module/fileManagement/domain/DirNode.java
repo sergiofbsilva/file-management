@@ -15,6 +15,11 @@ import module.fileManagement.domain.log.CreateDirLog;
 import module.fileManagement.domain.log.CreateFileLog;
 import module.fileManagement.domain.log.CreateNewVersionLog;
 import module.fileManagement.tools.StringUtils;
+import module.organization.domain.AccountabilityType;
+import module.organization.domain.Party;
+import module.organization.domain.Person;
+import module.organization.domain.Unit;
+import module.organization.domain.groups.UnitGroup;
 import myorg.applicationTier.Authenticate.UserView;
 import myorg.domain.User;
 import myorg.domain.groups.EmptyGroup;
@@ -27,7 +32,8 @@ import dml.runtime.RelationListener;
 
 public class DirNode extends DirNode_Base {
 
-    public static final long USER_REPOSITORY_QUOTA = 50 * 1024 * 1024;
+    public static final long PERSON_REPOSITORY_QUOTA = 50 * 1024 * 1024;
+    public static final long UNIT_REPOSITORY_QUOTA = 1024 * 1024 * 1024;
     private static final long TRASH_REPOSITORY_QUOTA = Long.MAX_VALUE;
     public static final String SHARED_DIR_NAME = "Ficheiros Partilhados";
     public static final String TRASH_DIR_NAME = "Lixo";
@@ -84,16 +90,33 @@ public class DirNode extends DirNode_Base {
     }
 
     public DirNode(final User user) {
+	this(user.getPerson());
+    }
+
+    public DirNode(final Party party) {
 	this();
-	setQuota(USER_REPOSITORY_QUOTA);
-	setUser(user);
-	final String dirName = user.getPresentationName();
-	setName(dirName);
-	createSharedFolder();
-	final PersistentGroup group = SingleUserGroup.getOrCreateGroup(user);
-	setReadGroup(group);
-	setWriteGroup(group);
-	createTrashFolder(user);
+	setParty(party);
+	setName(party.getPresentationName());
+	if (party.isUnit()) {
+	    setUnitGroup((Unit) party);
+	    setQuota(UNIT_REPOSITORY_QUOTA);
+	} else {
+	    if (party.isPerson()) {
+		createSharedFolder();
+		final PersistentGroup group = SingleUserGroup.getOrCreateGroup(((Person) party).getUser());
+		setReadGroup(group);
+		setWriteGroup(group);
+		setQuota(PERSON_REPOSITORY_QUOTA);
+	    }
+	}
+	createTrashFolder();
+    }
+
+    private void setUnitGroup(Unit unit) {
+	final AccountabilityType[] memberTypes = new AccountabilityType[] { AccountabilityType.readBy("Personnel") };
+	final AccountabilityType[] childUnitTypes = new AccountabilityType[] { AccountabilityType.readBy("Organizational") };
+	setReadGroup(UnitGroup.getOrCreateGroup(unit, memberTypes, childUnitTypes));
+	setWriteGroup(UnitGroup.getOrCreateGroup(unit, memberTypes, null));
     }
 
     public DirNode(final DirNode dirNode, final String name) {
@@ -102,28 +125,12 @@ public class DirNode extends DirNode_Base {
 	setName(name);
     }
 
-    /*
-     * public DirNode(final Unit unit) { super(); setUnit(unit);
-     * setName(unit.getPresentationName()); final AccountabilityType[]
-     * memberTypes = new AccountabilityType[] {
-     * IstAccountabilityType.PERSONNEL.readAccountabilityType(),
-     * IstAccountabilityType.TEACHING_PERSONNEL.readAccountabilityType(),
-     * IstAccountabilityType.RESEARCH_PERSONNEL.readAccountabilityType(),
-     * IstAccountabilityType.GRANT_OWNER_PERSONNEL.readAccountabilityType(), };
-     * final AccountabilityType[] childUnitTypes = new AccountabilityType[] {
-     * IstAccountabilityType.ORGANIZATIONAL.readAccountabilityType(), };
-     * setReadGroup(UnitGroup.getOrCreateGroup(unit, memberTypes, childUnitTypes
-     * )); setWriteGroup(UnitGroup.getOrCreateGroup(unit, memberTypes, null ));
-     * }
-     */
-
-    public void createTrashFolder(User user) {
+    public void createTrashFolder() {
 	DirNode trash = new DirNode();
 	trash.setQuota(TRASH_REPOSITORY_QUOTA);
 	trash.setName(TRASH_DIR_NAME);
 	trash.setReadGroup(getReadGroup());
 	trash.setWriteGroup(getWriteGroup());
-	/* trash.setTrashUser(user); */
 	setTrash(trash);
     }
 
@@ -551,17 +558,15 @@ public class DirNode extends DirNode_Base {
 	return hasRootDirNode() ? getRootDirNode().getUser() : getUser();
     }
 
-    // @ConsistencyPredicate
-    // protected final boolean checkSize() {
-    // return getSize() >= 0;
-    // }
-
     /*
      * the top level dir is the
      */
     @ConsistencyPredicate
     public boolean checkParent() {
-	return hasParent() ? true : hasUser() || hasRootDirNode();
+	return hasParent() ? true : hasUser() || hasParty() || hasRootDirNode() /*
+										 * is
+										 * trash
+										 */;
     }
 
     @Override

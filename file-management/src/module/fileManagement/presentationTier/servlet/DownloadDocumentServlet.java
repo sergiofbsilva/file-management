@@ -11,23 +11,27 @@ import javax.servlet.http.HttpServletResponse;
 import module.fileManagement.domain.Document;
 import module.fileManagement.domain.FileNode;
 import module.fileManagement.domain.VersionedFile;
+import module.fileManagement.domain.log.AccessFileLog;
 import module.fileManagement.presentationTier.DownloadUtil;
 import myorg.applicationTier.Authenticate.UserView;
 import myorg.domain.User;
 import pt.ist.fenixWebFramework.Config.CasConfig;
 import pt.ist.fenixWebFramework.FenixWebFramework;
+import pt.ist.fenixWebFramework.services.Service;
 import pt.ist.fenixframework.DomainObject;
 import pt.ist.fenixframework.pstm.AbstractDomainObject;
 
 public class DownloadDocumentServlet extends HttpServlet {
 
     @Override
-    protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException,
+	    IOException {
 	process(request, response);
     }
 
     @Override
-    protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(final HttpServletRequest request, final HttpServletResponse response) throws ServletException,
+	    IOException {
 	process(request, response);
     }
 
@@ -59,10 +63,18 @@ public class DownloadDocumentServlet extends HttpServlet {
 	}
     }
 
-    private void process(final HttpServletRequest request, final HttpServletResponse response,
-	    final Document document, final VersionedFile versionedFile) throws IOException {
+    @Service
+    private void saveAccessLog(FileNode fileNode) {
+	new AccessFileLog(UserView.getCurrentUser(), fileNode.getParent().getContextPath(), fileNode);
+    }
+
+    private void process(final HttpServletRequest request, final HttpServletResponse response, final Document document,
+	    final VersionedFile versionedFile) throws IOException {
 	for (final FileNode fileNode : document.getFileNodeSet()) {
-	    if (fileNode.isAccessible() /*|| fileNode instanceof SharedFileNode*/) {
+	    if (fileNode.isAccessible() /* || fileNode instanceof SharedFileNode */) {
+		if (document.mustSaveAccessLog()) {
+		    saveAccessLog(fileNode);
+		}
 		process(request, response, versionedFile);
 	    } else {
 		final User user = UserView.getCurrentUser();
@@ -83,8 +95,8 @@ public class DownloadDocumentServlet extends HttpServlet {
 	}
     }
 
-    private void process(final HttpServletRequest request, final HttpServletResponse response,
-	    final VersionedFile versionedFile) throws IOException {
+    private void process(final HttpServletRequest request, final HttpServletResponse response, final VersionedFile versionedFile)
+	    throws IOException {
 	response.setContentType(versionedFile.getContentType());
 	response.setHeader("Content-disposition", "attachment; filename=" + versionedFile.getFilename());
 
@@ -94,4 +106,3 @@ public class DownloadDocumentServlet extends HttpServlet {
     }
 
 }
-

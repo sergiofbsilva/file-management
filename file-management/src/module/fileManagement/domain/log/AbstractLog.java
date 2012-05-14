@@ -27,7 +27,10 @@ package module.fileManagement.domain.log;
 import java.util.Comparator;
 
 import module.fileManagement.domain.ContextPath;
+import module.fileManagement.domain.DirNode;
 import module.fileManagement.domain.FileManagementSystem;
+import module.fileManagement.domain.FileRepository;
+import myorg.applicationTier.Authenticate.UserView;
 import myorg.domain.User;
 
 import org.joda.time.DateTime;
@@ -84,6 +87,10 @@ public abstract class AbstractLog extends AbstractLog_Base {
 
     public ContextPath getContextPath() {
 	return getTargetPath().createContextPath();
+    }
+
+    public DirNode getCurrentUserFileRepository() {
+	return FileRepository.getOrCreateFileRepository(UserView.getCurrentUser());
     }
 
 }

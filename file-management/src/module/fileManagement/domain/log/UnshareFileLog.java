@@ -21,7 +21,7 @@ public class UnshareFileLog extends UnshareFileLog_Base {
     
     @Override
     public String toString() {
-	final DirNode sharedFolder = UserView.getCurrentUser().getFileRepository().getSharedFolder();
+	final DirNode sharedFolder = getCurrentUserFileRepository().getSharedFolder();
 	final String sharedWith = sharedFolder == getTargetDirNode() ? "consigo" : " com " + getTargetDirNode().getOwner().getPresentationName();
 	return String.format("(%s) %s deixou de partilhar %s o ficheiro %s", getLogTime(), getUserName(), sharedWith, getFileNode().getDisplayName()); 
     }

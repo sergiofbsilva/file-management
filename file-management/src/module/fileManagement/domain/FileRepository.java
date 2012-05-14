@@ -25,6 +25,7 @@
 package module.fileManagement.domain;
 
 //import module.organization.domain.Unit;
+import module.organization.domain.Party;
 import myorg.domain.User;
 import pt.ist.fenixWebFramework.services.Service;
 
@@ -37,19 +38,12 @@ import pt.ist.fenixWebFramework.services.Service;
 public class FileRepository {
 
     public static DirNode getOrCreateFileRepository(final User user) {
-	return user.hasFileRepository() ? user.getFileRepository() : createFileRepository(user);
+	return getOrCreateFileRepository(user.getPerson());
     }
 
-    // public static DirNode getOrCreateFileRepository(final Unit unit) {
-    // return unit.hasFileRepository() ? unit.getFileRepository() :
-    // createFileRepository(unit);
-    // }
-    //
-    // @Service
-    // private static DirNode createFileRepository(final Unit unit) {
-    // return unit.hasFileRepository() ? unit.getFileRepository() : new
-    // DirNode(unit);
-    // }
+    public static DirNode getOrCreateFileRepository(final Party party) {
+	return party.hasFileRepository() ? party.getFileRepository() : createFileRepository(party);
+    }
 
     public static DirNode getTrash(final User user) {
 	final DirNode dirNode = getOrCreateFileRepository(user);
@@ -58,11 +52,12 @@ public class FileRepository {
 
     @Service
     private static DirNode createFileRepository(final User user) {
-	return user.hasFileRepository() ? user.getFileRepository() : new DirNode(user);
+	return createFileRepository(user.getPerson());
     }
 
-    // public static DirNode getOrCreateTrash(final User user) {
-    // return user.hasTrash() ? user.getTrash() : createFileRepository(user);
-    // }
+    @Service
+    private static DirNode createFileRepository(final Party party) {
+	return party.hasFileRepository() ? party.getFileRepository() : new DirNode(party);
+    }
 
 }

@@ -49,7 +49,7 @@ public class ShareFileLog extends ShareFileLog_Base {
     
     @Override
     public String getOperationString(String... args) {
-	final DirNode sharedFolder = UserView.getCurrentUser().getFileRepository().getSharedFolder();
+	final DirNode sharedFolder = getCurrentUserFileRepository().getSharedFolder();
 	final String sharedWith = sharedFolder == getTargetDirNode() ? "consigo" : " com " + getTargetDirNode().getOwner().getPresentationName();
         return super.getOperationString(sharedWith);
     }

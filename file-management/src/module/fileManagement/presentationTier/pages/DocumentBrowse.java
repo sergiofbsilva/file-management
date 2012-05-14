@@ -33,6 +33,7 @@ import module.fileManagement.domain.ContextPath;
 import module.fileManagement.presentationTier.component.AddDirWindow;
 import module.fileManagement.presentationTier.component.DocumentFileBrowser;
 import module.fileManagement.presentationTier.component.NodeDetails;
+import myorg.applicationTier.Authenticate.UserView;
 import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
@@ -65,7 +66,6 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
     NodeDetails fileDetails;
     DocumentFileBrowser browser;
     Layout mainLayout;
-    // GridLayout mainGrid;
     GridSystemLayout gsl;
     Button btUpload;
 
@@ -79,7 +79,10 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
 	final String pathString = arguments.get("contextPath");
 	if (pathString != null) {
 	    browser.setContextPath(pathString);
+	} else {
+	    browser.setContextPath(new ContextPath(UserView.getCurrentUser().getFileRepository()));
 	}
+	setFileDetails(browser.getNodeItem());
     }
 
     public HorizontalLayout createButtons() {
@@ -149,7 +152,7 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
 	gsl.setCell("quota", 16, new QuotaLabel(browser.getNodeItem()));
 	gsl.setCell("buttons", 16, createButtons());
 	gsl.setCell("browser", 10, browser);
-	setFileDetails(browser.getNodeItem());
+	// setFileDetails(browser.getNodeItem());
 	return gsl;
     }
 
