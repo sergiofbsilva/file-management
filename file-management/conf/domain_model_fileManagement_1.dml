@@ -2,7 +2,6 @@ package module.fileManagement.domain;
 
 enum module.fileManagement.domain.OperationLogType as OperationLogType;
 
-external class .pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile;
 
 class task.CreateDefaultMetadataTemplates extends .myorg.domain.scheduler.Task {
 }
