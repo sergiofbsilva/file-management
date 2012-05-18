@@ -126,6 +126,21 @@ public class Document extends Document_Base {
 	addNewVersionMetadata();
     }
 
+    /**
+     * 
+     * @param dirNode
+     * @return the FileNode that is contained directly contained in the
+     *         specified dirNode (no recursion is used)
+     */
+    public FileNode getFileNode(DirNode dirNode) {
+	for (FileNode fileNode : getFileNode()) {
+	    if (dirNode.equals(fileNode.getParent()))
+		return fileNode;
+	}
+	return null;
+
+    }
+
     private DateTime now() {
 	return new DateTime();
     }

@@ -26,9 +26,6 @@ import myorg.domain.groups.EmptyGroup;
 import myorg.domain.groups.PersistentGroup;
 import myorg.domain.groups.SingleUserGroup;
 import pt.ist.fenixWebFramework.services.Service;
-import dml.runtime.DirectRelation;
-import dml.runtime.Relation;
-import dml.runtime.RelationListener;
 
 public class DirNode extends DirNode_Base {
 
@@ -43,42 +40,7 @@ public class DirNode extends DirNode_Base {
     static {
 	INVALID_USER_DIR_NAMES.add(SHARED_DIR_NAME);
 	INVALID_USER_DIR_NAMES.add(TRASH_DIR_NAME);
-	DirectRelation<AbstractFileNode, DirNode> child = (DirectRelation<AbstractFileNode, DirNode>) DirNodeAbstractFileNode
-		.getInverseRelation();
-	child.addListener(new RelationListener<AbstractFileNode, DirNode>() {
 
-	    @Override
-	    public void afterAdd(Relation<AbstractFileNode, DirNode> arg0, AbstractFileNode arg1, DirNode arg2) {
-		// System.out.println(String.format("added child %s to %s", arg1
-		// != null ? arg1.getDisplayName() : "null",
-		// arg2 != null ? arg2.getDisplayName() : "null"));
-		if (arg1 != null && arg2 != null && !arg1.isShared()) {
-		    arg2.addUsedSpace(arg1.getFilesize());
-		}
-
-	    }
-
-	    @Override
-	    public void afterRemove(Relation<AbstractFileNode, DirNode> arg0, AbstractFileNode arg1, DirNode arg2) {
-		// System.out.println(String.format("remove child %s from %s",
-		// (arg1 != null ? arg1.getDisplayName() : "null"),
-		// (arg2 != null ? arg2.getDisplayName() : "null")));
-		if (arg1 != null && arg2 != null && !arg1.isShared()) {
-		    arg2.removeUsedSpace(arg1.getFilesize());
-		}
-	    }
-
-	    @Override
-	    public void beforeAdd(Relation<AbstractFileNode, DirNode> arg0, AbstractFileNode arg1, DirNode arg2) {
-
-	    }
-
-	    @Override
-	    public void beforeRemove(Relation<AbstractFileNode, DirNode> arg0, AbstractFileNode arg1, DirNode arg2) {
-		// TODO Auto-generated method stub
-
-	    }
-	});
     }
 
     // constructors
@@ -161,6 +123,7 @@ public class DirNode extends DirNode_Base {
 	return getParent().getSharedFolder();
     }
 
+    @Override
     public DirNode getTrash() {
 	return hasParent() ? getParent().getTrash() : super.getTrash();
     }
@@ -347,7 +310,7 @@ public class DirNode extends DirNode_Base {
     }
 
     @Service
-    private void addUsedSpace(long filesize) {
+    void addUsedSpace(long filesize) {
 	if (hasParent()) {
 	    getParent().addUsedSpace(filesize);
 	}
@@ -355,7 +318,7 @@ public class DirNode extends DirNode_Base {
     }
 
     @Service
-    private void removeUsedSpace(long filesize) {
+    void removeUsedSpace(long filesize) {
 	if (hasParent()) {
 	    getParent().removeUsedSpace(filesize);
 	}
@@ -391,6 +354,7 @@ public class DirNode extends DirNode_Base {
     public boolean hasQuotaDefined() {
 	return super.getQuota() != null;
     }
+
 
     /*
      * The actual size of the files and folders of this dir Shared files and
@@ -543,6 +507,7 @@ public class DirNode extends DirNode_Base {
 	super.delete();
     }
 
+    @Override
     public boolean isInTrash() {
 	if (hasParent()) {
 	    return getParent().isInTrash();

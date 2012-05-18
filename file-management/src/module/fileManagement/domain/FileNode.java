@@ -53,6 +53,15 @@ public class FileNode extends FileNode_Base {
 	setParent(dirNode);
     }
 
+    public FileNode(final DirNode dirNode, final Document document) {
+	super();
+	if (dirNode == null) {
+	    throw new DomainException("must.specify.a.dir.node.when.creating.a.file.node");
+	}
+	setDocument(document);
+	setParent(dirNode);
+    }
+
     public FileNode() {
 	super();
     }
@@ -76,6 +85,7 @@ public class FileNode extends FileNode_Base {
 	super.delete();
     }
 
+    @Override
     @Service
     public void deleteService() {
 	delete();
@@ -152,6 +162,7 @@ public class FileNode extends FileNode_Base {
 	    sharedNode.deleteLink(new ContextPath(getParent()));
 	}
     }
+
 
     @Service
     public void recoverTo(DirNode targetDir) {

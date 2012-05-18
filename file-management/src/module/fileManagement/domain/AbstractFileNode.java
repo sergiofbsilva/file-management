@@ -24,8 +24,48 @@ import pt.ist.fenixWebFramework.services.Service;
 import com.vaadin.terminal.Resource;
 import com.vaadin.terminal.ThemeResource;
 
-public abstract class AbstractFileNode extends AbstractFileNode_Base implements Comparable<AbstractFileNode> {
+import dml.runtime.DirectRelation;
+import dml.runtime.Relation;
+import dml.runtime.RelationListener;
 
+public abstract class AbstractFileNode extends AbstractFileNode_Base implements Comparable<AbstractFileNode> {
+    static {
+	DirectRelation<AbstractFileNode, DirNode> child = DirNodeAbstractFileNode;
+	child.addListener(new RelationListener<AbstractFileNode, DirNode>() {
+
+	    @Override
+	    public void afterAdd(Relation<AbstractFileNode, DirNode> arg0, AbstractFileNode arg1, DirNode arg2) {
+		// System.out.println(String.format("added child %s to %s", arg1
+		// != null ? arg1.getDisplayName() : "null",
+		// arg2 != null ? arg2.getDisplayName() : "null"));
+		if (arg1 != null && arg2 != null && !arg1.isShared()) {
+		    arg2.addUsedSpace(arg1.getFilesize());
+		}
+
+	    }
+
+	    @Override
+	    public void afterRemove(Relation<AbstractFileNode, DirNode> arg0, AbstractFileNode arg1, DirNode arg2) {
+		// System.out.println(String.format("remove child %s from %s",
+		// (arg1 != null ? arg1.getDisplayName() : "null"),
+		// (arg2 != null ? arg2.getDisplayName() : "null")));
+		if (arg1 != null && arg2 != null && !arg1.isShared()) {
+		    arg2.removeUsedSpace(arg1.getFilesize());
+		}
+	    }
+
+	    @Override
+	    public void beforeAdd(Relation<AbstractFileNode, DirNode> arg0, AbstractFileNode arg1, DirNode arg2) {
+
+	    }
+
+	    @Override
+	    public void beforeRemove(Relation<AbstractFileNode, DirNode> arg0, AbstractFileNode arg1, DirNode arg2) {
+		// TODO Auto-generated method stub
+
+	    }
+	});
+    }
     public enum VisibilityState {
 	PRIVATE, SHARED, PUBLIC;
     }
@@ -85,18 +125,19 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 	    }
 	}
 	final User currentUser = UserView.getCurrentUser();
-	final SingleUserGroup currentUserGroup = currentUser.getSingleUserGroup();
-	setReadGroup(currentUserGroup);
-	setWriteGroup(currentUserGroup);
+	//	final SingleUserGroup currentUserGroup = currentUser.getSingleUserGroup();
+	//	setReadGroup(currentUserGroup);
+	//	setWriteGroup(currentUserGroup);
 
 	if (isFile()) {
+	    setParent(getParent().getTrash());
 	    new DeleteFileLog(currentUser, contextPath, (FileNode) this);
 	} else if (isDir()) {
 	    final DirNode dirNode = (DirNode) this;
+	    setParent(dirNode.getTrash());
 	    createDirLogs(currentUser, contextPath.concat(dirNode), dirNode);
 	    new DeleteDirLog(currentUser, contextPath, dirNode);
 	}
-	setParent(FileRepository.getTrash(currentUser));
     }
 
     public abstract PersistentGroup getReadGroup();
@@ -142,6 +183,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 	return FileManagementSystem.getMessage("label.visibility." + getVisibilityState().toString().toLowerCase());
     }
 
+    @Override
     public int compareTo(final AbstractFileNode node) {
 	final String displayName1 = getDisplayName();
 	final String displayName2 = node.getDisplayName();
