@@ -13,6 +13,7 @@ import java.util.TreeSet;
 
 import myorg.applicationTier.Authenticate.UserView;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 
 import pt.ist.fenixWebFramework.services.Service;
@@ -32,9 +33,20 @@ public class Document extends Document_Base {
 	addMetadata(MetadataKey.FILENAME_KEY_VALUE, fileName);
     }
 
+    public Document(final String displayName, final String fileName, byte[] content) {
+	this();
+	setLastVersionedFile(new VersionedFile(displayName, fileName, content));
+	addMetadata(MetadataKey.FILENAME_KEY_VALUE, fileName);
+    }
+
     public String getDisplayName() {
 	final VersionedFile file = getLastVersionedFile();
 	return file.getDisplayName();
+    }
+
+    public String getFileName() {
+	final VersionedFile file = getLastVersionedFile();
+	return file.getFilename();
     }
 
     public void setDisplayName(final String displayName) {
@@ -101,6 +113,14 @@ public class Document extends Document_Base {
     public void addVersion(final File file, final String filename) {
 	final VersionedFile versionedFile = getLastVersionedFile();
 	final VersionedFile newVersion = new VersionedFile(file, filename);
+	newVersion.setPreviousVersion(versionedFile);
+	setLastVersionedFile(newVersion);
+	addNewVersionMetadata();
+    }
+
+    public void addVersion(String displayName, String filename, byte[] content) {
+	final VersionedFile versionedFile = getLastVersionedFile();
+	final VersionedFile newVersion = new VersionedFile(displayName, filename, content);
 	newVersion.setPreviousVersion(versionedFile);
 	setLastVersionedFile(newVersion);
 	addNewVersionMetadata();
@@ -271,6 +291,33 @@ public class Document extends Document_Base {
 	    }
 	}
 	return null;
+    }
+
+    /**
+     * 
+     * @param template
+     *            the {@link MetadataTemplate} to associate with this Document
+     */
+    public void setMetadataTemplateAssociated(MetadataTemplate template) {
+	addMetadata(MetadataKey.TEMPLATE_KEY_VALUE, template.getName());
+    }
+
+    public MetadataTemplate getMetadataTemplateAssociated()
+    {
+	String templateValue = getMetadataValue(MetadataKey.TEMPLATE_KEY_VALUE);
+	if (!StringUtils.isBlank(templateValue)) {
+	    return MetadataTemplate.getMetadataTemplate(templateValue);
+	}
+	return null;
+    }
+
+    private String getMetadataValue(String keyValue) {
+	Metadata metadata = getMetadata(MetadataKey.getInstance(keyValue));
+	if (metadata != null) {
+	    return metadata.getValue();
+	}
+	return null;
+
     }
 
     public String getTypology() {

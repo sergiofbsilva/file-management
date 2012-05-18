@@ -51,6 +51,11 @@ public class VersionedFile extends VersionedFile_Base {
 	}
     }
 
+    public VersionedFile(final String displayName, final String fileName, byte[] content) {
+	super();
+	init(displayName, fileName, content);
+    }
+
     public long getFilesize() {
 	return getSize();
     }

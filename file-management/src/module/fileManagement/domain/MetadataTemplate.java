@@ -51,7 +51,7 @@ public class MetadataTemplate extends MetadataTemplate_Base {
     public MetadataTemplate(String name, Set<String> keys) {
 	this();
 	setName(name);
-	setKeysStrings(keys);
+	addKeysStrings(keys);
     }
 
     public static MetadataTemplate getMetadataTemplate(String name) {
@@ -74,9 +74,24 @@ public class MetadataTemplate extends MetadataTemplate_Base {
 	FileManagementSystem.getInstance().removeMetadataTemplates(this);
 	deleteDomainObject();
     }
-
+    
     @Service
-    public void setKeysStrings(Set<String> keys) {
+    public static MetadataTemplate getOrCreateInstance(String name) {
+	MetadataTemplate instance = getMetadataTemplate(name);
+	if (instance == null)
+	    instance = new MetadataTemplate(name);
+	return instance;
+    }
+
+    /**
+     * 
+     * @param the
+     *            keys of the MetadataKey to be added to this template. If they
+     *            the corresponding MetadataKey object doesn't exist, it is
+     *            created
+     */
+    @Service
+    public void addKeysStrings(Set<String> keys) {
 	for (String key : keys) {
 	    addKeys(MetadataKey.getOrCreateInstance(key));
 	}
