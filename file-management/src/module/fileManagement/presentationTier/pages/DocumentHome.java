@@ -299,8 +299,7 @@ public class DocumentHome extends CustomComponent implements EmbeddedComponentCo
 	panel.setStyleName(BennuTheme.PANEL_LIGHT);
 	((VerticalLayout) panel.getContent()).setSpacing(Boolean.TRUE);
 
-	// final User currentUser = UserView.getCurrentUser();
-	final User currentUser = null;
+	final User currentUser = UserView.getCurrentUser();
 	final Person person = currentUser.getPerson();
 	for (final Party party : getAllParentUnits(person)) {
 	    final Button btRepository = new Button(party.getPresentationName(), new ClickListener() {
