@@ -44,6 +44,7 @@ import module.vaadin.ui.BennuTheme;
 import myorg.applicationTier.Authenticate.UserView;
 import myorg.domain.Presentable;
 import myorg.domain.RoleType;
+import myorg.domain.User;
 import pt.ist.fenixframework.plugins.luceneIndexing.queryBuilder.dsl.BuildingState;
 import pt.ist.fenixframework.plugins.luceneIndexing.queryBuilder.dsl.DSLState;
 import pt.ist.vaadinframework.EmbeddedApplication;
@@ -215,7 +216,7 @@ public class DocumentHome extends CustomComponent implements EmbeddedComponentCo
 	return pDetails;
     }
 
-    private Set<Party> getParentUnits(final Party party, Set<Party> processed) {
+    private static Set<Party> getParentUnits(final Party party, Set<Party> processed) {
 	final Set<Party> result = new HashSet<Party>();
 	if (party.hasFileRepository() && party.getFileRepository().isAccessible()) {
 	    result.add(party);
@@ -230,11 +231,21 @@ public class DocumentHome extends CustomComponent implements EmbeddedComponentCo
 	return result;
     }
 
-    private Set<Party> getAllParentUnits(final Person person) {
+    private static Set<Party> getAllParentUnits(final Person person) {
 	final Set<Party> processed = new HashSet<Party>();
 	final Set<Party> result = new HashSet<Party>();
 	result.addAll(getParentUnits(person, processed));
 	return result;
+    }
+
+    public static Set<DirNode> getAvailableRepositories() {
+	final Set<DirNode> reps = new HashSet<DirNode>();
+	final Person person = UserView.getCurrentUser().getPerson();
+	reps.add(person.getFileRepository());
+	for (Party party : getAllParentUnits(person)) {
+	    reps.add(party.getFileRepository());
+	}
+	return reps;
     }
 
     public Component createRepositorySelect() {
@@ -288,7 +299,9 @@ public class DocumentHome extends CustomComponent implements EmbeddedComponentCo
 	panel.setStyleName(BennuTheme.PANEL_LIGHT);
 	((VerticalLayout) panel.getContent()).setSpacing(Boolean.TRUE);
 
-	final Person person = UserView.getCurrentUser().getPerson();
+	// final User currentUser = UserView.getCurrentUser();
+	final User currentUser = null;
+	final Person person = currentUser.getPerson();
 	for (final Party party : getAllParentUnits(person)) {
 	    final Button btRepository = new Button(party.getPresentationName(), new ClickListener() {
 
@@ -312,9 +325,12 @@ public class DocumentHome extends CustomComponent implements EmbeddedComponentCo
 	return gsl;
     }
 
+    public DocumentHome() {
+	setCompositionRoot(createPage());
+    }
+
     @Override
     public void attach() {
-	setCompositionRoot(createPage());
     }
 
 }
