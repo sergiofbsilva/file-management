@@ -2,7 +2,7 @@
  * @(#)DocumentHome.java
  *
  * Copyright 2011 Instituto Superior Tecnico
- * Founding Authors: Luis Cruz, Sérgio Silva
+ * Founding Authors: Luis Cruz, S�rgio Silva
  * 
  *      https://fenix-ashes.ist.utl.pt/
  * 
@@ -76,14 +76,16 @@ import com.vaadin.ui.VerticalLayout;
 /**
  * 
  * @author Pedro Santos
- * @author Sérgio Silva
+ * @author S�rgio Silva
  * 
  */
 public class DocumentHome extends CustomComponent implements EmbeddedComponentContainer {
 
+    private GridSystemLayout gsl;
+
     @Override
     public boolean isAllowedToOpen(Map<String, String> arguments) {
-	return true;
+	return UserView.getCurrentUser() != null;
     }
 
     @Override
@@ -316,20 +318,20 @@ public class DocumentHome extends CustomComponent implements EmbeddedComponentCo
 	return panel;
     }
 
-    public Component createPage() {
-	GridSystemLayout gsl = new GridSystemLayout();
+    public void createPage() {
 	gsl.setCell("welcome", 16, createWelcomePanel());
 	gsl.setCell("available_repositories", 16, createRepositoryDashboard());
 	gsl.setCell("select_repository", 0, 9, 7, createRepositorySelect());
-	return gsl;
     }
 
     public DocumentHome() {
-	setCompositionRoot(createPage());
+	gsl = new GridSystemLayout();
+	setCompositionRoot(gsl);
     }
 
     @Override
     public void attach() {
+	createPage();
     }
 
 }
