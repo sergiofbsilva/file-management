@@ -71,7 +71,7 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
 
     @Override
     public boolean isAllowedToOpen(Map<String, String> arguments) {
-	return true;
+	return UserView.getCurrentUser() != null;
     }
 
     @Override
