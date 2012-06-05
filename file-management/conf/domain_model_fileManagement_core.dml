@@ -1,12 +1,13 @@
 package module.fileManagement.domain;
 
-enum module.fileManagement.domain.OperationLogType as OperationLogType;
-
-
-class task.CreateDefaultMetadataTemplates extends .myorg.domain.scheduler.Task {
+valueType java.lang.Class as Class {
+	externalizeWith {
+		String getName();
+	}
+	internalizeWith myorg.domain.util.ClassInternalizer.internalize();
 }
 
-class task.PopulateRootDirTask extends .myorg.domain.scheduler.Task { }
+ class task.PopulateRootDirTask extends .myorg.domain.scheduler.Task { }
 
 
 class AbstractFileNode {
@@ -20,6 +21,8 @@ class AbstractFileNode {
 		String name;
 		Long size;
 		Long quota;
+		Integer sequenceNumber;
+		String filenameTemplate;
 	}
 	
 	class SharedFileNode extends FileNode {
@@ -35,58 +38,7 @@ class Document {
 	DateTime lastModifiedDate;
 }
 
-class MetadataKey {
-	String keyValue;
-	Boolean reserved;
-}
-
-class Metadata {
-	String value;
-	DateTime timestamp ( REQUIRED );
-}
-
-relation MetadataMetadataKey {
-	MetadataKey playsRole metadataKey {
-		multiplicity 1;
-	}
-	Metadata playsRole metadata {
-		multiplicity *;
-	}
-}
-
-
-class MetadataTemplate {
-	String name;
-}
-
 // RELATIONS
-
-
-relation MetadataKeysTemplate {
-	MetadataTemplate playsRole templates {
-		multiplicity *;
-	}
-	MetadataKey playsRole keys {
-		multiplicity *;
-	}
-}
-
-relation DocumentMetadata {
-	Document playsRole document {
-		multiplicity 1;
-	}
-	Metadata playsRole metadata {
-		multiplicity *;
-	}
-}
-
-relation TemplateTemplates {
-	MetadataTemplate playsRole parent;
-	MetadataTemplate playsRole childs {
-		multiplicity *;
-	}
-}
-
 
 class VersionedFile extends .pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile {
 }
@@ -191,20 +143,6 @@ relation DirNodeTrashNode {
 
 class FileManagementSystem { 
 
-}
-
-relation FileManagementTemplates {
-	FileManagementSystem playsRole fileManagementSystem;
-	MetadataTemplate playsRole metadataTemplates {
-		multiplicity *;
-	}
-}
-
-relation FileManagementMetadataKeys {
-	FileManagementSystem playsRole  fileManagementSystem;
-	MetadataKey playsRole metadataKeys {
-		multiplicity *;
-	}
 }
 
 relation FileManagementMyOrg {

@@ -74,7 +74,7 @@ public class VersionedFile extends VersionedFile_Base {
     }
 
     public Document getConnectedDocument() {
-	return hasDocument() ? getDocument() : (hasNextVersion() ? getNextVersion().getDocument() : null);
+	return hasDocument() ? getDocument() : (hasNextVersion() ? getNextVersion().getConnectedDocument() : null);
     }
 
 }

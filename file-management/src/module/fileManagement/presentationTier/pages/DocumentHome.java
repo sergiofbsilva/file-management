@@ -2,7 +2,7 @@
  * @(#)DocumentHome.java
  *
  * Copyright 2011 Instituto Superior Tecnico
- * Founding Authors: Luis Cruz, S�rgio Silva
+ * Founding Authors: Luis Cruz, Sérgio Silva
  * 
  *      https://fenix-ashes.ist.utl.pt/
  * 
@@ -76,7 +76,7 @@ import com.vaadin.ui.VerticalLayout;
 /**
  * 
  * @author Pedro Santos
- * @author S�rgio Silva
+ * @author Sérgio Silva
  * 
  */
 public class DocumentHome extends CustomComponent implements EmbeddedComponentContainer {
@@ -331,6 +331,7 @@ public class DocumentHome extends CustomComponent implements EmbeddedComponentCo
 
     @Override
     public void attach() {
+	super.attach();
 	createPage();
     }
 

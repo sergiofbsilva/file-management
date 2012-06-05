@@ -45,19 +45,14 @@ public class FileRepository {
 	return party.hasFileRepository() ? party.getFileRepository() : createFileRepository(party);
     }
 
+    @Service
+    private static DirNode createFileRepository(Party party) {
+	return new DirNode(party);
+    }
+
     public static DirNode getTrash(final User user) {
 	final DirNode dirNode = getOrCreateFileRepository(user);
 	return dirNode.getTrash();
-    }
-
-    @Service
-    private static DirNode createFileRepository(final User user) {
-	return createFileRepository(user.getPerson());
-    }
-
-    @Service
-    private static DirNode createFileRepository(final Party party) {
-	return party.hasFileRepository() ? party.getFileRepository() : new DirNode(party);
     }
 
 }

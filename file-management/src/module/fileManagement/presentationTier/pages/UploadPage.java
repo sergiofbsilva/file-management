@@ -9,6 +9,7 @@ import java.util.Map;
 import module.fileManagement.domain.ContextPath;
 import module.fileManagement.domain.DirNode;
 import module.fileManagement.domain.Document;
+import module.fileManagement.domain.FileNode;
 import module.fileManagement.presentationTier.component.MetadataPanel;
 import module.fileManagement.presentationTier.component.UploadFilePanel;
 import module.vaadin.ui.BennuTheme;
@@ -32,7 +33,6 @@ public class UploadPage extends CustomComponent implements EmbeddedComponentCont
     private MetadataPanel metadataPanel;
     private UploadFilePanel uploadFilePanel;
     private final VerticalLayout leftPanel;
-    // private Select selectDir;
     private final Label uploadDirLabel;
     private Label lblQuotaText;
     private final VerticalLayout vlMetadata;
@@ -59,11 +59,6 @@ public class UploadPage extends CustomComponent implements EmbeddedComponentCont
 	lblQuotaText.setValue(getMessage("upload.quota", usedSpace, usedSpacePerc, quota, availableSpace));
     }
 
-    @Override
-    public void attach() {
-	super.attach();
-    }
-
     @SuppressWarnings("serial")
     public UploadPage() {
 	uploadDirLabel = new Label("Upload para : ");
@@ -82,6 +77,14 @@ public class UploadPage extends CustomComponent implements EmbeddedComponentCont
 	setCompositionRoot(mainLayout);
     }
 
+    private void initSelectedDocuments() {
+	final DirNode uploadDir = uploadFilePanel.getUploadDir();
+	if (uploadDir.hasSequenceNumber()) {
+	    final FileNode fileNode = uploadDir.createFile();
+	    uploadFilePanel.selectDocument(fileNode.getDocument());
+	}
+    }
+
     public void setUploadArea(ContextPath contextPath) {
 	if (uploadFilePanel != null) {
 	    leftPanel.removeComponent(uploadFilePanel);
@@ -97,6 +100,16 @@ public class UploadPage extends CustomComponent implements EmbeddedComponentCont
 
 	updateQuotaLabel();
 
+	leftPanel.addComponent(uploadFilePanel);
+
+	this.metadataPanel = new MetadataPanel(uploadFilePanel.getDocumentContainer(),
+		uploadFilePanel.getSelectedDocumentsProperty());
+	vlMetadata.addComponent(new Label("Seleccione um ou mais ficheiros para editar"));
+	vlMetadata.addComponent(metadataPanel);
+	// vlMetadata.setVisible(false);
+	((GridLayout) getCompositionRoot()).addComponent(vlMetadata, 1, 0);
+	uploadDirLabel.setValue(uploadDirLabel.getValue() + uploadFilePanel.getUploadDir().getDisplayName());
+
 	uploadFilePanel.addListener(new ValueChangeListener() {
 
 	    @Override
@@ -104,15 +117,7 @@ public class UploadPage extends CustomComponent implements EmbeddedComponentCont
 		metadataPanel.selectDocuments((Collection<Document>) event.getProperty().getValue());
 	    }
 	});
-	leftPanel.addComponent(uploadFilePanel);
-
-	this.metadataPanel = new MetadataPanel(uploadFilePanel.getDocumentContainer(),
-		uploadFilePanel.getSelectedDocumentsProperty());
-	vlMetadata.addComponent(new Label("Seleccione um ou mais ficheiros para editar"));
-	vlMetadata.addComponent(metadataPanel);
-	vlMetadata.setVisible(false);
-	((GridLayout) getCompositionRoot()).addComponent(vlMetadata, 1, 0);
-	uploadDirLabel.setValue(uploadDirLabel.getValue() + uploadFilePanel.getUploadDir().getDisplayName());
+	initSelectedDocuments();
     }
 
     @Override
@@ -128,5 +133,9 @@ public class UploadPage extends CustomComponent implements EmbeddedComponentCont
 
     public void metadataPanelVisible(final boolean visible) {
 	vlMetadata.setVisible(visible);
+    }
+
+    public MetadataPanel getMetadataPanel() {
+	return metadataPanel;
     }
 }

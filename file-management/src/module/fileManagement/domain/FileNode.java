@@ -45,12 +45,13 @@ import pt.ist.fenixWebFramework.services.Service;
 public class FileNode extends FileNode_Base {
 
     public FileNode(final DirNode dirNode, final File file, final String fileName) {
-	super();
-	if (dirNode == null) {
-	    throw new DomainException("must.specify.a.dir.node.when.creating.a.file.node");
-	}
-	setDocument(new Document(file, fileName));
-	setParent(dirNode);
+	// super();
+	// if (dirNode == null) {
+	// throw new DomainException("must.specify.a.dir.node.when.creating.a.file.node");
+	// }
+	// setDocument(new Document(file, fileName));
+	// setParent(dirNode);
+	this(dirNode, new Document(file, fileName));
     }
 
     public FileNode(final DirNode dirNode, final Document document) {
@@ -125,7 +126,7 @@ public class FileNode extends FileNode_Base {
 	final Document document = getDocument();
 	document.setWriteGroup(persistentGroup);
     }
-    
+
     @Override
     public boolean search(String searchText) {
 	return getDocument().search(searchText);
@@ -162,7 +163,6 @@ public class FileNode extends FileNode_Base {
 	    sharedNode.deleteLink(new ContextPath(getParent()));
 	}
     }
-
 
     @Service
     public void recoverTo(DirNode targetDir) {

@@ -27,8 +27,7 @@ package module.fileManagement.presentationTier.pages;
 import java.util.Map;
 
 import module.fileManagement.domain.FileManagementSystem;
-import module.fileManagement.domain.MetadataKey;
-import module.fileManagement.domain.MetadataTemplate;
+import module.fileManagement.domain.metadata.MetadataTemplate;
 
 import org.vaadin.dialogs.ConfirmDialog;
 
@@ -36,6 +35,7 @@ import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
 
+import com.google.common.base.Joiner;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -67,22 +67,15 @@ public class ManageMetadataTemplates extends CustomComponent implements Embedded
     }
 
     private Label createTemplateDescription(final MetadataTemplate template) {
-
-	String description = template.getName() + " [";
-
-	if (template.hasAnyKeys()) {
-
-	    for (MetadataKey key : template.getKeys()) {
-		description += key.getKeyValue() + ",";
-	    }
-
-	    description = description.substring(0, description.length() - 1);
+	final String templateName = template.getName();
+	final Label label = new Label();
+	if (template.hasAnyKey()) {
+	    final String keyNames = Joiner.on(",").join(template.getKeyNames());
+	    label.setValue(String.format("%s [%s]", templateName, keyNames));
+	} else {
+	    label.setValue(templateName);
 	}
-
-	description += "]";
-
-	return new Label(description);
-
+	return label;
     }
 
     private void createTemplateEntry(final Layout container, final MetadataTemplate template) {

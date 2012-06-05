@@ -14,6 +14,9 @@ import module.fileManagement.domain.exception.NodeDuplicateNameException;
 import module.fileManagement.domain.log.CreateDirLog;
 import module.fileManagement.domain.log.CreateFileLog;
 import module.fileManagement.domain.log.CreateNewVersionLog;
+import module.fileManagement.domain.metadata.MetadataKey;
+import module.fileManagement.domain.metadata.MetadataTemplate;
+import module.fileManagement.domain.metadata.SeqNumberMetadata;
 import module.fileManagement.tools.StringUtils;
 import module.organization.domain.AccountabilityType;
 import module.organization.domain.Party;
@@ -21,11 +24,15 @@ import module.organization.domain.Person;
 import module.organization.domain.Unit;
 import module.organization.domain.groups.UnitGroup;
 import myorg.applicationTier.Authenticate.UserView;
+import myorg.domain.RoleType;
 import myorg.domain.User;
 import myorg.domain.groups.EmptyGroup;
 import myorg.domain.groups.PersistentGroup;
+import myorg.domain.groups.Role;
 import myorg.domain.groups.SingleUserGroup;
+import myorg.domain.groups.UnionGroup;
 import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.fenixframework.FFDomainException;
 
 public class DirNode extends DirNode_Base {
 
@@ -40,7 +47,6 @@ public class DirNode extends DirNode_Base {
     static {
 	INVALID_USER_DIR_NAMES.add(SHARED_DIR_NAME);
 	INVALID_USER_DIR_NAMES.add(TRASH_DIR_NAME);
-
     }
 
     // constructors
@@ -75,10 +81,21 @@ public class DirNode extends DirNode_Base {
     }
 
     private void setUnitGroup(Unit unit) {
-	final AccountabilityType[] memberTypes = new AccountabilityType[] { AccountabilityType.readBy("Personnel") };
-	final AccountabilityType[] childUnitTypes = new AccountabilityType[] { AccountabilityType.readBy("Organizational") };
-	setReadGroup(UnitGroup.getOrCreateGroup(unit, memberTypes, childUnitTypes));
-	setWriteGroup(UnitGroup.getOrCreateGroup(unit, memberTypes, null));
+	// final AccountabilityType[] memberTypes = new AccountabilityType[] {
+	// AccountabilityType.readBy("Personnel") };
+	// final AccountabilityType[] childUnitTypes = new AccountabilityType[]
+	// { AccountabilityType.readBy("Organizational") };
+	// setReadGroup(UnitGroup.getOrCreateGroup(unit, memberTypes,
+	// childUnitTypes));
+	// setWriteGroup(UnitGroup.getOrCreateGroup(unit, memberTypes, null));
+	// final AccountabilityType[] memberTypes = new AccountabilityType[] {
+	// AccountabilityType.readBy("Personnel") };
+	final AccountabilityType[] childUnitTypes = new AccountabilityType[] { AccountabilityType.readBy("Organizational"),
+		AccountabilityType.readBy("Personnel") };
+	final UnitGroup group = UnitGroup.getOrCreateGroup(unit, childUnitTypes, childUnitTypes);
+	final UnionGroup unitManagerGroup = UnionGroup.getOrCreateUnionGroup(group, Role.createRole(RoleType.MANAGER));
+	setReadGroup(unitManagerGroup);
+	setWriteGroup(unitManagerGroup);
     }
 
     public DirNode(final DirNode dirNode, final String name) {
@@ -131,20 +148,6 @@ public class DirNode extends DirNode_Base {
     public String getRepositoryName() {
 	return hasParent() ? getParent().getRepositoryName() : getName();
     }
-
-    /*
-     * @Service public void initIfNecessary() { if (!hasAnyChild()) { final
-     * DirNode dirNode = new DirNode(this, "Documentos Oficiais");
-     * dirNode.setWriteGroup(EmptyGroup.getInstance()); new DirNode(dirNode,
-     * "Contracto"); new DirNode(dirNode, "IRS"); new DirNode(dirNode,
-     * "Vencimento");
-     * 
-     * new DirNode(this, "Os Meus Documentos");
-     * 
-     * final DirNode sharedDirNode = new DirNode(this,
-     * "Documentos Partilhados");
-     * sharedDirNode.setReadGroup(UserGroup.getInstance()); } }
-     */
 
     @Override
     public boolean isDir() {
@@ -294,6 +297,26 @@ public class DirNode extends DirNode_Base {
 	return fileNode;
     }
 
+    @Service
+    public FileNode createFile() {
+	if (hasSequenceNumber()) {
+	    final Integer nextSequenceNumber = getNextSequenceNumber();
+	    FileManagementSystem.FILENAME_TEMPLATE.setDirNode(this);
+	    final String fileName = FileManagementSystem.FILENAME_TEMPLATE.getValue();
+	    final Document document = new Document(fileName, fileName, StringUtils.EMPTY.getBytes());
+	    if (hasDefaultTemplate()) {
+		final MetadataTemplate defaultTemplate = getDefaultTemplate();
+		final Set<MetadataKey> seqNumberKeys = defaultTemplate.getKeysByMetadataType(SeqNumberMetadata.class);
+		for (MetadataKey key : seqNumberKeys) {
+		    document.addMetadata(key.createMetadata(nextSequenceNumber));
+		}
+		document.setMetadataTemplateAssociated(defaultTemplate);
+	    }
+	    return new FileNode(this, document);
+	}
+	return null;
+    }
+
     // size and quota
 
     @Override
@@ -355,25 +378,12 @@ public class DirNode extends DirNode_Base {
 	return super.getQuota() != null;
     }
 
-
     /*
      * The actual size of the files and folders of this dir Shared files and
      * dirs with defined quota are ignored for this purpose.
      */
     private long getDirUsedSpace() {
-	long size = getSize();
-
-	// for (AbstractFileNode node : getChild()) {
-	// if (!node.isShared() && node.isDir()) {
-	// if (!((DirNode) node).hasQuotaDefined()) {
-	// final long usedSpace = ((DirNode) node).getDirUsedSpace();
-	// System.out.println("used space of " + node.getDisplayName() + " is "
-	// + usedSpace);
-	// size += usedSpace;
-	// }
-	// }
-	// }
-	return size;
+	return getSize();
     }
 
     /*
@@ -421,32 +431,6 @@ public class DirNode extends DirNode_Base {
 	final AbstractFileNode searchNode = searchNode(dirName);
 	return searchNode != null && searchNode instanceof DirNode ? (DirNode) searchNode : null;
     }
-
-    /*
-     * private boolean hasAvailableQuotaInRepository(final long length) { final
-     * User user = getUser(); return user == null || getUsedSpace() + length <
-     * USER_REPOSITORY_QUOTA; }
-     */
-    /*
-     * private void calculatePaths(List<String> paths) { if (!hasParent()) {
-     * paths.add(getUser().getUsername()); } else { paths.add(getDisplayName());
-     * getParent().calculatePaths(paths); } }
-     */
-
-    /*
-     * public String getAbsolutePath() { String ret = new String();
-     * ArrayList<String> paths = new ArrayList<String>(); calculatePaths(paths);
-     * final ListIterator<String> iterator = paths.listIterator(paths.size());
-     * while (iterator.hasPrevious()) { ret += iterator.previous(); if
-     * (iterator.hasPrevious()) { ret += " > "; } } return ret; }
-     */
-
-    /*
-     * public List<DirNode> getAllDirs() { List<DirNode> nodes = new
-     * ArrayList<DirNode>(); nodes.add(this); for (AbstractFileNode node :
-     * getChildSet()) { if (node.isDir()) { final DirNode dirNode = (DirNode)
-     * node; nodes.addAll(dirNode.getAllDirs()); } } return nodes; }
-     */
 
     public boolean hasSharedNode(AbstractFileNode selectedNode) {
 	for (AbstractFileNode node : getChild()) {
@@ -500,7 +484,6 @@ public class DirNode extends DirNode_Base {
     @Override
     public void delete() {
 	removeUser();
-	// removeUnit();
 	for (final AbstractFileNode abstractFileNode : getChildSet()) {
 	    abstractFileNode.delete();
 	}
@@ -524,14 +507,12 @@ public class DirNode extends DirNode_Base {
     }
 
     /*
-     * the top level dir is the
+     * This method guarantees that a directory is within other directory. If not
+     * it is a root.
      */
     @ConsistencyPredicate
     public boolean checkParent() {
-	return hasParent() ? true : hasUser() || hasParty() || hasRootDirNode() /*
-										 * is
-										 * trash
-										 */;
+	return hasParent() ? true : hasUser() || hasParty() || hasRootDirNode();
     }
 
     @Override
@@ -553,5 +534,28 @@ public class DirNode extends DirNode_Base {
 	    getPath(child.getParent(), nodes);
 	}
 	nodes.add(child);
+    }
+
+    /*
+     * sequencedNumber is used to provide an sequenced unique identifier for
+     * files within this dir
+     */
+    public void setSequenced() {
+	if (getSequenceNumber() == null) {
+	    setSequenceNumber(0);
+	}
+    }
+
+    public boolean hasSequenceNumber() {
+	return getSequenceNumber() != null;
+    }
+
+    @Service
+    public Integer getNextSequenceNumber() {
+	if (getSequenceNumber() == null) {
+	    throw new FFDomainException("Sequence Number is null: Must be 0 to use a sequence number");
+	}
+	setSequenceNumber(getSequenceNumber() + 1);
+	return getSequenceNumber();
     }
 }

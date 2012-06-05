@@ -24,14 +24,14 @@
  */
 package module.fileManagement.presentationTier.pages;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import module.fileManagement.domain.AbstractFileNode;
-import module.fileManagement.domain.FileRepository;
+import module.fileManagement.domain.DirNode;
 import module.fileManagement.presentationTier.component.DocumentFileBrowser;
 import module.fileManagement.presentationTier.component.NodeDetails;
-import myorg.applicationTier.Authenticate.UserView;
 import pt.ist.vaadinframework.VaadinFrameworkLogger;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
@@ -135,14 +135,21 @@ public class DocumentSearch extends CustomComponent implements EmbeddedComponent
 	}
     }
 
+    private Set<AbstractFileNode> search(String searchText) {
+	final Set<AbstractFileNode> resultSet = new HashSet<AbstractFileNode>();
+	for (DirNode repository : DocumentHome.getAvailableRepositories()) {
+	    resultSet.addAll(repository.doSearch(searchText));
+	}
+	return resultSet;
+    }
+
     private void doSearch(String searchText) {
 	if (searchText.isEmpty()) {
 	    setNoResults();
 	    lblSearchResult.setVisible(false);
 	}
 	long start = System.currentTimeMillis();
-	final Set<AbstractFileNode> searchResult = FileRepository.getOrCreateFileRepository(UserView.getCurrentUser()).doSearch(
-		searchText);
+	final Set<AbstractFileNode> searchResult = search(searchText);
 	long end = System.currentTimeMillis();
 	VaadinFrameworkLogger.getLogger().debug(
 		String.format("[%s ms] > query : %s size : %d\n", new Long(end - start), searchText, searchResult.size()));

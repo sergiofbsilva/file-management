@@ -28,7 +28,12 @@ import java.util.HashSet;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import module.fileManagement.domain.metadata.Metadata;
+import module.fileManagement.domain.metadata.MetadataKey;
+import module.fileManagement.domain.metadata.MetadataTemplate;
+import module.fileManagement.domain.metadata.StringMetadata;
 import module.fileManagement.presentationTier.action.OrganizationModelPluginAction.FileRepositoryView;
+import module.fileManagement.tools.FilenameTemplate;
 import module.organization.domain.Party;
 import module.organization.presentationTier.actions.OrganizationModelAction;
 import myorg.domain.ModuleInitializer;
@@ -59,6 +64,8 @@ public class FileManagementSystem extends FileManagementSystem_Base implements M
 
     private static final Logger logger = Logger.getLogger(FileManagementSystem.class);
 
+    public static final FilenameTemplate FILENAME_TEMPLATE = new FilenameTemplate();
+
     static {
 	VaadinFrameworkLogger.getLogger().setLevel(Level.ALL);
     }
@@ -72,9 +79,27 @@ public class FileManagementSystem extends FileManagementSystem_Base implements M
     }
 
     public MetadataKey getMetadataKey(String keyValue) {
+	return getMetadataKey(keyValue, Boolean.FALSE, StringMetadata.class);
+    }
+
+    public MetadataKey getMetadataKey(String keyValue, final Class<? extends Metadata> classType) {
+	return getMetadataKey(keyValue, Boolean.FALSE, classType);
+    }
+
+    public MetadataKey getMetadataKey(final String keyValue, final Boolean reserved, final Class<? extends Metadata> classType) {
 	for (MetadataKey key : getMetadataKeys()) {
-	    if (key.getKeyValue().equals(keyValue)) {
+	    if (key.getKeyValue().equals(keyValue) && key.getMetadataValueType().equals(classType)
+		    && reserved.equals(key.getReserved())) {
 		return key;
+	    }
+	}
+	return null;
+    }
+
+    public MetadataTemplate getMetadataTemplate(final String name) {
+	for (MetadataTemplate template : getMetadataTemplatesSet()) {
+	    if (template.getName().equals(name)) {
+		return template;
 	    }
 	}
 	return null;
@@ -148,14 +173,19 @@ public class FileManagementSystem extends FileManagementSystem_Base implements M
 	final Set<String> reserved = new HashSet<String>();
 	reserved.add(MetadataKey.FILENAME_KEY_VALUE);
 	reserved.add(MetadataKey.TEMPLATE_KEY_VALUE);
-	reserved.add(Document.DOCUMENT_NEW_VERSION_KEY);
+	reserved.add(MetadataKey.DOCUMENT_NEW_VERSION_KEY);
 	reserved.add(MetadataKey.SAVE_ACCESS_LOG);
 	for (MetadataKey metadataKey : root.getMetadataKeys()) {
 	    if (metadataKey.getReserved() == null) {
 		final boolean contains = reserved.contains(metadataKey.getKeyValue());
-		metadataKey.setReserved(contains);
+		metadataKey.setReserved(new Boolean(contains));
+		metadataKey.setMetadataValueType(StringMetadata.class);
 		VaadinFrameworkLogger.getLogger().warn(
 			String.format("set key %s, reserved : %s", metadataKey.getKeyValue(), contains));
+	    }
+	    if (metadataKey.getMetadataValueType() == null) {
+		metadataKey.setMetadataValueType(StringMetadata.class);
+		VaadinFrameworkLogger.getLogger().warn(String.format("set type to String for key %s", metadataKey.getKeyValue()));
 	    }
 	}
     }
@@ -173,4 +203,5 @@ public class FileManagementSystem extends FileManagementSystem_Base implements M
     private static void initDocumentOrganizationModelView() {
 	OrganizationModelAction.partyViewHookManager.register(new FileRepositoryView());
     }
+
 }

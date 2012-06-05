@@ -3,11 +3,16 @@ package module.fileManagement.presentationTier.component;
 import static module.fileManagement.domain.FileManagementSystem.getMessage;
 import module.fileManagement.domain.AbstractFileNode;
 import module.fileManagement.domain.DirNode;
+import module.fileManagement.presentationTier.pages.ManageDirProperties;
+import myorg.applicationTier.Authenticate.UserView;
+import myorg.domain.RoleType;
+import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
 
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.themes.BaseTheme;
 
 public class DirDetails extends NodeDetails {
@@ -62,6 +67,10 @@ public class DirDetails extends NodeDetails {
 	return btDeleteDir;
     }
 
+    private boolean userIsManager() {
+	return UserView.getCurrentUser().hasRoleType(RoleType.MANAGER);
+    }
+
     @Override
     public void updateOperations() {
 	if (getNode().hasParent() && getNode().isWriteGroupMember()) {
@@ -73,5 +82,21 @@ public class DirDetails extends NodeDetails {
 		addOperation(createDeleteDirLink());
 	    }
 	}
+	if (userIsManager()) {
+	    addOperation(manageDirProperties());
+	}
+    }
+
+    private Component manageDirProperties() {
+	final Button btManage = new Button("Propriedades (manager)");
+	btManage.setStyleName(BaseTheme.BUTTON_LINK);
+	btManage.addListener(new ClickListener() {
+
+	    @Override
+	    public void buttonClick(ClickEvent event) {
+		EmbeddedApplication.open(getApplication(), ManageDirProperties.class, getNode().getExternalId());
+	    }
+	});
+	return btManage;
     }
 }

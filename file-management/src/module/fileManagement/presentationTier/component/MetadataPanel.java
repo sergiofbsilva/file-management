@@ -29,9 +29,9 @@ import java.util.HashSet;
 
 import module.fileManagement.domain.Document;
 import module.fileManagement.domain.FileManagementSystem;
-import module.fileManagement.domain.Metadata;
-import module.fileManagement.domain.MetadataKey;
-import module.fileManagement.domain.MetadataTemplate;
+import module.fileManagement.domain.metadata.Metadata;
+import module.fileManagement.domain.metadata.MetadataKey;
+import module.fileManagement.domain.metadata.MetadataTemplate;
 import module.fileManagement.presentationTier.data.DocumentContainer;
 import module.fileManagement.presentationTier.data.FMSFieldFactory;
 import module.fileManagement.presentationTier.data.TemplateItem;
@@ -42,6 +42,7 @@ import pt.ist.vaadinframework.ui.TransactionalForm;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.Validator.InvalidValueException;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Select;
 
@@ -68,8 +69,8 @@ public class MetadataPanel extends Panel {
 	if (metadataTemplateItem == null) {
 	    selectTemplate.setEnabled(true);
 	    metadataTemplateItem = new TemplateItem(template, documentContainer, selectedDocuments);
-	    metadataForm.setItemDataSource(metadataTemplateItem);
-	    metadataForm.setVisibleItemProperties(metadataTemplateItem.getVisibleItemProperties());
+	    metadataForm.setFormFieldFactory(new FMSFieldFactory(FileManagementSystem.getBundleName(), template));
+	    metadataForm.setItemDataSource(metadataTemplateItem, metadataTemplateItem.getVisibleItemProperties());
 	    metadataForm.setImmediate(true);
 	    metadataForm.setWriteThrough(true);
 	    selectedDocuments.addListener(new ValueChangeListener() {
@@ -83,7 +84,6 @@ public class MetadataPanel extends Panel {
 	} else {
 	    metadataTemplateItem.setValue(template);
 	}
-
     }
 
     @SuppressWarnings("serial")
@@ -92,7 +92,7 @@ public class MetadataPanel extends Panel {
 	this.documentContainer = documentContainer;
 	this.selectedDocuments = selectedDocuments;
 
-	selectTemplate = new Select("Template");
+	selectTemplate = new Select("Tipologia");
 	selectTemplate.setImmediate(true);
 	selectTemplate.setEnabled(false);
 	selectTemplate.setContainerDataSource((Container) new DomainItem(FileManagementSystem.getInstance())
@@ -107,7 +107,7 @@ public class MetadataPanel extends Panel {
 	});
 	addComponent(selectTemplate);
 	metadataForm = new TransactionalForm(FileManagementSystem.getBundleName());
-	metadataForm.setFormFieldFactory(new FMSFieldFactory(FileManagementSystem.getBundleName()));
+	metadataForm.setSizeFull();
 	addComponent(metadataForm);
     }
 
@@ -125,6 +125,19 @@ public class MetadataPanel extends Panel {
 	    final String templateName = templateNames.size() < 1 ? null : templateNames.iterator().next();
 	    selectTemplate.select(templateName == null ? null : MetadataTemplate.getMetadataTemplate(templateName));
 	}
+    }
+
+    public boolean isValid() {
+	try {
+	    metadataForm.validate();
+	    return true;
+	} catch (InvalidValueException ive) {
+	    return false;
+	}
+    }
+
+    public void commit() {
+	metadataForm.commit();
     }
 
 }

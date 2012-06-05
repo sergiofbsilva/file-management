@@ -5,22 +5,23 @@ import static module.fileManagement.tools.StringUtils.matches;
 import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeSet;
 
+import module.fileManagement.domain.metadata.Metadata;
+import module.fileManagement.domain.metadata.MetadataKey;
+import module.fileManagement.domain.metadata.MetadataTemplate;
+import module.fileManagement.tools.StringUtils;
 import myorg.applicationTier.Authenticate.UserView;
 
-import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 
 import pt.ist.fenixWebFramework.services.Service;
 
-public class Document extends Document_Base {
+import com.google.common.base.Predicate;
+import com.google.common.collect.Sets;
 
-    public static String DOCUMENT_NEW_VERSION_KEY = "document.new.version.key.value";
+public class Document extends Document_Base {
 
     public Document() {
 	super();
@@ -30,13 +31,13 @@ public class Document extends Document_Base {
     public Document(final File file, final String fileName) {
 	this();
 	setLastVersionedFile(new VersionedFile(file, fileName));
-	addMetadata(MetadataKey.FILENAME_KEY_VALUE, fileName);
+	addMetadata(MetadataKey.getFilenameKey(), fileName);
     }
 
     public Document(final String displayName, final String fileName, byte[] content) {
 	this();
 	setLastVersionedFile(new VersionedFile(displayName, fileName, content));
-	addMetadata(MetadataKey.FILENAME_KEY_VALUE, fileName);
+	addMetadata(MetadataKey.getFilenameKey(), fileName);
     }
 
     public String getDisplayName() {
@@ -84,7 +85,7 @@ public class Document extends Document_Base {
     private boolean searchMetadata(String searchText) {
 	for (Metadata metadata : getMetadata()) {
 	    final String keyValue = metadata.getKeyValue();
-	    final String value = metadata.getValue();
+	    final String value = metadata.getPresentationValue();
 	    if (matches(keyValue, searchText) || matches(value, searchText)) {
 		return true;
 	    }
@@ -215,32 +216,27 @@ public class Document extends Document_Base {
     }
 
     public Collection<Metadata> getRecentMetadata() {
-	final TreeSet<Metadata> metadataUntil = getMetadataUntil(now());
-	Iterator<Metadata> iter = metadataUntil.iterator();
-	final Set<String> keysToFilter = new HashSet<String>();
-	keysToFilter.add(DOCUMENT_NEW_VERSION_KEY);
-	keysToFilter.add(MetadataKey.FILENAME_KEY_VALUE);
-	while (iter.hasNext()) {
-	    Metadata metadata = iter.next();
-	    if (keysToFilter.contains(metadata.getKeyValue())) {
-		iter.remove();
-	    }
-	}
 	final TreeSet<Metadata> metadataByKeyValue = new TreeSet<Metadata>(Metadata.KEYVALUE_COMPARATOR);
-	metadataByKeyValue.addAll(metadataUntil);
-	return metadataByKeyValue;
+	metadataByKeyValue.addAll(getMetadataUntil(now()));
+	return Sets.filter(metadataByKeyValue, new Predicate<Metadata>() {
+
+	    @Override
+	    public boolean apply(Metadata arg0) {
+		return !arg0.getMetadataKey().isReserved();
+	    }
+	});
     }
 
     public TreeSet<Metadata> getVersions() {
 	final TreeSet<Metadata> metadataSet = new TreeSet<Metadata>(Metadata.TIMESTAMP_DESC_COMPARATOR);
-	final TreeSet<Metadata> resultingSet = new TreeSet<Metadata>(Metadata.TIMESTAMP_DESC_COMPARATOR);
-	metadataSet.addAll(getMetadata());
-	for (Metadata metadata : metadataSet) {
-	    if (DOCUMENT_NEW_VERSION_KEY.equals(metadata.getKeyValue())) {
-		resultingSet.add(metadata);
+	metadataSet.addAll(Sets.filter(getMetadataSet(), new Predicate<Metadata>() {
+
+	    @Override
+	    public boolean apply(Metadata arg0) {
+		return MetadataKey.getNewDocumentVersionKey().equals(arg0.getMetadataKey());
 	    }
-	}
-	return resultingSet;
+	}));
+	return metadataSet;
     }
 
     private void cleanup(TreeSet<Metadata> metadataSet) {
@@ -257,7 +253,7 @@ public class Document extends Document_Base {
     }
 
     private void addNewVersionMetadata() {
-	addMetadata(DOCUMENT_NEW_VERSION_KEY, UserView.getCurrentUser().getShortPresentationName());
+	addMetadata(MetadataKey.getNewDocumentVersionKey(), UserView.getCurrentUser().getShortPresentationName());
 	setModifiedDateNow();
     }
 
@@ -314,20 +310,19 @@ public class Document extends Document_Base {
      *            the {@link MetadataTemplate} to associate with this Document
      */
     public void setMetadataTemplateAssociated(MetadataTemplate template) {
-	addMetadata(MetadataKey.TEMPLATE_KEY_VALUE, template.getName());
+	addMetadata(MetadataKey.getTemplateKey(), template.getName());
     }
 
-    public MetadataTemplate getMetadataTemplateAssociated()
-    {
-	String templateValue = getMetadataValue(MetadataKey.TEMPLATE_KEY_VALUE);
+    public MetadataTemplate getMetadataTemplateAssociated() {
+	String templateValue = getMetadataValue(MetadataKey.getTemplateKey());
 	if (!StringUtils.isBlank(templateValue)) {
 	    return MetadataTemplate.getMetadataTemplate(templateValue);
 	}
 	return null;
     }
 
-    private String getMetadataValue(String keyValue) {
-	Metadata metadata = getMetadata(MetadataKey.getInstance(keyValue));
+    private String getMetadataValue(MetadataKey key) {
+	Metadata metadata = getMetadata(key);
 	if (metadata != null) {
 	    return metadata.getValue();
 	}
@@ -341,15 +336,12 @@ public class Document extends Document_Base {
     }
 
     public void setSaveAccessLog(final Boolean shouldSave) {
-	addMetadata(getSaveAccessLogKey(), shouldSave.toString());
-    }
-
-    private MetadataKey getSaveAccessLogKey() {
-	return MetadataKey.getOrCreateInstance(MetadataKey.SAVE_ACCESS_LOG, Boolean.TRUE);
+	addMetadata(MetadataKey.getSaveLogKey(), shouldSave.toString());
     }
 
     public boolean mustSaveAccessLog() {
-	final Metadata metadata = getMetadata(getSaveAccessLogKey());
+	final Metadata metadata = getMetadata(MetadataKey.getSaveLogKey());
 	return metadata != null ? metadata.getValue().equals(Boolean.TRUE.toString()) : false;
     }
+
 }

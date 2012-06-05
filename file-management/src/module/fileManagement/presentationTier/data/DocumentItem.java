@@ -25,8 +25,8 @@
 package module.fileManagement.presentationTier.data;
 
 import module.fileManagement.domain.Document;
-import module.fileManagement.domain.Metadata;
-import module.fileManagement.domain.MetadataKey;
+import module.fileManagement.domain.metadata.Metadata;
+import module.fileManagement.domain.metadata.MetadataKey;
 import pt.ist.vaadinframework.data.BufferedProperty;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
 
@@ -52,7 +52,7 @@ public class DocumentItem extends DomainItem<Document> {
 	    Document document = DocumentItem.this.getValue();
 	    if (document != null) {
 		Metadata metadata = document.getMetadataRecentlyChanged(key);
-		return metadata != null ? metadata.getValue() : null;
+		return metadata != null ? metadata.getRealValue() : null;
 	    }
 	    return null;
 	}
@@ -60,7 +60,7 @@ public class DocumentItem extends DomainItem<Document> {
 	@Override
 	public void setValue(Object newValue) {
 	    Document document = DocumentItem.this.getValue();
-	    document.addMetadata(key, (String) newValue);
+	    document.addMetadata(key.createMetadata(newValue));
 	}
 
 	@Override

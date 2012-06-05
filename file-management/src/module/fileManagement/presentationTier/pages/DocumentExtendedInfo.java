@@ -35,8 +35,9 @@ import java.util.Map;
 import module.fileManagement.domain.AbstractFileNode;
 import module.fileManagement.domain.Document;
 import module.fileManagement.domain.FileNode;
-import module.fileManagement.domain.Metadata;
+import module.fileManagement.domain.VersionedFile;
 import module.fileManagement.domain.VisibilityList;
+import module.fileManagement.domain.metadata.Metadata;
 import module.fileManagement.presentationTier.DownloadUtil;
 import module.fileManagement.presentationTier.component.MetadataPanel;
 import module.fileManagement.presentationTier.component.NodeDetails;
@@ -101,8 +102,8 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
     }
 
     public void update() {
-	mainGrid.setCell("info", 10, createExtendedInfo());
-	mainGrid.setCell("ops", 6, createDocumentOperations());
+	mainGrid.setCell("info", 12, createExtendedInfo());
+	mainGrid.setCell("ops", 4, createDocumentOperations());
     }
 
     public DocumentExtendedInfo() {
@@ -144,12 +145,16 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
 	final Property recentMetadata = item.getItemProperty("document.versions");
 	final Collection<Metadata> itemIds = (Collection<Metadata>) recentMetadata.getValue();
 	int index = itemIds.size();
+	VersionedFile file = fileNode.getDocument().getLastVersionedFile();
 	for (Metadata metadata : itemIds) {
 	    final Label lblValue = new Label();
+	    lblValue.setContentMode(Label.CONTENT_XHTML);
 	    lblValue.setCaption(String.format("Versão (%d) info", index--));
-	    lblValue.setValue(String.format("%s em %s", metadata.getValue(),
-		    metadata.getTimestamp().toString("dd/MM/yyyy HH:mm:ss")));
+	    final String url = DownloadUtil.getDownloadUrl(getApplication(), file);
+	    lblValue.setValue(String.format("%s em %s (%s) <a href='%s'>download</a>", metadata.getValue(), metadata
+		    .getTimestamp().toString("dd/MM/yyyy HH:mm:ss"), file.getFilename(), url));
 	    versions.add(lblValue);
+	    file = file.getPreviousVersion();
 	}
 	return versions;
     }
@@ -204,6 +209,7 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
 	vl.setSpacing(true);
 
 	final HorizontalLayout hl = new HorizontalLayout();
+	hl.setSpacing(true);
 	final Label lbl = new Label(
 		String.format("Metadata Versão %s", item.getItemProperty("document.versionNumber").toString()));
 	lbl.addStyleName(BennuTheme.LABEL_H3);
@@ -231,9 +237,9 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
 	if (metadataContainer.size() > 0) {
 	    final Table table = new Table();
 	    table.setPageLength(0);
-	    metadataContainer.setContainerProperties("keyValue", "value");
+	    metadataContainer.setContainerProperties("keyValue", "presentationValue");
 	    table.setContainerDataSource(metadataContainer);
-	    table.setVisibleColumns(new Object[] { "keyValue", "value" });
+	    table.setVisibleColumns(new Object[] { "keyValue", "presentationValue" });
 	    table.setColumnHeaderMode(Table.COLUMN_HEADER_MODE_HIDDEN);
 	    metadataInfoView = table;
 	} else {

@@ -28,11 +28,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 import module.fileManagement.domain.Document;
-import module.fileManagement.domain.MetadataKey;
-import module.fileManagement.domain.MetadataTemplate;
+import module.fileManagement.domain.metadata.Metadata;
+import module.fileManagement.domain.metadata.MetadataKey;
+import module.fileManagement.domain.metadata.MetadataTemplate;
 import module.vaadin.data.util.ObjectHintedProperty;
 import pt.ist.vaadinframework.data.AbstractBufferedItem;
 import pt.ist.vaadinframework.data.BufferedProperty;
@@ -58,12 +58,12 @@ public class TemplateItem extends AbstractBufferedItem<MetadataKey, MetadataTemp
 
 	@Override
 	public Object getValue() {
-	    final Set<String> allValues = new HashSet<String>();
+	    final Set<Object> allValues = new HashSet<Object>();
 	    for (Object item : selectedDocuments.getValue()) {
 		final Document document = (Document) item;
 		final DocumentItem documentItem = container.getItem(document);
 		final Property itemProperty = documentItem.getItemProperty(key);
-		allValues.add((String) (itemProperty == null ? null : itemProperty.getValue()));
+		allValues.add(itemProperty == null ? null : itemProperty.getValue());
 	    }
 	    return allValues.size() == 1 ? allValues.iterator().next() : null;
 	}
@@ -80,13 +80,12 @@ public class TemplateItem extends AbstractBufferedItem<MetadataKey, MetadataTemp
 
 	@Override
 	public Class<?> getType() {
-	    return String.class;
+	    return Metadata.getMetadataType(key.getMetadataValueType());
 	}
 
     }
 
     DocumentContainer container;
-
     ObjectHintedProperty<Collection> selectedDocuments;
 
     public TemplateItem(MetadataTemplate value, DocumentContainer container,
@@ -119,18 +118,20 @@ public class TemplateItem extends AbstractBufferedItem<MetadataKey, MetadataTemp
 	itemProperty.setValue(getValue().getName());
 
 	for (MetadataKey key : getItemPropertyIds()) {
-	    if (!template.hasKeys(key) && !templateKey.equals(key)) {
+	    MetadataKey keyFromTemplate = template.getKey(key);
+	    if (keyFromTemplate != null && !keyFromTemplate.isReserved()) {
 		removeItemProperty(key);
 	    }
 	}
-	for (MetadataKey key : template.getAlfabeticallyOrderedKeys()) {
+	for (MetadataKey key : template.getPositionOrderedKeys()) {
 	    getItemProperty(key);
 	}
     }
 
     public Collection<?> getVisibleItemProperties() {
-	TreeSet<MetadataKey> propIds = new TreeSet<MetadataKey>(getItemPropertyIds());
-	propIds.remove(MetadataKey.getTemplateKey());
-	return Collections.unmodifiableCollection(propIds);
+	if (getValue() != null) {
+	    return getValue().getPositionOrderedKeys();
+	}
+	return Collections.EMPTY_LIST;
     }
 }

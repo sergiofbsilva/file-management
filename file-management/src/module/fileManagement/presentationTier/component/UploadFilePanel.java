@@ -6,6 +6,7 @@ import java.util.HashSet;
 import module.fileManagement.domain.ContextPath;
 import module.fileManagement.domain.DirNode;
 import module.fileManagement.domain.Document;
+import module.fileManagement.domain.FileNode;
 import module.fileManagement.presentationTier.component.UploadFileArea.FileUploadListener;
 import module.fileManagement.presentationTier.component.UploadFileArea.OnFileUploadEvent;
 import module.fileManagement.presentationTier.data.DocumentContainer;
@@ -13,6 +14,11 @@ import module.fileManagement.presentationTier.pages.DocumentBrowse;
 import module.fileManagement.presentationTier.pages.UploadPage;
 import module.vaadin.data.util.ObjectHintedProperty;
 import module.vaadin.ui.BennuTheme;
+
+import org.bouncycastle.util.Strings;
+
+import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.fenixframework.FFDomainException;
 import pt.ist.vaadinframework.EmbeddedApplication;
 
 import com.vaadin.data.Container.ItemSetChangeEvent;
@@ -39,6 +45,54 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
     private final Label submittedDocumentsLabel;
     private final Label lblOr = new Label("ou");
 
+    class UploadListener implements FileUploadListener {
+
+	@Override
+	public void uploadedFile(OnFileUploadEvent event) {
+	    final DirNode uploadDir = getUploadDir();
+	    if (uploadDir.hasSequenceNumber()) {
+		seqNumberUpload(event);
+	    } else {
+		normalUpload(event);
+	    }
+	}
+
+	private void normalUpload(OnFileUploadEvent event) {
+	    final DirNode uploadDir = getUploadDir();
+	    if (uploadDir != null) {
+		try {
+		    final FileNode fileNode = uploadDir.createFile(event.getFile(), event.getFileName(), event.getLength(),
+			    contextPath);
+		    addDocument(fileNode.getDocument());
+		} catch (FFDomainException ffde) {
+		    uploadArea.setError(ffde.getMessage());
+		}
+	    }
+	}
+
+	@Service
+	private void seqNumberUpload(OnFileUploadEvent event) {
+	    final Collection<Document> selectedDocument = selectedDocumentsProperty.getValue();
+	    assert documentContainer.size() == 1 && selectedDocument.size() == 1;
+	    Document document = selectedDocument.iterator().next();
+	    String displayName = document.getDisplayName();
+	    final String fileName = event.getFileName();
+	    displayName = getNewDisplayName(displayName, fileName);
+	    document.addVersion(event.getFile(), fileName);
+	    documentContainer.getItem(document).getItemProperty("displayName").setValue(displayName);
+	}
+
+	private String getNewDisplayName(String displayName, final String fileName) {
+	    final String[] fileNameParts = Strings.split(fileName, '.');
+	    final String[] displayNameParts = Strings.split(displayName, '.');
+	    if (fileNameParts.length == 2) {
+		displayName = String.format("%s.%s", displayNameParts.length == 2 ? displayNameParts[0] : displayName,
+			fileNameParts[1]);
+	    }
+	    return displayName;
+	}
+    }
+
     public UploadFilePanel(final UploadPage uploadPage) {
 	super();
 	documentContainer = new DocumentContainer();
@@ -46,13 +100,8 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
 	this.documents = createDocumentTable();
 
 	uploadArea = new UploadFileArea();
-	uploadArea.addListener(new FileUploadListener() {
+	uploadArea.addListener(new UploadListener());
 
-	    @Override
-	    public void uploadedFile(OnFileUploadEvent event) {
-		addDocument(event.getUploadedFileNode().getDocument());
-	    }
-	});
 	this.uploadPage = uploadPage;
 	submittedDocumentsLabel = new Label("<h3> Documentos Submetidos </h3>", Label.CONTENT_XHTML);
 	submittedDocumentsLabel.setVisible(false);
@@ -82,6 +131,10 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
 
 	    @Override
 	    public void buttonClick(ClickEvent event) {
+		// if (!uploadPage.getMetadataPanel().isValid()) {
+		// return;
+		// }
+		uploadPage.getMetadataPanel().commit();
 		documentContainer.commit();
 		EmbeddedApplication.open(getApplication(), DocumentBrowse.class, contextPath.toString());
 	    }
@@ -122,7 +175,7 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
     private Table createDocumentTable() {
 	final Table table = new Table();
 	table.setSizeFull();
-	table.setVisible(false);
+	// table.setVisible(false);
 	table.setSelectable(true);
 	table.setMultiSelect(true);
 	table.setImmediate(true);
@@ -171,6 +224,13 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
 
     public void setContextPath(ContextPath ContextPath) {
 	uploadArea.setContextPath(contextPath);
+    }
+
+    public void selectDocument(Document document) {
+	if (!documents.containsId(document)) {
+	    documents.addItem(document);
+	}
+	documents.select(document);
     }
 
 }

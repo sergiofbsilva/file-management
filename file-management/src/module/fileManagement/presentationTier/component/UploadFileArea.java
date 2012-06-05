@@ -3,16 +3,14 @@ package module.fileManagement.presentationTier.component;
 import static module.fileManagement.domain.FileManagementSystem.getMessage;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import module.fileManagement.domain.ContextPath;
 import module.fileManagement.domain.DirNode;
-import module.fileManagement.domain.FileNode;
 
-import org.vaadin.easyuploads.DirectoryFileFactory;
-
-import pt.ist.fenixframework.FFDomainException;
+import org.vaadin.easyuploads.FileFactory;
 
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
@@ -25,52 +23,49 @@ public class UploadFileArea extends CustomComponent {
     private UploadArea uploadArea;
     private VerticalLayout vlError;
     private ContextPath contextPath;
-    
+
     private static Method UPLOAD_FILE_METHOD;
+    public static FileFactory DEFAULT_FACTORY;
 
     static {
 	try {
 	    UPLOAD_FILE_METHOD = FileUploadListener.class.getDeclaredMethod("uploadedFile",
 		    new Class[] { OnFileUploadEvent.class });
+	    DEFAULT_FACTORY = new TempFileFactory();
 	} catch (SecurityException e) {
-	    // TODO Auto-generated catch block
 	    e.printStackTrace();
 	} catch (NoSuchMethodException e) {
-	    // TODO Auto-generated catch block
 	    e.printStackTrace();
+	}
+    }
+
+    public static class TempFileFactory implements FileFactory {
+
+	public TempFileFactory() {
+
+	}
+
+	public File createFile(String fileName, String mimeType) {
+	    final String tempFileName = "upload_tmpfile_" + System.currentTimeMillis();
+	    try {
+		return File.createTempFile(tempFileName, null);
+	    } catch (IOException e) {
+		throw new RuntimeException(e);
+	    }
 	}
     }
 
     private class UploadArea extends MultiFileUpload {
 
 	public UploadArea() {
-	    final DirectoryFileFactory directoryFileFactory = new DirectoryFileFactory(new File("/tmp"));
-	    setFileFactory(directoryFileFactory);
+	    setFileFactory(DEFAULT_FACTORY);
 	    setMargin(true);
 	    setSizeFull();
 	}
 
-	private Component newError(String message) {
-	    Label label = new Label();
-	    label.setStyleName("v-upload-error-message");
-	    label.setValue(message);
-	    return label;
-	}
-
 	@Override
 	protected void handleFile(final File file, final String fileName, final String mimeType, final long length) {
-//	    final DirNode destination = uploadDir == null || !uploadDir.isWriteGroupMember() ? UserView.getCurrentUser()
-//		    .getFileRepository() : uploadDir;
-	    final DirNode uploadDir = getUploadDir();
-	    if (uploadDir != null) {
-		try {
-		    final FileNode fileNode = uploadDir.createFile(file, fileName, length,contextPath);
-		    fireFileUploaded(fileNode);
-		} catch (FFDomainException ffde) {
-		    vlError.removeAllComponents();
-		    vlError.addComponent(newError(ffde.getMessage()));
-		}
-	    }
+	    fireFileUploaded(file, fileName, mimeType, length);
 	}
 
 	@Override
@@ -92,8 +87,15 @@ public class UploadFileArea extends CustomComponent {
 	vlError.setSpacing(true);
     }
 
-    public void fireFileUploaded(FileNode fileNode) {
-	fireEvent(new OnFileUploadEvent(this, fileNode));
+    private Component newError(String message) {
+	Label label = new Label();
+	label.setStyleName("v-upload-error-message");
+	label.setValue(message);
+	return label;
+    }
+
+    public void fireFileUploaded(final File file, final String fileName, final String mimeType, final long length) {
+	fireEvent(new OnFileUploadEvent(this, file, fileName, mimeType, length));
     }
 
     public DirNode getUploadDir() {
@@ -101,20 +103,37 @@ public class UploadFileArea extends CustomComponent {
     }
 
     public class OnFileUploadEvent extends Component.Event {
-	private FileNode node;
 
-	public OnFileUploadEvent(Component source) {
+	private final File file;
+	private final String fileName;
+	private final String mimeType;
+	private final long length;
+
+	public OnFileUploadEvent(Component source, final File file, final String fileName, final String mimeType,
+		final long length) {
 	    super(source);
+	    this.file = file;
+	    this.fileName = fileName;
+	    this.mimeType = mimeType;
+	    this.length = length;
 	}
 
-	public OnFileUploadEvent(Component source, FileNode node) {
-	    this(source);
-	    this.node = node;
+	public File getFile() {
+	    return file;
 	}
 
-	public FileNode getUploadedFileNode() {
-	    return node;
+	public String getFileName() {
+	    return fileName;
 	}
+
+	public String getMimeType() {
+	    return mimeType;
+	}
+
+	public long getLength() {
+	    return length;
+	}
+
     }
 
     public interface FileUploadListener extends Serializable {
@@ -133,8 +152,13 @@ public class UploadFileArea extends CustomComponent {
     public Layout getErrorLayout() {
 	return vlError;
     }
-    
+
     public void setContextPath(ContextPath contextPath) {
 	this.contextPath = contextPath;
+    }
+
+    public void setError(String message) {
+	vlError.removeAllComponents();
+	vlError.addComponent(newError(message));
     }
 }

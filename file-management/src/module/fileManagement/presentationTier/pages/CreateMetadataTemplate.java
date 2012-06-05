@@ -25,9 +25,13 @@
 package module.fileManagement.presentationTier.pages;
 
 import java.util.Map;
+import java.util.Set;
 
-import module.fileManagement.domain.MetadataKey;
-import module.fileManagement.domain.MetadataTemplate;
+import module.fileManagement.domain.metadata.Metadata;
+import module.fileManagement.domain.metadata.MetadataKey;
+import module.fileManagement.domain.metadata.MetadataTemplate;
+import module.fileManagement.domain.metadata.MetadataTemplateRule;
+import module.fileManagement.domain.metadata.StringMetadata;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -37,13 +41,17 @@ import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
 
 import com.vaadin.data.Validator.InvalidValueException;
+import com.vaadin.data.util.BeanContainer;
+import com.vaadin.data.util.BeanItem;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.CustomField;
 import com.vaadin.ui.Form;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Select;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window.Notification;
@@ -63,8 +71,30 @@ public class CreateMetadataTemplate extends CustomComponent implements EmbeddedC
     private MetadataTemplate template;
     private boolean readOnly = false;
 
-    public String getNextKeyIndex() {
-	return "key_" + keyIndex++;
+    class KeyProp implements Comparable<KeyProp> {
+	private Integer index;
+
+	public KeyProp() {
+	    this.index = keyIndex++;
+	}
+
+	public KeyProp(final Integer index) {
+	    this.index = index;
+	    keyIndex = index;
+	}
+
+	public Integer getIndex() {
+	    return index;
+	}
+
+	public void setIndex(final Integer index) {
+	    this.index = index;
+	}
+
+	@Override
+	public int compareTo(KeyProp o) {
+	    return getIndex().compareTo(o.getIndex());
+	}
     }
 
     @Service
@@ -74,17 +104,18 @@ public class CreateMetadataTemplate extends CustomComponent implements EmbeddedC
 	if (template != null) {
 	    currentTemplate = template;
 	    currentTemplate.setName(templateName);
-	    for (MetadataKey key : template.getKeys()) {
-		currentTemplate.removeKeys(key);
-	    }
+	    currentTemplate.clear();
 	} else {
 	    currentTemplate = new MetadataTemplate(templateName);
 	}
-	for (Object prop : form.getItemPropertyIds()) {
-	    String propId = (String) prop;
-	    if (propId.startsWith("key_")) {
-		String keyName = (String) form.getItemProperty(propId).getValue();
-		currentTemplate.addKeys(MetadataKey.getOrCreateInstance(keyName));
+
+	for (Object propId : form.getItemPropertyIds()) {
+	    if (propId instanceof KeyProp) {
+		final KeyField itemProperty = (KeyField) form.getItemProperty(propId);
+		String keyName = (String) itemProperty.getValue();
+		Class<? extends Metadata> metadataClassType = itemProperty.getMetadataType();
+		final MetadataKey key = new MetadataKey(keyName, Boolean.FALSE, metadataClassType);
+		currentTemplate.addKey(key, ((KeyProp) propId).getIndex(), itemProperty.getRequired());
 	    }
 	}
     }
@@ -94,11 +125,20 @@ public class CreateMetadataTemplate extends CustomComponent implements EmbeddedC
 	private final Form underlingForm;
 	private final Object propId;
 	private final TextField fieldKey;
+	private final Select selectType;
+	private final CheckBox requiredBox;
+
+	public KeyField(Form form, Object id, Class<? extends Metadata> metadataType, Boolean required) {
+	    this(form, id);
+	    selectType.select(metadataType.getSimpleName());
+	    requiredBox.setValue(required);
+	}
 
 	public KeyField(Form form, Object id) {
 	    this.underlingForm = form;
 	    this.propId = id;
 	    fieldKey = new TextField();
+	    requiredBox = new CheckBox("Required");
 
 	    HorizontalLayout hl = new HorizontalLayout();
 	    hl.setSpacing(true);
@@ -113,8 +153,27 @@ public class CreateMetadataTemplate extends CustomComponent implements EmbeddedC
 		    underlingForm.removeItemProperty(propId);
 		}
 	    });
+
+	    selectType = getMetadataTypeSelect();
+	    hl.addComponent(selectType);
+	    hl.addComponent(requiredBox);
 	    hl.addComponent(btDelete);
+
 	    setCompositionRoot(hl);
+	}
+
+	private Select getMetadataTypeSelect() {
+	    final Select selectMetadataType = new Select();
+	    selectMetadataType.setNullSelectionAllowed(false);
+	    final Set<Class<? extends Metadata>> types = Metadata.getAvailableMetadataClasses();
+	    BeanContainer<String, Class<? extends Metadata>> typeContainer = new BeanContainer<String, Class<? extends Metadata>>(
+		    Class.class);
+	    typeContainer.setBeanIdProperty("simpleName");
+	    typeContainer.addAll(types);
+	    selectMetadataType.setContainerDataSource(typeContainer);
+	    selectMetadataType.setItemCaptionPropertyId("simpleName");
+	    selectMetadataType.select(StringMetadata.class.getSimpleName());
+	    return selectMetadataType;
 	}
 
 	@Override
@@ -131,6 +190,15 @@ public class CreateMetadataTemplate extends CustomComponent implements EmbeddedC
 	@Override
 	public Object getValue() {
 	    return fieldKey.getValue();
+	}
+
+	public Class<? extends Metadata> getMetadataType() {
+	    final Object itemId = selectType.getValue();
+	    return (Class<? extends Metadata>) ((BeanItem) selectType.getItem(itemId)).getBean();
+	}
+
+	public Boolean getRequired() {
+	    return (Boolean) requiredBox.getValue();
 	}
 
 	@Override
@@ -169,9 +237,10 @@ public class CreateMetadataTemplate extends CustomComponent implements EmbeddedC
 
 	if (template != null) {
 	    txtName.setValue(template.getName());
-	    for (MetadataKey key : template.getKeys()) {
-		String propId = getNextKeyIndex();
-		final KeyField keyField = new KeyField(form, propId);
+	    for (MetadataTemplateRule rule : template.getPositionOrderedRules()) {
+		KeyProp propId = new KeyProp(rule.getPosition());
+		final MetadataKey key = rule.getKey();
+		final KeyField keyField = new KeyField(form, propId, key.getMetadataValueType(), rule.getRequired());
 		keyField.setValue(key.getKeyValue());
 		form.addField(propId, keyField);
 	    }
@@ -183,7 +252,7 @@ public class CreateMetadataTemplate extends CustomComponent implements EmbeddedC
 
 	    @Override
 	    public void buttonClick(ClickEvent event) {
-		final String propId = getNextKeyIndex();
+		final KeyProp propId = new KeyProp();
 		form.addField(propId, new KeyField(form, propId));
 	    }
 	});
