@@ -34,6 +34,9 @@ import myorg.domain.groups.UnionGroup;
 import pt.ist.fenixWebFramework.services.Service;
 import pt.ist.fenixframework.FFDomainException;
 
+/**
+ * @author Sergio Silva
+*/
 public class DirNode extends DirNode_Base {
 
     public static final long PERSON_REPOSITORY_QUOTA = 50 * 1024 * 1024;
