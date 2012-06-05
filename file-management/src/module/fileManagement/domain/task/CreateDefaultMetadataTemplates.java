@@ -1,18 +1,16 @@
 package module.fileManagement.domain.task;
 
+import pt.ist.fenixWebFramework.services.Service;
+
 import module.fileManagement.domain.FileManagementSystem;
 import module.fileManagement.domain.metadata.DateTimeMetadata;
 import module.fileManagement.domain.metadata.IntegerMetadata;
 import module.fileManagement.domain.metadata.MetadataKey;
 import module.fileManagement.domain.metadata.MetadataTemplate;
+import module.fileManagement.domain.metadata.PersonMetadata;
 import module.fileManagement.domain.metadata.SeqNumberMetadata;
-import module.fileManagement.domain.metadata.StringMetadata;
-import pt.ist.fenixWebFramework.services.Service;
 
 public class CreateDefaultMetadataTemplates extends CreateDefaultMetadataTemplates_Base {
-
-    public static final String[] KEYS = { "Título", "Autor", "Entidade", "Departamento", "Data", "Descrição", "Categoria",
-	    "Identificador" };
 
     public CreateDefaultMetadataTemplates() {
 	super();
@@ -41,16 +39,32 @@ public class CreateDefaultMetadataTemplates extends CreateDefaultMetadataTemplat
 	    MetadataTemplate template = new MetadataTemplate(name);
 	    template.addKey(MetadataKey.getOrCreateInstance("Nº Declaração", SeqNumberMetadata.class), 1, Boolean.TRUE);
 	    template.addKey(MetadataKey.getOrCreateInstance("Data", DateTimeMetadata.class), 2, Boolean.TRUE);
-	    template.addKey(MetadataKey.getOrCreateInstance("Destinatário", StringMetadata.class), 3, Boolean.TRUE);
-	    template.addKey(MetadataKey.getOrCreateInstance("Nº Mecanográfico", IntegerMetadata.class), 4, Boolean.TRUE);
-	    template.addKey(MetadataKey.getOrCreateInstance("Remetente", StringMetadata.class), 5, Boolean.TRUE);
-	    template.addKey(MetadataKey.getOrCreateInstance("Observações", StringMetadata.class), 6, Boolean.FALSE);
+	    template.addKey(MetadataKey.getOrCreateInstance("Destinatário", PersonMetadata.class), 3, Boolean.FALSE);
+	    template.addKey(MetadataKey.getOrCreateInstance("Nº Mecanográfico", IntegerMetadata.class), 4, Boolean.FALSE);
+	    template.addKey(MetadataKey.getOrCreateInstance("Remetente", PersonMetadata.class), 5, Boolean.TRUE);
+	    template.addKey(MetadataKey.getOrCreateInstance("Observações"), 6, Boolean.FALSE);
+	}
+    }
+
+    public void createDocumentTemplate() {
+	final String name = "Documento";
+	final MetadataTemplate metadataTemplate = FileManagementSystem.getInstance().getMetadataTemplate(name);
+	if (metadataTemplate == null) {
+	    MetadataTemplate template = new MetadataTemplate(name);
+	    template.addKey(MetadataKey.getOrCreateInstance("Identificador"), 1, Boolean.FALSE);
+	    template.addKey(MetadataKey.getOrCreateInstance("Título"), 2, Boolean.FALSE);
+	    template.addKey(MetadataKey.getOrCreateInstance("Data", DateTimeMetadata.class), 3, Boolean.FALSE);
+	    template.addKey(MetadataKey.getOrCreateInstance("Autor"), 4, Boolean.FALSE);
+	    template.addKey(MetadataKey.getOrCreateInstance("Categoria"), 5, Boolean.FALSE);
+	    template.addKey(MetadataKey.getOrCreateInstance("Departamento"), 6, Boolean.FALSE);
+	    template.addKey(MetadataKey.getOrCreateInstance("Descrição"), 7, Boolean.FALSE);
+	    template.addKey(MetadataKey.getOrCreateInstance("Entidade"), 8, Boolean.FALSE);
 	}
     }
 
     @Service
     public void executeTask() {
-	resetTemplatesAndKeys();
+	createDocumentTemplate();
 	createDRHDeclarationTemplate();
     }
 
