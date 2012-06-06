@@ -33,7 +33,6 @@ public abstract class Metadata extends Metadata_Base implements Comparable<Metad
 
     public Metadata() {
 	super();
-	setOjbConcreteClass(getClass().getName());
 	changedNow();
     }
 
@@ -60,7 +59,7 @@ public abstract class Metadata extends Metadata_Base implements Comparable<Metad
 	setTimestamp(new DateTime());
     }
 
-    public abstract Object getValue(); 
+    public abstract Object getValue();
 
     public void setValue(Object value) {
 	changedNow();
@@ -124,9 +123,9 @@ public abstract class Metadata extends Metadata_Base implements Comparable<Metad
 	}
 	return null;
     }
-    
+
     public Metadata getCopy() {
 	return getMetadataKey().createMetadata(getValue());
-    }	
+    }
 
 }
