@@ -10,6 +10,7 @@ class MetadataKey {
 }
 
 class Metadata {
+	String ojbConcreteClass;
 	String value;
 	DateTime timestamp ( REQUIRED );
 }

@@ -29,11 +29,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import module.fileManagement.domain.Document;
-import module.fileManagement.domain.metadata.Metadata;
-import module.fileManagement.domain.metadata.MetadataKey;
-import module.fileManagement.domain.metadata.MetadataTemplate;
-import module.vaadin.data.util.ObjectHintedProperty;
 import pt.ist.vaadinframework.data.AbstractBufferedItem;
 import pt.ist.vaadinframework.data.BufferedProperty;
 
@@ -41,6 +36,12 @@ import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.AbstractProperty;
+
+import module.fileManagement.domain.Document;
+import module.fileManagement.domain.metadata.Metadata;
+import module.fileManagement.domain.metadata.MetadataKey;
+import module.fileManagement.domain.metadata.MetadataTemplate;
+import module.vaadin.data.util.ObjectHintedProperty;
 
 /**
  * 
@@ -117,12 +118,14 @@ public class TemplateItem extends AbstractBufferedItem<MetadataKey, MetadataTemp
 	final Property itemProperty = getItemProperty(templateKey);
 	itemProperty.setValue(getValue().getName());
 
-	for (MetadataKey key : getItemPropertyIds()) {
+	Collection<MetadataKey> itemPropertyIds = new HashSet<MetadataKey>(getItemPropertyIds());
+	for (MetadataKey key : itemPropertyIds) {
 	    MetadataKey keyFromTemplate = template.getKey(key);
 	    if (keyFromTemplate != null && !keyFromTemplate.isReserved()) {
 		removeItemProperty(key);
 	    }
 	}
+
 	for (MetadataKey key : template.getPositionOrderedKeys()) {
 	    getItemProperty(key);
 	}

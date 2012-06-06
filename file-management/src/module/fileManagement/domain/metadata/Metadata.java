@@ -34,6 +34,7 @@ public class Metadata extends Metadata_Base implements Comparable<Metadata> {
 
     public Metadata() {
 	super();
+	setOjbConcreteClass(getClass().getName());
 	changedNow();
     }
 
