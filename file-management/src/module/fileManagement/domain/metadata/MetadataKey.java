@@ -84,7 +84,7 @@ public class MetadataKey extends MetadataKey_Base implements Comparable<Metadata
 	try {
 	    final Metadata newInstance = (Metadata) metadataValueType.newInstance();
 	    newInstance.setMetadataKey(this);
-	    newInstance.setRealValue(value);
+	    newInstance.setValue(value);
 	    return newInstance;
 	} catch (InstantiationException e) {
 	    e.printStackTrace();

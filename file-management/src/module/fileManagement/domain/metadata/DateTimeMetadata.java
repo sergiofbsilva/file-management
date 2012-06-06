@@ -5,22 +5,23 @@ import org.joda.time.DateTime;
 public class DateTimeMetadata extends DateTimeMetadata_Base {
 
     public DateTimeMetadata() {
-	super();
+		super();
     }
 
     @Override
-    public DateTime getRealValue() {
-	return getDatetimeValue();
+    public DateTime getValue() {
+		return getDatetimeValue();
     }
 
     @Override
-    public void setRealValue(Object value) {
-	setDatetimeValue((DateTime) value);
-    }
+    public void setValue(Object value) {
+		super.setValue(value);
+		setDatetimeValue((DateTime) value);
+	}
 
     @Override
     public String getPresentationValue() {
-	return getRealValue().toString("dd-MM-yyyy");
+		return getValue().toString("dd-MM-yyyy");
     }
 
 }

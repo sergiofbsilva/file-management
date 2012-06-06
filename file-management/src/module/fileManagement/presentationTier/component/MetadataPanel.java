@@ -119,7 +119,7 @@ public class MetadataPanel extends Panel {
 	    for (Document doc : selectedDocuments) {
 		Metadata templateMetadata = doc.getMetadata(MetadataKey.getTemplateKey());
 		if (templateMetadata != null) {
-		    templateNames.add(templateMetadata.getValue());
+		    templateNames.add((String)templateMetadata.getValue());
 		}
 	    }
 	    final String templateName = templateNames.size() < 1 ? null : templateNames.iterator().next();

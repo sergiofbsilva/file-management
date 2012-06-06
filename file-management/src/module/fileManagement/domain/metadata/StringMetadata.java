@@ -7,17 +7,18 @@ public class StringMetadata extends StringMetadata_Base {
     }
 
     @Override
-    public String getRealValue() {
+    public String getValue() {
 	return getStringValue();
     }
 
     @Override
-    public void setRealValue(Object value) {
+    public void setValue(Object value) {
+	super.setValue(value);
 	setStringValue((String) value);
     }
 
     @Override
     public String getPresentationValue() {
-	return getRealValue();
+	return getValue();
     }
 }

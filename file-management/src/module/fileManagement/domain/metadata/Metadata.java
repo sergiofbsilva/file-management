@@ -7,12 +7,11 @@ import java.util.Set;
 
 import org.joda.time.DateTime;
 
-import pt.ist.fenixWebFramework.services.Service;
 import pt.ist.fenixframework.FenixFramework;
 import dml.DomainClass;
 import dml.DomainModel;
 
-public class Metadata extends Metadata_Base implements Comparable<Metadata> {
+public abstract class Metadata extends Metadata_Base implements Comparable<Metadata> {
 
     public static final Comparator<Metadata> TIMESTAMP_DESC_COMPARATOR = new Comparator<Metadata>() {
 
@@ -38,11 +37,11 @@ public class Metadata extends Metadata_Base implements Comparable<Metadata> {
 	changedNow();
     }
 
-    public Metadata(final String keyValue, final String value) {
+    public Metadata(final String keyValue, final Object value) {
 	this(MetadataKey.getOrCreateInstance(keyValue), value);
     }
 
-    public Metadata(final MetadataKey key, final String value) {
+    public Metadata(final MetadataKey key, final Object value) {
 	this();
 	setMetadataKey(key);
 	setValue(value);
@@ -57,27 +56,17 @@ public class Metadata extends Metadata_Base implements Comparable<Metadata> {
 	return getMetadataKey().getKeyValue();
     }
 
-    @Service
-    public Metadata getCopy() {
-	return new Metadata(getKeyValue(), getValue());
-    }
-
     public void changedNow() {
 	setTimestamp(new DateTime());
     }
 
-    public Object getRealValue() {
-	return getValue();
-    }
+    public abstract Object getValue(); 
 
-    public void setRealValue(Object value) {
-	setValue((String) value);
+    public void setValue(Object value) {
 	changedNow();
     }
 
-    public String getPresentationValue() {
-	return getValue();
-    }
+    public abstract String getPresentationValue();
 
     @Override
     public int compareTo(Metadata o) {
@@ -135,5 +124,9 @@ public class Metadata extends Metadata_Base implements Comparable<Metadata> {
 	}
 	return null;
     }
+    
+    public Metadata getCopy() {
+	return getMetadataKey().createMetadata(getValue());
+    }	
 
 }

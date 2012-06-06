@@ -3,21 +3,22 @@ package module.fileManagement.domain.metadata;
 public class IntegerMetadata extends IntegerMetadata_Base {
 
     public IntegerMetadata() {
-	super();
+		super();
     }
 
     @Override
-    public Integer getRealValue() {
-	return getIntegerValue();
+    public Integer getValue() {
+		return getIntegerValue();
     }
 
     @Override
-    public void setRealValue(Object value) {
-	setIntegerValue((Integer) value);
+    public void setValue(Object value) {
+		super.setValue(value);
+		setIntegerValue((Integer) value);
     }
 
     @Override
     public String getPresentationValue() {
-	return getRealValue().toString();
+		return getValue().toString();
     }
 }

@@ -161,7 +161,7 @@ public class Document extends Document_Base {
 
     @Service
     public void addMetadata(String key, String value) {
-	addMetadata(new Metadata(key, value));
+	addMetadata(MetadataKey.getOrCreateInstance(key),value);
     }
 
     @Service
@@ -173,7 +173,7 @@ public class Document extends Document_Base {
 
     @Service
     public void addMetadata(MetadataKey key, String value) {
-	addMetadata(new Metadata(key, value));
+	addMetadata(key.createMetadata(value));
     }
 
     public TreeSet<Metadata> getMetadataOrderedByTimestamp() {
@@ -314,14 +314,14 @@ public class Document extends Document_Base {
     }
 
     public MetadataTemplate getMetadataTemplateAssociated() {
-	String templateValue = getMetadataValue(MetadataKey.getTemplateKey());
+	String templateValue = (String) getMetadataValue(MetadataKey.getTemplateKey());
 	if (!StringUtils.isBlank(templateValue)) {
 	    return MetadataTemplate.getMetadataTemplate(templateValue);
 	}
 	return null;
     }
 
-    private String getMetadataValue(MetadataKey key) {
+    private Object getMetadataValue(MetadataKey key) {
 	Metadata metadata = getMetadata(key);
 	if (metadata != null) {
 	    return metadata.getValue();
@@ -332,7 +332,7 @@ public class Document extends Document_Base {
 
     public String getTypology() {
 	final Metadata metadataTemplate = getMetadataRecentlyChanged(MetadataKey.getTemplateKey());
-	return metadataTemplate != null ? metadataTemplate.getValue() : "-";
+	return metadataTemplate != null ? (String) metadataTemplate.getValue() : "-";
     }
 
     public void setSaveAccessLog(final Boolean shouldSave) {

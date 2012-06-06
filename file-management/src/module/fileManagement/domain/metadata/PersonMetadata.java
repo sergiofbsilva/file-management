@@ -9,18 +9,19 @@ public class PersonMetadata extends PersonMetadata_Base {
     }
 
     @Override
-    public Person getRealValue() {
+    public Person getValue() {
 	return getPerson();
     }
 
     @Override
-    public void setRealValue(Object value) {
+    public void setValue(Object value) {
+	super.setValue(value);
 	setPerson((Person) value);
     }
 
     @Override
     public String getPresentationValue() {
-	return getRealValue().getPresentationName();
+	return getValue().getPresentationName();
     }
 
 }

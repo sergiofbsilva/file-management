@@ -52,7 +52,7 @@ public class DocumentItem extends DomainItem<Document> {
 	    Document document = DocumentItem.this.getValue();
 	    if (document != null) {
 		Metadata metadata = document.getMetadataRecentlyChanged(key);
-		return metadata != null ? metadata.getRealValue() : null;
+		return metadata != null ? metadata.getValue() : null;
 	    }
 	    return null;
 	}
