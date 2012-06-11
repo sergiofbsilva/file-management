@@ -27,15 +27,6 @@ package module.fileManagement.presentationTier.component;
 import java.util.Collection;
 import java.util.HashSet;
 
-import module.fileManagement.domain.Document;
-import module.fileManagement.domain.FileManagementSystem;
-import module.fileManagement.domain.metadata.Metadata;
-import module.fileManagement.domain.metadata.MetadataKey;
-import module.fileManagement.domain.metadata.MetadataTemplate;
-import module.fileManagement.presentationTier.data.DocumentContainer;
-import module.fileManagement.presentationTier.data.FMSFieldFactory;
-import module.fileManagement.presentationTier.data.TemplateItem;
-import module.vaadin.data.util.ObjectHintedProperty;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
 import pt.ist.vaadinframework.ui.TransactionalForm;
 
@@ -45,6 +36,16 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.Validator.InvalidValueException;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Select;
+
+import module.fileManagement.domain.Document;
+import module.fileManagement.domain.FileManagementSystem;
+import module.fileManagement.domain.metadata.Metadata;
+import module.fileManagement.domain.metadata.MetadataKey;
+import module.fileManagement.domain.metadata.MetadataTemplate;
+import module.fileManagement.presentationTier.data.DocumentContainer;
+import module.fileManagement.presentationTier.data.FMSFieldFactory;
+import module.fileManagement.presentationTier.data.TemplateItem;
+import module.vaadin.data.util.ObjectHintedProperty;
 
 /**
  * 
@@ -83,6 +84,7 @@ public class MetadataPanel extends Panel {
 
 	} else {
 	    metadataTemplateItem.setValue(template);
+	    metadataForm.setItemDataSource(metadataTemplateItem, metadataTemplateItem.getVisibleItemProperties());
 	}
     }
 
@@ -119,7 +121,7 @@ public class MetadataPanel extends Panel {
 	    for (Document doc : selectedDocuments) {
 		Metadata templateMetadata = doc.getMetadata(MetadataKey.getTemplateKey());
 		if (templateMetadata != null) {
-		    templateNames.add((String)templateMetadata.getValue());
+		    templateNames.add((String) templateMetadata.getValue());
 		}
 	    }
 	    final String templateName = templateNames.size() < 1 ? null : templateNames.iterator().next();

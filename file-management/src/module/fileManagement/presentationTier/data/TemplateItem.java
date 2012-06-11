@@ -113,20 +113,19 @@ public class TemplateItem extends AbstractBufferedItem<MetadataKey, MetadataTemp
 
     @Override
     public void valueChange(ValueChangeEvent event) {
-	final MetadataTemplate template = (MetadataTemplate) event.getProperty().getValue();
+	final MetadataTemplate newTemplate = (MetadataTemplate) event.getProperty().getValue();
 	final MetadataKey templateKey = MetadataKey.getTemplateKey();
 	final Property itemProperty = getItemProperty(templateKey);
 	itemProperty.setValue(getValue().getName());
 
-	Collection<MetadataKey> itemPropertyIds = new HashSet<MetadataKey>(getItemPropertyIds());
-	for (MetadataKey key : itemPropertyIds) {
-	    MetadataKey keyFromTemplate = template.getKey(key);
-	    if (keyFromTemplate != null && !keyFromTemplate.isReserved()) {
-		removeItemProperty(key);
+	Collection<MetadataKey> oldPropertyIds = new HashSet<MetadataKey>(getItemPropertyIds());
+	for (MetadataKey oldKey : oldPropertyIds) {
+	    if (!oldKey.equals(templateKey)) {
+		removeItemProperty(oldKey);
 	    }
 	}
 
-	for (MetadataKey key : template.getPositionOrderedKeys()) {
+	for (MetadataKey key : newTemplate.getPositionOrderedKeys()) {
 	    getItemProperty(key);
 	}
     }

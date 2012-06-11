@@ -114,7 +114,7 @@ public abstract class Metadata extends Metadata_Base implements Comparable<Metad
     public static Class getMetadataType(Class<? extends Metadata> entryValueClass) {
 	Method method;
 	try {
-	    method = entryValueClass.getMethod("getRealValue");
+	    method = entryValueClass.getMethod("getValue");
 	    return method.getReturnType();
 	} catch (SecurityException e) {
 	    e.printStackTrace();
