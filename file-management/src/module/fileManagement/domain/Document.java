@@ -4,22 +4,27 @@ import static module.fileManagement.tools.StringUtils.matches;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
-
-import module.fileManagement.domain.metadata.Metadata;
-import module.fileManagement.domain.metadata.MetadataKey;
-import module.fileManagement.domain.metadata.MetadataTemplate;
-import module.fileManagement.tools.StringUtils;
-import myorg.applicationTier.Authenticate.UserView;
 
 import org.joda.time.DateTime;
 
 import pt.ist.fenixWebFramework.services.Service;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
+
+import module.fileManagement.domain.metadata.Metadata;
+import module.fileManagement.domain.metadata.MetadataKey;
+import module.fileManagement.domain.metadata.MetadataTemplate;
+import module.fileManagement.tools.StringUtils;
+
+import myorg.applicationTier.Authenticate.UserView;
 
 public class Document extends Document_Base {
 
@@ -161,7 +166,7 @@ public class Document extends Document_Base {
 
     @Service
     public void addMetadata(String key, String value) {
-	addMetadata(MetadataKey.getOrCreateInstance(key),value);
+	addMetadata(MetadataKey.getOrCreateInstance(key), value);
     }
 
     @Service
@@ -216,15 +221,35 @@ public class Document extends Document_Base {
     }
 
     public Collection<Metadata> getRecentMetadata() {
-	final TreeSet<Metadata> metadataByKeyValue = new TreeSet<Metadata>(Metadata.KEYVALUE_COMPARATOR);
-	metadataByKeyValue.addAll(getMetadataUntil(now()));
-	return Sets.filter(metadataByKeyValue, new Predicate<Metadata>() {
+	MetadataTemplate template = getMetadataTemplateAssociated();
+	TreeSet<Metadata> metadataUntil = getMetadataUntil(now());
+	final Comparator<Metadata> comparator;
 
-	    @Override
-	    public boolean apply(Metadata arg0) {
-		return !arg0.getMetadataKey().isReserved();
-	    }
-	});
+	if (template != null) {
+	    final List<MetadataKey> positionOrderedKeys = template.getPositionOrderedKeysList();
+	    comparator = new Comparator<Metadata>() {
+
+		@Override
+		public int compare(Metadata o1, Metadata o2) {
+		    final int indexOfo1 = positionOrderedKeys.indexOf(o1.getMetadataKey());
+		    final int indexOfo2 = positionOrderedKeys.indexOf(o2.getMetadataKey());
+		    return indexOfo1 < indexOfo2 ? -1 : (indexOfo1 == indexOfo2) ? 0 : 1; // int
+											  // compare
+		}
+
+	    };
+	} else {
+	    comparator = Metadata.KEYVALUE_COMPARATOR;
+	}
+
+	return FluentIterable.from(Ordering.from(comparator).immutableSortedCopy(metadataUntil))
+		.filter(new Predicate<Metadata>() {
+
+		    @Override
+		    public boolean apply(Metadata arg0) {
+			return !arg0.getMetadataKey().isReserved();
+		    }
+		}).toImmutableSet();
     }
 
     public TreeSet<Metadata> getVersions() {
