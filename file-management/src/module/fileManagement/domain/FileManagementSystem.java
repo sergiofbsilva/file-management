@@ -154,6 +154,7 @@ public class FileManagementSystem extends FileManagementSystem_Base implements M
     }
 
     private void checkUserPartyRelation(MyOrg myOrg) {
+	if (true) return ; 
 	VaadinFrameworkLogger.getLogger().debug("Start processing party <-> dirNode relation");
 	for (User user : myOrg.getUser()) {
 	    Party person = user.getPerson();
