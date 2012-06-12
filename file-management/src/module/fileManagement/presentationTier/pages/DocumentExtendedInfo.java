@@ -152,8 +152,8 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
 	    lblValue.setContentMode(Label.CONTENT_XHTML);
 	    lblValue.setCaption(String.format("Versão (%d) info", index--));
 	    final String url = DownloadUtil.getDownloadUrl(getApplication(), file);
-	    lblValue.setValue(String.format("%s em %s (%s) <a href='%s'>download</a>", metadata.getValue(), metadata
-		    .getTimestamp().toString("dd/MM/yyyy HH:mm:ss"), file.getFilename(), url));
+	    lblValue.setValue(String.format("%s em %s <a href='%s'>(%s)</a>", metadata.getValue(), metadata.getTimestamp()
+		    .toString("dd/MM/yyyy HH:mm:ss"), file.getFilename(), url));
 	    versions.add(lblValue);
 	    file = file.getPreviousVersion();
 	}

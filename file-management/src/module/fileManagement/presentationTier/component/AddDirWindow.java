@@ -25,14 +25,21 @@
 package module.fileManagement.presentationTier.component;
 
 import static module.fileManagement.domain.FileManagementSystem.getMessage;
-import module.fileManagement.domain.DirNode;
+
+import org.apache.commons.lang.StringUtils;
 
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+
+import module.fileManagement.domain.DirNode;
+import module.vaadin.ui.BennuTheme;
+
+import myorg.domain.exceptions.DomainException;
 
 /**
  * 
@@ -43,6 +50,7 @@ public class AddDirWindow extends Window {
     private DocumentFileBrowser browser;
     private final AddDirWindow addDirWindow;
     private final TextField editor = new TextField();
+    private final Label lblError;
 
     private class CloseButton extends Button implements ClickListener {
 
@@ -71,10 +79,27 @@ public class AddDirWindow extends Window {
 
 	@Override
 	public void buttonClick(final ClickEvent event) {
-	    final DirNode newDirNode = browser.getDirNode().createDir((String) editor.getValue(), browser.getContextPath());
-	    browser.getContainer().addItem(newDirNode);
-	    super.buttonClick(event);
+	    String value = (String) editor.getValue();
+	    if (!StringUtils.isBlank(value)) {
+		try {
+		    final DirNode newDirNode = browser.getDirNode().createDir(value, browser.getContextPath());
+		    browser.getContainer().addItem(newDirNode);
+		    lblError.setVisible(false);
+		    super.buttonClick(event);
+		} catch (DomainException de) {
+		    setError(getMessage(de.getClass().getName()));
+		}
+	    } else {
+		setError(getMessage("label.file.repository.empty.dir.name"));
+	    }
 	}
+    }
+
+    private void setError(final String message) {
+	if (!lblError.isVisible()) {
+	    lblError.setVisible(true);
+	}
+	lblError.setValue(message);
     }
 
     public AddDirWindow(DocumentFileBrowser browser) {
@@ -83,11 +108,13 @@ public class AddDirWindow extends Window {
 	this.browser = browser;
 	setModal(true);
 	setWidth(50, UNITS_PERCENTAGE);
+	lblError = new Label();
+	lblError.addStyleName(BennuTheme.LABEL_ERROR);
 
 	final VerticalLayout layout = (VerticalLayout) getContent();
 	layout.setMargin(true);
 	layout.setSpacing(true);
-
+	addComponent(lblError);
 	editor.setWidth(100, UNITS_PERCENTAGE);
 	addComponent(editor);
 
