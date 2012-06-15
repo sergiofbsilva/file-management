@@ -54,6 +54,7 @@ relation MetadataMetadataKey {
 class MetadataTemplateRule {
 	Integer position (REQUIRED);
 	Boolean required (REQUIRED);
+	Boolean readOnly (REQUIRED);
 }
 
 

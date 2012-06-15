@@ -27,6 +27,15 @@ package module.fileManagement.presentationTier.component.viewers;
 import java.util.Collections;
 import java.util.List;
 
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Window.CloseEvent;
+import com.vaadin.ui.Window.CloseListener;
+import com.vaadin.ui.themes.BaseTheme;
+
 import module.fileManagement.domain.ContextPath;
 import module.fileManagement.domain.DirNode;
 import module.fileManagement.domain.FileNode;
@@ -36,16 +45,6 @@ import module.fileManagement.domain.log.DirLog;
 import module.fileManagement.domain.log.FileLog;
 import module.fileManagement.presentationTier.DownloadUtil;
 import module.fileManagement.presentationTier.component.dialog.SelectDestinationDialog;
-import myorg.applicationTier.Authenticate.UserView;
-
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Window.CloseEvent;
-import com.vaadin.ui.Window.CloseListener;
-import com.vaadin.ui.themes.BaseTheme;
 
 /**
  * 
@@ -90,8 +89,7 @@ class DeleteFileLogViewer extends FileLogViewer {
 
     @Override
     public boolean hasOperations() {
-	final FileNode fileNode = getLog().getFileNode();
-	return UserView.getCurrentUser().equals(fileNode.getOwner()) && fileNode.isInTrash();
+	return getLog().getFileNode().isInTrash();
     }
 
     @Override

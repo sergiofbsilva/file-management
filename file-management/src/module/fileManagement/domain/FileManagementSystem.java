@@ -24,24 +24,9 @@
  */
 package module.fileManagement.domain;
 
-import java.util.HashSet;
 import java.util.ResourceBundle;
-import java.util.Set;
 
-import module.fileManagement.domain.metadata.Metadata;
-import module.fileManagement.domain.metadata.MetadataKey;
-import module.fileManagement.domain.metadata.MetadataTemplate;
-import module.fileManagement.domain.metadata.StringMetadata;
-import module.fileManagement.presentationTier.action.OrganizationModelPluginAction.FileRepositoryView;
-import module.fileManagement.tools.FilenameTemplate;
-import module.organization.domain.Party;
-import module.organization.presentationTier.actions.OrganizationModelAction;
-import myorg.domain.ModuleInitializer;
-import myorg.domain.MyOrg;
-import myorg.domain.User;
-import myorg.domain.exceptions.DomainException;
-import myorg.util.BundleUtil;
-
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
@@ -50,6 +35,20 @@ import pt.ist.vaadinframework.VaadinFrameworkLogger;
 
 import com.vaadin.Application;
 import com.vaadin.ui.Window;
+
+import module.fileManagement.domain.metadata.Metadata;
+import module.fileManagement.domain.metadata.MetadataKey;
+import module.fileManagement.domain.metadata.MetadataTemplate;
+import module.fileManagement.domain.metadata.MetadataTemplateRule;
+import module.fileManagement.domain.metadata.StringMetadata;
+import module.fileManagement.presentationTier.action.OrganizationModelPluginAction.FileRepositoryView;
+import module.fileManagement.tools.FilenameTemplate;
+import module.organization.presentationTier.actions.OrganizationModelAction;
+
+import myorg.domain.ModuleInitializer;
+import myorg.domain.MyOrg;
+import myorg.domain.exceptions.DomainException;
+import myorg.util.BundleUtil;
 
 /**
  * 
@@ -113,6 +112,16 @@ public class FileManagementSystem extends FileManagementSystem_Base implements M
 
     }
 
+    public static String getNewDisplayName(String displayName, final String fileName) {
+	final String[] fileNameParts = StringUtils.split(fileName, '.');
+	final String[] displayNameParts = StringUtils.split(displayName, '.');
+	if (fileNameParts.length == 2) {
+	    displayName = String.format("%s.%s", displayNameParts.length == 2 ? displayNameParts[0] : displayName,
+		    fileNameParts[1]);
+	}
+	return displayName;
+    }
+
     @Service
     private static FileManagementSystem getOrCreateInstance() {
 	final MyOrg myorg = MyOrg.getInstance();
@@ -136,16 +145,6 @@ public class FileManagementSystem extends FileManagementSystem_Base implements M
 	return logger;
     }
 
-    // public static void goTo(Class clazz) {
-    //
-    // for(Annotation anot : clazz.getAnnotations()) {
-    // if (anot.annotationType().equals(EmbeddedComponent.class)) {
-    // EmbeddedComponent embedded = (EmbeddedComponent) anot;
-    //
-    // }
-    // }
-    // }
-
     public static void showException(Application app, DomainException e) {
 	Window.Notification notif = new Window.Notification(FileManagementSystem.getMessage("label.operation.not.allowed"),
 		e.getMessage(), Window.Notification.TYPE_TRAY_NOTIFICATION);
@@ -153,48 +152,31 @@ public class FileManagementSystem extends FileManagementSystem_Base implements M
 	app.getMainWindow().showNotification(notif);
     }
 
-    private void checkUserPartyRelation(MyOrg myOrg) {
-	if (true) return ; 
-	VaadinFrameworkLogger.getLogger().debug("Start processing party <-> dirNode relation");
-	for (User user : myOrg.getUser()) {
-	    Party person = user.getPerson();
-	    if (person != null) {
-		if (!person.hasFileRepository()) {
-		    person.setFileRepository(user.getFileRepository());
-		} else {
-		    VaadinFrameworkLogger.getLogger().debug("Assume that if a person already has root dir everybody has");
-		    break;
-		}
-	    }
-	}
-	VaadinFrameworkLogger.getLogger().debug("Stop processing party <-> dirNode relation");
+    public static void showWarning(Application app, final String message) {
+	show(app, getMessage("label.operation.not.allowed"), message, Window.Notification.TYPE_WARNING_MESSAGE);
     }
 
-    private void checkMetadataKeyReservedValue(FileManagementSystem root) {
-	final Set<String> reserved = new HashSet<String>();
-	reserved.add(MetadataKey.FILENAME_KEY_VALUE);
-	reserved.add(MetadataKey.TEMPLATE_KEY_VALUE);
-	reserved.add(MetadataKey.DOCUMENT_NEW_VERSION_KEY);
-	reserved.add(MetadataKey.SAVE_ACCESS_LOG);
-	for (MetadataKey metadataKey : root.getMetadataKeys()) {
-	    if (metadataKey.getReserved() == null) {
-		final boolean contains = reserved.contains(metadataKey.getKeyValue());
-		metadataKey.setReserved(new Boolean(contains));
-		metadataKey.setMetadataValueType(StringMetadata.class);
-		VaadinFrameworkLogger.getLogger().warn(
-			String.format("set key %s, reserved : %s", metadataKey.getKeyValue(), contains));
-	    }
-	    if (metadataKey.getMetadataValueType() == null) {
-		metadataKey.setMetadataValueType(StringMetadata.class);
-		VaadinFrameworkLogger.getLogger().warn(String.format("set type to String for key %s", metadataKey.getKeyValue()));
+    public static void show(Application app, final String caption, final String message, int type) {
+	Window.Notification notif = new Window.Notification(caption, type);
+	notif.setDescription(message);
+	notif.setDelayMsec(5000);
+	notif.setPosition(Window.Notification.POSITION_TOP_RIGHT);
+	app.getMainWindow().showNotification(notif);
+    }
+
+    public void setMetadataRulesReadOnlyFalse(FileManagementSystem root) {
+	for (MetadataTemplate template : root.getMetadataTemplates()) {
+	    for (MetadataTemplateRule rule : template.getRule()) {
+		if (rule.getReadOnly() == null) {
+		    rule.setReadOnly(Boolean.FALSE);
+		}
 	    }
 	}
     }
 
     @Override
     public void init(MyOrg root) {
-	checkUserPartyRelation(root);
-	checkMetadataKeyReservedValue(root.getFileManagementSystem());
+	setMetadataRulesReadOnlyFalse(root.getFileManagementSystem());
     }
 
     static {

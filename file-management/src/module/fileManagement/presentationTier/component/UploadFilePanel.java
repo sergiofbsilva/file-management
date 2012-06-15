@@ -3,20 +3,6 @@ package module.fileManagement.presentationTier.component;
 import java.util.Collection;
 import java.util.HashSet;
 
-import module.fileManagement.domain.ContextPath;
-import module.fileManagement.domain.DirNode;
-import module.fileManagement.domain.Document;
-import module.fileManagement.domain.FileNode;
-import module.fileManagement.presentationTier.component.UploadFileArea.FileUploadListener;
-import module.fileManagement.presentationTier.component.UploadFileArea.OnFileUploadEvent;
-import module.fileManagement.presentationTier.data.DocumentContainer;
-import module.fileManagement.presentationTier.pages.DocumentBrowse;
-import module.fileManagement.presentationTier.pages.UploadPage;
-import module.vaadin.data.util.ObjectHintedProperty;
-import module.vaadin.ui.BennuTheme;
-
-import org.bouncycastle.util.Strings;
-
 import pt.ist.fenixWebFramework.services.Service;
 import pt.ist.fenixframework.FFDomainException;
 import pt.ist.vaadinframework.EmbeddedApplication;
@@ -33,6 +19,19 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
+
+import module.fileManagement.domain.ContextPath;
+import module.fileManagement.domain.DirNode;
+import module.fileManagement.domain.Document;
+import module.fileManagement.domain.FileManagementSystem;
+import module.fileManagement.domain.FileNode;
+import module.fileManagement.presentationTier.component.UploadFileArea.FileUploadListener;
+import module.fileManagement.presentationTier.component.UploadFileArea.OnFileUploadEvent;
+import module.fileManagement.presentationTier.data.DocumentContainer;
+import module.fileManagement.presentationTier.pages.DocumentBrowse;
+import module.fileManagement.presentationTier.pages.UploadPage;
+import module.vaadin.data.util.ObjectHintedProperty;
+import module.vaadin.ui.BennuTheme;
 
 public class UploadFilePanel extends CustomComponent implements ValueChangeNotifier {
 
@@ -75,21 +74,10 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
 	    final Collection<Document> selectedDocument = selectedDocumentsProperty.getValue();
 	    assert documentContainer.size() == 1 && selectedDocument.size() == 1;
 	    Document document = selectedDocument.iterator().next();
-	    String displayName = document.getDisplayName();
 	    final String fileName = event.getFileName();
-	    displayName = getNewDisplayName(displayName, fileName);
-	    document.addVersion(event.getFile(), fileName);
+	    final String displayName = FileManagementSystem.getNewDisplayName(document.getDisplayName(), fileName);
+	    document.getFileNode().get(0).addNewVersion(event.getFile(), fileName, displayName, event.getLength());
 	    documentContainer.getItem(document).getItemProperty("displayName").setValue(displayName);
-	}
-
-	private String getNewDisplayName(String displayName, final String fileName) {
-	    final String[] fileNameParts = Strings.split(fileName, '.');
-	    final String[] displayNameParts = Strings.split(displayName, '.');
-	    if (fileNameParts.length == 2) {
-		displayName = String.format("%s.%s", displayNameParts.length == 2 ? displayNameParts[0] : displayName,
-			fileNameParts[1]);
-	    }
-	    return displayName;
 	}
     }
 

@@ -27,12 +27,6 @@ package module.fileManagement.presentationTier.pages;
 import java.util.Map;
 import java.util.Set;
 
-import module.fileManagement.domain.metadata.Metadata;
-import module.fileManagement.domain.metadata.MetadataKey;
-import module.fileManagement.domain.metadata.MetadataTemplate;
-import module.fileManagement.domain.metadata.MetadataTemplateRule;
-import module.fileManagement.domain.metadata.StringMetadata;
-
 import org.apache.commons.lang.StringUtils;
 
 import pt.ist.fenixWebFramework.services.Service;
@@ -56,6 +50,12 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window.Notification;
 import com.vaadin.ui.themes.BaseTheme;
+
+import module.fileManagement.domain.metadata.Metadata;
+import module.fileManagement.domain.metadata.MetadataKey;
+import module.fileManagement.domain.metadata.MetadataTemplate;
+import module.fileManagement.domain.metadata.MetadataTemplateRule;
+import module.fileManagement.domain.metadata.StringMetadata;
 
 @SuppressWarnings("serial")
 @EmbeddedComponent(path = { "CreateMetadataTemplate" }, args = { "template", "readOnly" })
@@ -115,7 +115,8 @@ public class CreateMetadataTemplate extends CustomComponent implements EmbeddedC
 		String keyName = (String) itemProperty.getValue();
 		Class<? extends Metadata> metadataClassType = itemProperty.getMetadataType();
 		final MetadataKey key = new MetadataKey(keyName, Boolean.FALSE, metadataClassType);
-		currentTemplate.addKey(key, ((KeyProp) propId).getIndex(), itemProperty.getRequired());
+		currentTemplate
+			.addKey(key, ((KeyProp) propId).getIndex(), itemProperty.getRequired(), itemProperty.getReadOnly());
 	    }
 	}
     }
@@ -127,11 +128,13 @@ public class CreateMetadataTemplate extends CustomComponent implements EmbeddedC
 	private final TextField fieldKey;
 	private final Select selectType;
 	private final CheckBox requiredBox;
+	private final CheckBox readOnlyBox;
 
-	public KeyField(Form form, Object id, Class<? extends Metadata> metadataType, Boolean required) {
+	public KeyField(Form form, Object id, Class<? extends Metadata> metadataType, Boolean required, Boolean readOnly) {
 	    this(form, id);
 	    selectType.select(metadataType.getSimpleName());
 	    requiredBox.setValue(required);
+	    readOnlyBox.setValue(readOnly);
 	}
 
 	public KeyField(Form form, Object id) {
@@ -139,6 +142,7 @@ public class CreateMetadataTemplate extends CustomComponent implements EmbeddedC
 	    this.propId = id;
 	    fieldKey = new TextField();
 	    requiredBox = new CheckBox("Required");
+	    readOnlyBox = new CheckBox("Read Only");
 
 	    HorizontalLayout hl = new HorizontalLayout();
 	    hl.setSpacing(true);
@@ -157,6 +161,7 @@ public class CreateMetadataTemplate extends CustomComponent implements EmbeddedC
 	    selectType = getMetadataTypeSelect();
 	    hl.addComponent(selectType);
 	    hl.addComponent(requiredBox);
+	    hl.addComponent(readOnlyBox);
 	    hl.addComponent(btDelete);
 
 	    setCompositionRoot(hl);
@@ -201,6 +206,10 @@ public class CreateMetadataTemplate extends CustomComponent implements EmbeddedC
 	    return (Boolean) requiredBox.getValue();
 	}
 
+	public Boolean getReadOnly() {
+	    return (Boolean) readOnlyBox.getValue();
+	}
+
 	@Override
 	public void commit() throws SourceException, InvalidValueException {
 	    super.commit();
@@ -240,7 +249,8 @@ public class CreateMetadataTemplate extends CustomComponent implements EmbeddedC
 	    for (MetadataTemplateRule rule : template.getPositionOrderedRules()) {
 		KeyProp propId = new KeyProp(rule.getPosition());
 		final MetadataKey key = rule.getKey();
-		final KeyField keyField = new KeyField(form, propId, key.getMetadataValueType(), rule.getRequired());
+		final KeyField keyField = new KeyField(form, propId, key.getMetadataValueType(), rule.getRequired(),
+			rule.getReadOnly());
 		keyField.setValue(key.getKeyValue());
 		form.addField(propId, keyField);
 	    }

@@ -1,9 +1,7 @@
 package module.fileManagement.presentationTier.component.dialog;
 
-import module.fileManagement.domain.AbstractFileNode;
-import module.fileManagement.domain.DirNode;
-import module.fileManagement.domain.FileRepository;
-import myorg.applicationTier.Authenticate.UserView;
+import java.util.Set;
+
 import pt.ist.vaadinframework.data.reflect.DomainContainer;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -17,6 +15,10 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.BaseTheme;
+
+import module.fileManagement.domain.AbstractFileNode;
+import module.fileManagement.domain.DirNode;
+import module.fileManagement.presentationTier.pages.DocumentHome;
 
 public class SelectDestinationDialog extends Window {
 
@@ -34,17 +36,18 @@ public class SelectDestinationDialog extends Window {
 
 	setCaption("Seleccionar Directoria");
 
-	dirNode = FileRepository.getOrCreateFileRepository(UserView.getCurrentUser());
+	Set<DirNode> availableRepositories = DocumentHome.getAvailableRepositories();
 
 	childs = new DomainContainer<DirNode>(DirNode.class);
 	childs.setContainerProperties("displayName", "icon");
-
-	childs.addItem(dirNode);
-
 	wrapper = new ContainerHierarchicalWrapper(childs);
-	createChildContainer(dirNode);
-	wrapper.updateHierarchicalWrapper();
 
+	for (DirNode dirNode : availableRepositories) {
+	    wrapper.addItem(dirNode);
+	    createChildContainer(dirNode);
+	}
+
+	wrapper.updateHierarchicalWrapper();
 	buildDefaultLayout();
     }
 
@@ -73,7 +76,6 @@ public class SelectDestinationDialog extends Window {
     public void buildDefaultLayout() {
 	Panel pnlDialog = new Panel("Por favor seleccione uma directoria");
 	pnlDialog.setScrollable(true);
-	// ((VerticalLayout) pnlDialog.getContent()).setSpacing(true);
 
 	pnlDialog.setWidth("400px");
 	pnlDialog.setHeight("400px");

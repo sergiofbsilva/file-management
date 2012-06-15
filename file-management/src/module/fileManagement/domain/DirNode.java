@@ -8,12 +8,13 @@ import java.util.List;
 import java.util.Set;
 
 import jvstm.cps.ConsistencyPredicate;
-import module.fileManagement.domain.exception.CannotCreateFileException;
+import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.fenixframework.FFDomainException;
+
 import module.fileManagement.domain.exception.NoAvailableQuotaException;
 import module.fileManagement.domain.exception.NodeDuplicateNameException;
 import module.fileManagement.domain.log.CreateDirLog;
 import module.fileManagement.domain.log.CreateFileLog;
-import module.fileManagement.domain.log.CreateNewVersionLog;
 import module.fileManagement.domain.metadata.MetadataKey;
 import module.fileManagement.domain.metadata.MetadataTemplate;
 import module.fileManagement.domain.metadata.SeqNumberMetadata;
@@ -23,6 +24,7 @@ import module.organization.domain.Party;
 import module.organization.domain.Person;
 import module.organization.domain.Unit;
 import module.organization.domain.groups.UnitGroup;
+
 import myorg.applicationTier.Authenticate.UserView;
 import myorg.domain.RoleType;
 import myorg.domain.User;
@@ -31,12 +33,10 @@ import myorg.domain.groups.PersistentGroup;
 import myorg.domain.groups.Role;
 import myorg.domain.groups.SingleUserGroup;
 import myorg.domain.groups.UnionGroup;
-import pt.ist.fenixWebFramework.services.Service;
-import pt.ist.fenixframework.FFDomainException;
 
 /**
  * @author Sergio Silva
-*/
+ */
 public class DirNode extends DirNode_Base {
 
     public static final long PERSON_REPOSITORY_QUOTA = 50 * 1024 * 1024;
@@ -251,19 +251,7 @@ public class DirNode extends DirNode_Base {
 
 	if (fileNode != null) {
 
-	    if (!fileNode.isWriteGroupMember()) {
-		throw new CannotCreateFileException(fileName);
-	    }
-
-	    if (!hasAvailableQuota(filesize, fileNode)) {
-		throw new NoAvailableQuotaException();
-	    }
-	    final DirNode targetDir = fileNode.isShared() ? ((SharedFileNode) fileNode).getNode().getParent() : this;
-	    targetDir.removeUsedSpace(fileNode.getFilesize());
-	    final Document document = fileNode.getDocument();
-	    document.addVersion(file, fileName);
-	    targetDir.addUsedSpace(filesize);
-	    new CreateNewVersionLog(UserView.getCurrentUser(), contextPath, fileNode);
+	    fileNode.addNewVersion(file, fileName, fileName, filesize);
 	    return fileNode;
 
 	} else {

@@ -28,13 +28,18 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
+import pt.ist.fenixWebFramework.services.Service;
+
+import module.fileManagement.domain.exception.CannotCreateFileException;
+import module.fileManagement.domain.exception.NoAvailableQuotaException;
+import module.fileManagement.domain.log.CreateNewVersionLog;
 import module.fileManagement.domain.log.FileLog;
 import module.fileManagement.domain.log.RecoverFileLog;
 import module.fileManagement.domain.log.UnshareFileLog;
+
 import myorg.applicationTier.Authenticate.UserView;
 import myorg.domain.exceptions.DomainException;
 import myorg.domain.groups.PersistentGroup;
-import pt.ist.fenixWebFramework.services.Service;
 
 /**
  * 
@@ -47,7 +52,8 @@ public class FileNode extends FileNode_Base {
     public FileNode(final DirNode dirNode, final File file, final String fileName) {
 	// super();
 	// if (dirNode == null) {
-	// throw new DomainException("must.specify.a.dir.node.when.creating.a.file.node");
+	// throw new
+	// DomainException("must.specify.a.dir.node.when.creating.a.file.node");
 	// }
 	// setDocument(new Document(file, fileName));
 	// setParent(dirNode);
@@ -173,5 +179,30 @@ public class FileNode extends FileNode_Base {
     @Override
     public int getCountFiles() {
 	return 1;
+    }
+
+    public DirNode getRealParent() {
+	return getParent();
+    }
+
+    @Service
+    public void addNewVersion(File file, String fileName, String displayName, long filesize) {
+
+	if (!isWriteGroupMember()) {
+	    throw new CannotCreateFileException(fileName);
+	}
+
+	if (!getParent().hasAvailableQuota(filesize, this)) {
+	    throw new NoAvailableQuotaException();
+	}
+
+	getRealParent().removeUsedSpace(getFilesize());
+	getRealParent().addUsedSpace(filesize);
+
+	final Document document = getDocument();
+	document.addVersion(file, fileName);
+	document.setDisplayName(displayName);
+
+	new CreateNewVersionLog(UserView.getCurrentUser(), getParent().getContextPath(), this);
     }
 }

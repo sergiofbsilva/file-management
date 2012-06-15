@@ -119,13 +119,21 @@ public class MetadataTemplate extends MetadataTemplate_Base {
     @Service
     public void addKeysStrings(Set<String> keys) {
 	for (String key : keys) {
-	    addKey(MetadataKey.getOrCreateInstance(key), getRule().size() + 1, Boolean.FALSE);
+	    addKey(MetadataKey.getOrCreateInstance(key), getRule().size() + 1);
 	}
     }
 
-    @Service
+    private void addKey(MetadataKey key, Integer position) {
+	addKey(key, position, Boolean.FALSE, Boolean.FALSE);
+    }
+
     public void addKey(MetadataKey key, Integer position, Boolean required) {
-	addRule(new MetadataTemplateRule(this, key, position, required));
+	addKey(key, position, required, Boolean.FALSE);
+    }
+
+    @Service
+    public void addKey(MetadataKey key, Integer position, Boolean required, Boolean readOnly) {
+	addRule(new MetadataTemplateRule(this, key, position, required, readOnly));
     }
 
     public Set<String> getKeyNames() {

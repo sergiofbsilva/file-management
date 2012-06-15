@@ -29,14 +29,11 @@ import static module.fileManagement.domain.FileManagementSystem.getMessage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 
-import module.fileManagement.domain.AbstractFileNode;
-import module.fileManagement.domain.Document;
-import module.fileManagement.domain.FileNode;
-import module.fileManagement.presentationTier.DownloadUtil;
-import module.fileManagement.presentationTier.pages.DocumentExtendedInfo;
-import module.vaadin.ui.BennuTheme;
+import org.apache.commons.lang.StringUtils;
+
 import pt.ist.fenixWebFramework.services.Service;
 import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
@@ -49,6 +46,15 @@ import com.vaadin.ui.Link;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.Receiver;
 import com.vaadin.ui.themes.BaseTheme;
+
+import module.fileManagement.domain.AbstractFileNode;
+import module.fileManagement.domain.DirNode;
+import module.fileManagement.domain.Document;
+import module.fileManagement.domain.FileManagementSystem;
+import module.fileManagement.domain.FileNode;
+import module.fileManagement.presentationTier.DownloadUtil;
+import module.fileManagement.presentationTier.pages.DocumentExtendedInfo;
+import module.vaadin.ui.BennuTheme;
 
 /**
  * 
@@ -122,6 +128,7 @@ public class FileDetails extends NodeDetails {
 
     private class SingleFileUpload extends Upload implements Upload.SucceededListener, Upload.FailedListener, Receiver {
 	private File file;
+	private String sameNameFailed;
 
 	public SingleFileUpload() {
 	    super();
@@ -131,12 +138,25 @@ public class FileDetails extends NodeDetails {
 	    addListener((FailedListener) this);
 	    setButtonCaption("Upload Nova Versão");
 	    addStyleName(BennuTheme.BUTTON_LINK);
+	    sameNameFailed = StringUtils.EMPTY;
 	}
 
 	@Override
 	public OutputStream receiveUpload(String filename, String mimeType) {
 	    try {
 		file = UploadFileArea.DEFAULT_FACTORY.createFile(filename, mimeType);
+		final String displayName = FileManagementSystem.getNewDisplayName(getDocument().getDisplayName(), filename);
+		DirNode parent = getNode().getParent();
+		if (parent.searchNode(displayName) != null) {
+		    interruptUpload();
+		    sameNameFailed = displayName;
+		    return new OutputStream() {
+
+			@Override
+			public void write(int b) throws IOException {
+			}
+		    };
+		}
 		return new FileOutputStream(file);
 	    } catch (FileNotFoundException e) {
 		e.printStackTrace();
@@ -150,19 +170,24 @@ public class FileDetails extends NodeDetails {
 
 	@Override
 	public void uploadFailed(FailedEvent event) {
-	    getApplication().getMainWindow().showNotification(String.format("Upload falhou. Tente novamente!"));
+	    if (!sameNameFailed.equals(StringUtils.EMPTY)) {
+		String warnMsg = String.format("Já existe um ficheiro com esse nome %s", sameNameFailed);
+		FileManagementSystem.showWarning(getApplication(), warnMsg);
+		sameNameFailed = StringUtils.EMPTY;
+	    }
+	    FileManagementSystem.showWarning(getApplication(), "Upload falhou. Tente novamente!");
 	}
 
 	@Override
 	@Service
 	public void uploadSucceeded(SucceededEvent event) {
 	    final Document document = getDocument();
-	    final String displayName = document.getDisplayName();
-	    document.addVersion(file, event.getFilename());
-	    document.setDisplayName(displayName);
+	    final String displayName = FileManagementSystem.getNewDisplayName(document.getDisplayName(), event.getFilename());
+	    getNode().addNewVersion(file, event.getFilename(), displayName, event.getLength());
 	    getNodeItem().setValue(getNode());
 	    getApplication().getMainWindow().showNotification(
 		    String.format("Upload da nova versão %s com sucesso", document.getVersionNumber()));
+	    sameNameFailed = StringUtils.EMPTY;
 	}
 
     }

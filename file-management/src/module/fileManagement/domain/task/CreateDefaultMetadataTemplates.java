@@ -37,7 +37,8 @@ public class CreateDefaultMetadataTemplates extends CreateDefaultMetadataTemplat
 	final MetadataTemplate metadataTemplate = FileManagementSystem.getInstance().getMetadataTemplate(name);
 	if (metadataTemplate == null) {
 	    MetadataTemplate template = new MetadataTemplate(name);
-	    template.addKey(MetadataKey.getOrCreateInstance("Nº Declaração", SeqNumberMetadata.class), 1, Boolean.TRUE);
+	    MetadataKey key = MetadataKey.getOrCreateInstance("Nº Declaração", SeqNumberMetadata.class);
+	    template.addKey(key, 1, Boolean.TRUE, Boolean.TRUE);
 	    template.addKey(MetadataKey.getOrCreateInstance("Data", DateTimeMetadata.class), 2, Boolean.TRUE);
 	    template.addKey(MetadataKey.getOrCreateInstance("Destinatário", PersonMetadata.class), 3, Boolean.FALSE);
 	    template.addKey(MetadataKey.getOrCreateInstance("Nº Mecanográfico", IntegerMetadata.class), 4, Boolean.FALSE);

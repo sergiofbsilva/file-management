@@ -6,17 +6,6 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import module.fileManagement.domain.log.DeleteDirLog;
-import module.fileManagement.domain.log.DeleteFileLog;
-import module.fileManagement.domain.log.ShareDirLog;
-import module.fileManagement.domain.log.ShareFileLog;
-import myorg.applicationTier.Authenticate.UserView;
-import myorg.domain.User;
-import myorg.domain.exceptions.DomainException;
-import myorg.domain.groups.AnyoneGroup;
-import myorg.domain.groups.PersistentGroup;
-import myorg.domain.groups.SingleUserGroup;
-
 import org.apache.commons.lang.StringUtils;
 
 import pt.ist.fenixWebFramework.services.Service;
@@ -28,6 +17,18 @@ import dml.runtime.DirectRelation;
 import dml.runtime.Relation;
 import dml.runtime.RelationListener;
 
+import module.fileManagement.domain.log.DeleteDirLog;
+import module.fileManagement.domain.log.DeleteFileLog;
+import module.fileManagement.domain.log.ShareDirLog;
+import module.fileManagement.domain.log.ShareFileLog;
+
+import myorg.applicationTier.Authenticate.UserView;
+import myorg.domain.User;
+import myorg.domain.exceptions.DomainException;
+import myorg.domain.groups.AnyoneGroup;
+import myorg.domain.groups.PersistentGroup;
+import myorg.domain.groups.SingleUserGroup;
+
 public abstract class AbstractFileNode extends AbstractFileNode_Base implements Comparable<AbstractFileNode> {
     static {
 	DirectRelation<AbstractFileNode, DirNode> child = DirNodeAbstractFileNode;
@@ -35,20 +36,13 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 
 	    @Override
 	    public void afterAdd(Relation<AbstractFileNode, DirNode> arg0, AbstractFileNode arg1, DirNode arg2) {
-		// System.out.println(String.format("added child %s to %s", arg1
-		// != null ? arg1.getDisplayName() : "null",
-		// arg2 != null ? arg2.getDisplayName() : "null"));
 		if (arg1 != null && arg2 != null && !arg1.isShared()) {
 		    arg2.addUsedSpace(arg1.getFilesize());
 		}
-
 	    }
 
 	    @Override
 	    public void afterRemove(Relation<AbstractFileNode, DirNode> arg0, AbstractFileNode arg1, DirNode arg2) {
-		// System.out.println(String.format("remove child %s from %s",
-		// (arg1 != null ? arg1.getDisplayName() : "null"),
-		// (arg2 != null ? arg2.getDisplayName() : "null")));
 		if (arg1 != null && arg2 != null && !arg1.isShared()) {
 		    arg2.removeUsedSpace(arg1.getFilesize());
 		}
@@ -66,6 +60,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 	    }
 	});
     }
+
     public enum VisibilityState {
 	PRIVATE, SHARED, PUBLIC;
     }
@@ -125,9 +120,10 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 	    }
 	}
 	final User currentUser = UserView.getCurrentUser();
-	//	final SingleUserGroup currentUserGroup = currentUser.getSingleUserGroup();
-	//	setReadGroup(currentUserGroup);
-	//	setWriteGroup(currentUserGroup);
+	// final SingleUserGroup currentUserGroup =
+	// currentUser.getSingleUserGroup();
+	// setReadGroup(currentUserGroup);
+	// setWriteGroup(currentUserGroup);
 
 	if (isFile()) {
 	    setParent(getParent().getTrash());

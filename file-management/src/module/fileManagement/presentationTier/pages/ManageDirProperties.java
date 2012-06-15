@@ -3,12 +3,6 @@ package module.fileManagement.presentationTier.pages;
 import java.util.List;
 import java.util.Map;
 
-import module.fileManagement.domain.DirNode;
-import module.fileManagement.domain.FileManagementSystem;
-import module.fileManagement.domain.metadata.MetadataTemplate;
-import module.organization.domain.Unit;
-import myorg.applicationTier.Authenticate.UserView;
-import myorg.domain.RoleType;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.ItemConstructor;
 import pt.ist.vaadinframework.data.hints.Options;
@@ -22,6 +16,14 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
+
+import module.fileManagement.domain.DirNode;
+import module.fileManagement.domain.FileManagementSystem;
+import module.fileManagement.domain.metadata.MetadataTemplate;
+import module.organization.domain.Unit;
+
+import myorg.applicationTier.Authenticate.UserView;
+import myorg.domain.RoleType;
 
 @EmbeddedComponent(path = { "ManageDirProperties" }, args = { "dirNode" })
 public class ManageDirProperties extends CustomComponent implements EmbeddedComponentContainer {
@@ -82,6 +84,16 @@ public class ManageDirProperties extends CustomComponent implements EmbeddedComp
 	form.addClearButton();
 	form.addCancelButton();
 	mainLayout.addComponent(form);
+
+	// Button btCalcSize = new Button("recalcular tamanho", new
+	// ClickListener() {
+	//
+	// @Override
+	// public void buttonClick(ClickEvent event) {
+	//
+	// }
+	// });
+	// mainLayout.addComponent(btCalcSize);
     }
 
     private void setTemplateSelect() {
