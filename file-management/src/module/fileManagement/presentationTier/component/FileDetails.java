@@ -45,10 +45,10 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.Receiver;
+import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.BaseTheme;
 
 import module.fileManagement.domain.AbstractFileNode;
-import module.fileManagement.domain.DirNode;
 import module.fileManagement.domain.Document;
 import module.fileManagement.domain.FileManagementSystem;
 import module.fileManagement.domain.FileNode;
@@ -141,13 +141,17 @@ public class FileDetails extends NodeDetails {
 	    sameNameFailed = StringUtils.EMPTY;
 	}
 
+	private boolean dirHasFile(String filename) {
+	    AbstractFileNode searchNode = getNode().getParent().searchNode(filename);
+	    return (searchNode != null && !searchNode.equals(getNode()));
+	}
+
 	@Override
 	public OutputStream receiveUpload(String filename, String mimeType) {
 	    try {
 		file = UploadFileArea.DEFAULT_FACTORY.createFile(filename, mimeType);
 		final String displayName = FileManagementSystem.getNewDisplayName(getDocument().getDisplayName(), filename);
-		DirNode parent = getNode().getParent();
-		if (parent.searchNode(displayName) != null) {
+		if (dirHasFile(displayName)) {
 		    interruptUpload();
 		    sameNameFailed = displayName;
 		    return new OutputStream() {
@@ -174,8 +178,9 @@ public class FileDetails extends NodeDetails {
 		String warnMsg = String.format("Já existe um ficheiro com esse nome %s", sameNameFailed);
 		FileManagementSystem.showWarning(getApplication(), warnMsg);
 		sameNameFailed = StringUtils.EMPTY;
+	    } else {
+		FileManagementSystem.showWarning(getApplication(), "Upload falhou. Tente novamente!");
 	    }
-	    FileManagementSystem.showWarning(getApplication(), "Upload falhou. Tente novamente!");
 	}
 
 	@Override
@@ -185,8 +190,8 @@ public class FileDetails extends NodeDetails {
 	    final String displayName = FileManagementSystem.getNewDisplayName(document.getDisplayName(), event.getFilename());
 	    getNode().addNewVersion(file, event.getFilename(), displayName, event.getLength());
 	    getNodeItem().setValue(getNode());
-	    getApplication().getMainWindow().showNotification(
-		    String.format("Upload da nova versão %s com sucesso", document.getVersionNumber()));
+	    String msg = String.format("Nova versão %s", document.getVersionNumber());
+	    FileManagementSystem.show(getApplication(), "Upload", msg, Window.Notification.TYPE_HUMANIZED_MESSAGE);
 	    sameNameFailed = StringUtils.EMPTY;
 	}
 
