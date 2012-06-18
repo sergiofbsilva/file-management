@@ -225,6 +225,7 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
 		public void buttonClick(ClickEvent event) {
 		    editMetadataView = editMetadataPanel();
 		    vl.replaceComponent(metadataInfoView, editMetadataView);
+		    btEditMetadata.setVisible(false);
 		}
 	    });
 	    hl.addComponent(btEditMetadata);
