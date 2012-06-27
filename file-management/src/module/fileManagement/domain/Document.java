@@ -25,6 +25,7 @@ import module.fileManagement.domain.metadata.MetadataTemplate;
 import module.fileManagement.tools.StringUtils;
 
 import myorg.applicationTier.Authenticate.UserView;
+import myorg.domain.User;
 
 public class Document extends Document_Base {
 
@@ -278,7 +279,9 @@ public class Document extends Document_Base {
     }
 
     private void addNewVersionMetadata() {
-	addMetadata(MetadataKey.getNewDocumentVersionKey(), UserView.getCurrentUser().getShortPresentationName());
+	User currentUser = UserView.getCurrentUser();
+	addMetadata(MetadataKey.getNewDocumentVersionKey(), currentUser == null ? FileManagementSystem.getMessage("user.script")
+		: currentUser.getShortPresentationName());
 	setModifiedDateNow();
     }
 
