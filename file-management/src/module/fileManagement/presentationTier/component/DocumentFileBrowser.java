@@ -5,19 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import module.fileManagement.domain.AbstractFileNode;
-import module.fileManagement.domain.ContextPath;
-import module.fileManagement.domain.DirNode;
-import module.fileManagement.domain.Document;
-import module.fileManagement.domain.FileManagementSystem;
-import module.fileManagement.domain.FileNode;
-import module.fileManagement.domain.FileRepository;
-import module.fileManagement.domain.VersionedFile;
-import module.fileManagement.presentationTier.component.viewers.VisibilityListViewer;
-import myorg.applicationTier.Authenticate.UserView;
-import myorg.domain.RoleType;
-import myorg.domain.User;
-import myorg.domain.groups.Role;
+import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.data.VBoxProperty;
 import pt.ist.vaadinframework.data.reflect.DomainContainer;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
@@ -44,6 +32,22 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window.Notification;
 
+import module.fileManagement.domain.AbstractFileNode;
+import module.fileManagement.domain.ContextPath;
+import module.fileManagement.domain.DirNode;
+import module.fileManagement.domain.Document;
+import module.fileManagement.domain.FileManagementSystem;
+import module.fileManagement.domain.FileNode;
+import module.fileManagement.domain.FileRepository;
+import module.fileManagement.domain.VersionedFile;
+import module.fileManagement.presentationTier.component.viewers.VisibilityListViewer;
+import module.fileManagement.presentationTier.pages.DocumentBrowse;
+
+import myorg.applicationTier.Authenticate.UserView;
+import myorg.domain.RoleType;
+import myorg.domain.User;
+import myorg.domain.groups.Role;
+
 @SuppressWarnings("serial")
 public class DocumentFileBrowser extends CustomComponent implements ValueChangeNotifier, ValueChangeListener {
 
@@ -55,6 +59,10 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 
     protected String getMessage(final String key, String... args) {
 	return FileManagementSystem.getMessage(key, args);
+    }
+
+    private void open(DirNode dirNode) {
+	EmbeddedApplication.open(getApplication(), DocumentBrowse.class, dirNode.getContextPath().toString());
     }
 
     public class DocumentTable extends Table implements Table.ValueChangeListener, ItemClickListener {
@@ -115,9 +123,10 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 
 	    if (event.isDoubleClick()) {
 		if (abstractFileNode.isDir()) {
-		    nodeItem.setValue(abstractFileNode);
-		    changeTable();
-		    documentMenu.addDirNode((DirNode) abstractFileNode);
+		    open((DirNode) abstractFileNode);
+		    // nodeItem.setValue(abstractFileNode);
+		    // changeTable();
+		    // documentMenu.addDirNode((DirNode) abstractFileNode);
 		} else if (abstractFileNode.isFile()) {
 		    final FileNode fileNode = (FileNode) abstractFileNode;
 		    final Document document = fileNode.getDocument();
@@ -158,8 +167,9 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 	    @Override
 	    public void menuSelected(MenuItem selectedItem) {
 		if (!nodeItem.getValue().equals(dirNode)) {
-		    removeAllItemsAfter(selectedItem);
-		    nodeItem.setValue(dirNode);
+		    // removeAllItemsAfter(selectedItem);
+		    // nodeItem.setValue(dirNode);
+		    open(dirNode);
 		}
 	    }
 
