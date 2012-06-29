@@ -2,8 +2,6 @@ package module.fileManagement.presentationTier.component.fields;
 
 import java.util.Collection;
 
-import module.fileManagement.tools.StringUtils;
-import module.organization.domain.Person;
 import pt.ist.fenixframework.plugins.luceneIndexing.queryBuilder.dsl.BuildingState;
 import pt.ist.fenixframework.plugins.luceneIndexing.queryBuilder.dsl.DSLState;
 import pt.ist.vaadinframework.data.reflect.DomainContainer;
@@ -12,6 +10,9 @@ import pt.ist.vaadinframework.ui.TimeoutSelect;
 import com.vaadin.data.Property;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
+
+import module.fileManagement.tools.StringUtils;
+import module.organization.domain.Person;
 
 public class PersonField extends TimeoutSelect {
 
@@ -73,5 +74,15 @@ public class PersonField extends TimeoutSelect {
 		container.search(event.getText());
 	    }
 	});
+    }
+
+    @Override
+    public void setPropertyDataSource(Property newDataSource) {
+	super.setPropertyDataSource(newDataSource);
+	if (newDataSource != null && newDataSource.getValue() != null) {
+	    Person value = (Person) newDataSource.getValue();
+	    setValue(value);
+	    setText(value.getUser().getUsername());
+	}
     }
 }
