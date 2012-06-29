@@ -12,6 +12,9 @@ public class StringUtils extends org.apache.commons.lang.StringUtils {
      * @return
      */
     public static boolean matches(String stack, String needle) {
+	if (StringUtils.isBlank(stack) || StringUtils.isBlank(needle)) {
+	    return false;
+	}
 	String[] needles = StringNormalizer.normalize(needle).toLowerCase().split(" ");
 	final String normalizedStack = StringNormalizer.normalize(stack).toLowerCase();
 	for (String value : needles) {

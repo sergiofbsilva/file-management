@@ -41,7 +41,10 @@ public class FMSFieldFactory extends DefaultFieldFactory {
 	    @Override
 	    public Field makeField(MetadataKey key) {
 		if ("Observações".equals(key.getKeyValue())) {
-		    return new TextArea();
+		    TextArea textArea = new TextArea();
+		    textArea.setColumns(22);
+		    textArea.setRows(5);
+		    return textArea;
 		}
 		return new TextField();
 	    }
