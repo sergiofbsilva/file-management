@@ -30,20 +30,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import module.fileManagement.domain.AbstractFileNode;
-import module.fileManagement.domain.ContextPath;
-import module.fileManagement.domain.VisibilityGroup;
-import module.fileManagement.domain.VisibilityGroup.VisibilityOperation;
-import module.fileManagement.presentationTier.component.NodeDetails;
-import module.fileManagement.presentationTier.component.groups.GroupCreatorRegistry;
-import module.fileManagement.presentationTier.component.groups.HasPersistentGroup;
-import module.fileManagement.presentationTier.component.groups.HasPersistentGroupCreator;
-import module.fileManagement.presentationTier.data.AbstractSearchContainer;
-import module.fileManagement.presentationTier.data.GroupContainer;
-import module.vaadin.ui.BennuTheme;
-import myorg.applicationTier.Authenticate.UserView;
-import myorg.domain.Presentable;
-import myorg.domain.groups.SingleUserGroup;
 import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
@@ -74,6 +60,22 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.BaseTheme;
+
+import module.fileManagement.domain.AbstractFileNode;
+import module.fileManagement.domain.ContextPath;
+import module.fileManagement.domain.VisibilityGroup;
+import module.fileManagement.domain.VisibilityGroup.VisibilityOperation;
+import module.fileManagement.presentationTier.component.NodeDetails;
+import module.fileManagement.presentationTier.component.groups.GroupCreatorRegistry;
+import module.fileManagement.presentationTier.component.groups.HasPersistentGroup;
+import module.fileManagement.presentationTier.component.groups.HasPersistentGroupCreator;
+import module.fileManagement.presentationTier.data.AbstractSearchContainer;
+import module.fileManagement.presentationTier.data.GroupContainer;
+import module.vaadin.ui.BennuTheme;
+
+import myorg.applicationTier.Authenticate.UserView;
+import myorg.domain.Presentable;
+import myorg.domain.groups.SingleUserGroup;
 
 @EmbeddedComponent(path = { "DocumentShare" }, args = { "fileNode", "contextPath" })
 /**
@@ -121,7 +123,7 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
     public boolean isAllowedToOpen(Map<String, String> arguments) {
 	final String fileExternalId = arguments.get("fileNode");
 	final AbstractFileNode node = AbstractFileNode.fromExternalId(fileExternalId);
-	if (node == null || node.isDir() || !node.isWriteGroupMember()) {
+	if (node == null || node.isShared() || !node.isWriteGroupMember()) {
 	    return false;
 	}
 	return true;

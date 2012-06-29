@@ -159,8 +159,8 @@ public class FileManagementSystem extends FileManagementSystem_Base implements M
     public static void show(Application app, final String caption, final String message, int type) {
 	Window.Notification notif = new Window.Notification(caption, type);
 	notif.setDescription(message);
-	notif.setDelayMsec(5000);
-	notif.setPosition(Window.Notification.POSITION_TOP_RIGHT);
+	//notif.setDelayMsec(1000);
+	notif.setPosition(Window.Notification.POSITION_CENTERED);
 	app.getMainWindow().showNotification(notif);
     }
 

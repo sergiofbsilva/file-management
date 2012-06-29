@@ -17,12 +17,15 @@ public class CreateMetadataTemplates extends WriteCustomTask {
 	final MetadataTemplate metadataTemplate = FileManagementSystem.getInstance().getMetadataTemplate(name);
 	if (metadataTemplate == null) {
 	    MetadataTemplate template = new MetadataTemplate(name);
-	    template.addKey(MetadataKey.getOrCreateInstance("Nº Declaração", SeqNumberMetadata.class), 1, Boolean.TRUE);
+	    template.addKey(MetadataKey.getOrCreateInstance("Nº Declaração", SeqNumberMetadata.class), 1, Boolean.TRUE,
+		    Boolean.TRUE);
 	    template.addKey(MetadataKey.getOrCreateInstance("Data", DateTimeMetadata.class), 2, Boolean.TRUE);
 	    template.addKey(MetadataKey.getOrCreateInstance("Destinatário", PersonMetadata.class), 3, Boolean.FALSE);
 	    template.addKey(MetadataKey.getOrCreateInstance("Nº Mecanográfico", IntegerMetadata.class), 4, Boolean.FALSE);
 	    template.addKey(MetadataKey.getOrCreateInstance("Remetente", PersonMetadata.class), 5, Boolean.TRUE);
 	    template.addKey(MetadataKey.getOrCreateInstance("Observações"), 6, Boolean.FALSE);
+	} else {
+	    out.printf("template already created %s\n", name);
 	}
     }
 
@@ -39,6 +42,8 @@ public class CreateMetadataTemplates extends WriteCustomTask {
 	    template.addKey(MetadataKey.getOrCreateInstance("Departamento"), 6, Boolean.FALSE);
 	    template.addKey(MetadataKey.getOrCreateInstance("Descrição"), 7, Boolean.FALSE);
 	    template.addKey(MetadataKey.getOrCreateInstance("Entidade"), 8, Boolean.FALSE);
+	} else {
+	    out.printf("template already created %s\n", name);
 	}
     }
 
