@@ -2,13 +2,13 @@ package module.fileManagement.domain;
 
 import static module.fileManagement.domain.FileManagementSystem.getMessage;
 
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.commons.lang.StringUtils;
 
 import pt.ist.fenixWebFramework.services.Service;
+import pt.utl.ist.fenix.tools.util.NaturalOrderComparator;
 
 import com.vaadin.terminal.Resource;
 import com.vaadin.terminal.ThemeResource;
@@ -30,6 +30,8 @@ import myorg.domain.groups.PersistentGroup;
 import myorg.domain.groups.SingleUserGroup;
 
 public abstract class AbstractFileNode extends AbstractFileNode_Base implements Comparable<AbstractFileNode> {
+    final static NaturalOrderComparator STRING_NATURAL_COMPARATOR;
+
     static {
 	DirectRelation<AbstractFileNode, DirNode> child = DirNodeAbstractFileNode;
 	child.addListener(new RelationListener<AbstractFileNode, DirNode>() {
@@ -59,6 +61,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 
 	    }
 	});
+	STRING_NATURAL_COMPARATOR = new NaturalOrderComparator();
     }
 
     public enum VisibilityState {
@@ -181,9 +184,20 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 
     @Override
     public int compareTo(final AbstractFileNode node) {
-	final String displayName1 = getDisplayName();
-	final String displayName2 = node.getDisplayName();
-	return Collator.getInstance().compare(displayName1, displayName2);
+	if ((isDir() && node.isDir()) || (isFile() && node.isFile())) {
+	    final String displayName1 = getDisplayName();
+	    final String displayName2 = node.getDisplayName();
+	    return STRING_NATURAL_COMPARATOR.compare(displayName1, displayName2);
+	}
+
+	if (isDir() && node.isFile()) {
+	    return -1;
+	}
+
+	if (isFile() && node.isDir()) {
+	    return 1;
+	}
+	return -1;
     }
 
     public VisibilityList getVisibilityGroups() {
