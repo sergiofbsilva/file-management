@@ -1,7 +1,7 @@
 package module.fileManagement.presentationTier.component;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -52,6 +52,8 @@ import myorg.domain.groups.Role;
 public class DocumentFileBrowser extends CustomComponent implements ValueChangeNotifier, ValueChangeListener {
 
     private boolean accessDenied = false;
+    private static final int MIN = 10;
+    private static final int MAX = 25;
 
     public Component getCurrent() {
 	return this;
@@ -67,12 +69,10 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 
     public class DocumentTable extends Table implements Table.ValueChangeListener, ItemClickListener {
 
-	private static final int MIN = 10;
-	private static final int MAX = 25;
-
-	public java.util.Collection<?> getSortableContainerPropertyIds() {
-	    return Collections.EMPTY_SET;
-	};
+	/*
+	 * public java.util.Collection<?> getSortableContainerPropertyIds() {
+	 * return Collections.EMPTY_SET; };
+	 */
 
 	DocumentTable() {
 	    super();
@@ -83,7 +83,8 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 	    setMultiSelect(false);
 	    setImmediate(true);
 	    setSortDisabled(false);
-	    setColumnCollapsingAllowed(true);
+	    setColumnCollapsingAllowed(false);
+	    setColumnReorderingAllowed(false);
 
 	    final ItemClickListener itemClickListener = this;
 	    addListener(itemClickListener);
@@ -103,17 +104,11 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 
 		@Override
 		public void containerItemSetChange(com.vaadin.data.Container.ItemSetChangeEvent event) {
-		    final int size = event.getContainer().size();
-		    if (size < MIN) {
-			setPageLength(MIN);
-		    } else if (size >= MIN && size <= MAX) {
-			setPageLength(0);
-		    } else if (size > MAX) {
-			setPageLength(MAX);
-		    }
+		    refreshPageLength();
 		}
 
 	    });
+
 	}
 
 	@Override
@@ -229,6 +224,17 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
     private DomainItem<AbstractFileNode> nodeItem;
     private DomainContainer<AbstractFileNode> items;
 
+    private void refreshPageLength() {
+	final int size = documentTable.getContainerDataSource().size();
+	if (size < MIN) {
+	    documentTable.setPageLength(MIN);
+	} else if (size >= MIN && size <= MAX) {
+	    documentTable.setPageLength(0);
+	} else if (size > MAX) {
+	    documentTable.setPageLength(MAX);
+	}
+    }
+
     @Override
     public void attach() {
 	super.attach();
@@ -287,9 +293,18 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 	});
 	childs.setContainerProperties("displayName", "icon");
 	childs.setItemSorter(new ItemSorter() {
+	    boolean asc = true;
 
 	    @Override
 	    public void setSortProperties(final Sortable container, final Object[] propertyId, final boolean[] ascending) {
+		//System.out.printf("cont: %s, props : %s, ascs : %s\n", container, Arrays.toString(propertyId),
+//			Arrays.toString(ascending));
+		for (boolean b : ascending) {
+		    if (b != asc) {
+			asc = b;
+			break;
+		    }
+		}
 	    }
 
 	    @Override
@@ -298,21 +313,22 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 		final AbstractFileNode node1 = getNodeFromItemId(itemId1);
 		final AbstractFileNode node2 = getNodeFromItemId(itemId2);
 
-		return node1.compareTo(node2);
+		return asc ? node1.compareTo(node2) : node2.compareTo(node1);
 	    }
 
 	});
 	documentTable.setContainerDataSource(childs);
 	documentTable.setVisibleColumns(new String[] { "displayName", "visibilidade" });
-	documentTable.setSortContainerPropertyId("displayName");
-	documentTable.setColumnHeaderMode(Table.COLUMN_HEADER_MODE_HIDDEN);
+	// documentTable.setSortContainerPropertyId("displayName");
+	documentTable.setColumnHeaders(new String[] { "Nome", "Visibilidade" });
+	documentTable.setColumnAlignment("visibilidade", Table.ALIGN_RIGHT);
 	documentTable.setRowHeaderMode(Table.ROW_HEADER_MODE_ICON_ONLY);
 	documentTable.setItemIconPropertyId("icon");
-	documentTable.setColumnReorderingAllowed(false);
 	documentTable.setColumnExpandRatio("icon", 0.15f);
 	documentTable.setColumnExpandRatio("displayName", 0.60f);
 	documentTable.setColumnExpandRatio("visibilidade", 0.25f);
 	documentTable.sort();
+	refreshPageLength();
     }
 
     private ThemeResource getThemeResource(AbstractFileNode abstractFileNode) {
