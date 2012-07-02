@@ -1,6 +1,7 @@
 package module.fileManagement.domain.metadata;
 
 import module.organization.domain.Person;
+import org.apache.commons.lang.StringUtils;
 
 public class PersonMetadata extends PersonMetadata_Base {
 
@@ -21,7 +22,7 @@ public class PersonMetadata extends PersonMetadata_Base {
 
     @Override
     public String getPresentationValue() {
-	return getValue().getPresentationName();
+	return getValue() == null ? StringUtils.EMPTY : getValue().getPresentationName();
     }
 
 }
