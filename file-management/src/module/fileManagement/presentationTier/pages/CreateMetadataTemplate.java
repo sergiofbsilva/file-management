@@ -114,7 +114,7 @@ public class CreateMetadataTemplate extends CustomComponent implements EmbeddedC
 		final KeyField itemProperty = (KeyField) form.getItemProperty(propId);
 		String keyName = (String) itemProperty.getValue();
 		Class<? extends Metadata> metadataClassType = itemProperty.getMetadataType();
-		final MetadataKey key = new MetadataKey(keyName, Boolean.FALSE, metadataClassType);
+		final MetadataKey key = MetadataKey.getOrCreateInstance(keyName, Boolean.FALSE, metadataClassType);
 		currentTemplate
 			.addKey(key, ((KeyProp) propId).getIndex(), itemProperty.getRequired(), itemProperty.getReadOnly());
 	    }

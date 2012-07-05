@@ -5,11 +5,15 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import jvstm.cps.ConsistencyPredicate;
 import pt.ist.fenixWebFramework.services.Service;
 import pt.ist.fenixframework.FFDomainException;
+
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 
 import module.fileManagement.domain.exception.NoAvailableQuotaException;
 import module.fileManagement.domain.exception.NodeDuplicateNameException;
@@ -240,6 +244,21 @@ public class DirNode extends DirNode_Base {
 	}
 
 	return nodes;
+    }
+
+    public Map<AbstractFileNode, Map<MetadataKey, Boolean>> doSearch(final Multimap<MetadataKey, Object> searchMap) {
+	Map<AbstractFileNode, Map<MetadataKey, Boolean>> resultMap = Maps.newHashMap();
+
+	for (AbstractFileNode child : getChild()) {
+	    if (child.isDir()) {
+		resultMap.putAll(((DirNode) child).doSearch(searchMap));
+	    }
+	    if (child.isFile()) {
+		FileNode file = (FileNode) child;
+		resultMap.put(file, file.search(searchMap));
+	    }
+	}
+	return resultMap;
     }
 
     // file creation

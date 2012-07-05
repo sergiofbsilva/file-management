@@ -63,7 +63,6 @@ public class PersonField extends TimeoutSelect {
 
     public PersonField() {
 	container = new PersonContainer();
-	setSizeFull();
 	setImmediate(true);
 	setContainerDataSource(container);
 	setItemCaptionPropertyId("presentationName");

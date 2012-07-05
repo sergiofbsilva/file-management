@@ -26,9 +26,12 @@ package module.fileManagement.domain;
 
 import java.io.File;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import pt.ist.fenixWebFramework.services.Service;
+
+import com.google.common.collect.Multimap;
 
 import module.fileManagement.domain.exception.CannotCreateFileException;
 import module.fileManagement.domain.exception.NoAvailableQuotaException;
@@ -36,6 +39,7 @@ import module.fileManagement.domain.log.CreateNewVersionLog;
 import module.fileManagement.domain.log.FileLog;
 import module.fileManagement.domain.log.RecoverFileLog;
 import module.fileManagement.domain.log.UnshareFileLog;
+import module.fileManagement.domain.metadata.MetadataKey;
 
 import myorg.applicationTier.Authenticate.UserView;
 import myorg.domain.exceptions.DomainException;
@@ -136,6 +140,10 @@ public class FileNode extends FileNode_Base {
     @Override
     public boolean search(String searchText) {
 	return getDocument().search(searchText);
+    }
+
+    public Map<MetadataKey, Boolean> search(final Multimap<MetadataKey, Object> searchMap) {
+	return getDocument().search(searchMap);
     }
 
     @Override

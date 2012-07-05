@@ -1,5 +1,6 @@
 package module.fileManagement.presentationTier.component.fields;
 
+import org.apache.commons.lang.StringUtils;
 import org.vaadin.customfield.PropertyConverter;
 
 import com.vaadin.data.Property;
@@ -53,6 +54,7 @@ public class IntegerField extends TextField {
 	    }
 
 	});
+	setNullRepresentation(StringUtils.EMPTY);
     }
 
     @Override

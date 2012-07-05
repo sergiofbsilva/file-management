@@ -110,7 +110,7 @@ public class FMSFieldFactory extends DefaultFieldFactory {
     }
 
     @Override
-    protected Field makeField(Item item, Object propertyId, Component uiContext) {
+    public Field makeField(Item item, Object propertyId, Component uiContext) {
 	final Field field = makeField(propertyId);
 	if (field instanceof AbstractTextField) {
 	    ((AbstractTextField) field).setNullRepresentation(StringUtils.EMPTY);
@@ -126,7 +126,7 @@ public class FMSFieldFactory extends DefaultFieldFactory {
 	return field;
     }
 
-    private FieldMaker get(Class<? extends Metadata> type) {
+    private static FieldMaker get(Class<? extends Metadata> type) {
 	if (Metadata.class.equals(type)) {
 	    return null;
 	}
@@ -137,7 +137,7 @@ public class FMSFieldFactory extends DefaultFieldFactory {
 	return fieldMaker;
     }
 
-    private Field makeField(Object propertyId) {
+    public static Field makeField(Object propertyId) {
 	final MetadataKey key = (MetadataKey) propertyId;
 	final Class<? extends Metadata> metadataValueType = key.getMetadataValueType();
 	final FieldMaker fieldMaker = get(metadataValueType);

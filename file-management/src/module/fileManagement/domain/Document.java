@@ -1,7 +1,5 @@
 package module.fileManagement.domain;
 
-import static module.fileManagement.tools.StringUtils.matches;
-
 import java.io.File;
 import java.util.Collection;
 import java.util.Comparator;
@@ -16,6 +14,7 @@ import pt.ist.fenixWebFramework.services.Service;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 
@@ -84,6 +83,52 @@ public class Document extends Document_Base {
 	// }
     }
 
+    private boolean match(Object stack, Object needle) {
+	if (stack == null || needle == null) {
+	    return false;
+	}
+
+	if (needle instanceof String && stack instanceof String) {
+	    return StringUtils.matches((String) stack, (String) needle);
+	}
+
+	return stack.equals(needle);
+    }
+
+    /*
+     * Searches for string values in metadataKey if present.
+     */
+    public Map<MetadataKey, Boolean> search(final Multimap<MetadataKey, Object> searchMap) {
+	Map<MetadataKey, Boolean> result = new HashMap<MetadataKey, Boolean>();
+	for (Metadata metadata : getMetadata()) {
+	    final MetadataKey metadataKey = metadata.getMetadataKey();
+	    final Object metadataValue = metadata.getValue();
+	    final Collection<Object> searchValues = searchMap.get(metadataKey);
+	    boolean found = false;
+	    for (Object searchValue : searchValues) {
+		if (searchValue != null) {
+		    if (match(metadataValue, searchValue)) {
+			found = true;
+			break;
+		    }
+		}
+	    }
+	    result.put(metadataKey, found);
+	}
+	// for (Entry<MetadataKey, Object> entry : searchMap.entrySet()) {
+	// Metadata metadata = getMetadata(entry.getKey());
+	// if (metadata != null) {
+	// final Object searchValue = entry.getValue();
+	// final Object metadataValue = metadata.getValue();
+	// // System.out.printf("compare %s>%s with $>%s : %s\n",
+	// // searchValue.getClass().getName(), searchValue, metadataValue
+	// // .getClass().getName(), metadataValue, equals);
+	// result.put(entry.getKey(), match(metadataValue, searchValue));
+	// }
+	// }
+	return result;
+    }
+
     public boolean search(String searchText) {
 	return /* matches(getDisplayName(), searchText) || */searchMetadata(searchText);
     }
@@ -92,7 +137,7 @@ public class Document extends Document_Base {
 	for (Metadata metadata : getMetadata()) {
 	    final String keyValue = metadata.getKeyValue();
 	    final String value = metadata.getPresentationValue();
-	    if (matches(keyValue, searchText) || matches(value, searchText)) {
+	    if (StringUtils.matches(keyValue, searchText) || StringUtils.matches(value, searchText)) {
 		return true;
 	    }
 	}
