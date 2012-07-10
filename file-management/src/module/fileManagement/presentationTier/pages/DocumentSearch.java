@@ -250,41 +250,60 @@ public class DocumentSearch extends CustomComponent implements EmbeddedComponent
 	final VerticalLayout vlMain = new VerticalLayout();
 	final VerticalLayout vlEntries = new VerticalLayout();
 
-	final AdvancedSearchEntry.RemoveEntryListener listener = new AdvancedSearchEntry.RemoveEntryListener() {
+	final AdvancedSearchEntry.RemoveEntryListener removeListener = new AdvancedSearchEntry.RemoveEntryListener() {
 
 	    @Override
 	    public void removeEntry(AdvancedSearchEntry.RemoveEntryEvent event) {
 		vlEntries.removeComponent(event.getEntry());
 	    }
 	};
+	final Button btAddEntry = new Button("+");
 
-	final Select cbTemplate = new Select("Tipologia");
+	final Select cbTemplate = new Select();
+	cbTemplate.setWidth(30, UNITS_EM);
 	cbTemplate.setImmediate(Boolean.TRUE);
 	cbTemplate.setNullSelectionAllowed(Boolean.FALSE);
 	cbTemplate.setContainerDataSource((Container) new DomainItem(FileManagementSystem.getInstance())
 		.getItemProperty("metadataTemplates"));
 	cbTemplate.setItemCaptionPropertyId("name");
-	cbTemplate.addListener(new ValueChangeListener() {
+	final ValueChangeListener templateListener = new ValueChangeListener() {
 
 	    @Override
 	    public void valueChange(ValueChangeEvent event) {
 		vlEntries.removeAllComponents();
+		for (Object listener : btAddEntry.getListeners(ClickEvent.class)) {
+		    ((ClickListener) listener).buttonClick(null);
+		}
 	    }
-	});
+	};
+	cbTemplate.addListener(templateListener);
 
-	vlMain.addComponent(cbTemplate);
+	HorizontalLayout hl = new HorizontalLayout();
+	hl.setSpacing(Boolean.TRUE);
+	final Label lbl = new Label("Tipologia");
+	lbl.setWidth(180, UNITS_PIXELS);
+	hl.addComponent(lbl);
+	hl.addComponent(cbTemplate);
+	final Label lblSimpleHelp = new Label("Por favor seleccione uma tipologia");
+	lblSimpleHelp.addStyleName(BennuTheme.LABEL_SMALL);
+	hl.addComponent(lblSimpleHelp);
+
+	vlMain.addComponent(hl);
 	vlMain.addComponent(vlEntries);
-	vlMain.addComponent(new Button("+", new ClickListener() {
+	final ClickListener addEntryListener = new ClickListener() {
 
 	    @Override
 	    public void buttonClick(ClickEvent event) {
 		MetadataTemplate template = (MetadataTemplate) cbTemplate.getValue();
 		DomainContainer<MetadataKey> keys = new DomainContainer<MetadataKey>(template.getKey(), MetadataKey.class);
 		final AdvancedSearchEntry advSearch = new AdvancedSearchEntry(keys);
-		advSearch.addListener(listener);
+		advSearch.addListener(removeListener);
 		vlEntries.addComponent(advSearch);
 	    }
-	}));
+	};
+
+	btAddEntry.addListener(addEntryListener);
+	vlMain.addComponent(btAddEntry);
 
 	Button btSimpleSearch = new Button("Pesquisa Simples", new ClickListener() {
 
@@ -316,7 +335,8 @@ public class DocumentSearch extends CustomComponent implements EmbeddedComponent
 		doAdvSearch(searchMap);
 	    }
 	});
-	HorizontalLayout hl = new HorizontalLayout();
+
+	hl = new HorizontalLayout();
 	hl.setSpacing(Boolean.TRUE);
 	hl.addComponent(btSearch);
 	hl.addComponent(btSimpleSearch);
@@ -420,6 +440,9 @@ public class DocumentSearch extends CustomComponent implements EmbeddedComponent
 	    hl.addComponent(cbMetadataKey);
 	    hl.addComponent(placeHolder);
 	    hl.addComponent(btRemove);
+	    if (keys.size() > 0) {
+		cbMetadataKey.select(keys.getIdByIndex(0));
+	    }
 	    setCompositionRoot(hl);
 	}
 
