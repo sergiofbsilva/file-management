@@ -88,6 +88,10 @@ public class Document extends Document_Base {
 	    return false;
 	}
 
+	if (needle instanceof DateTime && stack instanceof DateTime) {
+	    return ((DateTime) needle).toLocalDate().equals(((DateTime) stack).toLocalDate());
+	}
+
 	if (needle instanceof String && stack instanceof String) {
 	    return StringUtils.matches((String) stack, (String) needle);
 	}

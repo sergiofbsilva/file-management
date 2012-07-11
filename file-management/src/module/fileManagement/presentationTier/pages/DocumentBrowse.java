@@ -28,12 +28,6 @@ import static module.fileManagement.domain.FileManagementSystem.getMessage;
 
 import java.util.Map;
 
-import module.fileManagement.domain.AbstractFileNode;
-import module.fileManagement.domain.ContextPath;
-import module.fileManagement.presentationTier.component.AddDirWindow;
-import module.fileManagement.presentationTier.component.DocumentFileBrowser;
-import module.fileManagement.presentationTier.component.NodeDetails;
-import myorg.applicationTier.Authenticate.UserView;
 import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
@@ -53,6 +47,14 @@ import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Layout;
+
+import module.fileManagement.domain.AbstractFileNode;
+import module.fileManagement.domain.ContextPath;
+import module.fileManagement.presentationTier.component.AddDirWindow;
+import module.fileManagement.presentationTier.component.DocumentFileBrowser;
+import module.fileManagement.presentationTier.component.NodeDetails;
+
+import myorg.applicationTier.Authenticate.UserView;
 
 @EmbeddedComponent(path = { "DocumentBrowse" }, args = { "contextPath" })
 /**

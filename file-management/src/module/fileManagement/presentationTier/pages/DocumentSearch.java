@@ -69,6 +69,7 @@ import com.vaadin.ui.VerticalLayout;
 import module.fileManagement.domain.AbstractFileNode;
 import module.fileManagement.domain.DirNode;
 import module.fileManagement.domain.FileManagementSystem;
+import module.fileManagement.domain.FileNode;
 import module.fileManagement.domain.metadata.MetadataKey;
 import module.fileManagement.domain.metadata.MetadataTemplate;
 import module.fileManagement.presentationTier.component.DocumentFileBrowser;
@@ -92,7 +93,7 @@ public class DocumentSearch extends CustomComponent implements EmbeddedComponent
     private GridSystemLayout gsl;
     private Component advSearch;
     private Component simpleSearch;
-
+    private boolean isUsingSimpleSearch = true;
     private final TextField txtSearch;
 
     @Override
@@ -141,7 +142,7 @@ public class DocumentSearch extends CustomComponent implements EmbeddedComponent
 
     private void setNoResults() {
 	final Object value = txtSearch.getValue();
-	final String simpleSearch = "Não existem resultados a apresentar para a pesquisa por '%s's";
+	final String simpleSearch = "Não existem resultados a apresentar para a pesquisa por '%s'";
 	final String advSearch = "Não existem resultados a apresentar";
 
 	lblSearchResult.setValue(value != null ? String.format(simpleSearch, value) : advSearch);
@@ -152,12 +153,23 @@ public class DocumentSearch extends CustomComponent implements EmbeddedComponent
 	}
     }
 
-    private void updateSearchResultLabel(final int size) {
-	final Object value = txtSearch.getValue();
-	final String simpleSearch = "A pesquisa por '%s' resultou em %d ocorrências";
-	final String advSearch = "A pesquisa resultou em %d ocorrências";
-
-	lblSearchResult.setValue(String.format(value == null ? advSearch : simpleSearch, value, size));
+    private void updateSearchResultLabel(Set<AbstractFileNode> searchResult) {
+	final String simpleSearch = "A pesquisa por '%s' resultou em %d ocorrências de %d ficheiros";
+	final String advSearch = "A pesquisa resultou em %d ocorrências de %d ficheiros";
+	final Iterator<AbstractFileNode> iterator = searchResult.iterator();
+	int total = 0;
+	while (iterator.hasNext()) {
+	    final AbstractFileNode next = iterator.next();
+	    if (next instanceof FileNode) {
+		total = next.getParent().getCountFiles();
+		break;
+	    }
+	}
+	if (isUsingSimpleSearch) {
+	    lblSearchResult.setValue(String.format(simpleSearch, txtSearch.getValue(), searchResult.size(), total));
+	} else {
+	    lblSearchResult.setValue(String.format(advSearch, searchResult.size(), total));
+	}
 	lblSearchResult.setVisible(Boolean.TRUE);
     }
 
@@ -167,7 +179,7 @@ public class DocumentSearch extends CustomComponent implements EmbeddedComponent
 	} else {
 	    browser.setNodes(searchResult);
 	    browser.setVisible(Boolean.TRUE);
-	    updateSearchResultLabel(searchResult.size());
+	    updateSearchResultLabel(searchResult);
 	    final AbstractFileNode selected = (AbstractFileNode) browser.getNodes().getIdByIndex(0);
 	    browser.getDocumentTable().select(selected);
 	}
@@ -310,6 +322,7 @@ public class DocumentSearch extends CustomComponent implements EmbeddedComponent
 	    @Override
 	    public void buttonClick(ClickEvent event) {
 		gsl.setCell("search", 0, 8, 8, simpleSearch);
+		isUsingSimpleSearch = true;
 	    }
 	});
 
@@ -487,6 +500,7 @@ public class DocumentSearch extends CustomComponent implements EmbeddedComponent
 	    @Override
 	    public void buttonClick(ClickEvent event) {
 		gsl.setCell("search", 0, 8, 8, advSearch);
+		isUsingSimpleSearch = false;
 	    }
 	});
 	btAdvSearch.setStyleName(BennuTheme.BUTTON_LINK);

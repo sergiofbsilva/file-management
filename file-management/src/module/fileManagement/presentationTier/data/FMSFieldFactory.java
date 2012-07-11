@@ -9,6 +9,7 @@ import pt.ist.vaadinframework.ui.fields.PopupDateTimeField;
 
 import com.google.common.collect.Maps;
 import com.vaadin.data.Item;
+import com.vaadin.terminal.Sizeable;
 import com.vaadin.ui.AbstractTextField;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DateField;
@@ -68,6 +69,7 @@ public class FMSFieldFactory extends DefaultFieldFactory {
 	    public Field makeField(MetadataKey key) {
 		final DateField dateField = new PopupDateTimeField();
 		dateField.setDateFormat("dd-MM-yyyy");
+		dateField.setResolution(DateField.RESOLUTION_DAY);
 		return dateField;
 	    }
 	};
@@ -123,6 +125,7 @@ public class FMSFieldFactory extends DefaultFieldFactory {
 	if (rule != null && rule.getReadOnly()) {
 	    field.setReadOnly(true);
 	}
+	field.setWidth(30, Sizeable.UNITS_EM);
 	return field;
     }
 
