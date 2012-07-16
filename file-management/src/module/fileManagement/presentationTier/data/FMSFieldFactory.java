@@ -125,7 +125,7 @@ public class FMSFieldFactory extends DefaultFieldFactory {
 	if (rule != null && rule.getReadOnly()) {
 	    field.setReadOnly(true);
 	}
-	field.setWidth(30, Sizeable.UNITS_EM);
+	field.setWidth(22, Sizeable.UNITS_EM);
 	return field;
     }
 
