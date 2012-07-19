@@ -80,7 +80,7 @@ public class PersonField extends TimeoutSelect {
 	if (newDataSource != null && newDataSource.getValue() != null) {
 	    Person value = (Person) newDataSource.getValue();
 	    setValue(value);
-	    // setText(value.getUser().getUsername());
+	    setText(value.getUser().getUsername());
 	}
     }
 }
