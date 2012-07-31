@@ -32,15 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import module.fileManagement.domain.DirNode;
-import module.fileManagement.domain.FileNode;
-import module.fileManagement.presentationTier.data.AbstractSearchContainer;
-import module.fileManagement.tools.StringUtils;
-import module.organization.domain.Accountability;
-import module.organization.domain.Party;
-import module.organization.domain.Person;
-import module.organization.domain.Unit;
-import module.vaadin.ui.BennuTheme;
 import pt.ist.bennu.core.applicationTier.Authenticate.UserView;
 import pt.ist.bennu.core.domain.Presentable;
 import pt.ist.bennu.core.domain.RoleType;
@@ -71,6 +62,16 @@ import com.vaadin.ui.Layout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
+
+import module.fileManagement.domain.DirNode;
+import module.fileManagement.domain.FileNode;
+import module.fileManagement.presentationTier.data.AbstractSearchContainer;
+import module.fileManagement.tools.StringUtils;
+import module.organization.domain.Accountability;
+import module.organization.domain.Party;
+import module.organization.domain.Person;
+import module.organization.domain.Unit;
+import module.vaadin.ui.BennuTheme;
 
 @EmbeddedComponent(path = { "DocumentHome" })
 /**
@@ -322,7 +323,34 @@ public class DocumentHome extends CustomComponent implements EmbeddedComponentCo
 	gsl.setCell("welcome", 16, createWelcomePanel());
 	gsl.setCell("available_repositories", 16, createRepositoryDashboard());
 	gsl.setCell("select_repository", 0, 9, 7, createRepositorySelect());
+	// gsl.setCell("testjersey", 16, createTestJersey());
     }
+
+    // private Component createTestJersey() {
+    // VerticalLayout vl = new VerticalLayout();
+    // final Label lbl = new Label();
+    // lbl.setCaption("Request:");
+    // Button bt = new Button("do request", new ClickListener() {
+    //
+    // @Override
+    // public void buttonClick(ClickEvent event) {
+    //
+    // Map<String, String> args = new HashMap<String, String>();
+    // args.put("__username__", "1");
+    // args.put("__password__", "2");
+    // final String host =
+    // "http://ashtray.ist.utl.pt:8080/ciapl/jersey/services/";
+    // lbl.setValue(new
+    // JerseyClient().connect(host).method("helloworld").arg("__username__",
+    // "1")
+    // .arg("__password__", "3").get());
+    // }
+    // });
+    //
+    // vl.addComponent(lbl);
+    // vl.addComponent(bt);
+    // return vl;
+    // }
 
     public DocumentHome() {
 	gsl = new GridSystemLayout();

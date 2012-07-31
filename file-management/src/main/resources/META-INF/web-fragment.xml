@@ -17,6 +17,7 @@
             <name>lucene</name>
             <name>scheduler</name>
             <name>scheduler-plugin</name>
+            <name>web-service-utils</name>
             <!-- [END OF BENNU GENERATED FRAGMENT] -->
         </after>
         <before>

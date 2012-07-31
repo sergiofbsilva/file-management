@@ -24,21 +24,105 @@
  */
 package module.fileManagement.domain.task;
 
-import module.organization.domain.Party;
-import pt.ist.bennu.core.domain.MyOrg;
-import pt.ist.bennu.core.domain.scheduler.WriteCustomTask;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+import org.apache.commons.lang.StringUtils;
+
+import pt.ist.bennu.core.domain.scheduler.ReadCustomTask;
+import pt.ist.fenixframework.DomainObject;
+import pt.ist.fenixframework.FenixFramework;
+import pt.ist.fenixframework.pstm.AbstractDomainObject;
+import pt.ist.fenixframework.pstm.Transaction;
+import pt.ist.fenixframework.pstm.VersionNotAvailableException;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import com.mysql.jdbc.Connection;
+
+import dml.DomainClass;
+import dml.Slot;
 
 /**
  * 
  * @author Sérgio Silva
  * 
  */
-public class InitializeQuotaAndSizeTask extends WriteCustomTask {
-    protected void doService() {
-	for (Party party : MyOrg.getInstance().getPartiesSet()) {
-	    if (party.isUnit()) {
-		out.println(party.getPartyName());
+public class InitializeQuotaAndSizeTask extends ReadCustomTask {
+
+    @Override
+    public void doIt() {
+	System.out.println("Starting XXXX");
+	out.println("Starting XXXX");
+	final Connection connection = (Connection) Transaction.getCurrentJdbcConnection();
+	Statement statementQuery = null;
+	ResultSet resultSetQuery = null;
+	Multimap<String, String> cenas = HashMultimap.create();
+	Set<String> oids = new HashSet<String>();
+	try {
+	    statementQuery = connection.createStatement();
+	    resultSetQuery = statementQuery.executeQuery("SELECT COLUMN_NAME, TABLE_NAME \n"
+		    + "    FROM INFORMATION_SCHEMA.COLUMNS\n" + "    WHERE COLUMN_NAME LIKE 'OID_%'\n"
+		    + "        AND TABLE_SCHEMA='dot';");
+	    while (resultSetQuery.next()) {
+		final String columnName = resultSetQuery.getString(1);
+		final String tableName = resultSetQuery.getString(2);
+		cenas.put(tableName, columnName);
 	    }
+
+	    statementQuery = connection.createStatement();
+	    for (String table : cenas.keySet()) {
+		final Collection<String> columns = cenas.get(table);
+		final String query = String.format("SELECT %s FROM %s;", StringUtils.join(columns, ","), table);
+		System.out.println(query);
+		resultSetQuery = statementQuery.executeQuery(query);
+		while (resultSetQuery.next()) {
+		    for (int i = 1; i <= columns.size(); i++) {
+			final String oid = resultSetQuery.getString(i);
+			if (!oids.contains(oid)) {
+			    oids.add(oid);
+			    final DomainObject domainObject = AbstractDomainObject.fromExternalId(oid);
+			    if (domainObject != null) {
+				final Class clazz = domainObject.getClass();
+				final DomainClass domainClass = FenixFramework.getDomainModel().findClass(clazz.getName());
+				final Iterator<Slot> slots = domainClass.getSlots();
+				if (slots.hasNext()) {
+				    invoke(domainObject, domainClass, clazz, slots.next());
+				}
+			    } else {
+				System.out.println("No OID found : " + oid);
+			    }
+			}
+		    }
+		}
+	    }
+	    System.out.println(oids);
+	} catch (Exception e) {
+	    e.printStackTrace();
 	}
     }
+
+    private void invoke(final DomainObject domainObject, final DomainClass domainClass, final Class clazz, final Slot slot) {
+	String name = StringUtils.EMPTY;
+	try {
+	    name = "get" + StringUtils.capitalize(slot.getName());
+	    Method method = clazz.getMethod(name);
+	    method.invoke(domainObject);
+	} catch (final InvocationTargetException ex) {
+	    if (ex.getCause() != null && ex.getCause() instanceof VersionNotAvailableException) {
+		System.out.printf("Found the sob: %s %s %s\n", domainObject.getExternalId(), domainClass.getFullName(), name);
+	    }
+	} catch (VersionNotAvailableException ex) {
+	    System.out.printf(">Found the sob: %s %s %s\n", domainObject.getExternalId(), domainClass.getFullName(), name);
+	} catch (Throwable e) {
+	    e.printStackTrace();
+	}
+    }
+
 }
