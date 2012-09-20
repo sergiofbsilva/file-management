@@ -9,12 +9,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import module.fileManagement.domain.Document;
+import module.fileManagement.domain.FileManagementSystem;
 import module.fileManagement.domain.FileNode;
 import module.fileManagement.domain.VersionedFile;
 import module.fileManagement.domain.log.AccessFileLog;
 import module.fileManagement.presentationTier.DownloadUtil;
 import pt.ist.bennu.core.applicationTier.Authenticate.UserView;
 import pt.ist.bennu.core.domain.User;
+import pt.ist.bennu.core.domain.exceptions.DomainException;
 import pt.ist.fenixWebFramework.Config.CasConfig;
 import pt.ist.fenixWebFramework.FenixWebFramework;
 import pt.ist.fenixWebFramework.services.Service;
@@ -55,7 +57,7 @@ public class DownloadDocumentServlet extends HttpServlet {
 		    versionedFile = null;
 		}
 		if (document != null && versionedFile != null) {
-		    process(request, response, document, versionedFile);
+		    process(request, response, document);
 		}
 	    }
 	} else {
@@ -64,18 +66,38 @@ public class DownloadDocumentServlet extends HttpServlet {
     }
 
     @Service
-    private void saveAccessLog(FileNode fileNode) {
+    private static void saveAccessLog(FileNode fileNode) {
 	new AccessFileLog(UserView.getCurrentUser(), fileNode.getParent().getContextPath(), fileNode);
     }
 
-    private void process(final HttpServletRequest request, final HttpServletResponse response, final Document document,
-	    final VersionedFile versionedFile) throws IOException {
+    /**
+     * 
+     * @param request
+     * @param response
+     * @param fileNode
+     * @throws IOException
+     *             if there was a problem reading the file
+     * @throws DomainException
+     *             if the current user has no access to the given
+     *             {@link FileNode}
+     */
+    public static void downloadDocument(final HttpServletRequest request, final HttpServletResponse response,
+	    final FileNode fileNode) throws IOException, DomainException {
+	if (!fileNode.isAccessible())
+	    throw new DomainException("no.read.access.to.file", FileManagementSystem.BUNDLE);
+	Document document = fileNode.getDocument();
+	if (document.mustSaveAccessLog()) {
+	    saveAccessLog(fileNode);
+	}
+	VersionedFile versionedFile = document.getLastVersionedFile();
+	process(request, response, versionedFile);
+    }
+
+    private void process(final HttpServletRequest request, final HttpServletResponse response, final Document document)
+	    throws IOException {
 	for (final FileNode fileNode : document.getFileNodeSet()) {
 	    if (fileNode.isAccessible() /* || fileNode instanceof SharedFileNode */) {
-		if (document.mustSaveAccessLog()) {
-		    saveAccessLog(fileNode);
-		}
-		process(request, response, versionedFile);
+		downloadDocument(request, response, fileNode);
 	    } else {
 		final User user = UserView.getCurrentUser();
 		if (user == null) {
@@ -85,7 +107,7 @@ public class DownloadDocumentServlet extends HttpServlet {
 			final String casLoginUrl = casConfig.getCasLoginUrl();
 			final StringBuilder url = new StringBuilder();
 			url.append(casLoginUrl);
-			url.append(DownloadUtil.getDownloadUrl(request, versionedFile));
+			url.append(DownloadUtil.getDownloadUrl(request, document.getLastVersionedFile()));
 			response.sendRedirect(url.toString());
 			return;
 		    }
@@ -95,7 +117,7 @@ public class DownloadDocumentServlet extends HttpServlet {
 	}
     }
 
-    private void process(final HttpServletRequest request, final HttpServletResponse response, final VersionedFile versionedFile)
+    private static void process(final HttpServletRequest request, final HttpServletResponse response, final VersionedFile versionedFile)
 	    throws IOException {
 	response.setContentType(versionedFile.getContentType());
 	response.setHeader("Content-disposition", "attachment; filename=" + versionedFile.getFilename());

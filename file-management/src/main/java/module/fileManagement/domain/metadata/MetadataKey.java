@@ -6,6 +6,7 @@ import pt.ist.fenixWebFramework.services.Service;
 public class MetadataKey extends MetadataKey_Base implements Comparable<MetadataKey> {
 
     public static final String TEMPLATE_KEY_VALUE = "Tipologia";
+    public static final String DISPLAYNAME_KEY_VALUE = "Nome";
     public static final String FILENAME_KEY_VALUE = "Nome do Ficheiro";
     public static final String SAVE_ACCESS_LOG = "save.access.log";
     public static final String DOCUMENT_NEW_VERSION_KEY = "document.new.version.key.value";
@@ -32,6 +33,10 @@ public class MetadataKey extends MetadataKey_Base implements Comparable<Metadata
 
     public static MetadataKey getFilenameKey() {
 	return getOrCreateInstance(FILENAME_KEY_VALUE, Boolean.TRUE, StringMetadata.class);
+    }
+
+    public static MetadataKey getDisplaynameKey() {
+	return getOrCreateInstance(DISPLAYNAME_KEY_VALUE, Boolean.TRUE, StringMetadata.class);
     }
 
     public static MetadataKey getSaveLogKey() {

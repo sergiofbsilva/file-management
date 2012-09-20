@@ -109,6 +109,9 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 
     @Service
     public void trash(ContextPath contextPath) {
+	if (!isWriteGroupMember()) {
+	    throw new DomainException("no.write.permissions", FileManagementSystem.getBundle(), getDisplayName());
+	}
 	if (this instanceof FileNode) {
 	    Collection<SharedFileNode> shared = new ArrayList<SharedFileNode>(((FileNode) this).getSharedFileNodes());
 	    for (SharedFileNode node : shared) {

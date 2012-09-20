@@ -48,6 +48,7 @@ public abstract class Metadata extends Metadata_Base implements Comparable<Metad
 
     public void delete() {
 	removeDocument();
+	removeMetadataKey();
 	deleteDomainObject();
     }
 

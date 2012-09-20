@@ -51,6 +51,15 @@ public class VersionedFile extends VersionedFile_Base {
 	}
     }
 
+    public VersionedFile(final byte[] fileContent, final String fileName) {
+	init(fileName, fileName, fileContent);
+    }
+
+    public VersionedFile(final byte[] fileContent, final String fileName, final String displayName) {
+	this();
+	    init(displayName, fileName, fileContent);
+    }
+
     public VersionedFile(final String displayName, final String fileName, byte[] content) {
 	super();
 	init(displayName, fileName, content);

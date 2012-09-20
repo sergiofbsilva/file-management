@@ -25,9 +25,12 @@
 package module.fileManagement.domain;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.io.FileUtils;
 
 import pt.ist.fenixWebFramework.services.Service;
 
@@ -53,7 +56,21 @@ import pt.ist.bennu.core.domain.groups.PersistentGroup;
  */
 public class FileNode extends FileNode_Base {
 
-    public FileNode(final DirNode dirNode, final File file, final String fileName) {
+    /**
+     * 
+     * @param dirNode
+     *            it creates a new FileNode on the given {@link DirNode}
+     * @param file
+     *            the {@link File}
+     * @param fileName
+     *            this will be used as a display and filename. If you want to
+     *            use a different name for the displayName, use
+     *            {@link #FileNode(DirNode, File, String)}
+     * @throws IOException
+     */
+    public FileNode(final DirNode dirNode, final File file, final String fileName) throws IOException {
+	//note: here the displayName and the fileName are the same
+
 	// super();
 	// if (dirNode == null) {
 	// throw new
@@ -62,6 +79,14 @@ public class FileNode extends FileNode_Base {
 	// setDocument(new Document(file, fileName));
 	// setParent(dirNode);
 	this(dirNode, new Document(file, fileName));
+    }
+
+    public FileNode(final DirNode dirNode, final File file, final String fileName, final String displayName) throws IOException {
+	this(dirNode, new Document(file, fileName, displayName));
+    }
+
+    public FileNode(final DirNode dirNode, final byte[] fileContent, final String fileName, final String displayName) {
+	this(dirNode, new Document(fileContent, fileName, displayName));
     }
 
     public FileNode(final DirNode dirNode, final Document document) {
@@ -194,8 +219,7 @@ public class FileNode extends FileNode_Base {
     }
 
     @Service
-    public void addNewVersion(File file, String fileName, String displayName, long filesize) {
-
+    public void addNewVersion(byte[] fileContent, String fileName, String displayName, long filesize) {
 	if (!isWriteGroupMember()) {
 	    throw new CannotCreateFileException(fileName);
 	}
@@ -208,9 +232,21 @@ public class FileNode extends FileNode_Base {
 	getRealParent().addUsedSpace(filesize);
 
 	final Document document = getDocument();
-	document.addVersion(file, fileName);
+	document.addVersion(fileContent, fileName);
 	document.setDisplayName(displayName);
 
 	new CreateNewVersionLog(UserView.getCurrentUser(), getParent().getContextPath(), this);
+
+    }
+
+    @Service
+    public void addNewVersion(File file, String fileName, String displayName, long filesize) {
+	try {
+	    addNewVersion(FileUtils.readFileToByteArray(file), fileName, displayName, filesize);
+	} catch (IOException e) {
+	    throw new Error(e);
+	}
+
+
     }
 }

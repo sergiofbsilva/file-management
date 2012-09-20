@@ -1,6 +1,7 @@
 package module.fileManagement.domain;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
+import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 
 import pt.ist.fenixWebFramework.services.Service;
@@ -33,10 +35,25 @@ public class Document extends Document_Base {
 	addNewVersionMetadata();
     }
 
-    public Document(final File file, final String fileName) {
+    public Document(final File file, final String fileName) throws IOException {
+	this(FileUtils.readFileToByteArray(file), fileName);
+    }
+
+    public Document(final byte[] fileContent, final String fileName) {
 	this();
-	setLastVersionedFile(new VersionedFile(file, fileName));
+	setLastVersionedFile(new VersionedFile(fileContent, fileName));
 	addMetadata(MetadataKey.getFilenameKey(), fileName);
+    }
+
+    public Document(final File file, final String fileName, final String displayName) throws IOException {
+	    this(FileUtils.readFileToByteArray(file), fileName, displayName);
+    }
+
+    public Document(final byte[] fileContent, final String fileName, final String displayName) {
+	this();
+	setLastVersionedFile(new VersionedFile(fileContent, fileName, displayName));
+	addMetadata(MetadataKey.getFilenameKey(), fileName);
+	addMetadata(MetadataKey.getDisplaynameKey(), displayName);
     }
 
     public Document(final String displayName, final String fileName, byte[] content) {
@@ -167,8 +184,16 @@ public class Document extends Document_Base {
     }
 
     public void addVersion(final File file, final String filename) {
+	try {
+	    addVersion(FileUtils.readFileToByteArray(file), filename);
+	} catch (IOException e) {
+	    throw new Error(e);
+	}
+    }
+
+    public void addVersion(final byte[] fileContent, final String filename) {
 	final VersionedFile versionedFile = getLastVersionedFile();
-	final VersionedFile newVersion = new VersionedFile(file, filename);
+	final VersionedFile newVersion = new VersionedFile(fileContent, filename);
 	newVersion.setPreviousVersion(versionedFile);
 	setLastVersionedFile(newVersion);
 	addNewVersionMetadata();

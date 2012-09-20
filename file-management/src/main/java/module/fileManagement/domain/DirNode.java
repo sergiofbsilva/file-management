@@ -1,12 +1,15 @@
 package module.fileManagement.domain;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.io.FileUtils;
 
 import jvstm.cps.ConsistencyPredicate;
 import pt.ist.fenixWebFramework.services.Service;
@@ -262,15 +265,15 @@ public class DirNode extends DirNode_Base {
     }
 
     // file creation
-
+    @SuppressWarnings("unused")
     @Service
-    public FileNode createFile(final File file, final String fileName, final long filesize, final ContextPath contextPath) {
-
-	FileNode fileNode = searchFile(fileName);
+    public FileNode createFile(final byte[] fileContent, final String displayName, final String fileName, final long filesize,
+	    final ContextPath contextPath) {
+	FileNode fileNode = searchFile(displayName);
 
 	if (fileNode != null) {
 
-	    fileNode.addNewVersion(file, fileName, fileName, filesize);
+	    fileNode.addNewVersion(fileContent, fileName, displayName, filesize);
 	    return fileNode;
 
 	} else {
@@ -283,10 +286,28 @@ public class DirNode extends DirNode_Base {
 		throw new NoAvailableQuotaException();
 	    }
 
-	    fileNode = new FileNode(this, file, fileName);
+		fileNode = new FileNode(this, fileContent, fileName, displayName);
 	    new CreateFileLog(UserView.getCurrentUser(), contextPath, fileNode);
 	    return fileNode;
 	}
+
+    }
+    
+    @Service
+    public FileNode createFile(final File file, final String displayName, final String fileName, final long filesize, final ContextPath contextPath) {
+	try {
+	    return createFile(FileUtils.readFileToByteArray(file), displayName, fileName, filesize, contextPath);
+	} catch (IOException e) {
+	    throw new Error(e);
+	}
+
+
+    }
+
+    @Service
+    public FileNode createFile(final File file, final String displayName, final long filesize, final ContextPath contextPath) {
+	return createFile(file, displayName, displayName, filesize, contextPath);
+
     }
 
     @Service
