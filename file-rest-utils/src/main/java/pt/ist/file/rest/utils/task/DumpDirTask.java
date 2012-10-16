@@ -13,6 +13,7 @@ import pt.ist.file.rest.utils.client.FMSRestClient;
 import pt.ist.file.rest.utils.client.Folder;
 import pt.ist.file.rest.utils.client.IDocument;
 import pt.ist.file.rest.utils.domain.FileRestUtilsSystem;
+import pt.ist.file.rest.utils.domain.RemoteDocument;
 import pt.ist.file.rest.utils.domain.RemoteFolder;
 
 public class DumpDirTask extends WriteCustomTask {
@@ -23,7 +24,7 @@ public class DumpDirTask extends WriteCustomTask {
 		final String dirName = file.getName();
 		if (!dirName.contains(".svn")) {
 		    out.printf("%s[D] %s\n", StringUtils.repeat("-", depth), dirName);
-		    copyFiles(file, remoteDir.createDirectory(dirName), depth + 1);
+		    copyFiles(file, remoteDir.createFolder(dirName), depth + 1);
 		}
 	    } else {
 		out.printf("%s[F] %s\n", StringUtils.repeat("-", depth), file.getName());
@@ -40,7 +41,7 @@ public class DumpDirTask extends WriteCustomTask {
     }
 
     private void copyAllFiles(final Folder myRootDirectory) {
-	final Folder remoteScriptsDir = myRootDirectory.createDirectory("testUploadScripts");
+	final Folder remoteScriptsDir = myRootDirectory.createFolder("testUploadScripts");
 	final File localScriptsDir = new File("/home/sfbs/workspace/svn/ksvncore/application/a3es");
 	copyFiles(localScriptsDir, remoteScriptsDir);
     }
@@ -48,7 +49,7 @@ public class DumpDirTask extends WriteCustomTask {
     @SuppressWarnings("static-method")
     private void uploadSingleFile(final Folder myRootDirectory) {
 	final File file2upload = new File("/home/sfbs/Desktop/dmatos-full.html");
-	final Folder testRest = myRootDirectory.createDirectory("testREST");
+	final Folder testRest = myRootDirectory.createFolder("testREST");
 	final IDocument doc = testRest.createDocument(file2upload);
 	System.out.println(doc.info());
 	final Map<String, String> map = new HashMap<String, String>();
@@ -59,14 +60,22 @@ public class DumpDirTask extends WriteCustomTask {
     }
 
     private void testPersist(final Folder myRootDirectory) {
+	final File file2upload = new File("/home/sfbs/Desktop/dmatos-full.html");
 	final FileRestUtilsSystem system = FileRestUtilsSystem.getInstance();
 	if (!system.hasAnyFolder()) {
-	    system.addFolder(myRootDirectory.createDirectory("testPersist").persist());
+	    system.addFolder(myRootDirectory.createFolder("testPersist").persist());
 	    out.println("create testPersist");
+	}
+	if (system.hasAnyDocument()) {
+	    for (final RemoteDocument doc : system.getDocument()) {
+		out.println(doc.info());
+	    }
 	}
 	final RemoteFolder remoteFolder = system.getFolder().get(0);
 	final String random = UUID.randomUUID().toString();
-	remoteFolder.createDirectory(random);
+	final Folder folder = remoteFolder.createFolder(random);
+	final RemoteDocument doc = folder.createDocument(file2upload).persist();
+	doc.setSystem(system);
 	out.println("create dir " + random);
     }
 

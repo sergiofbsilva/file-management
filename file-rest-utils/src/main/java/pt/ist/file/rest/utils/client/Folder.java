@@ -33,6 +33,7 @@ public class Folder implements IFolder {
     public String getRemoteExternalId() {
 	if (remoteOid == null) {
 	    remoteOid = getWebResource().path("root").get(String.class);
+	    setRemoteExternalId(remoteOid);
 	}
 	return remoteOid;
     }
@@ -42,7 +43,7 @@ public class Folder implements IFolder {
     }
 
     @Override
-    public IDocument createDocument(final File file2upload) {
+    public Document createDocument(final File file2upload) {
 	final FileDataBodyPart fileDataBodyPart = new FileDataBodyPart("file", file2upload);
 	final FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
 	formDataMultiPart.bodyPart(fileDataBodyPart);
@@ -56,7 +57,7 @@ public class Folder implements IFolder {
     }
 
     @Override
-    public Folder createDirectory(final String name) {
+    public Folder createFolder(final String name) {
 	final String newDir = getWebResource().path("createDir").path(getRemoteExternalId()).queryParam("name", name)
 		.put(String.class);
 	return new Folder(fmsRestClient, newDir);

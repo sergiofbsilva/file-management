@@ -69,6 +69,13 @@ package pt.ist.file.rest.utils;
  class domain.FileRestUtilsSystem {
  
  }
+
+relation FileRestUtilsSystemDocument {
+ 	domain.FileRestUtilsSystem playsRole system;
+ 	domain.RemoteDocument playsRole document {
+ 		multiplicity *;
+ 	}
+}
  
 relation FileRestUtilsSystemFolders {
  	domain.FileRestUtilsSystem playsRole system;

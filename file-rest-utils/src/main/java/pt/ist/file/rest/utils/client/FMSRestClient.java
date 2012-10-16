@@ -1,5 +1,8 @@
 package pt.ist.file.rest.utils.client;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response.Status;
+
 import module.webserviceutils.domain.ClientHost;
 import module.webserviceutils.domain.HostSystem;
 import pt.ist.bennu.core.domain.User;
@@ -33,6 +36,9 @@ public class FMSRestClient {
 
 	@Override
 	public ClientResponse handle(final ClientRequest cr) throws ClientHandlerException {
+	    if (!clientHost.isEnabled()) {
+		throw new WebApplicationException(Status.FORBIDDEN);
+	    }
 	    cr.getHeaders().putSingle("__username__", clientHost.getUsername());
 	    cr.getHeaders().putSingle("__password__", clientHost.getPassword());
 	    cr.getHeaders().putSingle("__userToLogin__", userToLogin.getUsername());

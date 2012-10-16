@@ -6,6 +6,6 @@ public interface IFolder extends IFileNode {
 
     public IDocument createDocument(final File file2upload);
 
-    public IFolder createDirectory(final String name);
+    public IFolder createFolder(final String name);
 
 }

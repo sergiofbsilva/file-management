@@ -7,7 +7,6 @@ import pt.ist.bennu.core.domain.User;
 import pt.ist.file.rest.utils.client.FMSRestClient;
 import pt.ist.file.rest.utils.client.Folder;
 import pt.ist.file.rest.utils.client.IDocument;
-import pt.ist.file.rest.utils.client.IFolder;
 
 public class RemoteFolder extends RemoteFolder_Base {
 
@@ -31,7 +30,7 @@ public class RemoteFolder extends RemoteFolder_Base {
 
     private Folder getFolder() {
 	if (folder == null) {
-	    folder = new Folder(new FMSRestClient(getClientHost(), getUser()), getExternalId());
+	    folder = new Folder(new FMSRestClient(getClientHost(), getUser()), getRemoteExternalId());
 	}
 	return folder;
     }
@@ -42,8 +41,8 @@ public class RemoteFolder extends RemoteFolder_Base {
     }
 
     @Override
-    public IFolder createDirectory(final String name) {
-	return getFolder().createDirectory(name);
+    public Folder createFolder(final String name) {
+	return getFolder().createFolder(name);
     }
 
     @Override
