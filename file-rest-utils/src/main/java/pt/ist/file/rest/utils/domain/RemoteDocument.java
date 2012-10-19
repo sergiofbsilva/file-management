@@ -3,7 +3,6 @@ package pt.ist.file.rest.utils.domain;
 import java.util.Map;
 
 import module.webserviceutils.domain.ClientHost;
-import pt.ist.bennu.core.domain.User;
 import pt.ist.file.rest.utils.client.Document;
 import pt.ist.file.rest.utils.client.FMSRestClient;
 
@@ -17,16 +16,16 @@ public class RemoteDocument extends RemoteDocument_Base {
 	this.document = document;
     }
 
-    private RemoteDocument(final ClientHost clientHost, final User userToLogin, final String remoteExternalId) {
+    private RemoteDocument(final ClientHost clientHost, final String userToLogin, final String remoteExternalId) {
 	super();
 	setClientHost(clientHost);
 	setRemoteExternalId(remoteExternalId);
-	setUser(userToLogin);
+	setUsername(userToLogin);
     }
 
     public Document getDocument() {
 	if (document == null) {
-	    document = new Document(new FMSRestClient(getClientHost(), getUser()), getRemoteExternalId());
+	    document = new Document(new FMSRestClient(getClientHost(), getUsername()), getRemoteExternalId());
 	}
 	return document;
     }

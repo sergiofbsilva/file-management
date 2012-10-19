@@ -27,10 +27,12 @@ package pt.ist.file.rest.utils;
  
  class domain.RemoteFolder implements client.IFolder {
  	String remoteExternalId;
+ 	String username;
  }
  
  class domain.RemoteDocument implements client.IDocument {
  	String remoteExternalId;
+ 	String username;
  }
  
  relation ClientHostFolders {
@@ -46,24 +48,6 @@ package pt.ist.file.rest.utils;
  		multiplicity *;
  	}
  }
- 
- relation RemoteFolderUser {
- 	domain.RemoteFolder playsRole remoteFolder {
- 		multiplicity *;
-	}
- 	.pt.ist.bennu.core.domain.User playsRole user {
- 		multiplicity 1;
-	}
- }
-
- relation RemoteDocumentUser {
- 	domain.RemoteDocument playsRole remoteDocument {
- 		multiplicity *;
-	}
- 	.pt.ist.bennu.core.domain.User playsRole user {
- 		multiplicity 1;
-	}
- } 
  
  // This class is only for testing, it should not be deployed
  class domain.FileRestUtilsSystem {

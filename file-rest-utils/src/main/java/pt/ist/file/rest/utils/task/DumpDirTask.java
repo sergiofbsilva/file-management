@@ -81,7 +81,7 @@ public class DumpDirTask extends WriteCustomTask {
 
     @Override
     protected void doService() {
-	final FMSRestClient fms = new FMSRestClient("dot", User.findByUsername("ist152416"));
+	final FMSRestClient fms = new FMSRestClient("dot", User.findByUsername("ist152416").getUsername());
 	final Folder rootDir = fms.getRootDirectory();
 	// uploadSingleFile(rootDir);
 	// copyAllFiles(rootDir);

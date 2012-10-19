@@ -3,7 +3,6 @@ package pt.ist.file.rest.utils.domain;
 import java.io.File;
 
 import module.webserviceutils.domain.ClientHost;
-import pt.ist.bennu.core.domain.User;
 import pt.ist.file.rest.utils.client.FMSRestClient;
 import pt.ist.file.rest.utils.client.Folder;
 import pt.ist.file.rest.utils.client.IDocument;
@@ -21,16 +20,16 @@ public class RemoteFolder extends RemoteFolder_Base {
 	this(fmsRestClient.getClientHost(), fmsRestClient.getUserToLogin(), remoteExternalId);
     }
 
-    private RemoteFolder(final ClientHost clientHost, final User userToLogin, final String remoteExternalId) {
+    private RemoteFolder(final ClientHost clientHost, final String userToLogin, final String remoteExternalId) {
 	super();
 	setClientHost(clientHost);
 	setRemoteExternalId(remoteExternalId);
-	setUser(userToLogin);
+	setUsername(userToLogin);
     }
 
     private Folder getFolder() {
 	if (folder == null) {
-	    folder = new Folder(new FMSRestClient(getClientHost(), getUser()), getRemoteExternalId());
+	    folder = new Folder(new FMSRestClient(getClientHost(), getUsername()), getRemoteExternalId());
 	}
 	return folder;
     }

@@ -5,7 +5,6 @@ import javax.ws.rs.core.Response.Status;
 
 import module.webserviceutils.domain.ClientHost;
 import module.webserviceutils.domain.HostSystem;
-import pt.ist.bennu.core.domain.User;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
@@ -18,13 +17,13 @@ public class FMSRestClient {
 
     private final WebResource webResource;
     private final ClientHost clientHost;
-    private final User userToLogin;
+    private final String userToLogin;
 
-    public FMSRestClient(final String clientHostName, final User userToLogin) {
+    public FMSRestClient(final String clientHostName, final String userToLogin) {
 	this(HostSystem.getClientHost(clientHostName), userToLogin);
     }
 
-    public FMSRestClient(final ClientHost clientHost, final User userToLogin) {
+    public FMSRestClient(final ClientHost clientHost, final String userToLogin) {
 	this.clientHost = clientHost;
 	this.userToLogin = userToLogin;
 	final Client client = new Client();
@@ -41,7 +40,7 @@ public class FMSRestClient {
 	    }
 	    cr.getHeaders().putSingle("__username__", clientHost.getUsername());
 	    cr.getHeaders().putSingle("__password__", clientHost.getPassword());
-	    cr.getHeaders().putSingle("__userToLogin__", userToLogin.getUsername());
+	    cr.getHeaders().putSingle("__userToLogin__", userToLogin);
 	    return getNext().handle(cr);
 	}
 
@@ -55,7 +54,7 @@ public class FMSRestClient {
 	return clientHost;
     }
 
-    public User getUserToLogin() {
+    public String getUserToLogin() {
 	return userToLogin;
     }
 
