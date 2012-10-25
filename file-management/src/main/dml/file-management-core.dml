@@ -23,6 +23,7 @@ class AbstractFileNode {
 		Long quota;
 		Integer sequenceNumber;
 		String filenameTemplate;
+		Boolean root (REQUIRED);
 	}
 	
 	class SharedFileNode extends FileNode {
@@ -136,11 +137,6 @@ relation DirNodeTrashNode {
 }
 
 
-/*relation UnitAbstractFileNode {
-	.module.organization.domain.Unit playsRole unit;
-	DirNode playsRole fileRepository;
-}*/
-
 class FileManagementSystem { 
 
 }
@@ -150,3 +146,9 @@ relation FileManagementMyOrg {
 	FileManagementSystem playsRole fileManagementSystem;
 }
 
+relation FMSDirNode {
+	DirNode playsRole dirNode {
+		multiplicity *;
+	}
+	FileManagementSystem playsRole fileManagementSystem;
+}
