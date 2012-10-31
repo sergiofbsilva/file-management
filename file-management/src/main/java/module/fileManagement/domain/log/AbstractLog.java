@@ -53,7 +53,6 @@ public abstract class AbstractLog extends AbstractLog_Base {
 
     public AbstractLog() {
 	super();
-	setOjbConcreteClass(getClass().getName());
 
     }
 

@@ -2,7 +2,6 @@ package module.fileManagement.domain.log;
 
 class AbstractLog {
 	DateTime timestamp;
-	String ojbConcreteClass;
 }
 
 class DirNodePath { }
