@@ -33,9 +33,9 @@ class PersonMetadata extends Metadata {
 	
 }
 
-class MoneyMetadata extends Metadata {
+/*class MoneyMetadata extends Metadata {
 	Money moneyValue;
-}
+}*/
 
 relation PersonPersonMetadata {
 	PersonMetadata playsRole metadata;
