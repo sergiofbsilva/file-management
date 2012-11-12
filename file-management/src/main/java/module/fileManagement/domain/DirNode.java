@@ -403,7 +403,7 @@ public class DirNode extends DirNode_Base {
 
     @Override
     public Long getQuota() {
-	return hasQuotaDefined() ? super.getQuota() : hasParent() ? getParent().getQuota() : 0;
+	return hasQuotaDefined() ? super.getQuota() : (hasParent() ? getParent().getQuota() : 0);
     }
 
     public boolean hasQuotaDefined() {
@@ -424,7 +424,7 @@ public class DirNode extends DirNode_Base {
      * by the parent
      */
     public long getUsedSpace() {
-	return hasQuotaDefined() ? getDirUsedSpace() : hasParent() ? getParent().getUsedSpace() : getDirUsedSpace();
+	return hasQuotaDefined() ? getDirUsedSpace() : (hasParent() ? getParent().getUsedSpace() : getDirUsedSpace());
     }
 
     @Override
@@ -442,12 +442,12 @@ public class DirNode extends DirNode_Base {
 	}
 
 	final Long quota = getQuota();
-	if (quota == Long.MAX_VALUE) {
+
+	if (quota == Long.MAX_VALUE)
 	    return true;
-	}
 
 	final long fileNodeSize = fileNode != null ? fileNode.getFilesize() : 0;
-	return getUsedSpace() + length <= quota + fileNodeSize;
+	return (getUsedSpace() + length) <= (quota + fileNodeSize);
     }
 
     public AbstractFileNode searchNode(final String displayName) {
