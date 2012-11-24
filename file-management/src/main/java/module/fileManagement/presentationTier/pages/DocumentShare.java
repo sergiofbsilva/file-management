@@ -24,16 +24,33 @@
  */
 package module.fileManagement.presentationTier.pages;
 
-import static module.fileManagement.domain.FileManagementSystem.getMessage;
-
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
+import module.fileManagement.domain.FileManagementSystem;
+
+import module.fileManagement.domain.AbstractFileNode;
+import module.fileManagement.domain.ContextPath;
+import module.fileManagement.domain.VisibilityGroup;
+import module.fileManagement.domain.VisibilityGroup.VisibilityOperation;
+import module.fileManagement.presentationTier.component.NodeDetails;
+import module.fileManagement.presentationTier.component.groups.GroupCreatorRegistry;
+import module.fileManagement.presentationTier.component.groups.HasPersistentGroup;
+import module.fileManagement.presentationTier.component.groups.HasPersistentGroupCreator;
+import module.fileManagement.presentationTier.data.AbstractSearchContainer;
+import module.fileManagement.presentationTier.data.GroupContainer;
+import module.vaadin.ui.BennuTheme;
+
+import org.apache.commons.lang.StringUtils;
+import org.vaadin.dialogs.ConfirmDialog;
+
+import pt.ist.bennu.core.applicationTier.Authenticate.UserView;
+import pt.ist.bennu.core.domain.Presentable;
 import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
+import pt.ist.vaadinframework.ui.GridSystemLayout;
 import pt.ist.vaadinframework.ui.TimeoutSelect;
 
 import com.vaadin.data.Container.ItemSetChangeEvent;
@@ -60,22 +77,7 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.Table.ColumnGenerator;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.BaseTheme;
-
-import module.fileManagement.domain.AbstractFileNode;
-import module.fileManagement.domain.ContextPath;
-import module.fileManagement.domain.VisibilityGroup;
-import module.fileManagement.domain.VisibilityGroup.VisibilityOperation;
-import module.fileManagement.presentationTier.component.NodeDetails;
-import module.fileManagement.presentationTier.component.groups.GroupCreatorRegistry;
-import module.fileManagement.presentationTier.component.groups.HasPersistentGroup;
-import module.fileManagement.presentationTier.component.groups.HasPersistentGroupCreator;
-import module.fileManagement.presentationTier.data.AbstractSearchContainer;
-import module.fileManagement.presentationTier.data.GroupContainer;
-import module.vaadin.ui.BennuTheme;
-
-import pt.ist.bennu.core.applicationTier.Authenticate.UserView;
-import pt.ist.bennu.core.domain.Presentable;
-import pt.ist.bennu.core.domain.groups.SingleUserGroup;
+import com.vaadin.ui.themes.Reindeer;
 
 @EmbeddedComponent(path = { "DocumentShare" }, args = { "fileNode", "contextPath" })
 /**
@@ -92,7 +94,6 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
     private HasPersistentGroup currentPersistentGroupHolder;
     private VisibilityOperation currentVisibilityOperation;
     private ContextPath contextPath;
-    private Set<HasPersistentGroup> fileNodeGroups;
     private Table fileNodeGroupsTable;
     private BeanContainer<VisibilityGroup, VisibilityGroupBean> visibilityGroupContainer;
 
@@ -140,28 +141,29 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
 
     private void updateGroupTable() {
 	for (VisibilityGroup visibilityGroup : fileNode.getVisibilityGroups()) {
-	    if (visibilityGroup.persistentGroup instanceof SingleUserGroup) {
-		final SingleUserGroup singleUserGroup = (SingleUserGroup) visibilityGroup.persistentGroup;
-		if (singleUserGroup.isMember(UserView.getCurrentUser())) {
-		    continue;
-		}
-	    }
+	    // if (visibilityGroup.persistentGroup instanceof SingleUserGroup) {
+	    // final SingleUserGroup singleUserGroup = (SingleUserGroup)
+	    // visibilityGroup.persistentGroup;
+	    // if (singleUserGroup.isMember(UserView.getCurrentUser())) {
+	    // continue;
+	    // }
+	    // }
 	    visibilityGroupContainer.addBean(new VisibilityGroupBean(visibilityGroup));
 	}
     }
 
     private void unshare(VisibilityGroup group) {
 	fileNode.unshare(group);
-	fileNodeGroupsTable.removeItem(group);
+	visibilityGroupContainer.removeItem(group);
     }
 
     public Component createHeaderPanel() {
 	Panel welcomePanel = new Panel();
 	welcomePanel.setStyleName(BennuTheme.PANEL_LIGHT);
-	welcomePanel.setCaption(getMessage("document.share.title"));
+	welcomePanel.setCaption(FileManagementSystem.getMessage("document.share.title"));
 	welcomePanel.setScrollable(false);
 	final Layout hlWelcomeContent = new VerticalLayout();
-	Label lblWelcomeText = new Label(getMessage("welcome.share.content"), Label.CONTENT_XHTML);
+	Label lblWelcomeText = new Label(FileManagementSystem.getMessage("welcome.share.content"), Label.CONTENT_XHTML);
 	hlWelcomeContent.addComponent(lblWelcomeText);
 	welcomePanel.setContent(hlWelcomeContent);
 	return welcomePanel;
@@ -185,13 +187,15 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
     }
 
     private Component createSharePanel() {
-	final Panel pnlShare = new Panel(getMessage("document.share.with"));
+	final Panel pnlShare = new Panel(FileManagementSystem.getMessage("document.share.with"));
+	pnlShare.setStyleName(Reindeer.PANEL_LIGHT);
+	((VerticalLayout) pnlShare.getContent()).setSpacing(true);
+
 	final HorizontalLayout hlVisibilityGroup = new HorizontalLayout();
 	hlVisibilityGroup.setSizeFull();
 	hlVisibilityGroup.setSpacing(true);
 
 	final TimeoutSelect selectGroupToMake = new TimeoutSelect();
-	selectGroupToMake.setWidth("220px");
 	selectGroupToMake.setContainerDataSource(groupContainer);
 	selectGroupToMake.setItemCaptionPropertyId("presentationName");
 	selectGroupToMake.addListener(new TextChangeListener() {
@@ -216,17 +220,29 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
 
 	    @Override
 	    public void buttonClick(ClickEvent event) {
-		if (fileNodeGroups.add(currentPersistentGroupHolder)) {
-		    final VisibilityGroup group = new VisibilityGroup(currentPersistentGroupHolder.getPersistentGroup(),
-			    currentVisibilityOperation);
-		    final VisibilityGroupBean groupBean = new VisibilityGroupBean(group);
-		    visibilityGroupContainer.addBean(groupBean);
+		// if (fileNodeGroups.add(currentPersistentGroupHolder)) {
+		// final VisibilityGroup group = new
+		// VisibilityGroup(currentPersistentGroupHolder.getPersistentGroup(),
+		// currentVisibilityOperation);
+		// final VisibilityGroupBean groupBean = new
+		// VisibilityGroupBean(group);
+		// visibilityGroupContainer.addBean(groupBean);
+		// updateFileVisibility(group);
+		// } else {
+		// getWindow().showNotification("Elemento já se encontra atribuído");
+		// }
+		// selectGroupToMake.setValue(StringUtils.EMPTY);
+		// groupSpecificLayout.removeAllComponents();
+		final VisibilityGroup group = new VisibilityGroup(currentPersistentGroupHolder.getPersistentGroup(),
+			currentVisibilityOperation);
+		if (!visibilityGroupContainer.containsId(group)) {
+		    visibilityGroupContainer.addBean(new VisibilityGroupBean(group));
 		    updateFileVisibility(group);
 		} else {
-		    getWindow().showNotification("Elemento já se encontra atribuído");
+		    getWindow().showNotification(
+			    "Já está partilhado com o utilizador " + group.persistentGroup.getPresentationName());
 		}
-		currentVisibilityOperation = VisibilityOperation.READ;
-		selectGroupToMake.discard();
+		selectGroupToMake.setValue(StringUtils.EMPTY);
 		groupSpecificLayout.removeAllComponents();
 	    }
 	});
@@ -256,6 +272,9 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
 
 	pnlShare.addComponent(hlVisibilityGroup);
 	pnlShare.addComponent(groupSpecificLayout);
+
+	selectGroupToMake.setSizeFull();
+	hlVisibilityGroup.setExpandRatio(selectGroupToMake, 0.7f);
 	return pnlShare;
     }
 
@@ -271,26 +290,27 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
 	return NodeDetails.makeDetails(new DomainItem<AbstractFileNode>(fileNode), false, true);
     }
 
-    public GridLayout createGrid() {
-	GridLayout grid = new GridLayout(2, 1);
-	grid.setSizeFull();
-	grid.setMargin(true, true, true, false);
-	grid.setSpacing(true);
-	grid.addComponent(createSharePanel(), 0, 0);
-	grid.addComponent(createFileDetails(), 1, 0);
-	return grid;
+    private GridLayout createGrid() {
+	GridSystemLayout gsl = new GridSystemLayout();
+	gsl.setSizeFull();
+	gsl.setMargin(true, true, true, false);
+	gsl.setSpacing(true);
+	gsl.addComponent(10, createSharePanel());
+	gsl.addComponent(6, createFileDetails());
+	return gsl;
     }
 
     public Component createPage() {
-	VerticalLayout mainLayout = new VerticalLayout();
-	mainLayout.setSizeFull();
-	mainLayout.setMargin(true);
-	mainLayout.setSpacing(true);
-	mainLayout.addComponent(createHeaderPanel());
-	mainLayout.addComponent(createGrid());
-	mainLayout.addComponent(fileNodeGroupsTable);
-	mainLayout.addComponent(createBackLink());
-	return mainLayout;
+	GridSystemLayout gsl = new GridSystemLayout();
+	gsl.setMargin(true);
+	gsl.setSpacing(true);
+	gsl.addComponent(16, createHeaderPanel());
+	gsl.addComponent(10, createSharePanel());
+	gsl.addComponent(6, createFileDetails());
+	gsl.addComponent(16, fileNodeGroupsTable);
+	gsl.addComponent(6, createBackLink());
+
+	return gsl;
     }
 
     private Component createBackLink() {
@@ -351,7 +371,22 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
 
 		    @Override
 		    public void buttonClick(ClickEvent event) {
-			unshare(visibilityGroup);
+			if (visibilityGroup.persistentGroup.isMember(UserView.getCurrentUser())) {
+			    ConfirmDialog.show(getWindow(), "Atenção",
+				    "Encontra-se neste grupo. Tem a certeza que o deseja remover ? ", "Sim", "Não",
+				    new ConfirmDialog.Listener() {
+
+					@Override
+					public void onClose(ConfirmDialog dialog) {
+					    if (dialog.isConfirmed()) {
+						unshare(visibilityGroup);
+					    }
+					}
+				    });
+			} else {
+			    unshare(visibilityGroup);
+			}
+
 		    }
 		});
 		btRemoveGroup.setStyleName(BaseTheme.BUTTON_LINK);

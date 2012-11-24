@@ -88,4 +88,9 @@ public class VisibilityGroup implements Serializable {
 	return false;
     }
 
+    @Override
+    public int hashCode() {
+	return persistentGroup.getPresentationName().hashCode();
+    }
+
 }
