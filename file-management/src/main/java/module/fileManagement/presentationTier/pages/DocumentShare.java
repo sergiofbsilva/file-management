@@ -342,7 +342,7 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
 	fileNodeGroupsTable.setWidth("100%");
 	fileNodeGroupsTable.setPageLength(0);
 	fileNodeGroupsTable.setContainerDataSource(visibilityGroupContainer);
-	fileNodeGroups = new HashSet<HasPersistentGroup>();
+	//fileNodeGroups = new HashSet<HasPersistentGroup>();
 	fileNodeGroupsTable.addListener(new ItemSetChangeListener() {
 
 	    @Override
