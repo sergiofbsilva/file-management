@@ -18,12 +18,12 @@ import module.fileManagement.domain.DirNode;
 import module.fileManagement.domain.FileNode;
 import module.fileManagement.domain.FileRepository;
 import module.fileManagement.tools.StringUtils;
-import pt.ist.bennu.core.applicationTier.Authenticate;
-import pt.ist.bennu.core.domain.User;
 
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 
+import pt.ist.bennu.core.applicationTier.Authenticate;
+import pt.ist.bennu.core.domain.User;
 import pt.ist.fenixWebFramework.services.Service;
 import pt.ist.vaadinframework.VaadinFrameworkLogger;
 
@@ -214,6 +214,7 @@ public class PopulateRootDirTask extends PopulateRootDirTask_Base {
 		}
 	    }
 	}
+	pt.ist.fenixWebFramework.security.UserView.setUser(null);
     }
 
 }
