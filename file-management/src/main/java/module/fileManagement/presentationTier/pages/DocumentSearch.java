@@ -33,6 +33,17 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import module.fileManagement.domain.AbstractFileNode;
+import module.fileManagement.domain.DirNode;
+import module.fileManagement.domain.FileManagementSystem;
+import module.fileManagement.domain.FileNode;
+import module.fileManagement.domain.metadata.MetadataKey;
+import module.fileManagement.domain.metadata.MetadataTemplate;
+import module.fileManagement.presentationTier.component.DocumentFileBrowser;
+import module.fileManagement.presentationTier.component.NodeDetails;
+import module.fileManagement.presentationTier.data.FMSFieldFactory;
+import module.vaadin.ui.BennuTheme;
+
 import org.apache.commons.lang.StringUtils;
 
 import pt.ist.vaadinframework.VaadinFrameworkLogger;
@@ -65,17 +76,6 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Select;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
-
-import module.fileManagement.domain.AbstractFileNode;
-import module.fileManagement.domain.DirNode;
-import module.fileManagement.domain.FileManagementSystem;
-import module.fileManagement.domain.FileNode;
-import module.fileManagement.domain.metadata.MetadataKey;
-import module.fileManagement.domain.metadata.MetadataTemplate;
-import module.fileManagement.presentationTier.component.DocumentFileBrowser;
-import module.fileManagement.presentationTier.component.NodeDetails;
-import module.fileManagement.presentationTier.data.FMSFieldFactory;
-import module.vaadin.ui.BennuTheme;
 
 @EmbeddedComponent(path = { "DocumentSearch" }, persistent = true)
 /**
@@ -270,6 +270,7 @@ public class DocumentSearch extends CustomComponent implements EmbeddedComponent
 	    }
 	};
 	final Button btAddEntry = new Button("+");
+	btAddEntry.setEnabled(Boolean.FALSE);
 
 	final Select cbTemplate = new Select();
 	cbTemplate.setWidth(30, UNITS_EM);
@@ -282,6 +283,8 @@ public class DocumentSearch extends CustomComponent implements EmbeddedComponent
 
 	    @Override
 	    public void valueChange(ValueChangeEvent event) {
+		final Object value = event.getProperty().getValue();
+		btAddEntry.setEnabled(value != null);
 		vlEntries.removeAllComponents();
 		for (Object listener : btAddEntry.getListeners(ClickEvent.class)) {
 		    ((ClickListener) listener).buttonClick(null);
@@ -307,10 +310,12 @@ public class DocumentSearch extends CustomComponent implements EmbeddedComponent
 	    @Override
 	    public void buttonClick(ClickEvent event) {
 		MetadataTemplate template = (MetadataTemplate) cbTemplate.getValue();
-		DomainContainer<MetadataKey> keys = new DomainContainer<MetadataKey>(template.getKey(), MetadataKey.class);
-		final AdvancedSearchEntry advSearch = new AdvancedSearchEntry(keys);
-		advSearch.addListener(removeListener);
-		vlEntries.addComponent(advSearch);
+		if (template != null) {
+		    DomainContainer<MetadataKey> keys = new DomainContainer<MetadataKey>(template.getKey(), MetadataKey.class);
+		    final AdvancedSearchEntry advSearch = new AdvancedSearchEntry(keys);
+		    advSearch.addListener(removeListener);
+		    vlEntries.addComponent(advSearch);
+		}
 	    }
 	};
 
@@ -349,9 +354,20 @@ public class DocumentSearch extends CustomComponent implements EmbeddedComponent
 	    }
 	});
 
+	Button btClearSearch = new Button("Limpar", new ClickListener() {
+
+	    @Override
+	    public void buttonClick(ClickEvent event) {
+		vlEntries.removeAllComponents();
+		cbTemplate.select(null);
+	    }
+
+	});
+
 	hl = new HorizontalLayout();
 	hl.setSpacing(Boolean.TRUE);
 	hl.addComponent(btSearch);
+	hl.addComponent(btClearSearch);
 	hl.addComponent(btSimpleSearch);
 
 	vlMain.addComponent(hl);

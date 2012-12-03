@@ -1,10 +1,23 @@
 package module.fileManagement.presentationTier.component;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import module.fileManagement.domain.AbstractFileNode;
+import module.fileManagement.domain.ContextPath;
+import module.fileManagement.domain.DirNode;
+import module.fileManagement.domain.Document;
+import module.fileManagement.domain.FileManagementSystem;
+import module.fileManagement.domain.FileNode;
+import module.fileManagement.domain.FileRepository;
+import module.fileManagement.domain.VersionedFile;
+import module.fileManagement.presentationTier.component.viewers.VisibilityListViewer;
+import module.fileManagement.presentationTier.pages.DocumentBrowse;
+import pt.ist.bennu.core.applicationTier.Authenticate.UserView;
+import pt.ist.bennu.core.domain.RoleType;
+import pt.ist.bennu.core.domain.User;
+import pt.ist.bennu.core.domain.groups.Role;
 import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.data.VBoxProperty;
 import pt.ist.vaadinframework.data.reflect.DomainContainer;
@@ -31,22 +44,6 @@ import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window.Notification;
-
-import module.fileManagement.domain.AbstractFileNode;
-import module.fileManagement.domain.ContextPath;
-import module.fileManagement.domain.DirNode;
-import module.fileManagement.domain.Document;
-import module.fileManagement.domain.FileManagementSystem;
-import module.fileManagement.domain.FileNode;
-import module.fileManagement.domain.FileRepository;
-import module.fileManagement.domain.VersionedFile;
-import module.fileManagement.presentationTier.component.viewers.VisibilityListViewer;
-import module.fileManagement.presentationTier.pages.DocumentBrowse;
-
-import pt.ist.bennu.core.applicationTier.Authenticate.UserView;
-import pt.ist.bennu.core.domain.RoleType;
-import pt.ist.bennu.core.domain.User;
-import pt.ist.bennu.core.domain.groups.Role;
 
 @SuppressWarnings("serial")
 public class DocumentFileBrowser extends CustomComponent implements ValueChangeNotifier, ValueChangeListener {
@@ -297,8 +294,9 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 
 	    @Override
 	    public void setSortProperties(final Sortable container, final Object[] propertyId, final boolean[] ascending) {
-		//System.out.printf("cont: %s, props : %s, ascs : %s\n", container, Arrays.toString(propertyId),
-//			Arrays.toString(ascending));
+		// System.out.printf("cont: %s, props : %s, ascs : %s\n",
+		// container, Arrays.toString(propertyId),
+		// Arrays.toString(ascending));
 		for (boolean b : ascending) {
 		    if (b != asc) {
 			asc = b;
@@ -327,7 +325,7 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 	documentTable.setColumnExpandRatio("icon", 0.15f);
 	documentTable.setColumnExpandRatio("displayName", 0.60f);
 	documentTable.setColumnExpandRatio("visibilidade", 0.25f);
-	documentTable.sort();
+	documentTable.sort(new Object[] { "displayName" }, new boolean[] { Boolean.TRUE });
 	refreshPageLength();
     }
 
@@ -346,10 +344,11 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
     public String getNodeName(final AbstractFileNode node) {
 	final User user = UserView.getCurrentUser();
 	final DirNode fileRepository = FileRepository.getOrCreateFileRepository(user);
-	if (fileRepository == node)
+	if (fileRepository == node) {
 	    return getMessage("label.menu.home");
-	else
+	} else {
 	    return node.getDisplayName();
+	}
     }
 
     public DomainItem<AbstractFileNode> getNodeItem() {
@@ -438,7 +437,7 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
     }
 
     private boolean lastLineOfDefense(DirNode lastDirNode) {
-	return (lastDirNode.isAccessible() && !lastDirNode.hasRootDirNode())
+	return lastDirNode.isAccessible() && !lastDirNode.hasRootDirNode()
 		|| Role.getRole(RoleType.MANAGER).isMember(UserView.getCurrentUser());
     }
 
