@@ -1,4 +1,4 @@
-package module.fileManagement.webservices;
+package pt.ist.bennu.restservices;
 
 import java.io.File;
 import java.util.Collection;
@@ -38,7 +38,7 @@ import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
 
 @Path("/fms")
-public class JerseyServices {
+public class FMSJerseyServices {
 
     private Document resolveDocument(final String documentOid) {
 	// Authenticate.authenticate(User.findByUsername("ist152416"));
