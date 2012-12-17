@@ -77,6 +77,7 @@ public class DirDetails extends NodeDetails {
 	    addOperation(createRenameDirLink());
 	    addOperation(createShareLink());
 	    addOperation(createDeleteDirLink());
+	    addOperation(createDownloadLink());
 	} else {
 	    if (getNode().isShared()) {
 		addOperation(createDeleteDirLink());
@@ -98,5 +99,10 @@ public class DirDetails extends NodeDetails {
 	    }
 	});
 	return btManage;
+    }
+
+    @Override
+    public <T extends AbstractFileNode> T getNodeToDownload() {
+	return (T) getNode();
     }
 }

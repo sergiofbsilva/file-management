@@ -5,8 +5,19 @@ import static module.fileManagement.domain.FileManagementSystem.getMessage;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import module.fileManagement.domain.log.DeleteDirLog;
+import module.fileManagement.domain.log.DeleteFileLog;
+import module.fileManagement.domain.log.ShareDirLog;
+import module.fileManagement.domain.log.ShareFileLog;
+
 import org.apache.commons.lang.StringUtils;
 
+import pt.ist.bennu.core.applicationTier.Authenticate.UserView;
+import pt.ist.bennu.core.domain.User;
+import pt.ist.bennu.core.domain.exceptions.DomainException;
+import pt.ist.bennu.core.domain.groups.AnyoneGroup;
+import pt.ist.bennu.core.domain.groups.PersistentGroup;
+import pt.ist.bennu.core.domain.groups.SingleUserGroup;
 import pt.ist.fenixWebFramework.services.Service;
 import pt.utl.ist.fenix.tools.util.NaturalOrderComparator;
 
@@ -16,18 +27,6 @@ import com.vaadin.terminal.ThemeResource;
 import dml.runtime.DirectRelation;
 import dml.runtime.Relation;
 import dml.runtime.RelationListener;
-
-import module.fileManagement.domain.log.DeleteDirLog;
-import module.fileManagement.domain.log.DeleteFileLog;
-import module.fileManagement.domain.log.ShareDirLog;
-import module.fileManagement.domain.log.ShareFileLog;
-
-import pt.ist.bennu.core.applicationTier.Authenticate.UserView;
-import pt.ist.bennu.core.domain.User;
-import pt.ist.bennu.core.domain.exceptions.DomainException;
-import pt.ist.bennu.core.domain.groups.AnyoneGroup;
-import pt.ist.bennu.core.domain.groups.PersistentGroup;
-import pt.ist.bennu.core.domain.groups.SingleUserGroup;
 
 public abstract class AbstractFileNode extends AbstractFileNode_Base implements Comparable<AbstractFileNode> {
     final static NaturalOrderComparator STRING_NATURAL_COMPARATOR;
@@ -162,7 +161,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 
     private boolean isGroupMember(final PersistentGroup group) {
 	final User user = UserView.getCurrentUser();
-	return group != null && group.isMember(user);
+	return group.isMember(user);
     }
 
     public boolean isAccessible() {
@@ -178,7 +177,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
     public VisibilityState getVisibilityState() {
 	final PersistentGroup readGroup = getReadGroup();
 	return readGroup instanceof SingleUserGroup ? VisibilityState.PRIVATE
-		: (readGroup instanceof AnyoneGroup ? VisibilityState.PUBLIC : VisibilityState.SHARED);
+		: readGroup instanceof AnyoneGroup ? VisibilityState.PUBLIC : VisibilityState.SHARED;
     }
 
     public String getVisibility() {
@@ -187,7 +186,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 
     @Override
     public int compareTo(final AbstractFileNode node) {
-	if ((isDir() && node.isDir()) || (isFile() && node.isFile())) {
+	if (isDir() && node.isDir() || isFile() && node.isFile()) {
 	    final String displayName1 = getDisplayName();
 	    final String displayName2 = node.getDisplayName();
 	    return STRING_NATURAL_COMPARATOR.compare(displayName1, displayName2);

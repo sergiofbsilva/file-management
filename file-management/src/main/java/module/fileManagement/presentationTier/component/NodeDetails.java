@@ -10,6 +10,7 @@ import java.util.Set;
 
 import module.fileManagement.domain.AbstractFileNode;
 import module.fileManagement.domain.ContextPath;
+import module.fileManagement.presentationTier.DownloadUtil;
 import module.fileManagement.presentationTier.component.viewers.FMSViewerFactory;
 import module.fileManagement.presentationTier.pages.DocumentBrowse;
 import module.fileManagement.presentationTier.pages.DocumentShare;
@@ -20,9 +21,11 @@ import org.vaadin.dialogs.DefaultConfirmDialogFactory;
 import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
 
+import com.vaadin.terminal.ExternalResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Link;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.BaseTheme;
@@ -231,4 +234,13 @@ public abstract class NodeDetails extends Panel {
     public boolean isInfoVisible() {
 	return infoVisible;
     }
+
+    public Link createDownloadLink() {
+	final String url = DownloadUtil.getDownloadUrl(getApplication(), getNodeToDownload());
+	final ExternalResource externalResource = new ExternalResource(url);
+	return new Link(getMessage("label.download"), externalResource);
+    }
+
+    public abstract <T extends AbstractFileNode> T getNodeToDownload();
+
 }

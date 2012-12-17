@@ -32,29 +32,26 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import module.fileManagement.domain.AbstractFileNode;
+import module.fileManagement.domain.Document;
+import module.fileManagement.domain.FileManagementSystem;
+import module.fileManagement.domain.FileNode;
+import module.fileManagement.presentationTier.pages.DocumentExtendedInfo;
+import module.vaadin.ui.BennuTheme;
+
 import org.apache.commons.lang.StringUtils;
 
 import pt.ist.fenixWebFramework.services.Service;
 import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
 
-import com.vaadin.terminal.ExternalResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.Link;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.Receiver;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.BaseTheme;
-
-import module.fileManagement.domain.AbstractFileNode;
-import module.fileManagement.domain.Document;
-import module.fileManagement.domain.FileManagementSystem;
-import module.fileManagement.domain.FileNode;
-import module.fileManagement.presentationTier.DownloadUtil;
-import module.fileManagement.presentationTier.pages.DocumentExtendedInfo;
-import module.vaadin.ui.BennuTheme;
 
 /**
  * 
@@ -89,12 +86,6 @@ public class FileDetails extends NodeDetails {
 	});
 	btExtendedInfoLink.setStyleName(BaseTheme.BUTTON_LINK);
 	return btExtendedInfoLink;
-    }
-
-    public Link createDownloadLink() {
-	final String url = DownloadUtil.getDownloadUrl(getApplication(), getNode().getDocument());
-	final ExternalResource externalResource = new ExternalResource(url);
-	return new Link(getMessage("label.download"), externalResource);
     }
 
     public Button createDeleteFileLink() {
@@ -143,7 +134,7 @@ public class FileDetails extends NodeDetails {
 
 	private boolean dirHasFile(String filename) {
 	    AbstractFileNode searchNode = getNode().getParent().searchNode(filename);
-	    return (searchNode != null && !searchNode.equals(getNode()));
+	    return searchNode != null && !searchNode.equals(getNode());
 	}
 
 	@Override
@@ -199,5 +190,10 @@ public class FileDetails extends NodeDetails {
 
     public Component createUploadLink() {
 	return new SingleFileUpload();
+    }
+
+    @Override
+    public <T extends AbstractFileNode> T getNodeToDownload() {
+	return (T) getNode();
     }
 }
