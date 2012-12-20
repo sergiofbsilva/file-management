@@ -96,7 +96,8 @@ public class SharedDirNode extends SharedDirNode_Base implements SharedNode {
 
     @Override
     public String getDisplayName() {
-	return getNode().getDisplayName();
+		String name = super.getDisplayName();
+	return name != null ? name : getNode().getDisplayName();
     }
 
     @Override
