@@ -96,7 +96,7 @@ public class SharedDirNode extends SharedDirNode_Base implements SharedNode {
 
     @Override
     public String getDisplayName() {
-		String name = super.getDisplayName();
+	final String name = super.getDisplayName();
 	return name != null ? name : getNode().getDisplayName();
     }
 
@@ -112,7 +112,8 @@ public class SharedDirNode extends SharedDirNode_Base implements SharedNode {
 
     @Override
     public String getName() {
-	return getNode().getName();
+	final String name = super.getName();
+	return name != null ? name : getNode().getName();
     }
     
     @Override
