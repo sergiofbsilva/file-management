@@ -40,8 +40,6 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.Property.ValueChangeNotifier;
 import com.vaadin.data.util.ItemSorter;
 import com.vaadin.data.util.ObjectProperty;
-import com.vaadin.event.ItemClickEvent;
-import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.event.DataBoundTransferable;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
@@ -77,6 +75,8 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
     private static final int MIN = 10;
     private static final int MAX = 25;
 
+    private ContextPath currentContextPath;
+
     public Component getCurrent() {
 	return this;
     }
@@ -86,14 +86,17 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
     }
 
     private void open(DirNode dirNode) {
-	EmbeddedApplication.open(getApplication(), DocumentBrowse.class, dirNode.getContextPath().toString());
+	EmbeddedApplication.open(getApplication(), DocumentBrowse.class, currentContextPath.concat(dirNode).toString());
+    }
+
+    private void openWithLimit(DirNode dirNode) {
+	EmbeddedApplication.open(getApplication(), DocumentBrowse.class, currentContextPath.subContextPath(dirNode).toString());
     }
 
     public class DocumentTable extends Table implements Table.ValueChangeListener, ItemClickListener {
 
 	/*
-	 * public java.util.Collection<?> getSortableContainerPropertyIds() {
-	 * return Collections.EMPTY_SET; };
+	 * public java.util.Collection<?> getSortableContainerPropertyIds() { return Collections.EMPTY_SET; };
 	 */
 
 	DocumentTable() {
@@ -278,10 +281,9 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 		if (!nodeItem.getValue().equals(dirNode)) {
 		    // removeAllItemsAfter(selectedItem);
 		    // nodeItem.setValue(dirNode);
-		    open(dirNode);
+		    openWithLimit(dirNode);
 		}
 	    }
-
 	}
 
 	private void removeAllItemsAfter(MenuItem menuItem) {
@@ -565,18 +567,18 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 	if (lastLineOfDefense(lastDirNode)) {
 	    documentMenu.setDirNodes(contextPath);
 	    setValue(lastDirNode);
+	    currentContextPath = contextPath;
 	} else {
 	    accessDenied = true;
 	}
     }
 
     public void setContextPath(String pathString) {
-	final ContextPath contextPath = new ContextPath(pathString);
-	setContextPath(contextPath);
+	setContextPath(new ContextPath(pathString));
     }
 
-    private boolean lastLineOfDefense(DirNode lastDirNode) {
-	return lastDirNode.isAccessible() && !lastDirNode.hasRootDirNode()
+    private boolean lastLineOfDefense(DirNode dirNode) {
+	return dirNode.isAccessible() && !dirNode.hasRootDirNode()
 		|| Role.getRole(RoleType.MANAGER).isMember(Authenticate.getCurrentUser());
     }
 
