@@ -7,18 +7,18 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
+import module.fileManagement.domain.ContextPath;
+import module.fileManagement.domain.DirNode;
+
 import org.vaadin.easyuploads.FileFactory;
+
+import pt.ist.bennu.core.applicationTier.Authenticate;
 
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Layout;
 import com.vaadin.ui.VerticalLayout;
-
-import module.fileManagement.domain.ContextPath;
-import module.fileManagement.domain.DirNode;
-
-import pt.ist.bennu.core.applicationTier.Authenticate.UserView;
 
 public class UploadFileArea extends CustomComponent {
 
@@ -47,8 +47,9 @@ public class UploadFileArea extends CustomComponent {
 
 	}
 
+	@Override
 	public File createFile(String fileName, String mimeType) {
-	    final String tempFileName = "upload_tmpfile_" + UserView.getCurrentUser().getUsername();
+	    final String tempFileName = "upload_tmpfile_" + Authenticate.getCurrentUser().getUsername();
 	    try {
 		return File.createTempFile(tempFileName, "_" + System.currentTimeMillis());
 	    } catch (IOException e) {

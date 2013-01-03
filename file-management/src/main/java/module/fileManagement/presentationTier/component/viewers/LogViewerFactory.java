@@ -27,6 +27,17 @@ package module.fileManagement.presentationTier.component.viewers;
 import java.util.Collections;
 import java.util.List;
 
+import module.fileManagement.domain.ContextPath;
+import module.fileManagement.domain.DirNode;
+import module.fileManagement.domain.FileNode;
+import module.fileManagement.domain.log.AbstractLog;
+import module.fileManagement.domain.log.DeleteDirLog;
+import module.fileManagement.domain.log.DeleteFileLog;
+import module.fileManagement.domain.log.DirLog;
+import module.fileManagement.domain.log.FileLog;
+import module.fileManagement.presentationTier.DownloadUtil;
+import module.fileManagement.presentationTier.component.dialog.SelectDestinationDialog;
+
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -35,16 +46,6 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
 import com.vaadin.ui.themes.BaseTheme;
-
-import module.fileManagement.domain.ContextPath;
-import module.fileManagement.domain.DirNode;
-import module.fileManagement.domain.FileNode;
-import module.fileManagement.domain.log.AbstractLog;
-import module.fileManagement.domain.log.DeleteFileLog;
-import module.fileManagement.domain.log.DirLog;
-import module.fileManagement.domain.log.FileLog;
-import module.fileManagement.presentationTier.DownloadUtil;
-import module.fileManagement.presentationTier.component.dialog.SelectDestinationDialog;
 
 /**
  * 
@@ -57,6 +58,7 @@ class FileLogViewer extends AbstractLogLabel<FileLog> {
 	super(fileLog);
     }
 
+    @Override
     public String createTargetNodeLink() {
 	final FileNode fileNode = getLog().getFileNode();
 	if (fileNode.isAccessible()) {
@@ -128,6 +130,53 @@ class DeleteFileLogViewer extends FileLogViewer {
     }
 }
 
+class DeleteDirLogViewer extends DirLogViewer {
+
+    public DeleteDirLogViewer(DirLog log) {
+	super(log);
+    }
+
+    @Override
+    public boolean hasOperations() {
+	return getLog().getDirNode().isInTrash();
+    }
+
+    @Override
+    public String createTargetNodeLink() {
+	return getLog().getDirNode().getDisplayName();
+    }
+
+    private void updateParent() {
+
+    }
+
+    @Override
+    public List<Component> getOperations() {
+	final Component btSelectDir = new Button("Recuperar");
+	btSelectDir.setStyleName(BaseTheme.BUTTON_LINK);
+	((Button) btSelectDir).addListener(new ClickListener() {
+
+	    @Override
+	    public void buttonClick(ClickEvent event) {
+		final SelectDestinationDialog window = new SelectDestinationDialog();
+		getWindow().addWindow(window);
+		window.addListener(new CloseListener() {
+
+		    @Override
+		    public void windowClose(CloseEvent e) {
+			final DirNode targetDir = window.getSelectedDirNode();
+			if (targetDir != null) {
+			    getLog().getDirNode().recoverTo(targetDir);
+			    getParentContainer().reloadContent();
+			}
+		    }
+		});
+	    }
+	});
+	return Collections.singletonList(btSelectDir);
+    }
+}
+
 public class LogViewerFactory {
 
     public static Component createViewer(AbstractLog log) {
@@ -138,7 +187,9 @@ public class LogViewerFactory {
 	    return new FileLogViewer((FileLog) log);
 	}
 	if (log instanceof DirLog) {
-
+	    if (log instanceof DeleteDirLog) {
+		return new DeleteDirLogViewer((DirLog) log);
+	    }
 	    return new DirLogViewer((DirLog) log);
 	}
 	return new Label();

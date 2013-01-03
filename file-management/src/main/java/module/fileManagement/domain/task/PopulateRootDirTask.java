@@ -123,7 +123,7 @@ public class PopulateRootDirTask extends PopulateRootDirTask_Base {
     private String getValue(KeyEnum keyEnum) {
 	switch (keyEnum) {
 	case TITLE:
-	    return StringUtils.join(getRandom(words, RANDOM.nextInt(10)), " ");
+	    return org.apache.commons.lang.StringUtils.join(getRandom(words, RANDOM.nextInt(10)), " ");
 	case AUTHOR:
 	    return getRandom(names);
 	case ID:

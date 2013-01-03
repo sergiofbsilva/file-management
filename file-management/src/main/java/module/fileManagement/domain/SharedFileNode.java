@@ -29,12 +29,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import pt.ist.fenixWebFramework.services.Service;
-
 import module.fileManagement.domain.log.FileLog;
-
 import pt.ist.bennu.core.domain.User;
 import pt.ist.bennu.core.domain.groups.PersistentGroup;
+import pt.ist.fenixWebFramework.services.Service;
 
 /**
  * 
@@ -50,7 +48,7 @@ public class SharedFileNode extends SharedFileNode_Base implements SharedNode {
 
     @Override
     public FileNode getNode() {
-	return (FileNode) super.getNode();
+	return super.getNode();
     }
 
     @Override

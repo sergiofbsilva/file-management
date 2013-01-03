@@ -34,18 +34,21 @@ import pt.ist.bennu.core.domain.exceptions.DomainException;
  */
 public class NodeDuplicateNameException extends DomainException {
 
-    public NodeDuplicateNameException() {
+    private final String name;
+
+    public NodeDuplicateNameException(final String name) {
 	super();
+	this.name = name;
     }
-    
+
     @Override
     public String getMessage() {
-	return FileManagementSystem.getMessage(getClass().getName());
+	return FileManagementSystem.getMessage(getClass().getName(), name);
     }
-    
+
     @Override
     public String getLocalizedMessage() {
-     return getMessage();
+	return getMessage();
     }
 
 }

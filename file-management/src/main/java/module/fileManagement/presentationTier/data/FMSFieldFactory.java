@@ -2,6 +2,17 @@ package module.fileManagement.presentationTier.data;
 
 import java.util.Map;
 
+import module.fileManagement.domain.metadata.DateTimeMetadata;
+import module.fileManagement.domain.metadata.IntegerMetadata;
+import module.fileManagement.domain.metadata.Metadata;
+import module.fileManagement.domain.metadata.MetadataKey;
+import module.fileManagement.domain.metadata.MetadataTemplate;
+import module.fileManagement.domain.metadata.MetadataTemplateRule;
+import module.fileManagement.domain.metadata.PersonMetadata;
+import module.fileManagement.domain.metadata.StringMetadata;
+import module.fileManagement.presentationTier.component.fields.IntegerField;
+import module.fileManagement.presentationTier.component.fields.PersonField;
+
 import org.apache.commons.lang.StringUtils;
 
 import pt.ist.vaadinframework.ui.DefaultFieldFactory;
@@ -16,17 +27,6 @@ import com.vaadin.ui.DateField;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
-
-import module.fileManagement.domain.metadata.DateTimeMetadata;
-import module.fileManagement.domain.metadata.IntegerMetadata;
-import module.fileManagement.domain.metadata.Metadata;
-import module.fileManagement.domain.metadata.MetadataKey;
-import module.fileManagement.domain.metadata.MetadataTemplate;
-import module.fileManagement.domain.metadata.MetadataTemplateRule;
-import module.fileManagement.domain.metadata.PersonMetadata;
-import module.fileManagement.domain.metadata.StringMetadata;
-import module.fileManagement.presentationTier.component.fields.IntegerField;
-import module.fileManagement.presentationTier.component.fields.PersonField;
 
 public class FMSFieldFactory extends DefaultFieldFactory {
 

@@ -24,13 +24,11 @@
  */
 package module.fileManagement.presentationTier.pages;
 
-import java.util.HashSet;
 import java.util.Map;
-
-import module.fileManagement.domain.FileManagementSystem;
 
 import module.fileManagement.domain.AbstractFileNode;
 import module.fileManagement.domain.ContextPath;
+import module.fileManagement.domain.FileManagementSystem;
 import module.fileManagement.domain.VisibilityGroup;
 import module.fileManagement.domain.VisibilityGroup.VisibilityOperation;
 import module.fileManagement.presentationTier.component.NodeDetails;
@@ -44,8 +42,9 @@ import module.vaadin.ui.BennuTheme;
 import org.apache.commons.lang.StringUtils;
 import org.vaadin.dialogs.ConfirmDialog;
 
-import pt.ist.bennu.core.applicationTier.Authenticate.UserView;
+import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.Presentable;
+import pt.ist.fenixframework.pstm.AbstractDomainObject;
 import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
@@ -123,7 +122,7 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
     @Override
     public boolean isAllowedToOpen(Map<String, String> arguments) {
 	final String fileExternalId = arguments.get("fileNode");
-	final AbstractFileNode node = AbstractFileNode.fromExternalId(fileExternalId);
+	final AbstractFileNode node = AbstractDomainObject.fromExternalId(fileExternalId);
 	if (node == null || node.isShared() || !node.isWriteGroupMember()) {
 	    return false;
 	}
@@ -134,7 +133,7 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
     public void setArguments(Map<String, String> arguments) {
 	final String fileExternalId = arguments.get("fileNode");
 	final String contextPath = arguments.get("contextPath");
-	fileNode = AbstractFileNode.fromExternalId(fileExternalId);
+	fileNode = AbstractDomainObject.fromExternalId(fileExternalId);
 	this.contextPath = new ContextPath(contextPath);
 	updateGroupTable();
     }
@@ -144,7 +143,7 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
 	    // if (visibilityGroup.persistentGroup instanceof SingleUserGroup) {
 	    // final SingleUserGroup singleUserGroup = (SingleUserGroup)
 	    // visibilityGroup.persistentGroup;
-	    // if (singleUserGroup.isMember(UserView.getCurrentUser())) {
+	    // if (singleUserGroup.isMember(Authenticate.getCurrentUser())) {
 	    // continue;
 	    // }
 	    // }
@@ -371,7 +370,7 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
 
 		    @Override
 		    public void buttonClick(ClickEvent event) {
-			if (visibilityGroup.persistentGroup.isMember(UserView.getCurrentUser())) {
+			if (visibilityGroup.persistentGroup.isMember(Authenticate.getCurrentUser())) {
 			    ConfirmDialog.show(getWindow(), "Atenção",
 				    "Encontra-se neste grupo. Tem a certeza que o deseja remover ? ", "Sim", "Não",
 				    new ConfirmDialog.Listener() {

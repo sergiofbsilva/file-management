@@ -32,6 +32,8 @@ import module.fileManagement.domain.log.DirNodePath;
 
 import org.apache.commons.lang.StringUtils;
 
+import pt.ist.fenixframework.pstm.AbstractDomainObject;
+
 /**
  * 
  * @author Sérgio Silva
@@ -66,7 +68,7 @@ public class ContextPath {
 	final List<DirNode> dirNodes = new ArrayList<DirNode>();
 	final String[] split = StringUtils.split(pathString,'/');
 	for (String node : split) {
-	    final DirNode dirNode = DirNode.fromExternalId(node);
+	    final DirNode dirNode = AbstractDomainObject.fromExternalId(node);
 	    dirNodes.add(dirNode);
 	}
 	return Collections.unmodifiableList(dirNodes);

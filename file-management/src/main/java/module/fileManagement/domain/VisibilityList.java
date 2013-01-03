@@ -82,4 +82,14 @@ public class VisibilityList extends ArrayList<VisibilityGroup> {
 	return false;
     }
 
+    public String getDescription() {
+	final StringBuilder htmlDescription = new StringBuilder();
+	htmlDescription.append("<ul>");
+	for (VisibilityGroup group : this) {
+	    htmlDescription.append(String.format("<li>%s</li>", group.getDescription()));
+	}
+	htmlDescription.append("</ul>");
+	return htmlDescription.toString();
+    }
+
 }

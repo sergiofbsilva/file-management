@@ -74,10 +74,12 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
 	MultiUploadHandler handler = new MultiUploadHandler() {
 	    private LinkedList<ProgressIndicator> indicators;
 
+	    @Override
 	    public void streamingStarted(StreamingStartEvent event) {
 //		System.err.println("Started" + event.getFileName() + " size " + event.getContentLength());
 	    }
 
+	    @Override
 	    public void streamingFinished(StreamingEndEvent event) {
 		if (!indicators.isEmpty()) {
 		    progressBars.removeComponent(indicators.remove(0));
@@ -87,6 +89,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
 		reciever.setValue(null);
 	    }
 
+	    @Override
 	    public void streamingFailed(StreamingErrorEvent event) {
 		event.getException().printStackTrace();
 
@@ -96,6 +99,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
 
 	    }
 
+	    @Override
 	    public void onProgress(StreamingProgressEvent event) {
 		long readBytes = event.getBytesReceived();
 		long contentLength = event.getContentLength();
@@ -103,11 +107,13 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
 		indicators.get(0).setValue(f);
 	    }
 
+	    @Override
 	    public OutputStream getOutputStream() {
 		FileDetail next = upload.getPendingFileNames().iterator().next();
 		return reciever.receiveUpload(next.getFileName(), next.getMimeType());
 	    }
 
+	    @Override
 	    public void filesQueued(Collection<FileDetail> pendingFileNames) {
 		if (indicators == null) {
 		    indicators = new LinkedList<ProgressIndicator>();
@@ -218,6 +224,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
 	setFileFactory(new DirectoryFileFactory(new File(directoryWhereToUpload)));
     }
 
+    @Override
     public AcceptCriterion getAcceptCriterion() {
 	// TODO accept only files
 	// return new And(new TargetDetailIs("verticalLocation","MIDDLE"), new
@@ -225,6 +232,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
 	return AcceptAll.get();
     }
 
+    @Override
     public void drop(DragAndDropEvent event) {
 	DragAndDropWrapper.WrapperTransferable transferable = (WrapperTransferable) event.getTransferable();
 	Html5File[] files = transferable.getFiles();
@@ -238,34 +246,41 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
 		private String name;
 		private String mime;
 
+		@Override
 		public OutputStream getOutputStream() {
 		    return receiver.receiveUpload(name, mime);
 		}
 
+		@Override
 		public boolean listenProgress() {
 		    return true;
 		}
 
+		@Override
 		public void onProgress(StreamingProgressEvent event) {
 		    float p = (float) event.getBytesReceived() / (float) event.getContentLength();
 		    pi.setValue(p);
 		}
 
+		@Override
 		public void streamingStarted(StreamingStartEvent event) {
 		    name = event.getFileName();
 		    mime = event.getMimeType();
 
 		}
 
+		@Override
 		public void streamingFinished(StreamingEndEvent event) {
 		    progressBars.removeComponent(pi);
 		    handleFile(receiver.getFile(), html5File.getFileName(), html5File.getType(), html5File.getFileSize());
 		}
 
+		@Override
 		public void streamingFailed(StreamingErrorEvent event) {
 		    progressBars.removeComponent(pi);
 		}
 
+		@Override
 		public boolean isInterrupted() {
 		    return false;
 		}

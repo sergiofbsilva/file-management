@@ -76,6 +76,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Select;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.BaseTheme;
 
 @EmbeddedComponent(path = { "DocumentSearch" }, persistent = true)
 /**
@@ -331,7 +332,7 @@ public class DocumentSearch extends CustomComponent implements EmbeddedComponent
 	    }
 	});
 
-	btSimpleSearch.setStyleName(BennuTheme.BUTTON_LINK);
+	btSimpleSearch.setStyleName(BaseTheme.BUTTON_LINK);
 	final Button btSearch = new Button("Procurar", new ClickListener() {
 
 	    @Override
@@ -519,7 +520,7 @@ public class DocumentSearch extends CustomComponent implements EmbeddedComponent
 		isUsingSimpleSearch = false;
 	    }
 	});
-	btAdvSearch.setStyleName(BennuTheme.BUTTON_LINK);
+	btAdvSearch.setStyleName(BaseTheme.BUTTON_LINK);
 	hl.addComponent(txtSearch);
 	hl.addComponent(btSearch);
 	hl.addComponent(btAdvSearch);

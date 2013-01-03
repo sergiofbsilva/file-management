@@ -3,6 +3,13 @@ package module.fileManagement.presentationTier.pages;
 import java.util.List;
 import java.util.Map;
 
+import module.fileManagement.domain.DirNode;
+import module.fileManagement.domain.FileManagementSystem;
+import module.fileManagement.domain.metadata.MetadataTemplate;
+import module.organization.domain.Unit;
+import pt.ist.bennu.core.applicationTier.Authenticate;
+import pt.ist.bennu.core.domain.RoleType;
+import pt.ist.fenixframework.pstm.AbstractDomainObject;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.ItemConstructor;
 import pt.ist.vaadinframework.data.hints.Options;
@@ -16,14 +23,6 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
-
-import module.fileManagement.domain.DirNode;
-import module.fileManagement.domain.FileManagementSystem;
-import module.fileManagement.domain.metadata.MetadataTemplate;
-import module.organization.domain.Unit;
-
-import pt.ist.bennu.core.applicationTier.Authenticate.UserView;
-import pt.ist.bennu.core.domain.RoleType;
 
 @EmbeddedComponent(path = { "ManageDirProperties" }, args = { "dirNode" })
 public class ManageDirProperties extends CustomComponent implements EmbeddedComponentContainer {
@@ -45,13 +44,13 @@ public class ManageDirProperties extends CustomComponent implements EmbeddedComp
 
     @Override
     public boolean isAllowedToOpen(Map<String, String> args) {
-	return UserView.getCurrentUser().hasRoleType(RoleType.MANAGER);
+	return Authenticate.getCurrentUser().hasRoleType(RoleType.MANAGER);
     }
 
     @Override
     public void setArguments(Map<String, String> args) {
 	String dirNodeOid = args.get("dirNode");
-	setDirNode((DirNode) DirNode.fromExternalId(dirNodeOid));
+	setDirNode((DirNode) AbstractDomainObject.fromExternalId(dirNodeOid));
     }
 
     private void setDirNode(DirNode dirNode) {

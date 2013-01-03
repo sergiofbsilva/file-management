@@ -25,8 +25,12 @@
 package module.fileManagement.presentationTier.component;
 
 import static module.fileManagement.domain.FileManagementSystem.getMessage;
+import module.fileManagement.domain.DirNode;
+import module.vaadin.ui.BennuTheme;
 
 import org.apache.commons.lang.StringUtils;
+
+import pt.ist.bennu.core.domain.exceptions.DomainException;
 
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickListener;
@@ -35,11 +39,6 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
-
-import module.fileManagement.domain.DirNode;
-import module.vaadin.ui.BennuTheme;
-
-import pt.ist.bennu.core.domain.exceptions.DomainException;
 
 /**
  * 

@@ -14,6 +14,7 @@ import module.fileManagement.domain.exception.NoAvailableQuotaException;
 import module.fileManagement.domain.exception.NodeDuplicateNameException;
 import module.fileManagement.domain.log.CreateDirLog;
 import module.fileManagement.domain.log.CreateFileLog;
+import module.fileManagement.domain.log.RecoverDirLog;
 import module.fileManagement.domain.metadata.MetadataKey;
 import module.fileManagement.domain.metadata.MetadataTemplate;
 import module.fileManagement.domain.metadata.SeqNumberMetadata;
@@ -26,7 +27,7 @@ import module.organization.domain.groups.UnitGroup;
 
 import org.apache.commons.io.FileUtils;
 
-import pt.ist.bennu.core.applicationTier.Authenticate.UserView;
+import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.RoleType;
 import pt.ist.bennu.core.domain.User;
 import pt.ist.bennu.core.domain.groups.EmptyGroup;
@@ -169,10 +170,10 @@ public class DirNode extends DirNode_Base {
     public DirNode createDir(final String dirName, final ContextPath contextPath) {
 	final DirNode searchDir = searchDir(dirName);
 	if (searchDir != null) {
-	    throw new NodeDuplicateNameException();
+	    throw new NodeDuplicateNameException(dirName);
 	}
 	final DirNode resultNode = new DirNode(this, dirName);
-	new CreateDirLog(UserView.getCurrentUser(), contextPath, resultNode);
+	new CreateDirLog(Authenticate.getCurrentUser(), contextPath, resultNode);
 	return resultNode;
     }
 
@@ -197,19 +198,10 @@ public class DirNode extends DirNode_Base {
 	return hasUser() ? FileManagementSystem.getMessage("label.menu.home") : getName();
     }
 
+    @Override
     @Service
     public void setDisplayName(final String displayName) throws NodeDuplicateNameException {
-	final DirNode parent = getParent();
-
-	if (parent == null) {
-	    throw new NodeDuplicateNameException();
-	}
-
-	final AbstractFileNode searchNode = parent.searchNode(displayName);
-	if (searchNode != null) {
-	    throw new NodeDuplicateNameException();
-	}
-
+	super.setDisplayName(displayName);
 	setName(displayName);
     }
 
@@ -288,7 +280,7 @@ public class DirNode extends DirNode_Base {
 	    }
 
 	    fileNode = new FileNode(this, fileContent, fileName, displayName);
-	    new CreateFileLog(UserView.getCurrentUser(), contextPath, fileNode);
+	    new CreateFileLog(Authenticate.getCurrentUser(), contextPath, fileNode);
 	    return fileNode;
 	}
 
@@ -335,7 +327,7 @@ public class DirNode extends DirNode_Base {
 	    final Integer nextSequenceNumber = getNextSequenceNumber();
 	    FileManagementSystem.FILENAME_TEMPLATE.setDirNode(this);
 	    final String fileName = FileManagementSystem.FILENAME_TEMPLATE.getValue();
-	    final Document document = new Document(fileName, fileName, StringUtils.EMPTY.getBytes());
+	    final Document document = new Document(fileName, fileName, org.apache.commons.lang.StringUtils.EMPTY.getBytes());
 	    if (hasDefaultTemplate()) {
 		final MetadataTemplate defaultTemplate = getDefaultTemplate();
 		final Set<MetadataKey> seqNumberKeys = defaultTemplate.getKeysByMetadataType(SeqNumberMetadata.class);
@@ -459,6 +451,10 @@ public class DirNode extends DirNode_Base {
 	return null;
     }
 
+    public boolean hasNode(final String displayName) {
+	return searchNode(displayName) != null;
+    }
+
     public FileNode searchFile(final String fileName) {
 	final AbstractFileNode searchNode = searchNode(fileName);
 	return searchNode != null && searchNode instanceof FileNode ? (FileNode) searchNode : null;
@@ -505,9 +501,10 @@ public class DirNode extends DirNode_Base {
     @Override
     public void addChild(final AbstractFileNode child) throws NodeDuplicateNameException {
 	if (!child.isShared()) {
-	    final AbstractFileNode node = searchNode(child.getDisplayName());
+	    final String displayName = child.getDisplayName();
+	    final AbstractFileNode node = searchNode(displayName);
 	    if (node != null) {
-		throw new NodeDuplicateNameException();
+		throw new NodeDuplicateNameException(displayName);
 	    }
 	}
 	super.addChild(child);
@@ -536,11 +533,11 @@ public class DirNode extends DirNode_Base {
     }
 
     @Override
-    public User getOwner() {
+    public DirNode getTopDirNode() {
 	if (hasParent()) {
-	    return getParent().getOwner();
+	    return getParent().getTopDirNode();
 	}
-	return hasRootDirNode() ? getRootDirNode().getUser() : getUser();
+	return this;
     }
 
     /*
@@ -598,5 +595,12 @@ public class DirNode extends DirNode_Base {
 	}
 	setSequenceNumber(getSequenceNumber() + 1);
 	return getSequenceNumber();
+    }
+
+    @Override
+    @Service
+    public void recoverTo(DirNode targetDir) {
+	new RecoverDirLog(Authenticate.getCurrentUser(), targetDir.getContextPath(), this);
+	setParent(targetDir);
     }
 }

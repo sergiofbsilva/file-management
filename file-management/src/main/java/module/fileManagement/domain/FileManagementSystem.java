@@ -26,16 +26,6 @@ package module.fileManagement.domain;
 
 import java.util.ResourceBundle;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
-import pt.ist.fenixWebFramework.services.Service;
-import pt.ist.vaadinframework.VaadinFrameworkLogger;
-
-import com.vaadin.Application;
-import com.vaadin.ui.Window;
-
 import module.fileManagement.domain.metadata.Metadata;
 import module.fileManagement.domain.metadata.MetadataKey;
 import module.fileManagement.domain.metadata.MetadataTemplate;
@@ -45,10 +35,19 @@ import module.fileManagement.presentationTier.action.OrganizationModelPluginActi
 import module.fileManagement.tools.FilenameTemplate;
 import module.organization.presentationTier.actions.OrganizationModelAction;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 import pt.ist.bennu.core.domain.ModuleInitializer;
 import pt.ist.bennu.core.domain.MyOrg;
 import pt.ist.bennu.core.domain.exceptions.DomainException;
 import pt.ist.bennu.core.util.BundleUtil;
+import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.vaadinframework.VaadinFrameworkLogger;
+
+import com.vaadin.Application;
+import com.vaadin.ui.Window;
 
 /**
  * 

@@ -13,10 +13,11 @@ import module.fileManagement.domain.metadata.Metadata;
 import module.fileManagement.domain.metadata.MetadataKey;
 import module.fileManagement.domain.metadata.MetadataTemplate;
 import module.fileManagement.tools.StringUtils;
+
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 
-import pt.ist.bennu.core.applicationTier.Authenticate.UserView;
+import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.User;
 import pt.ist.fenixWebFramework.services.Service;
 
@@ -352,7 +353,7 @@ public class Document extends Document_Base {
     }
 
     private void addNewVersionMetadata() {
-	final User currentUser = UserView.getCurrentUser();
+	final User currentUser = Authenticate.getCurrentUser();
 	addMetadata(MetadataKey.getNewDocumentVersionKey(), currentUser == null ? FileManagementSystem.getMessage("user.script")
 		: currentUser.getShortPresentationName());
 	setModifiedDateNow();
@@ -416,7 +417,7 @@ public class Document extends Document_Base {
 
     public MetadataTemplate getMetadataTemplateAssociated() {
 	final String templateValue = (String) getMetadataValue(MetadataKey.getTemplateKey());
-	if (!StringUtils.isBlank(templateValue)) {
+	if (!org.apache.commons.lang.StringUtils.isBlank(templateValue)) {
 	    return MetadataTemplate.getMetadataTemplate(templateValue);
 	}
 	return null;

@@ -40,7 +40,7 @@ public class PersonField extends TimeoutSelect {
 
 	@Override
 	protected DSLState createFilterExpression(String filterText) {
-	    if (!StringUtils.isEmpty(filterText)) {
+	    if (!org.apache.commons.lang.StringUtils.isEmpty(filterText)) {
 		final String[] split = filterText.trim().split("\\s+");
 		BuildingState expr = new BuildingState();
 		for (int i = 0; i < split.length; i++) {

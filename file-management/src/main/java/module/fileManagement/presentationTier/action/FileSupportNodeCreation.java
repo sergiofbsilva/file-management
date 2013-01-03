@@ -27,17 +27,16 @@ package module.fileManagement.presentationTier.action;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+
 import pt.ist.bennu.core.domain.RoleType;
 import pt.ist.bennu.core.domain.VirtualHost;
 import pt.ist.bennu.core.domain.contents.Node;
 import pt.ist.bennu.core.domain.groups.Role;
 import pt.ist.bennu.core.domain.groups.UserGroup;
 import pt.ist.bennu.core.presentationTier.actions.ContextBaseAction;
-
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-
 import pt.ist.bennu.vaadin.domain.contents.VaadinNode;
 import pt.ist.fenixWebFramework.servlets.functionalities.CreateNodeAction;
 import pt.ist.fenixWebFramework.struts.annotations.Mapping;

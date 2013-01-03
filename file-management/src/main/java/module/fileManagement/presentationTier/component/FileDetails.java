@@ -107,7 +107,11 @@ public class FileDetails extends NodeDetails {
 	}
 	addOperation(createDownloadLink());
 	if (getNode().isWriteGroupMember()) {
+	    addOperation(createRenameLink());
 	    addOperation(createShareLink());
+	    if (!getNode().isShared()) {
+		addOperation(createMoveLink());
+	    }
 	    addOperation(createDeleteFileLink());
 	    addOperation(createUploadLink());
 	} else {
@@ -128,7 +132,7 @@ public class FileDetails extends NodeDetails {
 	    addListener((SucceededListener) this);
 	    addListener((FailedListener) this);
 	    setButtonCaption("Upload Nova Versão");
-	    addStyleName(BennuTheme.BUTTON_LINK);
+	    addStyleName(BaseTheme.BUTTON_LINK);
 	    sameNameFailed = StringUtils.EMPTY;
 	}
 

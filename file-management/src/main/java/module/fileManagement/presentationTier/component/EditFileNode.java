@@ -50,7 +50,8 @@ public class EditFileNode extends Window {
         layout.setComponentAlignment(horizontalLayout, Alignment.BOTTOM_RIGHT);
 
         final Button save = new Button(getMessage("label.save"), new Button.ClickListener() {
-            public void buttonClick(final ClickEvent event) {
+            @Override
+	    public void buttonClick(final ClickEvent event) {
         	final String displayName = (String) displayNameField.getValue();
         	final String filename = (String) fileNameField.getValue();
 
@@ -69,7 +70,8 @@ public class EditFileNode extends Window {
         });
         horizontalLayout.addComponent(save);
         final Button close = new Button(getMessage("label.close"), new Button.ClickListener() {
-            public void buttonClick(final ClickEvent event) {
+            @Override
+	    public void buttonClick(final ClickEvent event) {
                 (getParent()).removeWindow(window);
             }
         });

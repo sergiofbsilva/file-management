@@ -10,7 +10,9 @@ import java.util.Set;
 
 import module.fileManagement.domain.AbstractFileNode;
 import module.fileManagement.domain.ContextPath;
+import module.fileManagement.domain.DirNode;
 import module.fileManagement.presentationTier.DownloadUtil;
+import module.fileManagement.presentationTier.component.dialog.SelectDestinationDialog;
 import module.fileManagement.presentationTier.component.viewers.FMSViewerFactory;
 import module.fileManagement.presentationTier.pages.DocumentBrowse;
 import module.fileManagement.presentationTier.pages.DocumentShare;
@@ -28,6 +30,8 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
+import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.themes.BaseTheme;
 import com.vaadin.ui.themes.Reindeer;
 
@@ -235,10 +239,48 @@ public abstract class NodeDetails extends Panel {
 	return infoVisible;
     }
 
+    protected Button createRenameLink() {
+	Button btRenameDir = new Button(getMessage("label.rename"), new Button.ClickListener() {
+
+	    @Override
+	    public void buttonClick(ClickEvent event) {
+		getWindow().addWindow(new RenameWindow(getNodeItem()));
+	    }
+	});
+
+	btRenameDir.setStyleName(BaseTheme.BUTTON_LINK);
+	return btRenameDir;
+    }
+
     public Link createDownloadLink() {
 	final String url = DownloadUtil.getDownloadUrl(getApplication(), getNodeToDownload());
 	final ExternalResource externalResource = new ExternalResource(url);
 	return new Link(getMessage("label.download"), externalResource);
+    }
+
+    public Button createMoveLink() {
+	Button btMove = new Button(getMessage("label.move"), new Button.ClickListener() {
+
+	    @Override
+	    public void buttonClick(ClickEvent event) {
+		final SelectDestinationDialog sdd = new SelectDestinationDialog(getNode());
+		getWindow().addWindow(sdd);
+		sdd.addListener(new Window.CloseListener() {
+
+		    @Override
+		    public void windowClose(CloseEvent e) {
+			final DirNode selectedDirNode = sdd.getSelectedDirNode();
+			if (selectedDirNode != null) {
+			    documentBrowse.getBrowser().getDocumentTable().move(getNode(), selectedDirNode);
+			}
+		    }
+		});
+
+	    }
+	});
+	btMove.addStyleName(BaseTheme.BUTTON_LINK);
+	return btMove;
+
     }
 
     public abstract <T extends AbstractFileNode> T getNodeToDownload();

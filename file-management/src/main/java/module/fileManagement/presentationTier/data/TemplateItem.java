@@ -29,19 +29,17 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import pt.ist.vaadinframework.data.AbstractBufferedItem;
-import pt.ist.vaadinframework.data.BufferedProperty;
-
-import com.vaadin.data.Property;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.AbstractProperty;
-
 import module.fileManagement.domain.Document;
 import module.fileManagement.domain.metadata.Metadata;
 import module.fileManagement.domain.metadata.MetadataKey;
 import module.fileManagement.domain.metadata.MetadataTemplate;
 import module.vaadin.data.util.ObjectHintedProperty;
+import pt.ist.vaadinframework.data.AbstractBufferedItem;
+import pt.ist.vaadinframework.data.BufferedProperty;
+
+import com.vaadin.data.Property;
+import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.AbstractProperty;
 
 /**
  * 

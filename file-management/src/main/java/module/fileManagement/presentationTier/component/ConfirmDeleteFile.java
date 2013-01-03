@@ -70,7 +70,8 @@ public class ConfirmDeleteFile extends Window {
         layout.setComponentAlignment(horizontalLayout, Alignment.BOTTOM_RIGHT);
 
         final Button delete = new Button(getMessage("label.file.delete"), new Button.ClickListener() {
-            public void buttonClick(final ClickEvent event) {
+            @Override
+	    public void buttonClick(final ClickEvent event) {
         	fileTable.removeItem(fileNode.getExternalId());
         	fileNode.deleteService();
         	(getParent()).removeWindow(window);
@@ -78,7 +79,8 @@ public class ConfirmDeleteFile extends Window {
         });
         horizontalLayout.addComponent(delete);
         final Button close = new Button(getMessage("label.close"), new Button.ClickListener() {
-            public void buttonClick(final ClickEvent event) {
+            @Override
+	    public void buttonClick(final ClickEvent event) {
                 (getParent()).removeWindow(window);
             }
         });

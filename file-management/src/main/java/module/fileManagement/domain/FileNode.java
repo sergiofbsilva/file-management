@@ -30,23 +30,23 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.io.FileUtils;
-
-import pt.ist.fenixWebFramework.services.Service;
-
-import com.google.common.collect.Multimap;
-
 import module.fileManagement.domain.exception.CannotCreateFileException;
 import module.fileManagement.domain.exception.NoAvailableQuotaException;
+import module.fileManagement.domain.exception.NodeDuplicateNameException;
 import module.fileManagement.domain.log.CreateNewVersionLog;
 import module.fileManagement.domain.log.FileLog;
 import module.fileManagement.domain.log.RecoverFileLog;
 import module.fileManagement.domain.log.UnshareFileLog;
 import module.fileManagement.domain.metadata.MetadataKey;
 
-import pt.ist.bennu.core.applicationTier.Authenticate.UserView;
+import org.apache.commons.io.FileUtils;
+
+import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.exceptions.DomainException;
 import pt.ist.bennu.core.domain.groups.PersistentGroup;
+import pt.ist.fenixWebFramework.services.Service;
+
+import com.google.common.collect.Multimap;
 
 /**
  * 
@@ -69,7 +69,7 @@ public class FileNode extends FileNode_Base {
      * @throws IOException
      */
     public FileNode(final DirNode dirNode, final File file, final String fileName) throws IOException {
-	//note: here the displayName and the fileName are the same
+	// note: here the displayName and the fileName are the same
 
 	// super();
 	// if (dirNode == null) {
@@ -146,6 +146,12 @@ public class FileNode extends FileNode_Base {
     }
 
     @Override
+    public void setDisplayName(final String displayName) throws NodeDuplicateNameException {
+	super.setDisplayName(displayName);
+	getDocument().setDisplayName(displayName);
+    }
+
+    @Override
     public int compareTo(final AbstractFileNode node) {
 	return node.isDir() ? 1 : super.compareTo(node);
     }
@@ -198,14 +204,15 @@ public class FileNode extends FileNode_Base {
     public void unshare(VisibilityGroup group) {
 	super.unshare(group);
 	for (SharedFileNode sharedNode : getSharedFileNodes()) {
-	    new UnshareFileLog(UserView.getCurrentUser(), sharedNode);
+	    new UnshareFileLog(Authenticate.getCurrentUser(), sharedNode);
 	    sharedNode.deleteLink(new ContextPath(getParent()));
 	}
     }
 
+    @Override
     @Service
     public void recoverTo(DirNode targetDir) {
-	new RecoverFileLog(UserView.getCurrentUser(), targetDir.getContextPath(), this);
+	new RecoverFileLog(Authenticate.getCurrentUser(), targetDir.getContextPath(), this);
 	setParent(targetDir);
     }
 
@@ -235,7 +242,7 @@ public class FileNode extends FileNode_Base {
 	document.addVersion(fileContent, fileName);
 	document.setDisplayName(displayName);
 
-	new CreateNewVersionLog(UserView.getCurrentUser(), getParent().getContextPath(), this);
+	new CreateNewVersionLog(Authenticate.getCurrentUser(), getParent().getContextPath(), this);
 
     }
 
@@ -246,7 +253,10 @@ public class FileNode extends FileNode_Base {
 	} catch (IOException e) {
 	    throw new Error(e);
 	}
-
-
     }
+
+    @Override
+    public DirNode getTopDirNode() {
+	return getParent();
+    };
 }

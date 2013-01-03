@@ -27,16 +27,6 @@ package module.fileManagement.presentationTier.component;
 import java.util.Collection;
 import java.util.HashSet;
 
-import pt.ist.vaadinframework.data.reflect.DomainItem;
-import pt.ist.vaadinframework.ui.TransactionalForm;
-
-import com.vaadin.data.Container;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.Validator.InvalidValueException;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.Select;
-
 import module.fileManagement.domain.Document;
 import module.fileManagement.domain.FileManagementSystem;
 import module.fileManagement.domain.metadata.Metadata;
@@ -46,6 +36,15 @@ import module.fileManagement.presentationTier.data.DocumentContainer;
 import module.fileManagement.presentationTier.data.FMSFieldFactory;
 import module.fileManagement.presentationTier.data.TemplateItem;
 import module.vaadin.data.util.ObjectHintedProperty;
+import pt.ist.vaadinframework.data.reflect.DomainItem;
+import pt.ist.vaadinframework.ui.TransactionalForm;
+
+import com.vaadin.data.Container;
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.Validator.InvalidValueException;
+import com.vaadin.ui.Panel;
+import com.vaadin.ui.Select;
 
 /**
  * 

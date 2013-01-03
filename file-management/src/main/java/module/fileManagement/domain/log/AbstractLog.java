@@ -30,10 +30,11 @@ import module.fileManagement.domain.ContextPath;
 import module.fileManagement.domain.DirNode;
 import module.fileManagement.domain.FileManagementSystem;
 import module.fileManagement.domain.FileRepository;
-import pt.ist.bennu.core.applicationTier.Authenticate.UserView;
-import pt.ist.bennu.core.domain.User;
 
 import org.joda.time.DateTime;
+
+import pt.ist.bennu.core.applicationTier.Authenticate;
+import pt.ist.bennu.core.domain.User;
 
 /**
  * 
@@ -89,7 +90,7 @@ public abstract class AbstractLog extends AbstractLog_Base {
     }
 
     public DirNode getCurrentUserFileRepository() {
-	return FileRepository.getOrCreateFileRepository(UserView.getCurrentUser());
+	return FileRepository.getOrCreateFileRepository(Authenticate.getCurrentUser());
     }
 
 }

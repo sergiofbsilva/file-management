@@ -28,6 +28,12 @@ import static module.fileManagement.domain.FileManagementSystem.getMessage;
 
 import java.util.Map;
 
+import module.fileManagement.domain.AbstractFileNode;
+import module.fileManagement.domain.ContextPath;
+import module.fileManagement.presentationTier.component.AddDirWindow;
+import module.fileManagement.presentationTier.component.DocumentFileBrowser;
+import module.fileManagement.presentationTier.component.NodeDetails;
+import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
@@ -48,14 +54,6 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Layout;
 
-import module.fileManagement.domain.AbstractFileNode;
-import module.fileManagement.domain.ContextPath;
-import module.fileManagement.presentationTier.component.AddDirWindow;
-import module.fileManagement.presentationTier.component.DocumentFileBrowser;
-import module.fileManagement.presentationTier.component.NodeDetails;
-
-import pt.ist.bennu.core.applicationTier.Authenticate.UserView;
-
 @EmbeddedComponent(path = { "DocumentBrowse" }, args = { "contextPath" })
 /**
  * 
@@ -73,7 +71,7 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
 
     @Override
     public boolean isAllowedToOpen(Map<String, String> arguments) {
-	return UserView.getCurrentUser() != null;
+	return Authenticate.getCurrentUser() != null;
     }
 
     @Override
@@ -82,7 +80,7 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
 	if (pathString != null) {
 	    browser.setContextPath(pathString);
 	} else {
-	    browser.setContextPath(new ContextPath(UserView.getCurrentUser().getFileRepository()));
+	    browser.setContextPath(new ContextPath(Authenticate.getCurrentUser().getFileRepository()));
 	}
 	setFileDetails(browser.getNodeItem());
     }
@@ -239,6 +237,10 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
 
     public ContextPath getContextPath() {
 	return browser.getContextPath();
+    }
+
+    public DocumentFileBrowser getBrowser() {
+	return browser;
     }
 
 }

@@ -3,6 +3,18 @@ package module.fileManagement.presentationTier.component;
 import java.util.Collection;
 import java.util.HashSet;
 
+import module.fileManagement.domain.ContextPath;
+import module.fileManagement.domain.DirNode;
+import module.fileManagement.domain.Document;
+import module.fileManagement.domain.FileManagementSystem;
+import module.fileManagement.domain.FileNode;
+import module.fileManagement.presentationTier.component.UploadFileArea.FileUploadListener;
+import module.fileManagement.presentationTier.component.UploadFileArea.OnFileUploadEvent;
+import module.fileManagement.presentationTier.data.DocumentContainer;
+import module.fileManagement.presentationTier.pages.DocumentBrowse;
+import module.fileManagement.presentationTier.pages.UploadPage;
+import module.vaadin.data.util.ObjectHintedProperty;
+import module.vaadin.ui.BennuTheme;
 import pt.ist.fenixWebFramework.services.Service;
 import pt.ist.fenixframework.FFDomainException;
 import pt.ist.vaadinframework.EmbeddedApplication;
@@ -19,19 +31,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
-
-import module.fileManagement.domain.ContextPath;
-import module.fileManagement.domain.DirNode;
-import module.fileManagement.domain.Document;
-import module.fileManagement.domain.FileManagementSystem;
-import module.fileManagement.domain.FileNode;
-import module.fileManagement.presentationTier.component.UploadFileArea.FileUploadListener;
-import module.fileManagement.presentationTier.component.UploadFileArea.OnFileUploadEvent;
-import module.fileManagement.presentationTier.data.DocumentContainer;
-import module.fileManagement.presentationTier.pages.DocumentBrowse;
-import module.fileManagement.presentationTier.pages.UploadPage;
-import module.vaadin.data.util.ObjectHintedProperty;
-import module.vaadin.ui.BennuTheme;
+import com.vaadin.ui.themes.BaseTheme;
 
 public class UploadFilePanel extends CustomComponent implements ValueChangeNotifier {
 
@@ -139,7 +139,7 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
 	    }
 	});
 
-	btEditMetadata.setStyleName(BennuTheme.BUTTON_LINK);
+	btEditMetadata.setStyleName(BaseTheme.BUTTON_LINK);
 	hlUploadEditMetadata.setSpacing(true);
 	hlUploadEditMetadata.addComponent(btFinishUpload);
 	hlUploadEditMetadata.addComponent(lblOr);

@@ -1,7 +1,5 @@
 package module.fileManagement.domain.task;
 
-import pt.ist.fenixWebFramework.services.Service;
-
 import module.fileManagement.domain.FileManagementSystem;
 import module.fileManagement.domain.metadata.DateTimeMetadata;
 import module.fileManagement.domain.metadata.IntegerMetadata;
@@ -9,6 +7,7 @@ import module.fileManagement.domain.metadata.MetadataKey;
 import module.fileManagement.domain.metadata.MetadataTemplate;
 import module.fileManagement.domain.metadata.PersonMetadata;
 import module.fileManagement.domain.metadata.SeqNumberMetadata;
+import pt.ist.fenixWebFramework.services.Service;
 
 public class CreateDefaultMetadataTemplates extends CreateDefaultMetadataTemplates_Base {
 
@@ -63,6 +62,7 @@ public class CreateDefaultMetadataTemplates extends CreateDefaultMetadataTemplat
 	}
     }
 
+    @Override
     @Service
     public void executeTask() {
 	createDocumentTemplate();

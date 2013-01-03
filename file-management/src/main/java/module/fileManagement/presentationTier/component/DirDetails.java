@@ -4,7 +4,7 @@ import static module.fileManagement.domain.FileManagementSystem.getMessage;
 import module.fileManagement.domain.AbstractFileNode;
 import module.fileManagement.domain.DirNode;
 import module.fileManagement.presentationTier.pages.ManageDirProperties;
-import pt.ist.bennu.core.applicationTier.Authenticate.UserView;
+import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.RoleType;
 import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
@@ -31,20 +31,6 @@ public class DirDetails extends NodeDetails {
 	return (DirNode) super.getNode();
     }
 
-    private Button createRenameDirLink() {
-	Button btRenameDir = new Button(getMessage("label.rename"), new Button.ClickListener() {
-
-	    @Override
-	    public void buttonClick(ClickEvent event) {
-		final RenameDirWindow renameDirWindow = new RenameDirWindow(getNodeItem());
-		getWindow().addWindow(renameDirWindow);
-	    }
-	});
-
-	btRenameDir.setStyleName(BaseTheme.BUTTON_LINK);
-	return btRenameDir;
-    }
-
     @Override
     public String getDeleteDialogMessage() {
 	if (getNode().hasAnyChild()) {
@@ -68,16 +54,27 @@ public class DirDetails extends NodeDetails {
     }
 
     private boolean userIsManager() {
-	return UserView.getCurrentUser().hasRoleType(RoleType.MANAGER);
+	return Authenticate.getCurrentUser().hasRoleType(RoleType.MANAGER);
     }
 
     @Override
     public void updateOperations() {
-	if (getNode().hasParent() && getNode().isWriteGroupMember()) {
-	    addOperation(createRenameDirLink());
-	    addOperation(createShareLink());
-	    addOperation(createDeleteDirLink());
-	    addOperation(createDownloadLink());
+	if (getNode().hasParent()) {
+	    if (getNode().isReadGroupMember()) {
+		addOperation(createDownloadLink());
+	    }
+	    if (getNode().isWriteGroupMember()) {
+		addOperation(createRenameLink());
+		addOperation(createShareLink());
+		if (!getNode().isShared()) {
+		    addOperation(createMoveLink());
+		}
+		addOperation(createDeleteDirLink());
+	    } else {
+		if (getNode().isShared()) {
+		    addOperation(createDeleteDirLink());
+		}
+	    }
 	} else {
 	    if (getNode().isShared()) {
 		addOperation(createDeleteDirLink());

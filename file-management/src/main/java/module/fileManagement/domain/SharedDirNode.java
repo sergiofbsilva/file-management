@@ -36,42 +36,40 @@ import pt.ist.bennu.core.domain.User;
 import pt.ist.bennu.core.domain.groups.PersistentGroup;
 import pt.ist.fenixWebFramework.services.Service;
 
-
-
 /**
  * 
  * @author Sérgio Silva
  * 
  */
 public class SharedDirNode extends SharedDirNode_Base implements SharedNode {
-    
+
     public SharedDirNode() {
-        super();
+	super();
     }
-    
+
     public SharedDirNode(DirNode dirNode) {
-        this();
-        setNode(dirNode);
+	this();
+	setNode(dirNode);
     }
-    
+
     @Override
     public boolean isShared() {
 	return true;
     }
-    
+
     @Override
     public Long getQuota() {
 	return getNode().getQuota();
     }
-    
+
     @Override
     public Long getSize() {
 	return getNode().getSize();
     }
-    
+
     @Override
     public FileNode createFile(File file, String fileName, long filesize, ContextPath currentPath) {
-        return getNode().createFile(file, fileName, filesize, currentPath);
+	return getNode().createFile(file, fileName, filesize, currentPath);
     }
 
     @Override
@@ -115,27 +113,27 @@ public class SharedDirNode extends SharedDirNode_Base implements SharedNode {
 	final String name = super.getName();
 	return name != null ? name : getNode().getName();
     }
-    
+
     @Override
     public boolean hasAvailableQuota(long length) {
 	return getNode().hasAvailableQuota(length);
     }
-    
+
     @Override
     public boolean hasAvailableQuota(long length, FileNode fileNode) {
-        return getNode().hasAvailableQuota(length, fileNode);
+	return getNode().hasAvailableQuota(length, fileNode);
     }
-    
+
     @Override
     public String getPresentationFilesize() {
 	return getNode().getPresentationFilesize();
     }
-    
+
     @Override
     public String getPresentationTotalUsedSpace() {
 	return getNode().getPresentationTotalUsedSpace();
     }
-    
+
     @Override
     public String getPercentOfTotalUsedSpace() {
 	return getNode().getPercentOfTotalUsedSpace();
@@ -148,9 +146,9 @@ public class SharedDirNode extends SharedDirNode_Base implements SharedNode {
 
     @Override
     public User getOwner() {
-        return super.getOwner();
+	return super.getOwner();
     }
-    
+
     @Override
     public boolean hasReadGroup() {
 	return getNode() == null ? super.hasReadGroup() : getNode().hasReadGroup();
@@ -175,41 +173,41 @@ public class SharedDirNode extends SharedDirNode_Base implements SharedNode {
     public Iterator<AbstractFileNode> getChildIterator() {
 	return getNode().getChildIterator();
     }
-    
+
     @Service
     public void deleteLink() {
 	super.setParent(null);
 	super.setNode(null);
 	deleteDomainObject();
     }
-    
+
     @Service
     public void deleteLink(ContextPath currentPath) {
 	setParent(getTrash());
     }
-    
+
     @Override
     public void trash(ContextPath currentPath) {
 	deleteLink(currentPath);
     }
-    
+
     @Override
     public Set<DirLog> getDirLogSet() {
 	final Set<DirLog> dirLog = new HashSet<DirLog>(super.getDirLogSet());
 	dirLog.addAll(getNode().getDirLogSet());
 	return dirLog;
     }
-    
+
     @Override
     public Set<AbstractLog> getTargetLogSet() {
 	final Set<AbstractLog> fileLog = new HashSet<AbstractLog>(super.getTargetLogSet());
 	fileLog.addAll(getNode().getTargetLogSet());
 	return fileLog;
     }
-    
+
     @Override
     public boolean checkParent() {
 	return true;
     }
-    
+
 }

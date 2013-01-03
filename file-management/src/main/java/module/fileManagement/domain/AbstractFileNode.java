@@ -5,14 +5,12 @@ import static module.fileManagement.domain.FileManagementSystem.getMessage;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import module.fileManagement.domain.exception.NodeDuplicateNameException;
 import module.fileManagement.domain.log.DeleteDirLog;
 import module.fileManagement.domain.log.DeleteFileLog;
 import module.fileManagement.domain.log.ShareDirLog;
 import module.fileManagement.domain.log.ShareFileLog;
-
-import org.apache.commons.lang.StringUtils;
-
-import pt.ist.bennu.core.applicationTier.Authenticate.UserView;
+import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.User;
 import pt.ist.bennu.core.domain.exceptions.DomainException;
 import pt.ist.bennu.core.domain.groups.AnyoneGroup;
@@ -20,10 +18,6 @@ import pt.ist.bennu.core.domain.groups.PersistentGroup;
 import pt.ist.bennu.core.domain.groups.SingleUserGroup;
 import pt.ist.fenixWebFramework.services.Service;
 import pt.utl.ist.fenix.tools.util.NaturalOrderComparator;
-
-import com.vaadin.terminal.Resource;
-import com.vaadin.terminal.ThemeResource;
-
 import dml.runtime.DirectRelation;
 import dml.runtime.Relation;
 import dml.runtime.RelationListener;
@@ -95,6 +89,8 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 
     public abstract int getCountFiles();
 
+    public abstract DirNode getTopDirNode();
+
     private void createDirLogs(User user, ContextPath contextPath, DirNode dirNode) {
 	for (AbstractFileNode node : dirNode.getChild()) {
 	    if (node.isDir()) {
@@ -124,7 +120,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 		node.deleteLink(contextPath);
 	    }
 	}
-	final User currentUser = UserView.getCurrentUser();
+	final User currentUser = Authenticate.getCurrentUser();
 	// final SingleUserGroup currentUserGroup =
 	// currentUser.getSingleUserGroup();
 	// setReadGroup(currentUserGroup);
@@ -160,7 +156,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
     }
 
     private boolean isGroupMember(final PersistentGroup group) {
-	final User user = UserView.getCurrentUser();
+	final User user = Authenticate.getCurrentUser();
 	return group.isMember(user);
     }
 
@@ -173,6 +169,34 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
     }
 
     public abstract String getDisplayName();
+
+    @Service
+    public Boolean moveTo(final DirNode dirNode) throws NodeDuplicateNameException {
+	if (dirNode != null) {
+	    if (dirNode.isWriteGroupMember()) {
+		if (dirNode.hasNode(getDisplayName())) {
+		    throw new NodeDuplicateNameException(getDisplayName());
+		}
+		setParent(dirNode);
+		return true;
+	    }
+	}
+	return false;
+    }
+
+    public void setDisplayName(String displayName) throws NodeDuplicateNameException {
+	DirNode parent = getParent();
+
+	if (parent == null) {
+	    parent = (DirNode) this;
+	}
+
+	final AbstractFileNode searchNode = parent.searchNode(displayName);
+	if (searchNode != null && !searchNode.equals(this)) {
+	    throw new NodeDuplicateNameException(displayName);
+	}
+
+    }
 
     public VisibilityState getVisibilityState() {
 	final PersistentGroup readGroup = getReadGroup();
@@ -258,7 +282,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 	final DirNode sharedFolder = userRootDir.getSharedFolder();
 	if (!hasSharedNode(sharedFolder, this)) { // TODO: deal with same name
 						  // when shared later
-	    final AbstractFileNode sharedNode = makeSharedNode(UserView.getCurrentUser(), contextPath, group, sharedFolder);
+	    final AbstractFileNode sharedNode = makeSharedNode(Authenticate.getCurrentUser(), contextPath, group, sharedFolder);
 	    sharedFolder.addChild(sharedNode);
 	} else {
 	    FileManagementSystem.getLogger().warn(
@@ -266,7 +290,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 	}
 
 	addVisibilityGroup(group);
-	// final User currentUser = UserView.getCurrentUser();
+	// final User currentUser = Authenticate.getCurrentUser();
 	// Set<PersistentGroup> readGroupSet = new HashSet<PersistentGroup>();
 	// final PersistentGroup readGroup = getReadGroup();
 	// if (readGroup instanceof UnionGroup) {
@@ -304,22 +328,6 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 	return hasParent() ? getParent().getOwner() : null;
     }
 
-    private ThemeResource getThemeResource(AbstractFileNode abstractFileNode) {
-	final String iconFile = abstractFileNode.isDir() ? "folder1_16x16.gif" : getIconFile(((FileNode) abstractFileNode)
-		.getDocument().getLastVersionedFile().getFilename());
-	return new ThemeResource("../../../images/fileManagement/" + iconFile);
-    }
-
-    private String getIconFile(final String filename) {
-	final int lastDot = filename.lastIndexOf('.');
-	final String fileSuffix = lastDot < 0 ? "file" : filename.substring(lastDot + 1);
-	return "fileicons/" + StringUtils.lowerCase(fileSuffix) + ".png";
-    }
-
-    public Resource getIcon() {
-	return getThemeResource(this);
-    }
-
     public void unshare(VisibilityGroup group) {
 	removeVisibilityGroup(group);
     }
@@ -332,5 +340,11 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 	    return getMessage("node.type.dir");
 	}
 	return getMessage("label.empty");
+    }
+
+    public abstract void recoverTo(DirNode targetDir);
+
+    public boolean hasSameReadWriteGroup(AbstractFileNode node) {
+	return getReadGroup().equals(node.getReadGroup()) && getWriteGroup().equals(node.getWriteGroup());
     }
 }

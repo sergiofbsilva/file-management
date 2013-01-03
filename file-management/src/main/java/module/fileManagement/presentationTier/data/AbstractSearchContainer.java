@@ -3,11 +3,11 @@ package module.fileManagement.presentationTier.data;
 import java.util.Collection;
 import java.util.List;
 
-import com.vaadin.data.Property;
-
 import pt.ist.bennu.core.domain.Presentable;
 import pt.ist.vaadinframework.data.AbstractBufferedContainer;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
+
+import com.vaadin.data.Property;
 
 public abstract class AbstractSearchContainer extends AbstractBufferedContainer<Presentable, Object, DomainItem<Presentable>> {
 

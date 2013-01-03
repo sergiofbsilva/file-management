@@ -8,13 +8,14 @@ import module.fileManagement.domain.FileRepository;
 import module.organization.domain.OrganizationalModel;
 import module.organization.domain.Party;
 import module.organization.presentationTier.actions.PartyViewHook;
-import pt.ist.bennu.core.presentationTier.actions.ContextBaseAction;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
+import pt.ist.bennu.core.presentationTier.actions.ContextBaseAction;
 import pt.ist.fenixWebFramework.struts.annotations.Mapping;
+import pt.ist.fenixframework.pstm.AbstractDomainObject;
 
 @Mapping(path = "/fileManagementOrganizationModel")
 public class OrganizationModelPluginAction extends ContextBaseAction {
@@ -46,7 +47,7 @@ public class OrganizationModelPluginAction extends ContextBaseAction {
 	    HttpServletResponse response) throws Exception {
 	final String partyOid = getAttribute(request, "partyOid");
 	final String organizationalModelOid = getAttribute(request, "organizationalModelOid");
-	final Party party = Party.fromExternalId(partyOid);
+	final Party party = AbstractDomainObject.fromExternalId(partyOid);
 	FileRepository.getOrCreateFileRepository(party);
 	request.setAttribute("party", party);
 	final String redirect = String.format(

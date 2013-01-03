@@ -26,7 +26,6 @@ package module.fileManagement.domain.log;
 
 import module.fileManagement.domain.ContextPath;
 import module.fileManagement.domain.DirNode;
-import pt.ist.bennu.core.applicationTier.Authenticate.UserView;
 import pt.ist.bennu.core.domain.User;
 
 /**

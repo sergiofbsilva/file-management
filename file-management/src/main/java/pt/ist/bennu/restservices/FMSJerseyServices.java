@@ -29,7 +29,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import pt.ist.bennu.core.applicationTier.Authenticate;
-import pt.ist.bennu.core.applicationTier.Authenticate.UserView;
 import pt.ist.bennu.core.domain.User;
 import pt.ist.bennu.core.domain.exceptions.DomainException;
 import pt.ist.fenixframework.pstm.AbstractDomainObject;
@@ -126,7 +125,7 @@ public class FMSJerseyServices {
     @GET
     @Path("root")
     public Response getRoot() {
-	final User currentUser = UserView.getCurrentUser();
+	final User currentUser = Authenticate.getCurrentUser();
 	if (currentUser == null) {
 	    return Response.noContent().build();
 	}

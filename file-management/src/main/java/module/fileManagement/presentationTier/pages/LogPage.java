@@ -16,13 +16,13 @@ import module.fileManagement.domain.log.FileLog;
 import module.fileManagement.presentationTier.component.viewers.AbstractLogLabel;
 import module.fileManagement.presentationTier.component.viewers.AbstractLogViewer;
 import module.fileManagement.presentationTier.component.viewers.LogViewerFactory;
-import pt.ist.bennu.core.applicationTier.Authenticate.UserView;
-import pt.ist.bennu.core.domain.User;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.joda.time.DateTime;
 
+import pt.ist.bennu.core.applicationTier.Authenticate;
+import pt.ist.bennu.core.domain.User;
 import pt.ist.vaadinframework.VaadinFrameworkLogger;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
@@ -135,7 +135,7 @@ public class LogPage extends CustomComponent implements EmbeddedComponentContain
     }
 
     private Set<AbstractLog> getLogs(Date selectionDate) {
-	final User currentUser = UserView.getCurrentUser();
+	final User currentUser = Authenticate.getCurrentUser();
 
 	final TreeSet<AbstractLog> sortedLogs = new TreeSet<AbstractLog>(AbstractLog.TIMESTAMP_COMPARATOR);
 	final List<AbstractLog> operationLogs = currentUser.getOperationLog();

@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import module.fileManagement.domain.FileManagementSystem;
 import pt.ist.fenixWebFramework.services.Service;
 import pt.ist.fenixframework.pstm.AbstractDomainObject;
 
@@ -36,8 +37,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
-
-import module.fileManagement.domain.FileManagementSystem;
 
 /**
  * 

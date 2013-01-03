@@ -85,8 +85,8 @@ public class VisibilityListViewer extends com.vaadin.ui.Label implements ValueCh
 	if (isPublicAccess()) {
 	    return VisibilityType.PUBLIC;
 	} else {
-	    if ((list.size() == 1 && list.contains(SingleUserGroup.class))
-		    || (list.size() == 2 && list.contains(SingleUserGroup.class) && list.contains(EmptyGroup.class))) {
+	    if (list.size() == 1 && list.contains(SingleUserGroup.class) || list.size() == 2
+		    && list.contains(SingleUserGroup.class) && list.contains(EmptyGroup.class)) {
 		return VisibilityType.PRIVATE;
 	    } else {
 		return VisibilityType.SHARED;
@@ -101,12 +101,6 @@ public class VisibilityListViewer extends com.vaadin.ui.Label implements ValueCh
 
     @Override
     public String getDescription() {
-	final StringBuilder htmlDescription = new StringBuilder();
-	htmlDescription.append("<ul>");
-	for (VisibilityGroup group : getPropertyValue()) {
-	    htmlDescription.append(String.format("<li>%s</li>", group.getDescription()));
-	}
-	htmlDescription.append("</ul>");
-	return htmlDescription.toString();
+	return getPropertyValue().getDescription();
     }
 }

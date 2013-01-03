@@ -11,15 +11,10 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
-public class RenameDirWindow extends Window {
+public class RenameWindow extends Window {
 
-    private DomainItem<AbstractFileNode> dirNodeItem;
-    private final RenameDirWindow renameDirWindow;
-
-    public RenameDirWindow(DomainItem<AbstractFileNode> nodeItem) {
+    public RenameWindow(final DomainItem<AbstractFileNode> nodeItem) {
 	super(getMessage("label.rename"));
-	renameDirWindow = this;
-	dirNodeItem = nodeItem;
 
 	setModal(true);
 	setWidth(50, UNITS_PERCENTAGE);
@@ -27,7 +22,6 @@ public class RenameDirWindow extends Window {
 	final VerticalLayout layout = (VerticalLayout) getContent();
 	layout.setMargin(true);
 	layout.setSpacing(true);
-
 	final TransactionalForm form = new TransactionalForm(FileManagementSystem.getBundleName());
 	form.setWriteThrough(false);
 	form.addButton(getMessage("label.save"), new ClickListener() {
@@ -35,20 +29,41 @@ public class RenameDirWindow extends Window {
 	    @Override
 	    public void buttonClick(ClickEvent event) {
 		form.commit();
-		renameDirWindow.close();
+		close();
 	    }
+
 	});
 	form.addButton(getMessage("label.close"), new ClickListener() {
 
 	    @Override
 	    public void buttonClick(ClickEvent event) {
-		renameDirWindow.close();
+		close();
 	    }
 	});
 
-	form.setItemDataSource(dirNodeItem);
+	form.setItemDataSource(nodeItem);
 	form.setVisibleItemProperties(new String[] { "displayName" });
+	// form.getField("displayName").addValidator(new Validator() {
+	//
+	// @Override
+	// public void validate(Object value) throws InvalidValueException {
+	// if (!isValid(value)) {
+	// throw new
+	// InvalidValueException("Já existe um ficheiro com esse nome");
+	// }
+	// }
+	//
+	// @Override
+	// public boolean isValid(Object value) {
+	// AbstractFileNode node = nodeItem.getValue();
+	// final DirNode dirNode = (DirNode) (node instanceof FileNode ?
+	// ((FileNode) node).getParent() : node);
+	// final String displayName = (String) value;
+	// return node.getDisplayName().equals(displayName) ||
+	// !dirNode.hasNode(displayName);
+	// }
+	//
+	// });
 	layout.addComponent(form);
     }
-
 }

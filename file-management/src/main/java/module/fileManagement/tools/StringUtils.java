@@ -12,13 +12,13 @@ public class StringUtils extends org.apache.commons.lang.StringUtils {
      * @return
      */
     public static boolean matches(String stack, String needle) {
-	if (StringUtils.isBlank(stack) || StringUtils.isBlank(needle)) {
+	if (org.apache.commons.lang.StringUtils.isBlank(stack) || org.apache.commons.lang.StringUtils.isBlank(needle)) {
 	    return false;
 	}
 	String[] needles = StringNormalizer.normalize(needle).toLowerCase().split(" ");
 	final String normalizedStack = StringNormalizer.normalize(stack).toLowerCase();
 	for (String value : needles) {
-	    if (StringUtils.contains(normalizedStack, value)) {
+	    if (org.apache.commons.lang.StringUtils.contains(normalizedStack, value)) {
 		return true;
 	    }
 	}

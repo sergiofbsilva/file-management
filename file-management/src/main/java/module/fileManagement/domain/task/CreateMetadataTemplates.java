@@ -7,7 +7,6 @@ import module.fileManagement.domain.metadata.MetadataKey;
 import module.fileManagement.domain.metadata.MetadataTemplate;
 import module.fileManagement.domain.metadata.PersonMetadata;
 import module.fileManagement.domain.metadata.SeqNumberMetadata;
-
 import pt.ist.bennu.core.domain.scheduler.WriteCustomTask;
 
 public class CreateMetadataTemplates extends WriteCustomTask {

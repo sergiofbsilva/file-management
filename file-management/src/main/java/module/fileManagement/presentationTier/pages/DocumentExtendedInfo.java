@@ -32,6 +32,22 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import module.fileManagement.domain.AbstractFileNode;
+import module.fileManagement.domain.Document;
+import module.fileManagement.domain.FileNode;
+import module.fileManagement.domain.VersionedFile;
+import module.fileManagement.domain.VisibilityList;
+import module.fileManagement.domain.metadata.Metadata;
+import module.fileManagement.presentationTier.DownloadUtil;
+import module.fileManagement.presentationTier.component.MetadataPanel;
+import module.fileManagement.presentationTier.component.NodeDetails;
+import module.fileManagement.presentationTier.component.TabularViewer;
+import module.fileManagement.presentationTier.component.viewers.FMSViewerFactory;
+import module.fileManagement.presentationTier.component.viewers.VisibilityListViewer;
+import module.fileManagement.presentationTier.data.DocumentContainer;
+import module.vaadin.data.util.ObjectHintedProperty;
+import module.vaadin.ui.BennuTheme;
+import pt.ist.fenixframework.pstm.AbstractDomainObject;
 import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.reflect.DomainContainer;
@@ -52,22 +68,6 @@ import com.vaadin.ui.Layout;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.BaseTheme;
-
-import module.fileManagement.domain.AbstractFileNode;
-import module.fileManagement.domain.Document;
-import module.fileManagement.domain.FileNode;
-import module.fileManagement.domain.VersionedFile;
-import module.fileManagement.domain.VisibilityList;
-import module.fileManagement.domain.metadata.Metadata;
-import module.fileManagement.presentationTier.DownloadUtil;
-import module.fileManagement.presentationTier.component.MetadataPanel;
-import module.fileManagement.presentationTier.component.NodeDetails;
-import module.fileManagement.presentationTier.component.TabularViewer;
-import module.fileManagement.presentationTier.component.viewers.FMSViewerFactory;
-import module.fileManagement.presentationTier.component.viewers.VisibilityListViewer;
-import module.fileManagement.presentationTier.data.DocumentContainer;
-import module.vaadin.data.util.ObjectHintedProperty;
-import module.vaadin.ui.BennuTheme;
 
 @EmbeddedComponent(path = { "DocumentExtendedInfo" }, args = { "node" })
 /**
@@ -90,7 +90,7 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
 
     @Override
     public boolean isAllowedToOpen(Map<String, String> arguments) {
-	AbstractFileNode node = Document.fromExternalId(arguments.get("node"));
+	AbstractFileNode node = AbstractDomainObject.fromExternalId(arguments.get("node"));
 	if (node == null || node.isDir() || !(node.isReadGroupMember() || node.isWriteGroupMember())) {
 	    return false;
 	}
@@ -99,7 +99,7 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
 
     @Override
     public void setArguments(Map<String, String> arguments) {
-	fileNode = Document.fromExternalId(arguments.get("node"));
+	fileNode = AbstractDomainObject.fromExternalId(arguments.get("node"));
     }
 
     public void update() {

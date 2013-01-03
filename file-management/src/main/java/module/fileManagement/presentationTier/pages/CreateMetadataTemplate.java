@@ -27,6 +27,12 @@ package module.fileManagement.presentationTier.pages;
 import java.util.Map;
 import java.util.Set;
 
+import module.fileManagement.domain.metadata.Metadata;
+import module.fileManagement.domain.metadata.MetadataKey;
+import module.fileManagement.domain.metadata.MetadataTemplate;
+import module.fileManagement.domain.metadata.MetadataTemplateRule;
+import module.fileManagement.domain.metadata.StringMetadata;
+
 import org.apache.commons.lang.StringUtils;
 
 import pt.ist.fenixWebFramework.services.Service;
@@ -50,12 +56,6 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window.Notification;
 import com.vaadin.ui.themes.BaseTheme;
-
-import module.fileManagement.domain.metadata.Metadata;
-import module.fileManagement.domain.metadata.MetadataKey;
-import module.fileManagement.domain.metadata.MetadataTemplate;
-import module.fileManagement.domain.metadata.MetadataTemplateRule;
-import module.fileManagement.domain.metadata.StringMetadata;
 
 @SuppressWarnings("serial")
 @EmbeddedComponent(path = { "CreateMetadataTemplate" }, args = { "template", "readOnly" })

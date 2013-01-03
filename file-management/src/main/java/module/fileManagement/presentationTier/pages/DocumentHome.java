@@ -26,13 +26,25 @@ package module.fileManagement.presentationTier.pages;
 
 import static module.fileManagement.domain.FileManagementSystem.getMessage;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import pt.ist.bennu.core.applicationTier.Authenticate.UserView;
+import module.fileManagement.domain.DirNode;
+import module.fileManagement.domain.FileNode;
+import module.fileManagement.presentationTier.data.AbstractSearchContainer;
+import module.organization.domain.Accountability;
+import module.organization.domain.Party;
+import module.organization.domain.Person;
+import module.organization.domain.Unit;
+import module.vaadin.ui.BennuTheme;
+
+import org.apache.commons.lang.StringUtils;
+
+import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.Presentable;
 import pt.ist.bennu.core.domain.RoleType;
 import pt.ist.bennu.core.domain.User;
@@ -62,16 +74,7 @@ import com.vaadin.ui.Layout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
-
-import module.fileManagement.domain.DirNode;
-import module.fileManagement.domain.FileNode;
-import module.fileManagement.presentationTier.data.AbstractSearchContainer;
-import module.fileManagement.tools.StringUtils;
-import module.organization.domain.Accountability;
-import module.organization.domain.Party;
-import module.organization.domain.Person;
-import module.organization.domain.Unit;
-import module.vaadin.ui.BennuTheme;
+import com.vaadin.ui.themes.BaseTheme;
 
 @EmbeddedComponent(path = { "DocumentHome" })
 /**
@@ -86,13 +89,12 @@ public class DocumentHome extends CustomComponent implements EmbeddedComponentCo
 
     @Override
     public boolean isAllowedToOpen(Map<String, String> arguments) {
-	return UserView.getCurrentUser() != null;
+	return Authenticate.getCurrentUser() != null;
     }
 
     @Override
     public void setArguments(Map<String, String> arguments) {
 	// TODO Auto-generated method stub
-
     }
 
     private static class UnitContainer extends DomainContainer<Unit> {
@@ -161,7 +163,7 @@ public class DocumentHome extends CustomComponent implements EmbeddedComponentCo
 		public boolean passesFilter(Object itemId, Item item) throws UnsupportedOperationException {
 		    final Unit unit = (Unit) itemId;
 		    return unit.hasFileRepository()
-			    && (UserView.getCurrentUser().hasRoleType(RoleType.MANAGER) || unit.getFileRepository()
+			    && (Authenticate.getCurrentUser().hasRoleType(RoleType.MANAGER) || unit.getFileRepository()
 				    .isAccessible());
 		}
 
@@ -219,8 +221,8 @@ public class DocumentHome extends CustomComponent implements EmbeddedComponentCo
 	return pDetails;
     }
 
-    private static Set<Party> getParentUnits(final Party party, Set<Party> processed) {
-	final Set<Party> result = new HashSet<Party>();
+    private static List<Party> getParentUnits(final Party party, List<Party> processed) {
+	final List<Party> result = new ArrayList<Party>();
 	if (party.hasFileRepository() && party.getFileRepository().isAccessible()) {
 	    result.add(party);
 	}
@@ -234,16 +236,16 @@ public class DocumentHome extends CustomComponent implements EmbeddedComponentCo
 	return result;
     }
 
-    private static Set<Party> getAllParentUnits(final Person person) {
-	final Set<Party> processed = new HashSet<Party>();
-	final Set<Party> result = new HashSet<Party>();
+    private static List<Party> getAllParentUnits(final Person person) {
+	final List<Party> processed = new ArrayList<Party>();
+	final List<Party> result = new ArrayList<Party>();
 	result.addAll(getParentUnits(person, processed));
 	return result;
     }
 
     public static Set<DirNode> getAvailableRepositories() {
 	final Set<DirNode> reps = new HashSet<DirNode>();
-	final Person person = UserView.getCurrentUser().getPerson();
+	final Person person = Authenticate.getCurrentUser().getPerson();
 	reps.add(person.getFileRepository());
 	for (Party party : getAllParentUnits(person)) {
 	    reps.add(party.getFileRepository());
@@ -302,21 +304,32 @@ public class DocumentHome extends CustomComponent implements EmbeddedComponentCo
 	panel.setStyleName(BennuTheme.PANEL_LIGHT);
 	((VerticalLayout) panel.getContent()).setSpacing(Boolean.TRUE);
 
-	final User currentUser = UserView.getCurrentUser();
+	final User currentUser = Authenticate.getCurrentUser();
 	final Person person = currentUser.getPerson();
-	for (final Party party : getAllParentUnits(person)) {
-	    final Button btRepository = new Button(party.getPresentationName(), new ClickListener() {
 
-		@Override
-		public void buttonClick(ClickEvent event) {
-		    final DirNode rootDir = party.getFileRepository();
-		    EmbeddedApplication.open(getApplication(), DocumentBrowse.class, rootDir.getContextPath().toString());
-		}
-	    });
-	    btRepository.addStyleName(BennuTheme.BUTTON_LINK);
-	    panel.addComponent(btRepository);
+	final DirNode sharedFolder = person.getFileRepository().getSharedFolder();
+	panel.addComponent(getDirNodeLink(sharedFolder.getDisplayName(), sharedFolder));
+
+	for (final Party party : getAllParentUnits(person)) {
+	    panel.addComponent(addRepositoryButton(party));
 	}
 	return panel;
+    }
+
+    private Button addRepositoryButton(final Party party) {
+	return getDirNodeLink(party.getPresentationName(), party.getFileRepository());
+    }
+
+    private Button getDirNodeLink(final String linkName, final DirNode dirNode) {
+	final Button btRepository = new Button(linkName, new ClickListener() {
+
+	    @Override
+	    public void buttonClick(ClickEvent event) {
+		EmbeddedApplication.open(getApplication(), DocumentBrowse.class, dirNode.getContextPath().toString());
+	    }
+	});
+	btRepository.addStyleName(BaseTheme.BUTTON_LINK);
+	return btRepository;
     }
 
     public void createPage() {
