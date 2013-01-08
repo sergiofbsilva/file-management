@@ -26,12 +26,15 @@ import pt.ist.bennu.core.domain.User;
 import pt.ist.bennu.core.domain.groups.Role;
 import pt.ist.fenixframework.pstm.AbstractDomainObject;
 import pt.ist.vaadinframework.EmbeddedApplication;
+import pt.ist.vaadinframework.data.AbstractBufferedItem;
 import pt.ist.vaadinframework.data.VBoxProperty;
 import pt.ist.vaadinframework.data.reflect.DomainContainer;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Container.Filter;
+import com.vaadin.data.Container.ItemSetChangeEvent;
+import com.vaadin.data.Container.ItemSetChangeListener;
 import com.vaadin.data.Container.Sortable;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
@@ -60,7 +63,8 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window.Notification;
 
 @SuppressWarnings("serial")
-public class DocumentFileBrowser extends CustomComponent implements ValueChangeNotifier, ValueChangeListener {
+public class DocumentFileBrowser extends CustomComponent implements ValueChangeNotifier, ValueChangeListener,
+	ItemSetChangeListener {
 
     private static final List<String> KNOWN_FILE_EXTENSIONS = Arrays.asList("7z", "aiff", "ai", "asc", "audio", "bin", "bz2",
 	    "cfc", "cfm", "chm", "class", "conf", "c", "cpp", "cs", "css", "csv", "deb", "divx", "doc", "dot", "eml", "enc",
@@ -286,19 +290,6 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 	    }
 	}
 
-	private void removeAllItemsAfter(MenuItem menuItem) {
-	    final int index = getItems().indexOf(menuItem);
-	    if (index != -1) {
-		setItems(new ArrayList<MenuItem>(getItems().subList(0, index + 1)));
-	    }
-	}
-
-	private void setItems(List<MenuItem> items2) {
-	    getItems().clear();
-	    getItems().addAll(items2);
-	    requestRepaint();
-	}
-
 	public void addDirNode(final DirNode dirNode) {
 	    if (dirNode.isAccessible()) {
 		addItem(getNodeName(dirNode) + "  »", new DirNodeCommand(dirNode));
@@ -375,12 +366,15 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 	return items;
     }
 
-    private static void addIconToItems(DomainContainer<? extends AbstractFileNode> items) {
+    private static void addIconToItems(Container items) {
 	for (Object node : items.getItemIds()) {
-	    final DomainItem<? extends AbstractFileNode> item = items.getItem(node);
-	    item.addItemProperty("icon", new ObjectProperty<Resource>(getThemeResource((AbstractFileNode) node)));
+	    addIconToItem((AbstractBufferedItem) items.getItem(node));
 	}
 	items.addContainerProperty("icon", Resource.class, defaultFileIcon);
+    }
+
+    public static void addIconToItem(AbstractBufferedItem item) {
+	item.addItemProperty("icon", new ObjectProperty<Resource>(getThemeResource((AbstractFileNode) item.getValue())));
     }
 
     public void setNodes(Set<AbstractFileNode> nodes) {
@@ -530,6 +524,7 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
     public DocumentFileBrowser() {
 	nodeItem = new DomainItem<AbstractFileNode>(DirNode.class);
 	nodeItem.addListener(this);
+	documentTable.addListener((ItemSetChangeListener) this);
     }
 
     public DomainContainer<AbstractFileNode> getContainer() {
@@ -588,6 +583,15 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 
     public ContextPath getContextPath() {
 	return documentMenu.getContextPath();
+    }
+
+    @Override
+    public void containerItemSetChange(ItemSetChangeEvent event) {
+	addIconToItems(event.getContainer());
+    }
+
+    public void addItem(DirNode newDirNode) {
+	getContainer().addItem(newDirNode);
     }
 
 }

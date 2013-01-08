@@ -82,7 +82,7 @@ public class AddDirWindow extends Window {
 	    if (!StringUtils.isBlank(value)) {
 		try {
 		    final DirNode newDirNode = browser.getDirNode().createDir(value, browser.getContextPath());
-		    browser.getContainer().addItem(newDirNode);
+		    browser.addItem(newDirNode);
 		    lblError.setVisible(false);
 		    super.buttonClick(event);
 		} catch (DomainException de) {
