@@ -4,8 +4,9 @@ import java.util.Set;
 
 import module.fileManagement.domain.AbstractFileNode;
 import module.fileManagement.domain.DirNode;
+import module.fileManagement.domain.FileRepository;
 import module.fileManagement.presentationTier.component.DocumentFileBrowser;
-import module.fileManagement.presentationTier.pages.DocumentHome;
+import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.vaadinframework.data.reflect.DomainContainer;
 
 import com.vaadin.data.Item;
@@ -44,7 +45,7 @@ public class SelectDestinationDialog extends Window {
 
 	setCaption("Seleccionar Directoria");
 
-	Set<DirNode> availableRepositories = DocumentHome.getAvailableRepositories();
+	Set<DirNode> availableRepositories = FileRepository.getAvailableRepositories(Authenticate.getCurrentUser());
 
 	childs = new DomainContainer<DirNode>(DirNode.class);
 	childs.setContainerProperties("displayName");

@@ -45,7 +45,7 @@ public class Document extends Document_Base {
     }
 
     public Document(final File file, final String fileName, final String displayName) throws IOException {
-	    this(FileUtils.readFileToByteArray(file), fileName, displayName);
+	this(FileUtils.readFileToByteArray(file), fileName, displayName);
     }
 
     public Document(final byte[] fileContent, final String fileName, final String displayName) {
@@ -209,8 +209,7 @@ public class Document extends Document_Base {
     /**
      * 
      * @param dirNode
-     * @return the FileNode that is contained directly contained in the
-     *         specified dirNode (no recursion is used)
+     * @return the FileNode that is contained directly contained in the specified dirNode (no recursion is used)
      */
     public FileNode getFileNode(final DirNode dirNode) {
 	for (final FileNode fileNode : getFileNode()) {
@@ -360,8 +359,7 @@ public class Document extends Document_Base {
     }
 
     /**
-     * replace metadata value. If metadata value is not present the metadata
-     * value is added.
+     * replace metadata value. If metadata value is not present the metadata value is added.
      * 
      * @param key
      * @param value
@@ -453,6 +451,15 @@ public class Document extends Document_Base {
 	    }
 	}
 	return false;
+    }
+
+    public DateTime getCreationDate() {
+	VersionedFile lastVersionedFile;
+	for (lastVersionedFile = getLastVersionedFile(); lastVersionedFile.hasPreviousVersion(); lastVersionedFile = lastVersionedFile
+		.getPreviousVersion()) {
+	    ;
+	}
+	return lastVersionedFile.getCreationDate();
     }
 
 }

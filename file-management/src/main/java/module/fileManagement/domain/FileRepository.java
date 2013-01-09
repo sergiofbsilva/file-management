@@ -25,7 +25,15 @@
 package module.fileManagement.domain;
 
 //import module.organization.domain.Unit;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import module.organization.domain.Accountability;
 import module.organization.domain.Party;
+import module.organization.domain.Person;
+import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.User;
 import pt.ist.fenixWebFramework.services.Service;
 
@@ -55,4 +63,39 @@ public class FileRepository {
 	return dirNode.getTrash();
     }
 
+    private static List<Party> getParentUnits(final Party party, List<Party> processed) {
+	final List<Party> result = new ArrayList<Party>();
+	if (party.hasFileRepository() && party.getFileRepository().isAccessible()) {
+	    result.add(party);
+	}
+	for (Accountability accountability : party.getParentAccountabilities()) {
+	    final Party parent = accountability.getParent();
+	    if (!processed.contains(parent)) {
+		processed.add(parent);
+		result.addAll(getParentUnits(parent, processed));
+	    }
+	}
+	return result;
+    }
+
+    private static List<Party> getAllParentUnits(final Person person) {
+	final List<Party> processed = new ArrayList<Party>();
+	final List<Party> result = new ArrayList<Party>();
+	result.addAll(getParentUnits(person, processed));
+	return result;
+    }
+
+    public static Set<DirNode> getAvailableRepositories() {
+	return getAvailableRepositories(Authenticate.getCurrentUser());
+    }
+
+    public static Set<DirNode> getAvailableRepositories(final User user) {
+	final Set<DirNode> reps = new HashSet<DirNode>();
+	final Person person = user.getPerson();
+	reps.add(getOrCreateFileRepository(person));
+	for (Party party : getAllParentUnits(person)) {
+	    reps.add(party.getFileRepository());
+	}
+	return reps;
+    }
 }

@@ -4,6 +4,7 @@ import static module.fileManagement.domain.FileManagementSystem.getMessage;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import module.fileManagement.domain.exception.NodeDuplicateNameException;
 import module.fileManagement.domain.log.DeleteDirLog;
@@ -100,6 +101,25 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 		new DeleteFileLog(user, contextPath, (FileNode) node);
 	    }
 	}
+    }
+
+    public ContextPath getContextPath() {
+	final List<DirNode> nodes = new ArrayList<DirNode>();
+	getPath(this, nodes);
+	return new ContextPath(nodes);
+    }
+
+    private void getPath(final AbstractFileNode child, final List<DirNode> nodes) {
+	if (child.hasParent()) {
+	    getPath(child.getParent(), nodes);
+	}
+	if (child instanceof DirNode) {
+	    nodes.add((DirNode) child);
+	}
+    }
+
+    public void trash() {
+	trash(getContextPath());
     }
 
     @Service

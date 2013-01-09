@@ -26,17 +26,14 @@ package module.fileManagement.presentationTier.pages;
 
 import static module.fileManagement.domain.FileManagementSystem.getMessage;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import module.fileManagement.domain.DirNode;
 import module.fileManagement.domain.FileNode;
+import module.fileManagement.domain.FileRepository;
 import module.fileManagement.presentationTier.data.AbstractSearchContainer;
-import module.organization.domain.Accountability;
 import module.organization.domain.Party;
 import module.organization.domain.Person;
 import module.organization.domain.Unit;
@@ -86,6 +83,7 @@ import com.vaadin.ui.themes.BaseTheme;
 public class DocumentHome extends CustomComponent implements EmbeddedComponentContainer {
 
     private GridSystemLayout gsl;
+    private Component webdav;
 
     @Override
     public boolean isAllowedToOpen(Map<String, String> arguments) {
@@ -221,38 +219,6 @@ public class DocumentHome extends CustomComponent implements EmbeddedComponentCo
 	return pDetails;
     }
 
-    private static List<Party> getParentUnits(final Party party, List<Party> processed) {
-	final List<Party> result = new ArrayList<Party>();
-	if (party.hasFileRepository() && party.getFileRepository().isAccessible()) {
-	    result.add(party);
-	}
-	for (Accountability accountability : party.getParentAccountabilities()) {
-	    final Party parent = accountability.getParent();
-	    if (!processed.contains(parent)) {
-		processed.add(parent);
-		result.addAll(getParentUnits(parent, processed));
-	    }
-	}
-	return result;
-    }
-
-    private static List<Party> getAllParentUnits(final Person person) {
-	final List<Party> processed = new ArrayList<Party>();
-	final List<Party> result = new ArrayList<Party>();
-	result.addAll(getParentUnits(person, processed));
-	return result;
-    }
-
-    public static Set<DirNode> getAvailableRepositories() {
-	final Set<DirNode> reps = new HashSet<DirNode>();
-	final Person person = Authenticate.getCurrentUser().getPerson();
-	reps.add(person.getFileRepository());
-	for (Party party : getAllParentUnits(person)) {
-	    reps.add(party.getFileRepository());
-	}
-	return reps;
-    }
-
     public Component createRepositorySelect() {
 	final UnitSearchContainer unitSearchContainer = new UnitSearchContainer(Unit.class);
 	HorizontalLayout hl = new HorizontalLayout();
@@ -310,14 +276,14 @@ public class DocumentHome extends CustomComponent implements EmbeddedComponentCo
 	final DirNode sharedFolder = person.getFileRepository().getSharedFolder();
 	panel.addComponent(getDirNodeLink(sharedFolder.getDisplayName(), sharedFolder));
 
-	for (final Party party : getAllParentUnits(person)) {
-	    panel.addComponent(addRepositoryButton(party));
+	for (final DirNode repository : FileRepository.getAvailableRepositories(currentUser)) {
+	    panel.addComponent(addRepositoryButton(repository));
 	}
 	return panel;
     }
 
-    private Button addRepositoryButton(final Party party) {
-	return getDirNodeLink(party.getPresentationName(), party.getFileRepository());
+    private Button addRepositoryButton(final DirNode repository) {
+	return getDirNodeLink(repository.getParty().getPresentationName(), repository);
     }
 
     private Button getDirNodeLink(final String linkName, final DirNode dirNode) {

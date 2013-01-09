@@ -1,0 +1,15 @@
+package module.fileManagement.domain.webdav;
+
+class WebdavAuthentication {
+	String token;
+}
+
+relation UserWebDav {
+	.pt.ist.bennu.core.domain.User playsRole user {
+		multiplicity 1..1;
+	}
+	
+	WebdavAuthentication playsRole webdavAuthentication {
+		multiplicity 0..1;
+	}
+}

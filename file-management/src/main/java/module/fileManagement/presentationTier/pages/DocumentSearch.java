@@ -37,6 +37,7 @@ import module.fileManagement.domain.AbstractFileNode;
 import module.fileManagement.domain.DirNode;
 import module.fileManagement.domain.FileManagementSystem;
 import module.fileManagement.domain.FileNode;
+import module.fileManagement.domain.FileRepository;
 import module.fileManagement.domain.metadata.MetadataKey;
 import module.fileManagement.domain.metadata.MetadataTemplate;
 import module.fileManagement.presentationTier.component.DocumentFileBrowser;
@@ -46,6 +47,7 @@ import module.vaadin.ui.BennuTheme;
 
 import org.apache.commons.lang.StringUtils;
 
+import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.vaadinframework.VaadinFrameworkLogger;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.reflect.DomainContainer;
@@ -188,7 +190,7 @@ public class DocumentSearch extends CustomComponent implements EmbeddedComponent
 
     private Set<AbstractFileNode> search(String searchText) {
 	final Set<AbstractFileNode> resultSet = new HashSet<AbstractFileNode>();
-	for (DirNode repository : DocumentHome.getAvailableRepositories()) {
+	for (DirNode repository : FileRepository.getAvailableRepositories(Authenticate.getCurrentUser())) {
 	    resultSet.addAll(repository.doSearch(searchText));
 	}
 	return resultSet;
@@ -197,7 +199,7 @@ public class DocumentSearch extends CustomComponent implements EmbeddedComponent
     private Set<AbstractFileNode> advSearch(final Multimap<MetadataKey, Object> searchMap) {
 	final Set<AbstractFileNode> resultFiles = Sets.newHashSet();
 	Map<AbstractFileNode, Map<MetadataKey, Boolean>> resultMap = Maps.newHashMap();
-	for (DirNode repository : DocumentHome.getAvailableRepositories()) {
+	for (DirNode repository : FileRepository.getAvailableRepositories(Authenticate.getCurrentUser())) {
 	    resultMap.putAll(repository.doSearch(searchMap));
 	}
 	for (Entry<AbstractFileNode, Map<MetadataKey, Boolean>> entry : resultMap.entrySet()) {

@@ -3,9 +3,7 @@ package module.fileManagement.domain;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -166,6 +164,10 @@ public class DirNode extends DirNode_Base {
 	return true;
     }
 
+    public DirNode createDir(final String dirName) {
+	return createDir(dirName, getContextPath());
+    }
+
     @Service
     public DirNode createDir(final String dirName, final ContextPath contextPath) {
 	final DirNode searchDir = searchDir(dirName);
@@ -196,6 +198,20 @@ public class DirNode extends DirNode_Base {
     @Override
     public String getDisplayName() {
 	return hasUser() ? FileManagementSystem.getMessage("label.menu.home") : getName();
+    }
+
+    @Override
+    public boolean hasUser() {
+	return hasParty() && getParty() instanceof Person;
+    }
+
+    @Override
+    public void setUser(User user) {
+    }
+
+    @Override
+    public User getUser() {
+	return null;
     }
 
     @Override
@@ -403,17 +419,15 @@ public class DirNode extends DirNode_Base {
     }
 
     /*
-     * The actual size of the files and folders of this dir Shared files and
-     * dirs with defined quota are ignored for this purpose.
+     * The actual size of the files and folders of this dir Shared files and dirs with defined quota are ignored for this purpose.
      */
     private long getDirUsedSpace() {
 	return getSize();
     }
 
     /*
-     * If this dir has quota then the used space is the sum of it's size and
-     * contained dirs. If no quota is defined then the used space is calculated
-     * by the parent
+     * If this dir has quota then the used space is the sum of it's size and contained dirs. If no quota is defined then the used
+     * space is calculated by the parent
      */
     public long getUsedSpace() {
 	return hasQuotaDefined() ? getDirUsedSpace() : hasParent() ? getParent().getUsedSpace() : getDirUsedSpace();
@@ -541,8 +555,7 @@ public class DirNode extends DirNode_Base {
     }
 
     /*
-     * This method guarantees that a directory is within other directory. If not
-     * it is a root.
+     * This method guarantees that a directory is within other directory. If not it is a root.
      */
     @ConsistencyPredicate
     public boolean checkParent() {
@@ -561,22 +574,8 @@ public class DirNode extends DirNode_Base {
 	}
     }
 
-    public ContextPath getContextPath() {
-	final List<DirNode> nodes = new ArrayList<DirNode>();
-	getPath(this, nodes);
-	return new ContextPath(nodes);
-    }
-
-    private void getPath(final DirNode child, final List<DirNode> nodes) {
-	if (child.hasParent()) {
-	    getPath(child.getParent(), nodes);
-	}
-	nodes.add(child);
-    }
-
     /*
-     * sequencedNumber is used to provide an sequenced unique identifier for
-     * files within this dir
+     * sequencedNumber is used to provide an sequenced unique identifier for files within this dir
      */
     public void setSequenced() {
 	if (getSequenceNumber() == null) {
