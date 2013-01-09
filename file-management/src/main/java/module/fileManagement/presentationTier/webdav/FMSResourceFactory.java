@@ -12,11 +12,12 @@ import org.slf4j.LoggerFactory;
 
 public class FMSResourceFactory implements ResourceFactory {
     private static final Logger log = LoggerFactory.getLogger(FMSResourceFactory.class);
+    private static final String WEBDAV = "webdav";
 
     @Override
     public Resource getResource(String host, String url) throws NotAuthorizedException, BadRequestException {
+	url = url.substring(url.indexOf(WEBDAV) + WEBDAV.length(), url.length());
 	log.warn("getResource: {} {}", host, url);
-	url = url.replace("/dot/webdav", "");
 	Path path = Path.path(url);
 	Resource r = find(path);
 	return r;
