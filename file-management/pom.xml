@@ -66,6 +66,10 @@
 	</dependency>
   </dependencies>
   <repositories>
+  	<repository>
+	  <id>ettrema-repo</id>
+      <url>http://milton.io/maven/</url>
+    </repository>
     <repository>
       <id>fenix-ashes-maven-repository</id>
       <url>https://fenix-ashes.ist.utl.pt/nexus/content/groups/fenix-ashes-maven-repository</url>
