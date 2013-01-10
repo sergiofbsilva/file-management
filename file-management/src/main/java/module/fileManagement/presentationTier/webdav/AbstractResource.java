@@ -10,16 +10,18 @@ import io.milton.resource.MoveableResource;
 import io.milton.resource.PropFindableResource;
 import module.fileManagement.domain.AbstractFileNode;
 import module.fileManagement.domain.DirNode;
-import module.fileManagement.domain.exception.NodeDuplicateNameException;
+import pt.ist.bennu.core.domain.exceptions.DomainException;
 import pt.ist.fenixWebFramework.services.Service;
 
 public abstract class AbstractResource<T extends AbstractFileNode> extends Authenticator implements PropFindableResource,
 	DeletableResource, MoveableResource {
 
     private final T node;
+    private FolderResource parent;
 
-    public AbstractResource(T node) {
+    public AbstractResource(T node, FolderResource parent) {
 	this.node = node;
+	this.parent = parent;
     }
 
     public T getNode() {
@@ -34,6 +36,10 @@ public abstract class AbstractResource<T extends AbstractFileNode> extends Authe
     @Override
     public String getName() {
 	return getNode().getDisplayName();
+    }
+
+    public FolderResource getParent() {
+	return parent;
     }
 
     @Override
@@ -58,10 +64,24 @@ public abstract class AbstractResource<T extends AbstractFileNode> extends Authe
 	if (rDest instanceof FolderResource) {
 	    final DirNode destNode = ((FolderResource) rDest).getNode();
 	    try {
-		getNode().moveTo(destNode);
-	    } catch (NodeDuplicateNameException ndne) {
-		throw new BadRequestException(ndne.getLocalizedMessage(), ndne);
+		if (getParent() != null) {
+		    if (getParent().getNode().equals(destNode)) {
+			rename(name);
+		    } else {
+			getNode().moveTo(destNode);
+		    }
+		}
+	    } catch (DomainException ndne) {
+		throw new ConflictException(this, ndne.getLocalizedMessage());
 	    }
+	} else {
+	    throw new ConflictException(this);
 	}
     }
+
+    @Service
+    private void rename(String name) {
+	getNode().setDisplayName(name);
+    }
+
 }

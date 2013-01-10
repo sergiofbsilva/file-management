@@ -27,7 +27,7 @@ public class FMSSecurityManager extends SimpleSecurityManager {
 
     @Override
     public Object authenticate(DigestResponse digestRequest) {
-	log.warn("Authenticate : {} {} {}",
+	log.trace("Authenticate : {} {} {}",
 		new Object[] { getClass().getName(), digestRequest.getUser(), digestRequest.getResponseDigest() });
 	if (getDigestGenerator() == null) {
 	    throw new RuntimeException("No digest generator is configured");
@@ -40,7 +40,7 @@ public class FMSSecurityManager extends SimpleSecurityManager {
 	    String serverResponse = getDigestGenerator().generateDigest(digestRequest, actualPassword);
 	    String clientResponse = digestRequest.getResponseDigest();
 	    if (serverResponse.equals(clientResponse)) {
-		log.warn("authenticate : user {} authenticated", username);
+		log.info("authenticate : user {} authenticated", username);
 		return user;
 	    } else {
 		log.warn("authenticate : authentication for user {} failed", username);

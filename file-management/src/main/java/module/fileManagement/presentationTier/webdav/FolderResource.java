@@ -30,11 +30,12 @@ public class FolderResource extends AbstractResource<DirNode> implements Collect
 
     private static final Logger log = LoggerFactory.getLogger(FolderResource.class);
 
-    public FolderResource(DirNode node) {
-	super(node);
+    public FolderResource(DirNode node, FolderResource parent) {
+	super(node, parent);
     }
 
-    private Resource internalChild(String childName) {
+    @Override
+    public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
 	final AbstractFileNode node = getNode().searchNode(childName);
 	if (node != null && node.isAccessible()) {
 	    return makeResource(node);
@@ -42,28 +43,19 @@ public class FolderResource extends AbstractResource<DirNode> implements Collect
 	return null;
     }
 
-    @Override
-    public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
-	return internalChild(childName);
-    }
-
     public Resource makeResource(final AbstractFileNode searchNode) {
 	if (searchNode instanceof FileNode) {
-	    return new FileResource((FileNode) searchNode);
+	    return new FileResource((FileNode) searchNode, this);
 	}
 	if (searchNode instanceof DirNode) {
-	    return new FolderResource((DirNode) searchNode);
+	    return new FolderResource((DirNode) searchNode, this);
 	}
 	return null;
     }
 
     @Override
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
-	log.warn("getChildren");
-	return getInternalChildren();
-    }
-
-    private List<? extends Resource> getInternalChildren() {
+	log.trace("getChildren");
 	final List<Resource> resources = new ArrayList<Resource>();
 	for (AbstractFileNode node : getNode().getChild()) {
 	    if (node.isAccessible()) {
@@ -92,7 +84,7 @@ public class FolderResource extends AbstractResource<DirNode> implements Collect
     public CollectionResource createCollection(String newName) throws NotAuthorizedException, ConflictException,
 	    BadRequestException {
 	try {
-	    return new FolderResource(getNode().createDir(newName));
+	    return new FolderResource(getNode().createDir(newName), this);
 	} catch (NodeDuplicateNameException ndne) {
 	    throw new BadRequestException(ndne.getLocalizedMessage(), ndne);
 	}
@@ -104,9 +96,10 @@ public class FolderResource extends AbstractResource<DirNode> implements Collect
 	try {
 	    final FileNode fileNode = getNode().createFile(IOUtils.toByteArray(inputStream), newName, newName,
 		    length.longValue(), getNode().getContextPath());
-	    return new FileResource(fileNode);
+	    return new FileResource(fileNode, this);
 	} catch (DomainException ndne) {
 	    throw new BadRequestException(ndne.getLocalizedMessage(), ndne);
 	}
     }
+
 }

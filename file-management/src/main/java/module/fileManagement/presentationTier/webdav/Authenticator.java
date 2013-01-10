@@ -19,13 +19,12 @@ public abstract class Authenticator implements DigestResource, Resource {
 
     @Override
     public Object authenticate(String user, String password) {
-	log.error("Basic auth is called >{}< >{}<", user, password);
-	return "true";
+	throw new UnsupportedOperationException("Basic authentication is not supported.");
     }
 
     @Override
     public Object authenticate(DigestResponse digestRequest) {
-	log.warn("Authenticate : {} {} {}",
+	log.trace("Authenticate : {} {} {}",
 		new Object[] { getClass().getName(), digestRequest.getUser(), digestRequest.getResponseDigest() });
 	final String username = digestRequest.getUser();
 	if (StringUtils.isEmpty(username)) {
@@ -34,7 +33,7 @@ public abstract class Authenticator implements DigestResource, Resource {
 	}
 	User user = User.findByUsername(username);
 	if (user != null) {
-	    log.warn("authenticate : login user " + username);
+	    log.info("authenticate : login user " + username);
 	} else {
 	    log.warn("authenticate : user not found : " + username);
 	}
@@ -43,7 +42,7 @@ public abstract class Authenticator implements DigestResource, Resource {
 
     @Override
     public boolean authorise(Request request, Method method, Auth auth) {
-	log.warn("authorize: {}", auth == null ? "null" : auth.toString());
+	log.trace("authorize: {}", auth == null ? "null" : auth.toString());
 	return auth != null;
     }
 

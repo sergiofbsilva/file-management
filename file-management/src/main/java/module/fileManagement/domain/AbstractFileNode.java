@@ -207,6 +207,10 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
     public void setDisplayName(String displayName) throws NodeDuplicateNameException {
 	DirNode parent = getParent();
 
+	if (!isWriteGroupMember()) {
+	    throw new WriteDeniedException();
+	}
+
 	if (parent == null) {
 	    parent = (DirNode) this;
 	}

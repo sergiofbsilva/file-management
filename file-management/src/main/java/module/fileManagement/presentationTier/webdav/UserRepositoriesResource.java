@@ -47,10 +47,10 @@ public class UserRepositoriesResource extends Authenticator implements PropFinda
 
     @Override
     public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
-	log.warn("child: {}", childName);
+	log.trace("child: {}", childName);
 	for (DirNode repository : getUserRepositories()) {
 	    if (repository.getName().equals(childName)) {
-		return new FolderResource(repository);
+		return new FolderResource(repository, null);
 	    }
 	}
 	return null;
@@ -60,7 +60,7 @@ public class UserRepositoriesResource extends Authenticator implements PropFinda
     public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
 	final List<FolderResource> repositories = new ArrayList<FolderResource>();
 	for (DirNode repository : getUserRepositories()) {
-	    repositories.add(new FolderResource(repository));
+	    repositories.add(new FolderResource(repository, null));
 	}
 	return repositories;
     }

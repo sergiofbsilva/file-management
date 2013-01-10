@@ -22,14 +22,14 @@ public class FileResource extends AbstractResource<FileNode> implements GetableR
 
     private static final Logger log = LoggerFactory.getLogger(FileResource.class);
 
-    public FileResource(FileNode fileNode) {
-	super(fileNode);
+    public FileResource(FileNode fileNode, FolderResource parent) {
+	super(fileNode, parent);
     }
 
     @Override
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException,
 	    NotAuthorizedException, BadRequestException, NotFoundException {
-	log.warn("sendContent");
+	log.info("sendContent");
 	sendInternalContent(out, range, params, contentType);
     }
 

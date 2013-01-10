@@ -17,14 +17,14 @@ public class FMSResourceFactory implements ResourceFactory {
     @Override
     public Resource getResource(String host, String url) throws NotAuthorizedException, BadRequestException {
 	url = url.substring(url.indexOf(WEBDAV) + WEBDAV.length(), url.length());
-	log.warn("getResource: {} {}", host, url);
+	log.trace("getResource: {} {}", host, url);
 	Path path = Path.path(url);
 	Resource r = find(path);
 	return r;
     }
 
     private Resource find(Path path) throws NotAuthorizedException, BadRequestException {
-	log.warn("find: {}", path.toString());
+	log.trace("find: {}", path.toString());
 	if (path.isRoot()) {
 	    return new UserRepositoriesResource();
 	}

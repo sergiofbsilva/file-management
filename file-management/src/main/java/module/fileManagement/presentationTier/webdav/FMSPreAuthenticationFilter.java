@@ -82,14 +82,13 @@ public class FMSPreAuthenticationFilter implements Filter {
     public void process(FilterChain chain, Request request, Response response) {
 	log.trace("process");
 	try {
-	    log.warn("process");
 	    tlRequest.set(request);
 	    Object authTag = authenticate(request);
 	    if (authTag != null) {
 		request.getAuthorization().setTag(authTag);
 		User user = (User) authTag;
 		Authenticate.authenticate(user);
-		log.warn("set thread user {}", user.getUsername());
+		log.info("set thread user {}", user.getUsername());
 		chain.process(request, response);
 	    } else {
 		responseHandler.respondUnauthorised(null, response, request);
@@ -97,10 +96,10 @@ public class FMSPreAuthenticationFilter implements Filter {
 	} finally {
 	    final User currentUser = Authenticate.getCurrentUser();
 	    if (currentUser != null) {
-		log.warn("remove user {} from thread", currentUser.getUsername());
+		log.info("remove user {} from thread", currentUser.getUsername());
 		pt.ist.fenixWebFramework.security.UserView.setUser(null);
 	    } else {
-		log.warn("no user in thread");
+		log.warn("trying to logout but no user in thread");
 	    }
 	    tlRequest.remove();
 	}
