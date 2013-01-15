@@ -444,6 +444,7 @@ public class Document extends Document_Base {
 	return metadata != null ? metadata.getValue().equals(Boolean.TRUE.toString()) : false;
     }
 
+
     public boolean isAccessible() {
 	for (final FileNode fileNode : getFileNodeSet()) {
 	    if (fileNode.isAccessible()) {
@@ -451,6 +452,14 @@ public class Document extends Document_Base {
 	    }
 	}
 	return false;
+}
+    /**
+     * @return true if the current user can write on this document. False
+     *         otherwise
+     */
+    public boolean canWrite() {
+	return getWriteGroup().isMember(Authenticate.getCurrentUser());
+
     }
 
     public DateTime getCreationDate() {
