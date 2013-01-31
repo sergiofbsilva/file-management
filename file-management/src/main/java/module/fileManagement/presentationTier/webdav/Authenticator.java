@@ -15,39 +15,39 @@ import pt.ist.bennu.core.domain.User;
 
 public abstract class Authenticator implements DigestResource, Resource {
 
-    private static final Logger log = LoggerFactory.getLogger(Authenticator.class);
+	private static final Logger log = LoggerFactory.getLogger(Authenticator.class);
 
-    @Override
-    public Object authenticate(String user, String password) {
-	throw new UnsupportedOperationException("Basic authentication is not supported.");
-    }
-
-    @Override
-    public Object authenticate(DigestResponse digestRequest) {
-	log.trace("Authenticate : {} {} {}",
-		new Object[] { getClass().getName(), digestRequest.getUser(), digestRequest.getResponseDigest() });
-	final String username = digestRequest.getUser();
-	if (StringUtils.isEmpty(username)) {
-	    log.warn("authenticate: User not set!");
-	    return null;
+	@Override
+	public Object authenticate(String user, String password) {
+		throw new UnsupportedOperationException("Basic authentication is not supported.");
 	}
-	User user = User.findByUsername(username);
-	if (user != null) {
-	    log.info("authenticate : login user " + username);
-	} else {
-	    log.warn("authenticate : user not found : " + username);
+
+	@Override
+	public Object authenticate(DigestResponse digestRequest) {
+		log.trace("Authenticate : {} {} {}",
+				new Object[] { getClass().getName(), digestRequest.getUser(), digestRequest.getResponseDigest() });
+		final String username = digestRequest.getUser();
+		if (StringUtils.isEmpty(username)) {
+			log.warn("authenticate: User not set!");
+			return null;
+		}
+		User user = User.findByUsername(username);
+		if (user != null) {
+			log.info("authenticate : login user " + username);
+		} else {
+			log.warn("authenticate : user not found : " + username);
+		}
+		return user;
 	}
-	return user;
-    }
 
-    @Override
-    public boolean authorise(Request request, Method method, Auth auth) {
-	log.trace("authorize: {}", auth == null ? "null" : auth.toString());
-	return auth != null;
-    }
+	@Override
+	public boolean authorise(Request request, Method method, Auth auth) {
+		log.trace("authorize: {}", auth == null ? "null" : auth.toString());
+		return auth != null;
+	}
 
-    @Override
-    public boolean isDigestAllowed() {
-	return true;
-    }
+	@Override
+	public boolean isDigestAllowed() {
+		return true;
+	}
 }

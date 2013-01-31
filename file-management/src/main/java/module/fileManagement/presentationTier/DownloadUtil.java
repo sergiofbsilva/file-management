@@ -42,39 +42,39 @@ import com.vaadin.Application;
  */
 public class DownloadUtil {
 
-    public static String getDownloadUrl(final HttpServletRequest request, final DomainObject domainObject) {
-	return getDownloadUrl(request.getScheme(), request.getServerName(), request.getServerPort(), request.getContextPath(),
-		domainObject);
-    }
-
-    public static String getDownloadUrl(final Application application, final DomainObject domainObject) {
-	final URL url = application.getURL();
-	final String path = url.getPath();
-	return getDownloadUrl(url.getProtocol(), url.getHost(), url.getPort(), path.substring(0, path.length() - 7), domainObject);
-    }
-
-    private static String getDownloadUrl(final String scheme, final String servername, final int serverPort,
-	    final String contextPath, final DomainObject domainObject) {
-	final StringBuilder url = new StringBuilder();
-	url.append(scheme);
-	url.append("://");
-	url.append(servername);
-	if (serverPort > 0 && serverPort != 80 && serverPort != 443) {
-	    url.append(":");
-	    url.append(serverPort);
+	public static String getDownloadUrl(final HttpServletRequest request, final DomainObject domainObject) {
+		return getDownloadUrl(request.getScheme(), request.getServerName(), request.getServerPort(), request.getContextPath(),
+				domainObject);
 	}
-	url.append(contextPath);
-	url.append("/download/");
-	url.append(domainObject.getExternalId());
-	return url.toString();
-    }
 
-    public URL getURL(final Application application, final DomainObject domainObject) {
-	try {
-	    return new URL(getDownloadUrl(application, domainObject));
-	} catch (MalformedURLException e) {
-	    FileManagementSystem.getLogger().error(e);
+	public static String getDownloadUrl(final Application application, final DomainObject domainObject) {
+		final URL url = application.getURL();
+		final String path = url.getPath();
+		return getDownloadUrl(url.getProtocol(), url.getHost(), url.getPort(), path.substring(0, path.length() - 7), domainObject);
 	}
-	return null;
-    }
+
+	private static String getDownloadUrl(final String scheme, final String servername, final int serverPort,
+			final String contextPath, final DomainObject domainObject) {
+		final StringBuilder url = new StringBuilder();
+		url.append(scheme);
+		url.append("://");
+		url.append(servername);
+		if (serverPort > 0 && serverPort != 80 && serverPort != 443) {
+			url.append(":");
+			url.append(serverPort);
+		}
+		url.append(contextPath);
+		url.append("/download/");
+		url.append(domainObject.getExternalId());
+		return url.toString();
+	}
+
+	public URL getURL(final Application application, final DomainObject domainObject) {
+		try {
+			return new URL(getDownloadUrl(application, domainObject));
+		} catch (MalformedURLException e) {
+			FileManagementSystem.getLogger().error(e);
+		}
+		return null;
+	}
 }

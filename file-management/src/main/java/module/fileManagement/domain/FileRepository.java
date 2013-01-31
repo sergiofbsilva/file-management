@@ -45,57 +45,57 @@ import pt.ist.fenixWebFramework.services.Service;
  */
 public class FileRepository {
 
-    public static DirNode getOrCreateFileRepository(final User user) {
-	return getOrCreateFileRepository(user.getPerson());
-    }
-
-    public static DirNode getOrCreateFileRepository(final Party party) {
-	return party.hasFileRepository() ? party.getFileRepository() : createFileRepository(party);
-    }
-
-    @Service
-    private static DirNode createFileRepository(Party party) {
-	return new DirNode(party);
-    }
-
-    public static DirNode getTrash(final User user) {
-	final DirNode dirNode = getOrCreateFileRepository(user);
-	return dirNode.getTrash();
-    }
-
-    private static List<Party> getParentUnits(final Party party, List<Party> processed) {
-	final List<Party> result = new ArrayList<Party>();
-	if (party.hasFileRepository() && party.getFileRepository().isAccessible()) {
-	    result.add(party);
+	public static DirNode getOrCreateFileRepository(final User user) {
+		return getOrCreateFileRepository(user.getPerson());
 	}
-	for (Accountability accountability : party.getParentAccountabilities()) {
-	    final Party parent = accountability.getParent();
-	    if (!processed.contains(parent)) {
-		processed.add(parent);
-		result.addAll(getParentUnits(parent, processed));
-	    }
+
+	public static DirNode getOrCreateFileRepository(final Party party) {
+		return party.hasFileRepository() ? party.getFileRepository() : createFileRepository(party);
 	}
-	return result;
-    }
 
-    private static List<Party> getAllParentUnits(final Person person) {
-	final List<Party> processed = new ArrayList<Party>();
-	final List<Party> result = new ArrayList<Party>();
-	result.addAll(getParentUnits(person, processed));
-	return result;
-    }
-
-    public static Set<DirNode> getAvailableRepositories() {
-	return getAvailableRepositories(Authenticate.getCurrentUser());
-    }
-
-    public static Set<DirNode> getAvailableRepositories(final User user) {
-	final Set<DirNode> reps = new HashSet<DirNode>();
-	final Person person = user.getPerson();
-	reps.add(getOrCreateFileRepository(person));
-	for (Party party : getAllParentUnits(person)) {
-	    reps.add(party.getFileRepository());
+	@Service
+	private static DirNode createFileRepository(Party party) {
+		return new DirNode(party);
 	}
-	return reps;
-    }
+
+	public static DirNode getTrash(final User user) {
+		final DirNode dirNode = getOrCreateFileRepository(user);
+		return dirNode.getTrash();
+	}
+
+	private static List<Party> getParentUnits(final Party party, List<Party> processed) {
+		final List<Party> result = new ArrayList<Party>();
+		if (party.hasFileRepository() && party.getFileRepository().isAccessible()) {
+			result.add(party);
+		}
+		for (Accountability accountability : party.getParentAccountabilities()) {
+			final Party parent = accountability.getParent();
+			if (!processed.contains(parent)) {
+				processed.add(parent);
+				result.addAll(getParentUnits(parent, processed));
+			}
+		}
+		return result;
+	}
+
+	private static List<Party> getAllParentUnits(final Person person) {
+		final List<Party> processed = new ArrayList<Party>();
+		final List<Party> result = new ArrayList<Party>();
+		result.addAll(getParentUnits(person, processed));
+		return result;
+	}
+
+	public static Set<DirNode> getAvailableRepositories() {
+		return getAvailableRepositories(Authenticate.getCurrentUser());
+	}
+
+	public static Set<DirNode> getAvailableRepositories(final User user) {
+		final Set<DirNode> reps = new HashSet<DirNode>();
+		final Person person = user.getPerson();
+		reps.add(getOrCreateFileRepository(person));
+		for (Party party : getAllParentUnits(person)) {
+			reps.add(party.getFileRepository());
+		}
+		return reps;
+	}
 }

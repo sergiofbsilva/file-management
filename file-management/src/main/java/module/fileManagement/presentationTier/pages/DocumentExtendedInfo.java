@@ -77,218 +77,218 @@ import com.vaadin.ui.themes.BaseTheme;
  * 
  */
 public class DocumentExtendedInfo extends CustomComponent implements EmbeddedComponentContainer {
-    private final GridSystemLayout mainGrid;
-    private FileNode fileNode;
-    private Component metadataInfoView;
-    private Component editMetadataView;
-    private Layout metadataInfoPanel;
-    private static ViewerFactory viewerFactory;
+	private final GridSystemLayout mainGrid;
+	private FileNode fileNode;
+	private Component metadataInfoView;
+	private Component editMetadataView;
+	private Layout metadataInfoPanel;
+	private static ViewerFactory viewerFactory;
 
-    static {
-	viewerFactory = new ViewerFactory();
-    }
-
-    @Override
-    public boolean isAllowedToOpen(Map<String, String> arguments) {
-	AbstractFileNode node = AbstractDomainObject.fromExternalId(arguments.get("node"));
-	if (node == null || node.isDir() || !(node.isReadGroupMember() || node.isWriteGroupMember())) {
-	    return false;
+	static {
+		viewerFactory = new ViewerFactory();
 	}
-	return true;
-    }
 
-    @Override
-    public void setArguments(Map<String, String> arguments) {
-	fileNode = AbstractDomainObject.fromExternalId(arguments.get("node"));
-    }
-
-    public void update() {
-	mainGrid.setCell("info", 12, createExtendedInfo());
-	mainGrid.setCell("ops", 4, createDocumentOperations());
-    }
-
-    public DocumentExtendedInfo() {
-	final VerticalLayout vl = new VerticalLayout();
-	vl.setSizeFull();
-	vl.setSpacing(true);
-	vl.setMargin(false, false, false, true);
-	mainGrid = new GridSystemLayout();
-	/*
-	 * mainGrid.setSizeFull(); mainGrid.setSpacing(true);
-	 */vl.addComponent(new Label("<h3>Documento</h3>", Label.CONTENT_XHTML));
-	vl.addComponent(mainGrid);
-	setCompositionRoot(vl);
-    }
-
-    @Override
-    public void attach() {
-	super.attach();
-	update();
-    }
-
-    private Component createDocumentOperations() {
-	return NodeDetails.makeDetails(new DomainItem<AbstractFileNode>(fileNode), true, false);
-    }
-
-    private Component createExtendedInfo() {
-	final DomainItem<FileNode> item = new DomainItem<FileNode>(fileNode);
-	final VerticalLayout vlayout = new VerticalLayout();
-	vlayout.setSpacing(true);
-	vlayout.addComponent(createInfoPanel(item));
-	metadataInfoPanel = createMetadataInfoPanel(item);
-	vlayout.addComponent(metadataInfoPanel);
-	vlayout.addComponent(createBackLink());
-	return vlayout;
-    }
-
-    private List<Component> getVersionsEntries(DomainItem<FileNode> item) {
-	final List<Component> versions = new ArrayList<Component>();
-	final Property recentMetadata = item.getItemProperty("document.versions");
-	final Collection<Metadata> itemIds = (Collection<Metadata>) recentMetadata.getValue();
-	int index = itemIds.size();
-	VersionedFile file = fileNode.getDocument().getLastVersionedFile();
-	for (Metadata metadata : itemIds) {
-	    final Label lblValue = new Label();
-	    lblValue.setContentMode(Label.CONTENT_XHTML);
-	    lblValue.setCaption(String.format("Versão (%d) info", index--));
-	    final String url = DownloadUtil.getDownloadUrl(getApplication(), file);
-	    lblValue.setValue(String.format("%s em %s <a href='%s'>(%s)</a>", metadata.getValue(), metadata.getTimestamp()
-		    .toString("dd/MM/yyyy HH:mm:ss"), url, file.getFilename()));
-	    versions.add(lblValue);
-	    file = file.getPreviousVersion();
+	@Override
+	public boolean isAllowedToOpen(Map<String, String> arguments) {
+		AbstractFileNode node = AbstractDomainObject.fromExternalId(arguments.get("node"));
+		if (node == null || node.isDir() || !(node.isReadGroupMember() || node.isWriteGroupMember())) {
+			return false;
+		}
+		return true;
 	}
-	return versions;
-    }
 
-    private Component editMetadataPanel() {
-	final Document document = fileNode.getDocument();
-	final ObjectHintedProperty<Collection> selectedDocuments = new ObjectHintedProperty<Collection>(new HashSet<Document>(),
-		Collection.class);
-	final DocumentContainer documentContainer = new DocumentContainer();
-	documentContainer.addItem(document);
-	final Collection docs = selectedDocuments.getValue();
-	docs.add(document);
-	selectedDocuments.setValue(docs);
+	@Override
+	public void setArguments(Map<String, String> arguments) {
+		fileNode = AbstractDomainObject.fromExternalId(arguments.get("node"));
+	}
 
-	final Button btSubmit = new Button("Guardar");
-	btSubmit.addListener(new ClickListener() {
+	public void update() {
+		mainGrid.setCell("info", 12, createExtendedInfo());
+		mainGrid.setCell("ops", 4, createDocumentOperations());
+	}
 
-	    @Override
-	    public void buttonClick(ClickEvent event) {
-		documentContainer.commit();
-		// metadataInfoPanel.replaceComponent(editMetadataView,
-		// metadataInfoView);
+	public DocumentExtendedInfo() {
+		final VerticalLayout vl = new VerticalLayout();
+		vl.setSizeFull();
+		vl.setSpacing(true);
+		vl.setMargin(false, false, false, true);
+		mainGrid = new GridSystemLayout();
+		/*
+		 * mainGrid.setSizeFull(); mainGrid.setSpacing(true);
+		 */vl.addComponent(new Label("<h3>Documento</h3>", Label.CONTENT_XHTML));
+		vl.addComponent(mainGrid);
+		setCompositionRoot(vl);
+	}
+
+	@Override
+	public void attach() {
+		super.attach();
 		update();
-	    }
-	});
+	}
 
-	VerticalLayout vlEditMetadata = new VerticalLayout();
-	vlEditMetadata.setSizeFull();
-	vlEditMetadata.setSpacing(true);
-	final MetadataPanel metadataPanel = new MetadataPanel(documentContainer, selectedDocuments);
-	metadataPanel.setCaption("");
-	metadataPanel.selectDocuments(selectedDocuments.getValue());
-	vlEditMetadata.addComponent(metadataPanel);
-	vlEditMetadata.addComponent(btSubmit);
-	return vlEditMetadata;
-    }
+	private Component createDocumentOperations() {
+		return NodeDetails.makeDetails(new DomainItem<AbstractFileNode>(fileNode), true, false);
+	}
 
-    private Component createBackLink() {
-	final Button btBack = new Button("« voltar");
-	btBack.addListener(new ClickListener() {
+	private Component createExtendedInfo() {
+		final DomainItem<FileNode> item = new DomainItem<FileNode>(fileNode);
+		final VerticalLayout vlayout = new VerticalLayout();
+		vlayout.setSpacing(true);
+		vlayout.addComponent(createInfoPanel(item));
+		metadataInfoPanel = createMetadataInfoPanel(item);
+		vlayout.addComponent(metadataInfoPanel);
+		vlayout.addComponent(createBackLink());
+		return vlayout;
+	}
 
-	    @Override
-	    public void buttonClick(ClickEvent event) {
-		EmbeddedApplication.back(getApplication());
-	    }
-	});
-	return btBack;
-    }
-
-    private Layout createMetadataInfoPanel(DomainItem<FileNode> item) {
-	final VerticalLayout vl = new VerticalLayout();
-	vl.setSpacing(true);
-
-	final HorizontalLayout hl = new HorizontalLayout();
-	hl.setSpacing(true);
-	final Label lbl = new Label(
-		String.format("Metadata Versão %s", item.getItemProperty("document.versionNumber").toString()));
-	lbl.addStyleName(BennuTheme.LABEL_H3);
-	hl.addComponent(lbl);
-
-	if (fileNode.isWriteGroupMember()) {
-	    final Button btEditMetadata = new Button("editar");
-	    btEditMetadata.setStyleName(BaseTheme.BUTTON_LINK);
-	    btEditMetadata.addListener(new ClickListener() {
-
-		@Override
-		public void buttonClick(ClickEvent event) {
-		    editMetadataView = editMetadataPanel();
-		    vl.replaceComponent(metadataInfoView, editMetadataView);
-		    btEditMetadata.setVisible(false);
+	private List<Component> getVersionsEntries(DomainItem<FileNode> item) {
+		final List<Component> versions = new ArrayList<Component>();
+		final Property recentMetadata = item.getItemProperty("document.versions");
+		final Collection<Metadata> itemIds = (Collection<Metadata>) recentMetadata.getValue();
+		int index = itemIds.size();
+		VersionedFile file = fileNode.getDocument().getLastVersionedFile();
+		for (Metadata metadata : itemIds) {
+			final Label lblValue = new Label();
+			lblValue.setContentMode(Label.CONTENT_XHTML);
+			lblValue.setCaption(String.format("Versão (%d) info", index--));
+			final String url = DownloadUtil.getDownloadUrl(getApplication(), file);
+			lblValue.setValue(String.format("%s em %s <a href='%s'>(%s)</a>", metadata.getValue(), metadata.getTimestamp()
+					.toString("dd/MM/yyyy HH:mm:ss"), url, file.getFilename()));
+			versions.add(lblValue);
+			file = file.getPreviousVersion();
 		}
-	    });
-	    hl.addComponent(btEditMetadata);
+		return versions;
 	}
 
-	vl.addComponent(hl);
+	private Component editMetadataPanel() {
+		final Document document = fileNode.getDocument();
+		final ObjectHintedProperty<Collection> selectedDocuments =
+				new ObjectHintedProperty<Collection>(new HashSet<Document>(), Collection.class);
+		final DocumentContainer documentContainer = new DocumentContainer();
+		documentContainer.addItem(document);
+		final Collection docs = selectedDocuments.getValue();
+		docs.add(document);
+		selectedDocuments.setValue(docs);
 
-	final Property recentMetadata = item.getItemProperty("document.recentMetadata");
-	final DomainContainer<Metadata> metadataContainer = new DomainContainer<Metadata>(
-		(Collection<Metadata>) recentMetadata.getValue(), Metadata.class);
-	if (metadataContainer.size() > 0) {
-	    final Table table = new Table();
-	    table.setPageLength(0);
-	    metadataContainer.setContainerProperties("keyValue", "presentationValue");
-	    table.setContainerDataSource(metadataContainer);
-	    table.setVisibleColumns(new Object[] { "keyValue", "presentationValue" });
-	    table.setColumnHeaderMode(Table.COLUMN_HEADER_MODE_HIDDEN);
-	    metadataInfoView = table;
-	} else {
-	    metadataInfoView = new Label("Documento sem metadata");
+		final Button btSubmit = new Button("Guardar");
+		btSubmit.addListener(new ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				documentContainer.commit();
+				// metadataInfoPanel.replaceComponent(editMetadataView,
+				// metadataInfoView);
+				update();
+			}
+		});
+
+		VerticalLayout vlEditMetadata = new VerticalLayout();
+		vlEditMetadata.setSizeFull();
+		vlEditMetadata.setSpacing(true);
+		final MetadataPanel metadataPanel = new MetadataPanel(documentContainer, selectedDocuments);
+		metadataPanel.setCaption("");
+		metadataPanel.selectDocuments(selectedDocuments.getValue());
+		vlEditMetadata.addComponent(metadataPanel);
+		vlEditMetadata.addComponent(btSubmit);
+		return vlEditMetadata;
 	}
-	vl.addComponent(metadataInfoView);
-	return vl;
-    }
 
-    public static class ViewerFactory extends FMSViewerFactory {
+	private Component createBackLink() {
+		final Button btBack = new Button("« voltar");
+		btBack.addListener(new ClickListener() {
 
-	public static class VisibilityCompleteViewer extends VisibilityListViewer {
+			@Override
+			public void buttonClick(ClickEvent event) {
+				EmbeddedApplication.back(getApplication());
+			}
+		});
+		return btBack;
+	}
 
-	    public VisibilityCompleteViewer() {
-		removeStyleName("visibility-viewer");
-		setContentMode(CONTENT_XHTML);
-	    }
+	private Layout createMetadataInfoPanel(DomainItem<FileNode> item) {
+		final VerticalLayout vl = new VerticalLayout();
+		vl.setSpacing(true);
 
-	    @Override
-	    public String toString() {
-		if (getVisibilityType().equals(VisibilityListViewer.VisibilityType.SHARED)) {
-		    return super.getDescription();
+		final HorizontalLayout hl = new HorizontalLayout();
+		hl.setSpacing(true);
+		final Label lbl =
+				new Label(String.format("Metadata Versão %s", item.getItemProperty("document.versionNumber").toString()));
+		lbl.addStyleName(BennuTheme.LABEL_H3);
+		hl.addComponent(lbl);
+
+		if (fileNode.isWriteGroupMember()) {
+			final Button btEditMetadata = new Button("editar");
+			btEditMetadata.setStyleName(BaseTheme.BUTTON_LINK);
+			btEditMetadata.addListener(new ClickListener() {
+
+				@Override
+				public void buttonClick(ClickEvent event) {
+					editMetadataView = editMetadataPanel();
+					vl.replaceComponent(metadataInfoView, editMetadataView);
+					btEditMetadata.setVisible(false);
+				}
+			});
+			hl.addComponent(btEditMetadata);
 		}
-		return super.toString();
-	    }
+
+		vl.addComponent(hl);
+
+		final Property recentMetadata = item.getItemProperty("document.recentMetadata");
+		final DomainContainer<Metadata> metadataContainer =
+				new DomainContainer<Metadata>((Collection<Metadata>) recentMetadata.getValue(), Metadata.class);
+		if (metadataContainer.size() > 0) {
+			final Table table = new Table();
+			table.setPageLength(0);
+			metadataContainer.setContainerProperties("keyValue", "presentationValue");
+			table.setContainerDataSource(metadataContainer);
+			table.setVisibleColumns(new Object[] { "keyValue", "presentationValue" });
+			table.setColumnHeaderMode(Table.COLUMN_HEADER_MODE_HIDDEN);
+			metadataInfoView = table;
+		} else {
+			metadataInfoView = new Label("Documento sem metadata");
+		}
+		vl.addComponent(metadataInfoView);
+		return vl;
 	}
 
-	public ViewerFactory() {
-	    super();
+	public static class ViewerFactory extends FMSViewerFactory {
 
-	    register(VisibilityList.class, VisibilityCompleteViewer.class);
+		public static class VisibilityCompleteViewer extends VisibilityListViewer {
+
+			public VisibilityCompleteViewer() {
+				removeStyleName("visibility-viewer");
+				setContentMode(CONTENT_XHTML);
+			}
+
+			@Override
+			public String toString() {
+				if (getVisibilityType().equals(VisibilityListViewer.VisibilityType.SHARED)) {
+					return super.getDescription();
+				}
+				return super.toString();
+			}
+		}
+
+		public ViewerFactory() {
+			super();
+
+			register(VisibilityList.class, VisibilityCompleteViewer.class);
+		}
+
 	}
 
-    }
-
-    private Component createInfoPanel(DomainItem<FileNode> item) {
-	TabularViewer viewer = new TabularViewer(viewerFactory);
-	List<String> propertyIds = new ArrayList<String>();
-	item.addItemProperty("url", new ObjectProperty<URL>(
-		DownloadUtil.getDownloadUrl(getApplication(), fileNode.getDocument()), URL.class));
-	propertyIds.addAll(Arrays.asList(new String[] { "displayName", "url", "document.versionNumber", "presentationFilesize",
-		"document.lastModifiedDate", "parent.displayName", "visibilityGroups" }));
-	viewer.setItemDataSource(item, propertyIds);
-	for (Component versionEntry : getVersionsEntries(item)) {
-	    viewer.addLine(versionEntry);
+	private Component createInfoPanel(DomainItem<FileNode> item) {
+		TabularViewer viewer = new TabularViewer(viewerFactory);
+		List<String> propertyIds = new ArrayList<String>();
+		item.addItemProperty("url", new ObjectProperty<URL>(
+				DownloadUtil.getDownloadUrl(getApplication(), fileNode.getDocument()), URL.class));
+		propertyIds.addAll(Arrays.asList(new String[] { "displayName", "url", "document.versionNumber", "presentationFilesize",
+				"document.lastModifiedDate", "parent.displayName", "visibilityGroups" }));
+		viewer.setItemDataSource(item, propertyIds);
+		for (Component versionEntry : getVersionsEntries(item)) {
+			viewer.addLine(versionEntry);
+		}
+		return viewer;
 	}
-	return viewer;
-    }
 
 }

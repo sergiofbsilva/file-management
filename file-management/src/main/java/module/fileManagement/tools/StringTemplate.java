@@ -18,70 +18,70 @@ import com.google.common.collect.Collections2;
  */
 
 public class StringTemplate {
-    private final Function PARAMETER_TO_ATTRIBUTE = new Function<String, String>() {
+	private final Function PARAMETER_TO_ATTRIBUTE = new Function<String, String>() {
 
-	@Override
-	public String apply(String arg0) {
-	    return arg0.replace("$", "");
+		@Override
+		public String apply(String arg0) {
+			return arg0.replace("$", "");
+		}
+	};
+
+	private final Pattern ATTRIBUTE_REGEXP = Pattern.compile("\\$.*?\\$");
+	private String template;
+	private final Map<String, AttributeResolver> resolvers = new HashMap<String, AttributeResolver>();
+
+	public StringTemplate() {
+
 	}
-    };
 
-    private final Pattern ATTRIBUTE_REGEXP = Pattern.compile("\\$.*?\\$");
-    private String template;
-    private final Map<String, AttributeResolver> resolvers = new HashMap<String, AttributeResolver>();
-
-    public StringTemplate() {
-
-    }
-
-    public StringTemplate(final String template) {
-	this.template = template;
-    }
-
-    public void setTemplate(final String template) {
-	this.template = template;
-    }
-
-    public String getTemplate() {
-	return template;
-    }
-
-    /*
-     * Returns the list of defined parameters in current template A parameter is
-     * simply a attribute within '$'
-     */
-    private Set<String> getParameters() {
-	final Set<String> attributes = new HashSet<String>();
-	final Matcher matcher = ATTRIBUTE_REGEXP.matcher(template);
-	while (matcher.find()) {
-	    attributes.add(matcher.group());
+	public StringTemplate(final String template) {
+		this.template = template;
 	}
-	return attributes;
-    }
 
-    public Collection<String> getAttributes() {
-	return Collections2.transform(getParameters(), PARAMETER_TO_ATTRIBUTE);
-    }
-
-    public String getValue() {
-	String processed = new String(template);
-	for (String attribute : getParameters()) {
-	    final String resolvedAttribute = resolveAttribute((String) PARAMETER_TO_ATTRIBUTE.apply(attribute));
-	    processed = processed.replace(attribute, resolvedAttribute);
+	public void setTemplate(final String template) {
+		this.template = template;
 	}
-	return processed;
-    }
 
-    public String resolveAttribute(String attribute) {
-	return getResolver(attribute).resolve();
-    }
+	public String getTemplate() {
+		return template;
+	}
 
-    protected AttributeResolver getResolver(String attribute) {
-	return resolvers.get(attribute);
-    }
+	/*
+	 * Returns the list of defined parameters in current template A parameter is
+	 * simply a attribute within '$'
+	 */
+	private Set<String> getParameters() {
+		final Set<String> attributes = new HashSet<String>();
+		final Matcher matcher = ATTRIBUTE_REGEXP.matcher(template);
+		while (matcher.find()) {
+			attributes.add(matcher.group());
+		}
+		return attributes;
+	}
 
-    public void addResolver(AttributeResolver resolver) {
-	resolvers.put(resolver.get(), resolver);
-    }
+	public Collection<String> getAttributes() {
+		return Collections2.transform(getParameters(), PARAMETER_TO_ATTRIBUTE);
+	}
+
+	public String getValue() {
+		String processed = new String(template);
+		for (String attribute : getParameters()) {
+			final String resolvedAttribute = resolveAttribute((String) PARAMETER_TO_ATTRIBUTE.apply(attribute));
+			processed = processed.replace(attribute, resolvedAttribute);
+		}
+		return processed;
+	}
+
+	public String resolveAttribute(String attribute) {
+		return getResolver(attribute).resolve();
+	}
+
+	protected AttributeResolver getResolver(String attribute) {
+		return resolvers.get(attribute);
+	}
+
+	public void addResolver(AttributeResolver resolver) {
+		resolvers.put(resolver.get(), resolver);
+	}
 
 }

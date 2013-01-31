@@ -30,123 +30,123 @@ import com.vaadin.ui.TextField;
 
 public class FMSFieldFactory extends DefaultFieldFactory {
 
-    private interface FieldMaker {
-	Field makeField(MetadataKey key);
-    }
+	private interface FieldMaker {
+		Field makeField(MetadataKey key);
+	}
 
-    private static final Map<Class<? extends Metadata>, FieldMaker> metadataClassMakerMap = Maps.newHashMap();
+	private static final Map<Class<? extends Metadata>, FieldMaker> metadataClassMakerMap = Maps.newHashMap();
 
-    public static FieldMaker createStringFieldMaker() {
-	return new FieldMaker() {
+	public static FieldMaker createStringFieldMaker() {
+		return new FieldMaker() {
 
-	    @Override
-	    public Field makeField(MetadataKey key) {
-		if ("Observações".equals(key.getKeyValue())) {
-		    TextArea textArea = new TextArea();
-		    textArea.setColumns(22);
-		    textArea.setRows(5);
-		    return textArea;
+			@Override
+			public Field makeField(MetadataKey key) {
+				if ("Observações".equals(key.getKeyValue())) {
+					TextArea textArea = new TextArea();
+					textArea.setColumns(22);
+					textArea.setRows(5);
+					return textArea;
+				}
+				return new TextField();
+			}
+		};
+	}
+
+	public static FieldMaker createIntegerFieldMaker() {
+		return new FieldMaker() {
+
+			@Override
+			public Field makeField(MetadataKey key) {
+				return new IntegerField();
+			}
+		};
+	}
+
+	public static FieldMaker createDateFieldMaker() {
+		return new FieldMaker() {
+
+			@Override
+			public Field makeField(MetadataKey key) {
+				final DateField dateField = new PopupDateTimeField();
+				dateField.setDateFormat("dd-MM-yyyy");
+				dateField.setResolution(DateField.RESOLUTION_DAY);
+				return dateField;
+			}
+		};
+	}
+
+	private static FieldMaker createPersonMetadataFieldMaker() {
+		return new FieldMaker() {
+
+			@Override
+			public Field makeField(MetadataKey key) {
+				return new PersonField();
+			}
+		};
+	}
+
+	static {
+		metadataClassMakerMap.put(StringMetadata.class, createStringFieldMaker());
+		metadataClassMakerMap.put(IntegerMetadata.class, createIntegerFieldMaker());
+		metadataClassMakerMap.put(DateTimeMetadata.class, createDateFieldMaker());
+		metadataClassMakerMap.put(PersonMetadata.class, createPersonMetadataFieldMaker());
+	}
+
+	private MetadataTemplate template;
+
+	public FMSFieldFactory(String bundle, MetadataTemplate template) {
+		super(bundle);
+		setTemplate(template);
+	}
+
+	private void setTemplate(MetadataTemplate template) {
+		this.template = template;
+	}
+
+	@Override
+	protected String makeCaption(Item item, Object propertyId, Component uiContext) {
+		if (MetadataKey.class.isAssignableFrom(propertyId.getClass())) {
+			return ((MetadataKey) propertyId).getKeyValue();
+		}
+		return super.makeCaption(item, propertyId, uiContext);
+	}
+
+	@Override
+	public Field makeField(Item item, Object propertyId, Component uiContext) {
+		final Field field = makeField(propertyId);
+		if (field instanceof AbstractTextField) {
+			((AbstractTextField) field).setNullRepresentation(StringUtils.EMPTY);
+		}
+		final MetadataKey key = (MetadataKey) propertyId;
+		final MetadataTemplateRule rule = template.getRule(key);
+		if (rule != null && rule.getRequired()) {
+			field.setRequired(true);
+		}
+		if (rule != null && rule.getReadOnly()) {
+			field.setReadOnly(true);
+		}
+		field.setWidth(22, Sizeable.UNITS_EM);
+		return field;
+	}
+
+	private static FieldMaker get(Class<? extends Metadata> type) {
+		if (Metadata.class.equals(type)) {
+			return null;
+		}
+		final FieldMaker fieldMaker = metadataClassMakerMap.get(type);
+		if (fieldMaker == null) {
+			return get((Class<? extends Metadata>) type.getSuperclass());
+		}
+		return fieldMaker;
+	}
+
+	public static Field makeField(Object propertyId) {
+		final MetadataKey key = (MetadataKey) propertyId;
+		final Class<? extends Metadata> metadataValueType = key.getMetadataValueType();
+		final FieldMaker fieldMaker = get(metadataValueType);
+		if (fieldMaker != null) {
+			return fieldMaker.makeField(key);
 		}
 		return new TextField();
-	    }
-	};
-    }
-
-    public static FieldMaker createIntegerFieldMaker() {
-	return new FieldMaker() {
-
-	    @Override
-	    public Field makeField(MetadataKey key) {
-		return new IntegerField();
-	    }
-	};
-    }
-
-    public static FieldMaker createDateFieldMaker() {
-	return new FieldMaker() {
-
-	    @Override
-	    public Field makeField(MetadataKey key) {
-		final DateField dateField = new PopupDateTimeField();
-		dateField.setDateFormat("dd-MM-yyyy");
-		dateField.setResolution(DateField.RESOLUTION_DAY);
-		return dateField;
-	    }
-	};
-    }
-
-    private static FieldMaker createPersonMetadataFieldMaker() {
-	return new FieldMaker() {
-
-	    @Override
-	    public Field makeField(MetadataKey key) {
-		return new PersonField();
-	    }
-	};
-    }
-
-    static {
-	metadataClassMakerMap.put(StringMetadata.class, createStringFieldMaker());
-	metadataClassMakerMap.put(IntegerMetadata.class, createIntegerFieldMaker());
-	metadataClassMakerMap.put(DateTimeMetadata.class, createDateFieldMaker());
-	metadataClassMakerMap.put(PersonMetadata.class, createPersonMetadataFieldMaker());
-    }
-
-    private MetadataTemplate template;
-
-    public FMSFieldFactory(String bundle, MetadataTemplate template) {
-	super(bundle);
-	setTemplate(template);
-    }
-
-    private void setTemplate(MetadataTemplate template) {
-	this.template = template;
-    }
-
-    @Override
-    protected String makeCaption(Item item, Object propertyId, Component uiContext) {
-	if (MetadataKey.class.isAssignableFrom(propertyId.getClass())) {
-	    return ((MetadataKey) propertyId).getKeyValue();
 	}
-	return super.makeCaption(item, propertyId, uiContext);
-    }
-
-    @Override
-    public Field makeField(Item item, Object propertyId, Component uiContext) {
-	final Field field = makeField(propertyId);
-	if (field instanceof AbstractTextField) {
-	    ((AbstractTextField) field).setNullRepresentation(StringUtils.EMPTY);
-	}
-	final MetadataKey key = (MetadataKey) propertyId;
-	final MetadataTemplateRule rule = template.getRule(key);
-	if (rule != null && rule.getRequired()) {
-	    field.setRequired(true);
-	}
-	if (rule != null && rule.getReadOnly()) {
-	    field.setReadOnly(true);
-	}
-	field.setWidth(22, Sizeable.UNITS_EM);
-	return field;
-    }
-
-    private static FieldMaker get(Class<? extends Metadata> type) {
-	if (Metadata.class.equals(type)) {
-	    return null;
-	}
-	final FieldMaker fieldMaker = metadataClassMakerMap.get(type);
-	if (fieldMaker == null) {
-	    return get((Class<? extends Metadata>) type.getSuperclass());
-	}
-	return fieldMaker;
-    }
-
-    public static Field makeField(Object propertyId) {
-	final MetadataKey key = (MetadataKey) propertyId;
-	final Class<? extends Metadata> metadataValueType = key.getMetadataValueType();
-	final FieldMaker fieldMaker = get(metadataValueType);
-	if (fieldMaker != null) {
-	    return fieldMaker.makeField(key);
-	}
-	return new TextField();
-    }
 }

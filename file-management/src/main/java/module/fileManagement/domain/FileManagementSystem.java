@@ -57,133 +57,134 @@ import com.vaadin.ui.Window;
  */
 public class FileManagementSystem extends FileManagementSystem_Base implements ModuleInitializer {
 
-    private static FileManagementSystem system;
-    public static final String BUNDLE = "resources.FileManagementResources";
+	private static FileManagementSystem system;
+	public static final String BUNDLE = "resources.FileManagementResources";
 
-    private static final Logger logger = Logger.getLogger(FileManagementSystem.class);
+	private static final Logger logger = Logger.getLogger(FileManagementSystem.class);
 
-    public static final FilenameTemplate FILENAME_TEMPLATE = new FilenameTemplate();
+	public static final FilenameTemplate FILENAME_TEMPLATE = new FilenameTemplate();
 
-    static {
-	VaadinFrameworkLogger.getLogger().setLevel(Level.ALL);
-    }
-
-    private FileManagementSystem() {
-	super();
-    }
-
-    public static String getMessage(final String key, String... args) {
-	return BundleUtil.getFormattedStringFromResourceBundle(BUNDLE, key, args);
-    }
-
-    public MetadataKey getMetadataKey(String keyValue) {
-	return getMetadataKey(keyValue, Boolean.FALSE, StringMetadata.class);
-    }
-
-    public MetadataKey getMetadataKey(String keyValue, final Class<? extends Metadata> classType) {
-	return getMetadataKey(keyValue, Boolean.FALSE, classType);
-    }
-
-    public MetadataKey getMetadataKey(final String keyValue, final Boolean reserved, final Class<? extends Metadata> classType) {
-	for (MetadataKey key : getMetadataKeys()) {
-	    if (key.getKeyValue().equals(keyValue) && key.getMetadataValueType().equals(classType)
-		    && reserved.equals(key.getReserved())) {
-		return key;
-	    }
+	static {
+		VaadinFrameworkLogger.getLogger().setLevel(Level.ALL);
 	}
-	return null;
-    }
 
-    public MetadataTemplate getMetadataTemplate(final String name) {
-	for (MetadataTemplate template : getMetadataTemplatesSet()) {
-	    if (template.getName().equals(name)) {
-		return template;
-	    }
+	private FileManagementSystem() {
+		super();
 	}
-	return null;
-    }
 
-    public static FileManagementSystem getInstance() {
-	if (system == null) {
-	    system = getOrCreateInstance();
+	public static String getMessage(final String key, String... args) {
+		return BundleUtil.getFormattedStringFromResourceBundle(BUNDLE, key, args);
 	}
-	return system;
 
-    }
-
-    public static String getNewDisplayName(String displayName, final String fileName) {
-	final String[] fileNameParts = StringUtils.split(fileName, '.');
-	final String[] displayNameParts = StringUtils.split(displayName, '.');
-	if (fileNameParts.length == 2) {
-	    displayName = String.format("%s.%s", displayNameParts.length == 2 ? displayNameParts[0] : displayName,
-		    fileNameParts[1]);
+	public MetadataKey getMetadataKey(String keyValue) {
+		return getMetadataKey(keyValue, Boolean.FALSE, StringMetadata.class);
 	}
-	return displayName;
-    }
 
-    @Service
-    private static FileManagementSystem getOrCreateInstance() {
-	final MyOrg myorg = MyOrg.getInstance();
-	if (!myorg.hasFileManagementSystem()) {
-	    final FileManagementSystem fileManagementSystem = new FileManagementSystem();
-	    myorg.setFileManagementSystem(fileManagementSystem);
-
+	public MetadataKey getMetadataKey(String keyValue, final Class<? extends Metadata> classType) {
+		return getMetadataKey(keyValue, Boolean.FALSE, classType);
 	}
-	return myorg.getFileManagementSystem();
-    }
 
-    public static ResourceBundle getBundle() {
-	return ResourceBundle.getBundle(BUNDLE);
-    }
-
-    public static String getBundleName() {
-	return BUNDLE;
-    }
-
-    public static Logger getLogger() {
-	return logger;
-    }
-
-    public static void showException(Application app, DomainException e) {
-	Window.Notification notif = new Window.Notification(FileManagementSystem.getMessage("label.operation.not.allowed"),
-		e.getMessage(), Window.Notification.TYPE_TRAY_NOTIFICATION);
-	notif.setDelayMsec(-1);
-	app.getMainWindow().showNotification(notif);
-    }
-
-    public static void showWarning(Application app, final String message) {
-	show(app, getMessage("label.operation.not.allowed"), message, Window.Notification.TYPE_WARNING_MESSAGE);
-    }
-
-    public static void show(Application app, final String caption, final String message, int type) {
-	Window.Notification notif = new Window.Notification(caption, type);
-	notif.setDescription(message);
-	//notif.setDelayMsec(1000);
-	notif.setPosition(Window.Notification.POSITION_CENTERED);
-	app.getMainWindow().showNotification(notif);
-    }
-
-    public void setMetadataRulesReadOnlyFalse(FileManagementSystem root) {
-	for (MetadataTemplate template : root.getMetadataTemplates()) {
-	    for (MetadataTemplateRule rule : template.getRule()) {
-		if (rule.getReadOnly() == null) {
-		    rule.setReadOnly(Boolean.FALSE);
+	public MetadataKey getMetadataKey(final String keyValue, final Boolean reserved, final Class<? extends Metadata> classType) {
+		for (MetadataKey key : getMetadataKeys()) {
+			if (key.getKeyValue().equals(keyValue) && key.getMetadataValueType().equals(classType)
+					&& reserved.equals(key.getReserved())) {
+				return key;
+			}
 		}
-	    }
+		return null;
 	}
-    }
 
-    @Override
-    public void init(MyOrg root) {
-	setMetadataRulesReadOnlyFalse(root.getFileManagementSystem());
-    }
+	public MetadataTemplate getMetadataTemplate(final String name) {
+		for (MetadataTemplate template : getMetadataTemplatesSet()) {
+			if (template.getName().equals(name)) {
+				return template;
+			}
+		}
+		return null;
+	}
 
-    static {
-	initDocumentOrganizationModelView();
-    }
+	public static FileManagementSystem getInstance() {
+		if (system == null) {
+			system = getOrCreateInstance();
+		}
+		return system;
 
-    private static void initDocumentOrganizationModelView() {
-	OrganizationModelAction.partyViewHookManager.register(new FileRepositoryView());
-    }
+	}
+
+	public static String getNewDisplayName(String displayName, final String fileName) {
+		final String[] fileNameParts = StringUtils.split(fileName, '.');
+		final String[] displayNameParts = StringUtils.split(displayName, '.');
+		if (fileNameParts.length == 2) {
+			displayName =
+					String.format("%s.%s", displayNameParts.length == 2 ? displayNameParts[0] : displayName, fileNameParts[1]);
+		}
+		return displayName;
+	}
+
+	@Service
+	private static FileManagementSystem getOrCreateInstance() {
+		final MyOrg myorg = MyOrg.getInstance();
+		if (!myorg.hasFileManagementSystem()) {
+			final FileManagementSystem fileManagementSystem = new FileManagementSystem();
+			myorg.setFileManagementSystem(fileManagementSystem);
+
+		}
+		return myorg.getFileManagementSystem();
+	}
+
+	public static ResourceBundle getBundle() {
+		return ResourceBundle.getBundle(BUNDLE);
+	}
+
+	public static String getBundleName() {
+		return BUNDLE;
+	}
+
+	public static Logger getLogger() {
+		return logger;
+	}
+
+	public static void showException(Application app, DomainException e) {
+		Window.Notification notif =
+				new Window.Notification(FileManagementSystem.getMessage("label.operation.not.allowed"), e.getMessage(),
+						Window.Notification.TYPE_TRAY_NOTIFICATION);
+		notif.setDelayMsec(-1);
+		app.getMainWindow().showNotification(notif);
+	}
+
+	public static void showWarning(Application app, final String message) {
+		show(app, getMessage("label.operation.not.allowed"), message, Window.Notification.TYPE_WARNING_MESSAGE);
+	}
+
+	public static void show(Application app, final String caption, final String message, int type) {
+		Window.Notification notif = new Window.Notification(caption, type);
+		notif.setDescription(message);
+		//notif.setDelayMsec(1000);
+		notif.setPosition(Window.Notification.POSITION_CENTERED);
+		app.getMainWindow().showNotification(notif);
+	}
+
+	public void setMetadataRulesReadOnlyFalse(FileManagementSystem root) {
+		for (MetadataTemplate template : root.getMetadataTemplates()) {
+			for (MetadataTemplateRule rule : template.getRule()) {
+				if (rule.getReadOnly() == null) {
+					rule.setReadOnly(Boolean.FALSE);
+				}
+			}
+		}
+	}
+
+	@Override
+	public void init(MyOrg root) {
+		setMetadataRulesReadOnlyFalse(root.getFileManagementSystem());
+	}
+
+	static {
+		initDocumentOrganizationModelView();
+	}
+
+	private static void initDocumentOrganizationModelView() {
+		OrganizationModelAction.partyViewHookManager.register(new FileRepositoryView());
+	}
 
 }

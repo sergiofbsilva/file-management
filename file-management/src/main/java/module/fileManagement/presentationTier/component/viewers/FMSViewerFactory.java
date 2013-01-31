@@ -48,61 +48,61 @@ import com.vaadin.ui.Component;
  */
 public class FMSViewerFactory extends DefaultViewerFactory {
 
-    private Map<Class<?>, Class<? extends Viewer>> classViewerMap = new HashMap<Class<?>, Class<? extends Viewer>>();
+	private Map<Class<?>, Class<? extends Viewer>> classViewerMap = new HashMap<Class<?>, Class<? extends Viewer>>();
 
-    private static FMSViewerFactory defaultViewerFactory;
+	private static FMSViewerFactory defaultViewerFactory;
 
-    public FMSViewerFactory() {
-	super(FileManagementSystem.getBundle());
-    }
-
-    {
-	register(DateTime.class, DateTimeViewer.class);
-	register(URL.class, LinkViewer.class);
-	register(VisibilityList.class, VisibilityListViewer.class);
-    }
-
-    protected void register(Class<?> type, Class<? extends Viewer> viewer) {
-	classViewerMap.put(type, viewer);
-    }
-
-    private Viewer getNewViewer(Class<?> type) throws InstantiationException, IllegalAccessException {
-	final Class<? extends Viewer> viewerClass = classViewerMap.get(type);
-	return viewerClass == null ? null : viewerClass.newInstance();
-    }
-
-    public Class<?> getType(Class<Viewer> viewer) {
-	for (Entry<Class<?>, Class<? extends Viewer>> entry : classViewerMap.entrySet()) {
-	    if (entry.getValue().equals(viewer)) {
-		return entry.getKey();
-	    }
+	public FMSViewerFactory() {
+		super(FileManagementSystem.getBundle());
 	}
-	return null;
-    }
 
-    public static FMSViewerFactory getDefaultViewerFactory() {
-	if (defaultViewerFactory == null) {
-	    defaultViewerFactory = new FMSViewerFactory();
+	{
+		register(DateTime.class, DateTimeViewer.class);
+		register(URL.class, LinkViewer.class);
+		register(VisibilityList.class, VisibilityListViewer.class);
 	}
-	return defaultViewerFactory;
-    }
 
-    @Override
-    protected Viewer makeViewer(Item item, Object propertyId, Component uiContext) {
-	final Property itemProperty = item.getItemProperty(propertyId);
-	final Viewer viewer;
-	try {
-	    viewer = getNewViewer(itemProperty.getType());
-	} catch (InstantiationException e) {
-	    throw new UnsupportedOperationException(e);
-	} catch (IllegalAccessException e) {
-	    throw new UnsupportedOperationException(e);
+	protected void register(Class<?> type, Class<? extends Viewer> viewer) {
+		classViewerMap.put(type, viewer);
 	}
-	return viewer != null ? viewer : super.makeViewer(item, propertyId, uiContext);
-    }
 
-    @Override
-    public String makeDescription(Item item, Object propertyId, Component uiContext) {
-	return super.makeDescription(item, propertyId, uiContext);
-    }
+	private Viewer getNewViewer(Class<?> type) throws InstantiationException, IllegalAccessException {
+		final Class<? extends Viewer> viewerClass = classViewerMap.get(type);
+		return viewerClass == null ? null : viewerClass.newInstance();
+	}
+
+	public Class<?> getType(Class<Viewer> viewer) {
+		for (Entry<Class<?>, Class<? extends Viewer>> entry : classViewerMap.entrySet()) {
+			if (entry.getValue().equals(viewer)) {
+				return entry.getKey();
+			}
+		}
+		return null;
+	}
+
+	public static FMSViewerFactory getDefaultViewerFactory() {
+		if (defaultViewerFactory == null) {
+			defaultViewerFactory = new FMSViewerFactory();
+		}
+		return defaultViewerFactory;
+	}
+
+	@Override
+	protected Viewer makeViewer(Item item, Object propertyId, Component uiContext) {
+		final Property itemProperty = item.getItemProperty(propertyId);
+		final Viewer viewer;
+		try {
+			viewer = getNewViewer(itemProperty.getType());
+		} catch (InstantiationException e) {
+			throw new UnsupportedOperationException(e);
+		} catch (IllegalAccessException e) {
+			throw new UnsupportedOperationException(e);
+		}
+		return viewer != null ? viewer : super.makeViewer(item, propertyId, uiContext);
+	}
+
+	@Override
+	public String makeDescription(Item item, Object propertyId, Component uiContext) {
+		return super.makeDescription(item, propertyId, uiContext);
+	}
 }

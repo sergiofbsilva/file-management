@@ -5,14 +5,14 @@ import com.vaadin.terminal.Resource;
 
 public abstract class ActionWithImplementation extends Action {
 
-    public ActionWithImplementation(String caption) {
-	super(caption);
-    }
+	public ActionWithImplementation(String caption) {
+		super(caption);
+	}
 
-    public ActionWithImplementation(final String caption, final Resource resource) {
-	super(caption, resource);
-    }
+	public ActionWithImplementation(final String caption, final Resource resource) {
+		super(caption, resource);
+	}
 
-    public abstract void perform(final Object target);
+	public abstract void perform(final Object target);
 
 }

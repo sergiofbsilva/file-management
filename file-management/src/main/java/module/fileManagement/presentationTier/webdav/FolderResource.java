@@ -26,80 +26,81 @@ import org.slf4j.LoggerFactory;
 import pt.ist.bennu.core.domain.exceptions.DomainException;
 
 public class FolderResource extends AbstractResource<DirNode> implements CollectionResource, MakeCollectionableResource,
-	PutableResource {
+		PutableResource {
 
-    private static final Logger log = LoggerFactory.getLogger(FolderResource.class);
+	private static final Logger log = LoggerFactory.getLogger(FolderResource.class);
 
-    public FolderResource(DirNode node, FolderResource parent) {
-	super(node, parent);
-    }
-
-    @Override
-    public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
-	final AbstractFileNode node = getNode().searchNode(childName);
-	if (node != null && node.isAccessible()) {
-	    return makeResource(node);
+	public FolderResource(DirNode node, FolderResource parent) {
+		super(node, parent);
 	}
-	return null;
-    }
 
-    public Resource makeResource(final AbstractFileNode searchNode) {
-	if (searchNode instanceof FileNode) {
-	    return new FileResource((FileNode) searchNode, this);
+	@Override
+	public Resource child(String childName) throws NotAuthorizedException, BadRequestException {
+		final AbstractFileNode node = getNode().searchNode(childName);
+		if (node != null && node.isAccessible()) {
+			return makeResource(node);
+		}
+		return null;
 	}
-	if (searchNode instanceof DirNode) {
-	    return new FolderResource((DirNode) searchNode, this);
+
+	public Resource makeResource(final AbstractFileNode searchNode) {
+		if (searchNode instanceof FileNode) {
+			return new FileResource((FileNode) searchNode, this);
+		}
+		if (searchNode instanceof DirNode) {
+			return new FolderResource((DirNode) searchNode, this);
+		}
+		return null;
 	}
-	return null;
-    }
 
-    @Override
-    public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
-	log.trace("getChildren");
-	final List<Resource> resources = new ArrayList<Resource>();
-	for (AbstractFileNode node : getNode().getChild()) {
-	    if (node.isAccessible()) {
-		resources.add(makeResource(node));
-	    }
+	@Override
+	public List<? extends Resource> getChildren() throws NotAuthorizedException, BadRequestException {
+		log.trace("getChildren");
+		final List<Resource> resources = new ArrayList<Resource>();
+		for (AbstractFileNode node : getNode().getChild()) {
+			if (node.isAccessible()) {
+				resources.add(makeResource(node));
+			}
+		}
+		return resources;
 	}
-	return resources;
-    }
 
-    @Override
-    public Date getModifiedDate() {
-	return null;
-    }
-
-    @Override
-    public Date getCreateDate() {
-	return null;
-    }
-
-    @Override
-    public String getName() {
-	return getNode().getName();
-    }
-
-    @Override
-    public CollectionResource createCollection(String newName) throws NotAuthorizedException, ConflictException,
-	    BadRequestException {
-	try {
-	    return new FolderResource(getNode().createDir(newName), this);
-	} catch (NodeDuplicateNameException ndne) {
-	    throw new BadRequestException(ndne.getLocalizedMessage(), ndne);
+	@Override
+	public Date getModifiedDate() {
+		return null;
 	}
-    }
 
-    @Override
-    public Resource createNew(String newName, InputStream inputStream, Long length, String contentType) throws IOException,
-	    ConflictException, NotAuthorizedException, BadRequestException {
-	try {
-	    final FileNode fileNode = getNode().createFile(IOUtils.toByteArray(inputStream), newName, newName,
-		    length.longValue(), getNode().getContextPath());
-	    return new FileResource(fileNode, this);
-	} catch (DomainException ndne) {
-	    throw new BadRequestException(ndne.getLocalizedMessage(), ndne);
+	@Override
+	public Date getCreateDate() {
+		return null;
 	}
-    }
+
+	@Override
+	public String getName() {
+		return getNode().getName();
+	}
+
+	@Override
+	public CollectionResource createCollection(String newName) throws NotAuthorizedException, ConflictException,
+			BadRequestException {
+		try {
+			return new FolderResource(getNode().createDir(newName), this);
+		} catch (NodeDuplicateNameException ndne) {
+			throw new BadRequestException(ndne.getLocalizedMessage(), ndne);
+		}
+	}
+
+	@Override
+	public Resource createNew(String newName, InputStream inputStream, Long length, String contentType) throws IOException,
+			ConflictException, NotAuthorizedException, BadRequestException {
+		try {
+			final FileNode fileNode =
+					getNode().createFile(IOUtils.toByteArray(inputStream), newName, newName, length.longValue(),
+							getNode().getContextPath());
+			return new FileResource(fileNode, this);
+		} catch (DomainException ndne) {
+			throw new BadRequestException(ndne.getLocalizedMessage(), ndne);
+		}
+	}
 
 }

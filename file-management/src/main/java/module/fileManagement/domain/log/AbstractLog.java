@@ -43,54 +43,54 @@ import pt.ist.bennu.core.domain.User;
  */
 public abstract class AbstractLog extends AbstractLog_Base {
 
-    public static final Comparator<AbstractLog> TIMESTAMP_COMPARATOR = new Comparator<AbstractLog>() {
+	public static final Comparator<AbstractLog> TIMESTAMP_COMPARATOR = new Comparator<AbstractLog>() {
 
-	@Override
-	public int compare(AbstractLog o1, AbstractLog o2) {
-	    final int result = o2.getTimestamp().compareTo(o1.getTimestamp());
-	    return result == 0 ? o2.getExternalId().compareTo(o1.getExternalId()) : result;
+		@Override
+		public int compare(AbstractLog o1, AbstractLog o2) {
+			final int result = o2.getTimestamp().compareTo(o1.getTimestamp());
+			return result == 0 ? o2.getExternalId().compareTo(o1.getExternalId()) : result;
+		}
+	};
+
+	public AbstractLog() {
+		super();
+
 	}
-    };
 
-    public AbstractLog() {
-	super();
+	public AbstractLog(User user, ContextPath contextPath) {
+		this();
+		init(user, contextPath);
+	}
 
-    }
+	public void init(User user, ContextPath contextPath) {
+		setTimestamp(new DateTime());
+		setUser(user);
+		setTargetPath(contextPath.createDirNodePath());
+		setTargetDirNode(contextPath.getLastDirNode());
+	}
 
-    public AbstractLog(User user, ContextPath contextPath) {
-	this();
-	init(user, contextPath);
-    }
+	public String getOperationString(String... args) {
+		return FileManagementSystem.getMessage("label.log." + getClass().getSimpleName(), args);
+	}
 
-    public void init(User user, ContextPath contextPath) {
-	setTimestamp(new DateTime());
-	setUser(user);
-	setTargetPath(contextPath.createDirNodePath());
-	setTargetDirNode(contextPath.getLastDirNode());
-    }
+	public String getLogTime() {
+		return getTimestamp().toString("dd/MM/yyyy HH:mm");
+	}
 
-    public String getOperationString(String... args) {
-	return FileManagementSystem.getMessage("label.log." + getClass().getSimpleName(), args);
-    }
+	public String getTargetDirName() {
+		return getTargetDirNode().getDisplayName();
+	}
 
-    public String getLogTime() {
-	return getTimestamp().toString("dd/MM/yyyy HH:mm");
-    }
+	public String getUserName() {
+		return getUser() != null ? getUser().getUsername() : FileManagementSystem.getMessage("label.script");
+	}
 
-    public String getTargetDirName() {
-	return getTargetDirNode().getDisplayName();
-    }
+	public ContextPath getContextPath() {
+		return getTargetPath().createContextPath();
+	}
 
-    public String getUserName() {
-	return getUser() != null ? getUser().getUsername() : FileManagementSystem.getMessage("label.script");
-    }
-
-    public ContextPath getContextPath() {
-	return getTargetPath().createContextPath();
-    }
-
-    public DirNode getCurrentUserFileRepository() {
-	return FileRepository.getOrCreateFileRepository(Authenticate.getCurrentUser());
-    }
+	public DirNode getCurrentUserFileRepository() {
+		return FileRepository.getOrCreateFileRepository(Authenticate.getCurrentUser());
+	}
 
 }

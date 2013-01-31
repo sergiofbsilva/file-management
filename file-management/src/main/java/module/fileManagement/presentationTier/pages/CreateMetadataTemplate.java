@@ -67,260 +67,260 @@ import com.vaadin.ui.themes.BaseTheme;
  */
 public class CreateMetadataTemplate extends CustomComponent implements EmbeddedComponentContainer {
 
-    private int keyIndex = 1;
-    private MetadataTemplate template;
-    private boolean readOnly = false;
+	private int keyIndex = 1;
+	private MetadataTemplate template;
+	private boolean readOnly = false;
 
-    class KeyProp implements Comparable<KeyProp> {
-	private Integer index;
+	class KeyProp implements Comparable<KeyProp> {
+		private Integer index;
 
-	public KeyProp() {
-	    this.index = keyIndex++;
-	}
+		public KeyProp() {
+			this.index = keyIndex++;
+		}
 
-	public KeyProp(final Integer index) {
-	    this.index = index;
-	    keyIndex = index;
-	}
+		public KeyProp(final Integer index) {
+			this.index = index;
+			keyIndex = index;
+		}
 
-	public Integer getIndex() {
-	    return index;
-	}
+		public Integer getIndex() {
+			return index;
+		}
 
-	public void setIndex(final Integer index) {
-	    this.index = index;
-	}
-
-	@Override
-	public int compareTo(KeyProp o) {
-	    return getIndex().compareTo(o.getIndex());
-	}
-    }
-
-    @Service
-    private void editOrCreateTemplate(Form form) {
-	final String templateName = (String) form.getItemProperty("name").getValue();
-	MetadataTemplate currentTemplate;
-	if (template != null) {
-	    currentTemplate = template;
-	    currentTemplate.setName(templateName);
-	    currentTemplate.clear();
-	} else {
-	    currentTemplate = new MetadataTemplate(templateName);
-	}
-
-	for (Object propId : form.getItemPropertyIds()) {
-	    if (propId instanceof KeyProp) {
-		final KeyField itemProperty = (KeyField) form.getItemProperty(propId);
-		String keyName = (String) itemProperty.getValue();
-		Class<? extends Metadata> metadataClassType = itemProperty.getMetadataType();
-		final MetadataKey key = MetadataKey.getOrCreateInstance(keyName, Boolean.FALSE, metadataClassType);
-		currentTemplate
-			.addKey(key, ((KeyProp) propId).getIndex(), itemProperty.getRequired(), itemProperty.getReadOnly());
-	    }
-	}
-    }
-
-    public class KeyField extends CustomField {
-
-	private final Form underlingForm;
-	private final Object propId;
-	private final TextField fieldKey;
-	private final Select selectType;
-	private final CheckBox requiredBox;
-	private final CheckBox readOnlyBox;
-
-	public KeyField(Form form, Object id, Class<? extends Metadata> metadataType, Boolean required, Boolean readOnly) {
-	    this(form, id);
-	    selectType.select(metadataType.getSimpleName());
-	    requiredBox.setValue(required);
-	    readOnlyBox.setValue(readOnly);
-	}
-
-	public KeyField(Form form, Object id) {
-	    this.underlingForm = form;
-	    this.propId = id;
-	    fieldKey = new TextField();
-	    requiredBox = new CheckBox("Required");
-	    readOnlyBox = new CheckBox("Read Only");
-
-	    HorizontalLayout hl = new HorizontalLayout();
-	    hl.setSpacing(true);
-	    hl.addComponent(fieldKey);
-
-	    Button btDelete = new Button("Apagar");
-	    btDelete.setStyleName(BaseTheme.BUTTON_LINK);
-	    btDelete.addListener(new ClickListener() {
+		public void setIndex(final Integer index) {
+			this.index = index;
+		}
 
 		@Override
-		public void buttonClick(ClickEvent event) {
-		    underlingForm.removeItemProperty(propId);
+		public int compareTo(KeyProp o) {
+			return getIndex().compareTo(o.getIndex());
 		}
-	    });
-
-	    selectType = getMetadataTypeSelect();
-	    hl.addComponent(selectType);
-	    hl.addComponent(requiredBox);
-	    hl.addComponent(readOnlyBox);
-	    hl.addComponent(btDelete);
-
-	    setCompositionRoot(hl);
 	}
 
-	private Select getMetadataTypeSelect() {
-	    final Select selectMetadataType = new Select();
-	    selectMetadataType.setNullSelectionAllowed(false);
-	    final Set<Class<? extends Metadata>> types = Metadata.getAvailableMetadataClasses();
-	    BeanContainer<String, Class<? extends Metadata>> typeContainer = new BeanContainer<String, Class<? extends Metadata>>(
-		    Class.class);
-	    typeContainer.setBeanIdProperty("simpleName");
-	    typeContainer.addAll(types);
-	    selectMetadataType.setContainerDataSource(typeContainer);
-	    selectMetadataType.setItemCaptionPropertyId("simpleName");
-	    selectMetadataType.select(StringMetadata.class.getSimpleName());
-	    return selectMetadataType;
+	@Service
+	private void editOrCreateTemplate(Form form) {
+		final String templateName = (String) form.getItemProperty("name").getValue();
+		MetadataTemplate currentTemplate;
+		if (template != null) {
+			currentTemplate = template;
+			currentTemplate.setName(templateName);
+			currentTemplate.clear();
+		} else {
+			currentTemplate = new MetadataTemplate(templateName);
+		}
+
+		for (Object propId : form.getItemPropertyIds()) {
+			if (propId instanceof KeyProp) {
+				final KeyField itemProperty = (KeyField) form.getItemProperty(propId);
+				String keyName = (String) itemProperty.getValue();
+				Class<? extends Metadata> metadataClassType = itemProperty.getMetadataType();
+				final MetadataKey key = MetadataKey.getOrCreateInstance(keyName, Boolean.FALSE, metadataClassType);
+				currentTemplate
+						.addKey(key, ((KeyProp) propId).getIndex(), itemProperty.getRequired(), itemProperty.getReadOnly());
+			}
+		}
+	}
+
+	public class KeyField extends CustomField {
+
+		private final Form underlingForm;
+		private final Object propId;
+		private final TextField fieldKey;
+		private final Select selectType;
+		private final CheckBox requiredBox;
+		private final CheckBox readOnlyBox;
+
+		public KeyField(Form form, Object id, Class<? extends Metadata> metadataType, Boolean required, Boolean readOnly) {
+			this(form, id);
+			selectType.select(metadataType.getSimpleName());
+			requiredBox.setValue(required);
+			readOnlyBox.setValue(readOnly);
+		}
+
+		public KeyField(Form form, Object id) {
+			this.underlingForm = form;
+			this.propId = id;
+			fieldKey = new TextField();
+			requiredBox = new CheckBox("Required");
+			readOnlyBox = new CheckBox("Read Only");
+
+			HorizontalLayout hl = new HorizontalLayout();
+			hl.setSpacing(true);
+			hl.addComponent(fieldKey);
+
+			Button btDelete = new Button("Apagar");
+			btDelete.setStyleName(BaseTheme.BUTTON_LINK);
+			btDelete.addListener(new ClickListener() {
+
+				@Override
+				public void buttonClick(ClickEvent event) {
+					underlingForm.removeItemProperty(propId);
+				}
+			});
+
+			selectType = getMetadataTypeSelect();
+			hl.addComponent(selectType);
+			hl.addComponent(requiredBox);
+			hl.addComponent(readOnlyBox);
+			hl.addComponent(btDelete);
+
+			setCompositionRoot(hl);
+		}
+
+		private Select getMetadataTypeSelect() {
+			final Select selectMetadataType = new Select();
+			selectMetadataType.setNullSelectionAllowed(false);
+			final Set<Class<? extends Metadata>> types = Metadata.getAvailableMetadataClasses();
+			BeanContainer<String, Class<? extends Metadata>> typeContainer =
+					new BeanContainer<String, Class<? extends Metadata>>(Class.class);
+			typeContainer.setBeanIdProperty("simpleName");
+			typeContainer.addAll(types);
+			selectMetadataType.setContainerDataSource(typeContainer);
+			selectMetadataType.setItemCaptionPropertyId("simpleName");
+			selectMetadataType.select(StringMetadata.class.getSimpleName());
+			return selectMetadataType;
+		}
+
+		@Override
+		protected void setInternalValue(Object newValue) {
+			super.setInternalValue(newValue);
+			fieldKey.setValue(newValue);
+		}
+
+		@Override
+		public String getCaption() {
+			return "Chave";
+		}
+
+		@Override
+		public Object getValue() {
+			return fieldKey.getValue();
+		}
+
+		public Class<? extends Metadata> getMetadataType() {
+			final Object itemId = selectType.getValue();
+			return (Class<? extends Metadata>) ((BeanItem) selectType.getItem(itemId)).getBean();
+		}
+
+		public Boolean getRequired() {
+			return (Boolean) requiredBox.getValue();
+		}
+
+		public Boolean getReadOnly() {
+			return (Boolean) readOnlyBox.getValue();
+		}
+
+		@Override
+		public void commit() throws SourceException, InvalidValueException {
+			super.commit();
+			fieldKey.commit();
+		}
+
+		@Override
+		public void discard() throws SourceException {
+			super.discard();
+			fieldKey.discard();
+		}
+
+		@Override
+		public Class<?> getType() {
+			return String.class;
+		}
+
+		@Override
+		public void setReadOnly(boolean readOnly) {
+			fieldKey.setReadOnly(readOnly);
+		}
+
 	}
 
 	@Override
-	protected void setInternalValue(Object newValue) {
-	    super.setInternalValue(newValue);
-	    fieldKey.setValue(newValue);
+	public void attach() {
+		VerticalLayout layout = new VerticalLayout();
+
+		final Form form = new Form();
+		form.setReadOnly(readOnly);
+
+		final TextField txtName = new TextField("Nome");
+		form.addItemProperty("name", txtName);
+
+		if (template != null) {
+			txtName.setValue(template.getName());
+			for (MetadataTemplateRule rule : template.getPositionOrderedRules()) {
+				KeyProp propId = new KeyProp(rule.getPosition());
+				final MetadataKey key = rule.getKey();
+				final KeyField keyField =
+						new KeyField(form, propId, key.getMetadataValueType(), rule.getRequired(), rule.getReadOnly());
+				keyField.setValue(key.getKeyValue());
+				form.addField(propId, keyField);
+			}
+		}
+
+		layout.addComponent(form);
+		Button btAddField = new Button("Adicionar Chave");
+		btAddField.addListener(new ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				final KeyProp propId = new KeyProp();
+				form.addField(propId, new KeyField(form, propId));
+			}
+		});
+
+		Button btCreateTemplate = new Button((template == null ? "Criar" : "Editar ") + " Template");
+		btCreateTemplate.addListener(new ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				form.commit();
+				editOrCreateTemplate(form);
+				Notification not =
+						new Notification("Sucesso", "Template criado com sucesso!", Notification.TYPE_TRAY_NOTIFICATION);
+				not.setDelayMsec(500);
+				getWindow().showNotification(not);
+				goToManageTemplates();
+			}
+		});
+
+		Button btCancel = new Button("Voltar", new ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				goToManageTemplates();
+			}
+		});
+
+		HorizontalLayout hl = new HorizontalLayout();
+		hl.setSpacing(true);
+		if (!readOnly) {
+			hl.addComponent(btAddField);
+			hl.addComponent(btCreateTemplate);
+		}
+		hl.addComponent(btCancel);
+		layout.addComponent(hl);
+		setCompositionRoot(layout);
 	}
 
 	@Override
-	public String getCaption() {
-	    return "Chave";
+	public void setArguments(Map<String, String> arguments) {
+		final String templateOid = arguments.get("template");
+		final String readOnly = arguments.get("readOnly");
+		setTemplate(templateOid);
+		if (!StringUtils.isEmpty(readOnly)) {
+			this.readOnly = true;
+		}
+	}
+
+	private void setTemplate(String templateOid) {
+		template = MetadataTemplate.fromExternalId(templateOid);
+	}
+
+	private void goToManageTemplates() {
+		EmbeddedApplication.open(getApplication(), ManageMetadataTemplates.class);
 	}
 
 	@Override
-	public Object getValue() {
-	    return fieldKey.getValue();
+	public boolean isAllowedToOpen(Map<String, String> arg0) {
+		return true;
 	}
-
-	public Class<? extends Metadata> getMetadataType() {
-	    final Object itemId = selectType.getValue();
-	    return (Class<? extends Metadata>) ((BeanItem) selectType.getItem(itemId)).getBean();
-	}
-
-	public Boolean getRequired() {
-	    return (Boolean) requiredBox.getValue();
-	}
-
-	public Boolean getReadOnly() {
-	    return (Boolean) readOnlyBox.getValue();
-	}
-
-	@Override
-	public void commit() throws SourceException, InvalidValueException {
-	    super.commit();
-	    fieldKey.commit();
-	}
-
-	@Override
-	public void discard() throws SourceException {
-	    super.discard();
-	    fieldKey.discard();
-	}
-
-	@Override
-	public Class<?> getType() {
-	    return String.class;
-	}
-
-	@Override
-	public void setReadOnly(boolean readOnly) {
-	    fieldKey.setReadOnly(readOnly);
-	}
-
-    }
-
-    @Override
-    public void attach() {
-	VerticalLayout layout = new VerticalLayout();
-
-	final Form form = new Form();
-	form.setReadOnly(readOnly);
-
-	final TextField txtName = new TextField("Nome");
-	form.addItemProperty("name", txtName);
-
-	if (template != null) {
-	    txtName.setValue(template.getName());
-	    for (MetadataTemplateRule rule : template.getPositionOrderedRules()) {
-		KeyProp propId = new KeyProp(rule.getPosition());
-		final MetadataKey key = rule.getKey();
-		final KeyField keyField = new KeyField(form, propId, key.getMetadataValueType(), rule.getRequired(),
-			rule.getReadOnly());
-		keyField.setValue(key.getKeyValue());
-		form.addField(propId, keyField);
-	    }
-	}
-
-	layout.addComponent(form);
-	Button btAddField = new Button("Adicionar Chave");
-	btAddField.addListener(new ClickListener() {
-
-	    @Override
-	    public void buttonClick(ClickEvent event) {
-		final KeyProp propId = new KeyProp();
-		form.addField(propId, new KeyField(form, propId));
-	    }
-	});
-
-	Button btCreateTemplate = new Button((template == null ? "Criar" : "Editar ") + " Template");
-	btCreateTemplate.addListener(new ClickListener() {
-
-	    @Override
-	    public void buttonClick(ClickEvent event) {
-		form.commit();
-		editOrCreateTemplate(form);
-		Notification not = new Notification("Sucesso", "Template criado com sucesso!",
-			Notification.TYPE_TRAY_NOTIFICATION);
-		not.setDelayMsec(500);
-		getWindow().showNotification(not);
-		goToManageTemplates();
-	    }
-	});
-
-	Button btCancel = new Button("Voltar", new ClickListener() {
-
-	    @Override
-	    public void buttonClick(ClickEvent event) {
-		goToManageTemplates();
-	    }
-	});
-
-	HorizontalLayout hl = new HorizontalLayout();
-	hl.setSpacing(true);
-	if (!readOnly) {
-	    hl.addComponent(btAddField);
-	    hl.addComponent(btCreateTemplate);
-	}
-	hl.addComponent(btCancel);
-	layout.addComponent(hl);
-	setCompositionRoot(layout);
-    }
-
-    @Override
-    public void setArguments(Map<String, String> arguments) {
-	final String templateOid = arguments.get("template");
-	final String readOnly = arguments.get("readOnly");
-	setTemplate(templateOid);
-	if (!StringUtils.isEmpty(readOnly)) {
-	    this.readOnly = true;
-	}
-    }
-
-    private void setTemplate(String templateOid) {
-	template = MetadataTemplate.fromExternalId(templateOid);
-    }
-
-    private void goToManageTemplates() {
-	EmbeddedApplication.open(getApplication(), ManageMetadataTemplates.class);
-    }
-
-    @Override
-    public boolean isAllowedToOpen(Map<String, String> arg0) {
-	return true;
-    }
 }

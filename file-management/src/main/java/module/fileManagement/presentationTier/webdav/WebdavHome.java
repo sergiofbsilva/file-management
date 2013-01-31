@@ -54,72 +54,73 @@ import com.vaadin.ui.VerticalLayout;
  */
 public class WebdavHome extends CustomComponent implements EmbeddedComponentContainer {
 
-    private GridSystemLayout gsl;
+	private GridSystemLayout gsl;
 
-    @Override
-    public boolean isAllowedToOpen(Map<String, String> arguments) {
-	final User currentUser = Authenticate.getCurrentUser();
-	return currentUser != null && currentUser.hasRoleType(RoleType.MANAGER);
-    }
-
-    @Override
-    public void setArguments(Map<String, String> arguments) {
-	// TODO Auto-generated method stub
-    }
-
-    private void createWebdavLink(final Layout content) {
-	final User currentUser = Authenticate.getCurrentUser();
-	final boolean hasWebDavAuth = currentUser.hasWebdavAuthentication();
-	if (hasWebDavAuth) {
-	    Label lblInstructions = new Label(getMessage("webdav.message.instructions", currentUser.getUsername(), currentUser
-		    .getWebdavAuthentication().getToken()), Label.CONTENT_XHTML);
-	    content.addComponent(lblInstructions);
+	@Override
+	public boolean isAllowedToOpen(Map<String, String> arguments) {
+		final User currentUser = Authenticate.getCurrentUser();
+		return currentUser != null && currentUser.hasRoleType(RoleType.MANAGER);
 	}
-	final String btCaption = String.format("webdav.button.%s.token", hasWebDavAuth ? "generate" : "create");
-	final Button btCreateWebdavToken = new Button(getMessage(btCaption), new ClickListener() {
-	    @Override
-	    public void buttonClick(ClickEvent event) {
+
+	@Override
+	public void setArguments(Map<String, String> arguments) {
+		// TODO Auto-generated method stub
+	}
+
+	private void createWebdavLink(final Layout content) {
+		final User currentUser = Authenticate.getCurrentUser();
+		final boolean hasWebDavAuth = currentUser.hasWebdavAuthentication();
 		if (hasWebDavAuth) {
-		    currentUser.getWebdavAuthentication().generateNewToken();
-		} else {
-		    WebdavAuthentication.getOrCreateWebdavAuthentication(currentUser);
+			Label lblInstructions =
+					new Label(getMessage("webdav.message.instructions", currentUser.getUsername(), currentUser
+							.getWebdavAuthentication().getToken()), Label.CONTENT_XHTML);
+			content.addComponent(lblInstructions);
 		}
-		content.removeAllComponents();
-		createWebdavLink(content);
-	    }
-	});
-	btCreateWebdavToken.setStyleName(BennuTheme.BUTTON_LINK);
-	content.addComponent(btCreateWebdavToken);
-    }
+		final String btCaption = String.format("webdav.button.%s.token", hasWebDavAuth ? "generate" : "create");
+		final Button btCreateWebdavToken = new Button(getMessage(btCaption), new ClickListener() {
+			@Override
+			public void buttonClick(ClickEvent event) {
+				if (hasWebDavAuth) {
+					currentUser.getWebdavAuthentication().generateNewToken();
+				} else {
+					WebdavAuthentication.getOrCreateWebdavAuthentication(currentUser);
+				}
+				content.removeAllComponents();
+				createWebdavLink(content);
+			}
+		});
+		btCreateWebdavToken.setStyleName(BennuTheme.BUTTON_LINK);
+		content.addComponent(btCreateWebdavToken);
+	}
 
-    public Panel createWebdavPanel() {
-	final Panel webDavPanel = new Panel();
-	final VerticalLayout vlWebdavContent = new VerticalLayout();
-	vlWebdavContent.setSpacing(Boolean.TRUE);
-	webDavPanel.setContent(vlWebdavContent);
+	public Panel createWebdavPanel() {
+		final Panel webDavPanel = new Panel();
+		final VerticalLayout vlWebdavContent = new VerticalLayout();
+		vlWebdavContent.setSpacing(Boolean.TRUE);
+		webDavPanel.setContent(vlWebdavContent);
 
-	webDavPanel.setStyleName(BennuTheme.PANEL_LIGHT);
-	webDavPanel.setCaption(getMessage("webdav.title"));
+		webDavPanel.setStyleName(BennuTheme.PANEL_LIGHT);
+		webDavPanel.setCaption(getMessage("webdav.title"));
 
-	vlWebdavContent.addComponent(new Label(getMessage("webdav.message"), Label.CONTENT_XHTML));
-	createWebdavLink(vlWebdavContent);
+		vlWebdavContent.addComponent(new Label(getMessage("webdav.message"), Label.CONTENT_XHTML));
+		createWebdavLink(vlWebdavContent);
 
-	return webDavPanel;
-    }
+		return webDavPanel;
+	}
 
-    public void createPage() {
-	gsl.setCell("webdav", 16, createWebdavPanel());
-    }
+	public void createPage() {
+		gsl.setCell("webdav", 16, createWebdavPanel());
+	}
 
-    public WebdavHome() {
-	gsl = new GridSystemLayout();
-	setCompositionRoot(gsl);
-    }
+	public WebdavHome() {
+		gsl = new GridSystemLayout();
+		setCompositionRoot(gsl);
+	}
 
-    @Override
-    public void attach() {
-	super.attach();
-	createPage();
-    }
+	@Override
+	public void attach() {
+		super.attach();
+		createPage();
+	}
 
 }

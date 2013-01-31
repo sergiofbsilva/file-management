@@ -89,444 +89,444 @@ import com.vaadin.ui.themes.BaseTheme;
  */
 public class DocumentSearch extends CustomComponent implements EmbeddedComponentContainer {
 
-    private final Label lblSearchResult;
+	private final Label lblSearchResult;
 
-    private DocumentFileBrowser browser;
-    private NodeDetails details;
-    private GridSystemLayout gsl;
-    private Component advSearch;
-    private Component simpleSearch;
-    private boolean isUsingSimpleSearch = true;
-    private final TextField txtSearch;
+	private DocumentFileBrowser browser;
+	private NodeDetails details;
+	private GridSystemLayout gsl;
+	private Component advSearch;
+	private Component simpleSearch;
+	private boolean isUsingSimpleSearch = true;
+	private final TextField txtSearch;
 
-    @Override
-    public boolean isAllowedToOpen(Map<String, String> arguments) {
-	return Boolean.TRUE;
-    }
-
-    @Override
-    public void setArguments(Map<String, String> arguments) {
-	// TODO Auto-generated method stub
-
-    }
-
-    public DocumentSearch() {
-	txtSearch = new TextField();
-	lblSearchResult = new Label();
-	gsl = new GridSystemLayout();
-	browser = new DocumentFileBrowser();
-	browser.getDocumentMenu().setVisible(false);
-	browser.setVisible(false);
-	final ValueChangeListener itemChanged = new ValueChangeListener() {
-	    @Override
-	    public void valueChange(ValueChangeEvent event) {
-		Object absFileNode = event.getProperty().getValue();
-		if (absFileNode != null) {
-		    DomainItem<AbstractFileNode> nodeItem = browser.getContainer().getItem(absFileNode);
-		    setFileDetails(nodeItem);
-		}
-	    }
-	};
-	browser.addListener(itemChanged);
-	advSearch = createAdvancedSearchPanel();
-	simpleSearch = createSearchPanel();
-	gsl.setCell("header", 16, new Label("<h3>Procurar</h3>", Label.CONTENT_XHTML));
-	gsl.setCell("search", 16, simpleSearch);
-	gsl.setCell("result", 0, 10, 6, lblSearchResult);
-	gsl.setCell("browser", 10, browser);
-	gsl.setCell("details", 6);
-	setCompositionRoot(gsl);
-    }
-
-    private void setFileDetails(DomainItem<AbstractFileNode> nodeItem) {
-	details = NodeDetails.makeDetails(nodeItem);
-	gsl.setCell("details", 6, details);
-    }
-
-    private void setNoResults() {
-	final Object value = txtSearch.getValue();
-	final String simpleSearch = "Não existem resultados a apresentar para a pesquisa por '%s'";
-	final String advSearch = "Não existem resultados a apresentar";
-
-	lblSearchResult.setValue(value != null ? String.format(simpleSearch, value) : advSearch);
-	lblSearchResult.setVisible(Boolean.TRUE);
-	browser.setVisible(Boolean.FALSE);
-	if (details != null) {
-	    details.setVisible(Boolean.FALSE);
-	}
-    }
-
-    private void updateSearchResultLabel(Set<AbstractFileNode> searchResult) {
-	final String simpleSearch = "A pesquisa por '%s' resultou em %d ocorrências de %d ficheiros";
-	final String advSearch = "A pesquisa resultou em %d ocorrências de %d ficheiros";
-	final Iterator<AbstractFileNode> iterator = searchResult.iterator();
-	int total = 0;
-	while (iterator.hasNext()) {
-	    final AbstractFileNode next = iterator.next();
-	    if (next instanceof FileNode) {
-		total = next.getParent().getCountFiles();
-		break;
-	    }
-	}
-	if (isUsingSimpleSearch) {
-	    lblSearchResult.setValue(String.format(simpleSearch, txtSearch.getValue(), searchResult.size(), total));
-	} else {
-	    lblSearchResult.setValue(String.format(advSearch, searchResult.size(), total));
-	}
-	lblSearchResult.setVisible(Boolean.TRUE);
-    }
-
-    private void updateContent(Set<AbstractFileNode> searchResult) {
-	if (searchResult.isEmpty()) {
-	    setNoResults();
-	} else {
-	    browser.setNodes(searchResult);
-	    browser.setVisible(Boolean.TRUE);
-	    updateSearchResultLabel(searchResult);
-	    final AbstractFileNode selected = (AbstractFileNode) browser.getNodes().getIdByIndex(0);
-	    browser.getDocumentTable().select(selected);
-	}
-    }
-
-    private Set<AbstractFileNode> search(String searchText) {
-	final Set<AbstractFileNode> resultSet = new HashSet<AbstractFileNode>();
-	for (DirNode repository : FileRepository.getAvailableRepositories(Authenticate.getCurrentUser())) {
-	    resultSet.addAll(repository.doSearch(searchText));
-	}
-	return resultSet;
-    }
-
-    private Set<AbstractFileNode> advSearch(final Multimap<MetadataKey, Object> searchMap) {
-	final Set<AbstractFileNode> resultFiles = Sets.newHashSet();
-	Map<AbstractFileNode, Map<MetadataKey, Boolean>> resultMap = Maps.newHashMap();
-	for (DirNode repository : FileRepository.getAvailableRepositories(Authenticate.getCurrentUser())) {
-	    resultMap.putAll(repository.doSearch(searchMap));
-	}
-	for (Entry<AbstractFileNode, Map<MetadataKey, Boolean>> entry : resultMap.entrySet()) {
-	    for (Entry<MetadataKey, Boolean> entryKey : entry.getValue().entrySet()) {
-		if (entryKey.getValue()) {
-		    resultFiles.add(entry.getKey());
-		}
-	    }
-	}
-	return resultFiles;
-    }
-
-    private void doAdvSearch(final Multimap<MetadataKey, Object> searchMap) {
-	if (searchMap.isEmpty()) {
-	    setNoResults();
-	}
-	long start = System.currentTimeMillis();
-	final Set<AbstractFileNode> searchResult = advSearch(searchMap);
-	long end = System.currentTimeMillis();
-	VaadinFrameworkLogger.getLogger().debug(
-		String.format("[%s ms] > query : %s size : %d\n", new Long(end - start), searchMap, searchResult.size()));
-	start = System.currentTimeMillis();
-	updateContent(searchResult);
-	end = System.currentTimeMillis();
-	VaadinFrameworkLogger.getLogger().debug("render time : " + new Long(end - start) + "ms");
-    }
-
-    private void doSearch(String searchText) {
-	if (searchText.isEmpty()) {
-	    setNoResults();
-	}
-	long start = System.currentTimeMillis();
-	final Set<AbstractFileNode> searchResult = search(searchText);
-	long end = System.currentTimeMillis();
-	VaadinFrameworkLogger.getLogger().debug(
-		String.format("[%s ms] > query : %s size : %d\n", new Long(end - start), searchText, searchResult.size()));
-	start = System.currentTimeMillis();
-	updateContent(searchResult);
-	end = System.currentTimeMillis();
-	VaadinFrameworkLogger.getLogger().debug("render time : " + new Long(end - start) + "ms");
-    }
-
-    private static enum Operator {
-	AND("&"), OR("|");
-
-	private String operator;
-
-	private Operator(String operator) {
-	    this.operator = operator;
+	@Override
+	public boolean isAllowedToOpen(Map<String, String> arguments) {
+		return Boolean.TRUE;
 	}
 
 	@Override
-	public String toString() {
-	    return this == AND ? "e" : "ou";
+	public void setArguments(Map<String, String> arguments) {
+		// TODO Auto-generated method stub
+
 	}
 
-	public String getOperator() {
-	    return operator;
+	public DocumentSearch() {
+		txtSearch = new TextField();
+		lblSearchResult = new Label();
+		gsl = new GridSystemLayout();
+		browser = new DocumentFileBrowser();
+		browser.getDocumentMenu().setVisible(false);
+		browser.setVisible(false);
+		final ValueChangeListener itemChanged = new ValueChangeListener() {
+			@Override
+			public void valueChange(ValueChangeEvent event) {
+				Object absFileNode = event.getProperty().getValue();
+				if (absFileNode != null) {
+					DomainItem<AbstractFileNode> nodeItem = browser.getContainer().getItem(absFileNode);
+					setFileDetails(nodeItem);
+				}
+			}
+		};
+		browser.addListener(itemChanged);
+		advSearch = createAdvancedSearchPanel();
+		simpleSearch = createSearchPanel();
+		gsl.setCell("header", 16, new Label("<h3>Procurar</h3>", Label.CONTENT_XHTML));
+		gsl.setCell("search", 16, simpleSearch);
+		gsl.setCell("result", 0, 10, 6, lblSearchResult);
+		gsl.setCell("browser", 10, browser);
+		gsl.setCell("details", 6);
+		setCompositionRoot(gsl);
 	}
-    }
 
-    private Component createAdvancedSearchPanel() {
-	final VerticalLayout vlMain = new VerticalLayout();
-	final VerticalLayout vlEntries = new VerticalLayout();
+	private void setFileDetails(DomainItem<AbstractFileNode> nodeItem) {
+		details = NodeDetails.makeDetails(nodeItem);
+		gsl.setCell("details", 6, details);
+	}
 
-	final AdvancedSearchEntry.RemoveEntryListener removeListener = new AdvancedSearchEntry.RemoveEntryListener() {
+	private void setNoResults() {
+		final Object value = txtSearch.getValue();
+		final String simpleSearch = "Não existem resultados a apresentar para a pesquisa por '%s'";
+		final String advSearch = "Não existem resultados a apresentar";
 
-	    @Override
-	    public void removeEntry(AdvancedSearchEntry.RemoveEntryEvent event) {
-		vlEntries.removeComponent(event.getEntry());
-	    }
-	};
-	final Button btAddEntry = new Button("+");
-	btAddEntry.setEnabled(Boolean.FALSE);
-
-	final Select cbTemplate = new Select();
-	cbTemplate.setWidth(30, UNITS_EM);
-	cbTemplate.setImmediate(Boolean.TRUE);
-	cbTemplate.setNullSelectionAllowed(Boolean.FALSE);
-	cbTemplate.setContainerDataSource((Container) new DomainItem(FileManagementSystem.getInstance())
-		.getItemProperty("metadataTemplates"));
-	cbTemplate.setItemCaptionPropertyId("name");
-	final ValueChangeListener templateListener = new ValueChangeListener() {
-
-	    @Override
-	    public void valueChange(ValueChangeEvent event) {
-		final Object value = event.getProperty().getValue();
-		btAddEntry.setEnabled(value != null);
-		vlEntries.removeAllComponents();
-		for (Object listener : btAddEntry.getListeners(ClickEvent.class)) {
-		    ((ClickListener) listener).buttonClick(null);
+		lblSearchResult.setValue(value != null ? String.format(simpleSearch, value) : advSearch);
+		lblSearchResult.setVisible(Boolean.TRUE);
+		browser.setVisible(Boolean.FALSE);
+		if (details != null) {
+			details.setVisible(Boolean.FALSE);
 		}
-	    }
-	};
-	cbTemplate.addListener(templateListener);
+	}
 
-	HorizontalLayout hl = new HorizontalLayout();
-	hl.setSpacing(Boolean.TRUE);
-	final Label lbl = new Label("Tipologia");
-	lbl.setWidth(180, UNITS_PIXELS);
-	hl.addComponent(lbl);
-	hl.addComponent(cbTemplate);
-	final Label lblSimpleHelp = new Label("Por favor seleccione uma tipologia");
-	lblSimpleHelp.addStyleName(BennuTheme.LABEL_SMALL);
-	hl.addComponent(lblSimpleHelp);
-
-	vlMain.addComponent(hl);
-	vlMain.addComponent(vlEntries);
-	final ClickListener addEntryListener = new ClickListener() {
-
-	    @Override
-	    public void buttonClick(ClickEvent event) {
-		MetadataTemplate template = (MetadataTemplate) cbTemplate.getValue();
-		if (template != null) {
-		    DomainContainer<MetadataKey> keys = new DomainContainer<MetadataKey>(template.getKey(), MetadataKey.class);
-		    final AdvancedSearchEntry advSearch = new AdvancedSearchEntry(keys);
-		    advSearch.addListener(removeListener);
-		    vlEntries.addComponent(advSearch);
-		}
-	    }
-	};
-
-	btAddEntry.addListener(addEntryListener);
-	vlMain.addComponent(btAddEntry);
-
-	Button btSimpleSearch = new Button("Pesquisa Simples", new ClickListener() {
-
-	    @Override
-	    public void buttonClick(ClickEvent event) {
-		gsl.setCell("search", 0, 8, 8, simpleSearch);
-		isUsingSimpleSearch = true;
-	    }
-	});
-
-	btSimpleSearch.setStyleName(BaseTheme.BUTTON_LINK);
-	final Button btSearch = new Button("Procurar", new ClickListener() {
-
-	    @Override
-	    public void buttonClick(ClickEvent event) {
-		Multimap<MetadataKey, Object> searchMap = HashMultimap.create();
-		Iterator<Component> iterator = vlEntries.getComponentIterator();
-		final Set<AdvancedSearchEntry> entriesToRemove = Sets.newHashSet();
+	private void updateSearchResultLabel(Set<AbstractFileNode> searchResult) {
+		final String simpleSearch = "A pesquisa por '%s' resultou em %d ocorrências de %d ficheiros";
+		final String advSearch = "A pesquisa resultou em %d ocorrências de %d ficheiros";
+		final Iterator<AbstractFileNode> iterator = searchResult.iterator();
+		int total = 0;
 		while (iterator.hasNext()) {
-		    AdvancedSearchEntry entry = (AdvancedSearchEntry) iterator.next();
-		    if (entry.getFieldValue() != null) {
-			searchMap.put(entry.getMetadataKey(), entry.getFieldValue());
-		    } else {
-			entriesToRemove.add(entry);
-		    }
+			final AbstractFileNode next = iterator.next();
+			if (next instanceof FileNode) {
+				total = next.getParent().getCountFiles();
+				break;
+			}
 		}
-		for (AdvancedSearchEntry entry : entriesToRemove) {
-		    vlEntries.removeComponent(entry);
+		if (isUsingSimpleSearch) {
+			lblSearchResult.setValue(String.format(simpleSearch, txtSearch.getValue(), searchResult.size(), total));
+		} else {
+			lblSearchResult.setValue(String.format(advSearch, searchResult.size(), total));
 		}
-		doAdvSearch(searchMap);
-	    }
-	});
-
-	Button btClearSearch = new Button("Limpar", new ClickListener() {
-
-	    @Override
-	    public void buttonClick(ClickEvent event) {
-		vlEntries.removeAllComponents();
-		cbTemplate.select(null);
-	    }
-
-	});
-
-	hl = new HorizontalLayout();
-	hl.setSpacing(Boolean.TRUE);
-	hl.addComponent(btSearch);
-	hl.addComponent(btClearSearch);
-	hl.addComponent(btSimpleSearch);
-
-	vlMain.addComponent(hl);
-	vlMain.setSpacing(Boolean.TRUE);
-	vlEntries.setSpacing(Boolean.TRUE);
-	return vlMain;
-    }
-
-    private static class AdvancedSearchEntry extends CustomComponent {
-
-	private static Method REMOVE_ENTRY_METHOD;
-	private final Select cbMetadataKey;
-	private final HorizontalLayout hl;
-	private Field currentField;
-	private ObjectProperty property;
-
-	public class RemoveEntryEvent extends Event {
-
-	    public RemoveEntryEvent(Component source) {
-		super(source);
-	    }
-
-	    public Component getEntry() {
-		return (Component) getSource();
-	    }
-
+		lblSearchResult.setVisible(Boolean.TRUE);
 	}
 
-	public interface RemoveEntryListener extends Serializable {
-	    public void removeEntry(RemoveEntryEvent event);
+	private void updateContent(Set<AbstractFileNode> searchResult) {
+		if (searchResult.isEmpty()) {
+			setNoResults();
+		} else {
+			browser.setNodes(searchResult);
+			browser.setVisible(Boolean.TRUE);
+			updateSearchResultLabel(searchResult);
+			final AbstractFileNode selected = (AbstractFileNode) browser.getNodes().getIdByIndex(0);
+			browser.getDocumentTable().select(selected);
+		}
 	}
 
-	static {
-	    try {
-		REMOVE_ENTRY_METHOD = RemoveEntryListener.class.getDeclaredMethod("removeEntry",
-			new Class[] { RemoveEntryEvent.class });
-	    } catch (SecurityException e) {
-		e.printStackTrace();
-	    } catch (NoSuchMethodException e) {
-		e.printStackTrace();
-	    }
+	private Set<AbstractFileNode> search(String searchText) {
+		final Set<AbstractFileNode> resultSet = new HashSet<AbstractFileNode>();
+		for (DirNode repository : FileRepository.getAvailableRepositories(Authenticate.getCurrentUser())) {
+			resultSet.addAll(repository.doSearch(searchText));
+		}
+		return resultSet;
 	}
 
-	private void setCurrentField(final Field field) {
-	    currentField = field;
+	private Set<AbstractFileNode> advSearch(final Multimap<MetadataKey, Object> searchMap) {
+		final Set<AbstractFileNode> resultFiles = Sets.newHashSet();
+		Map<AbstractFileNode, Map<MetadataKey, Boolean>> resultMap = Maps.newHashMap();
+		for (DirNode repository : FileRepository.getAvailableRepositories(Authenticate.getCurrentUser())) {
+			resultMap.putAll(repository.doSearch(searchMap));
+		}
+		for (Entry<AbstractFileNode, Map<MetadataKey, Boolean>> entry : resultMap.entrySet()) {
+			for (Entry<MetadataKey, Boolean> entryKey : entry.getValue().entrySet()) {
+				if (entryKey.getValue()) {
+					resultFiles.add(entry.getKey());
+				}
+			}
+		}
+		return resultFiles;
 	}
 
-	private Field getCurrentField() {
-	    return currentField;
+	private void doAdvSearch(final Multimap<MetadataKey, Object> searchMap) {
+		if (searchMap.isEmpty()) {
+			setNoResults();
+		}
+		long start = System.currentTimeMillis();
+		final Set<AbstractFileNode> searchResult = advSearch(searchMap);
+		long end = System.currentTimeMillis();
+		VaadinFrameworkLogger.getLogger().debug(
+				String.format("[%s ms] > query : %s size : %d\n", new Long(end - start), searchMap, searchResult.size()));
+		start = System.currentTimeMillis();
+		updateContent(searchResult);
+		end = System.currentTimeMillis();
+		VaadinFrameworkLogger.getLogger().debug("render time : " + new Long(end - start) + "ms");
 	}
 
-	public AdvancedSearchEntry(DomainContainer<MetadataKey> keys) {
+	private void doSearch(String searchText) {
+		if (searchText.isEmpty()) {
+			setNoResults();
+		}
+		long start = System.currentTimeMillis();
+		final Set<AbstractFileNode> searchResult = search(searchText);
+		long end = System.currentTimeMillis();
+		VaadinFrameworkLogger.getLogger().debug(
+				String.format("[%s ms] > query : %s size : %d\n", new Long(end - start), searchText, searchResult.size()));
+		start = System.currentTimeMillis();
+		updateContent(searchResult);
+		end = System.currentTimeMillis();
+		VaadinFrameworkLogger.getLogger().debug("render time : " + new Long(end - start) + "ms");
+	}
 
-	    hl = new HorizontalLayout();
-	    hl.setSpacing(Boolean.TRUE);
+	private static enum Operator {
+		AND("&"), OR("|");
 
-	    final Field placeHolder = new TextField();
-	    placeHolder.setVisible(Boolean.FALSE);
-	    setCurrentField(placeHolder);
+		private String operator;
 
-	    cbMetadataKey = new Select();
-	    cbMetadataKey.setNullSelectionAllowed(Boolean.FALSE);
-	    cbMetadataKey.setImmediate(Boolean.TRUE);
-	    cbMetadataKey.setContainerDataSource(keys);
-	    cbMetadataKey.setItemCaptionPropertyId("keyValue");
-	    cbMetadataKey.addListener(new ValueChangeListener() {
+		private Operator(String operator) {
+			this.operator = operator;
+		}
 
 		@Override
-		public void valueChange(ValueChangeEvent event) {
-		    MetadataKey key = (MetadataKey) event.getProperty().getValue();
-		    Field newField = FMSFieldFactory.makeField(key);
-		    if (newField instanceof AbstractTextField) {
-			((AbstractTextField) newField).setNullRepresentation(StringUtils.EMPTY);
-		    }
-		    newField.setWidth(30, UNITS_EM);
-		    property = new ObjectProperty(null, key.getKeyPrimitiveType());
-		    newField.setPropertyDataSource(property);
-		    hl.replaceComponent(getCurrentField(), newField);
-		    setCurrentField(newField);
+		public String toString() {
+			return this == AND ? "e" : "ou";
 		}
-	    });
 
-	    Button btRemove = new Button();
-	    btRemove.setIcon(new ThemeResource("../runo/icons/16/cancel.png"));
-	    btRemove.addListener(new ClickListener() {
-
-		@Override
-		public void buttonClick(ClickEvent event) {
-		    fireEvent(new RemoveEntryEvent(AdvancedSearchEntry.this));
+		public String getOperator() {
+			return operator;
 		}
-	    });
-
-	    Select cbOperator = new Select(null, Arrays.asList(Operator.values()));
-	    cbOperator.setImmediate(Boolean.TRUE);
-	    cbOperator.setNullSelectionAllowed(Boolean.FALSE);
-	    cbOperator.select(Operator.OR);
-	    cbOperator.setWidth(5, UNITS_EM);
-	    // hl.addComponent(cbOperator);
-	    hl.addComponent(cbMetadataKey);
-	    hl.addComponent(placeHolder);
-	    hl.addComponent(btRemove);
-	    if (keys.size() > 0) {
-		cbMetadataKey.select(keys.getIdByIndex(0));
-	    }
-	    setCompositionRoot(hl);
 	}
 
-	public void addListener(RemoveEntryListener listener) {
-	    addListener(RemoveEntryEvent.class, listener, REMOVE_ENTRY_METHOD);
+	private Component createAdvancedSearchPanel() {
+		final VerticalLayout vlMain = new VerticalLayout();
+		final VerticalLayout vlEntries = new VerticalLayout();
+
+		final AdvancedSearchEntry.RemoveEntryListener removeListener = new AdvancedSearchEntry.RemoveEntryListener() {
+
+			@Override
+			public void removeEntry(AdvancedSearchEntry.RemoveEntryEvent event) {
+				vlEntries.removeComponent(event.getEntry());
+			}
+		};
+		final Button btAddEntry = new Button("+");
+		btAddEntry.setEnabled(Boolean.FALSE);
+
+		final Select cbTemplate = new Select();
+		cbTemplate.setWidth(30, UNITS_EM);
+		cbTemplate.setImmediate(Boolean.TRUE);
+		cbTemplate.setNullSelectionAllowed(Boolean.FALSE);
+		cbTemplate.setContainerDataSource((Container) new DomainItem(FileManagementSystem.getInstance())
+				.getItemProperty("metadataTemplates"));
+		cbTemplate.setItemCaptionPropertyId("name");
+		final ValueChangeListener templateListener = new ValueChangeListener() {
+
+			@Override
+			public void valueChange(ValueChangeEvent event) {
+				final Object value = event.getProperty().getValue();
+				btAddEntry.setEnabled(value != null);
+				vlEntries.removeAllComponents();
+				for (Object listener : btAddEntry.getListeners(ClickEvent.class)) {
+					((ClickListener) listener).buttonClick(null);
+				}
+			}
+		};
+		cbTemplate.addListener(templateListener);
+
+		HorizontalLayout hl = new HorizontalLayout();
+		hl.setSpacing(Boolean.TRUE);
+		final Label lbl = new Label("Tipologia");
+		lbl.setWidth(180, UNITS_PIXELS);
+		hl.addComponent(lbl);
+		hl.addComponent(cbTemplate);
+		final Label lblSimpleHelp = new Label("Por favor seleccione uma tipologia");
+		lblSimpleHelp.addStyleName(BennuTheme.LABEL_SMALL);
+		hl.addComponent(lblSimpleHelp);
+
+		vlMain.addComponent(hl);
+		vlMain.addComponent(vlEntries);
+		final ClickListener addEntryListener = new ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				MetadataTemplate template = (MetadataTemplate) cbTemplate.getValue();
+				if (template != null) {
+					DomainContainer<MetadataKey> keys = new DomainContainer<MetadataKey>(template.getKey(), MetadataKey.class);
+					final AdvancedSearchEntry advSearch = new AdvancedSearchEntry(keys);
+					advSearch.addListener(removeListener);
+					vlEntries.addComponent(advSearch);
+				}
+			}
+		};
+
+		btAddEntry.addListener(addEntryListener);
+		vlMain.addComponent(btAddEntry);
+
+		Button btSimpleSearch = new Button("Pesquisa Simples", new ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				gsl.setCell("search", 0, 8, 8, simpleSearch);
+				isUsingSimpleSearch = true;
+			}
+		});
+
+		btSimpleSearch.setStyleName(BaseTheme.BUTTON_LINK);
+		final Button btSearch = new Button("Procurar", new ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				Multimap<MetadataKey, Object> searchMap = HashMultimap.create();
+				Iterator<Component> iterator = vlEntries.getComponentIterator();
+				final Set<AdvancedSearchEntry> entriesToRemove = Sets.newHashSet();
+				while (iterator.hasNext()) {
+					AdvancedSearchEntry entry = (AdvancedSearchEntry) iterator.next();
+					if (entry.getFieldValue() != null) {
+						searchMap.put(entry.getMetadataKey(), entry.getFieldValue());
+					} else {
+						entriesToRemove.add(entry);
+					}
+				}
+				for (AdvancedSearchEntry entry : entriesToRemove) {
+					vlEntries.removeComponent(entry);
+				}
+				doAdvSearch(searchMap);
+			}
+		});
+
+		Button btClearSearch = new Button("Limpar", new ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				vlEntries.removeAllComponents();
+				cbTemplate.select(null);
+			}
+
+		});
+
+		hl = new HorizontalLayout();
+		hl.setSpacing(Boolean.TRUE);
+		hl.addComponent(btSearch);
+		hl.addComponent(btClearSearch);
+		hl.addComponent(btSimpleSearch);
+
+		vlMain.addComponent(hl);
+		vlMain.setSpacing(Boolean.TRUE);
+		vlEntries.setSpacing(Boolean.TRUE);
+		return vlMain;
 	}
 
-	public MetadataKey getMetadataKey() {
-	    return (MetadataKey) cbMetadataKey.getValue();
+	private static class AdvancedSearchEntry extends CustomComponent {
+
+		private static Method REMOVE_ENTRY_METHOD;
+		private final Select cbMetadataKey;
+		private final HorizontalLayout hl;
+		private Field currentField;
+		private ObjectProperty property;
+
+		public class RemoveEntryEvent extends Event {
+
+			public RemoveEntryEvent(Component source) {
+				super(source);
+			}
+
+			public Component getEntry() {
+				return (Component) getSource();
+			}
+
+		}
+
+		public interface RemoveEntryListener extends Serializable {
+			public void removeEntry(RemoveEntryEvent event);
+		}
+
+		static {
+			try {
+				REMOVE_ENTRY_METHOD =
+						RemoveEntryListener.class.getDeclaredMethod("removeEntry", new Class[] { RemoveEntryEvent.class });
+			} catch (SecurityException e) {
+				e.printStackTrace();
+			} catch (NoSuchMethodException e) {
+				e.printStackTrace();
+			}
+		}
+
+		private void setCurrentField(final Field field) {
+			currentField = field;
+		}
+
+		private Field getCurrentField() {
+			return currentField;
+		}
+
+		public AdvancedSearchEntry(DomainContainer<MetadataKey> keys) {
+
+			hl = new HorizontalLayout();
+			hl.setSpacing(Boolean.TRUE);
+
+			final Field placeHolder = new TextField();
+			placeHolder.setVisible(Boolean.FALSE);
+			setCurrentField(placeHolder);
+
+			cbMetadataKey = new Select();
+			cbMetadataKey.setNullSelectionAllowed(Boolean.FALSE);
+			cbMetadataKey.setImmediate(Boolean.TRUE);
+			cbMetadataKey.setContainerDataSource(keys);
+			cbMetadataKey.setItemCaptionPropertyId("keyValue");
+			cbMetadataKey.addListener(new ValueChangeListener() {
+
+				@Override
+				public void valueChange(ValueChangeEvent event) {
+					MetadataKey key = (MetadataKey) event.getProperty().getValue();
+					Field newField = FMSFieldFactory.makeField(key);
+					if (newField instanceof AbstractTextField) {
+						((AbstractTextField) newField).setNullRepresentation(StringUtils.EMPTY);
+					}
+					newField.setWidth(30, UNITS_EM);
+					property = new ObjectProperty(null, key.getKeyPrimitiveType());
+					newField.setPropertyDataSource(property);
+					hl.replaceComponent(getCurrentField(), newField);
+					setCurrentField(newField);
+				}
+			});
+
+			Button btRemove = new Button();
+			btRemove.setIcon(new ThemeResource("../runo/icons/16/cancel.png"));
+			btRemove.addListener(new ClickListener() {
+
+				@Override
+				public void buttonClick(ClickEvent event) {
+					fireEvent(new RemoveEntryEvent(AdvancedSearchEntry.this));
+				}
+			});
+
+			Select cbOperator = new Select(null, Arrays.asList(Operator.values()));
+			cbOperator.setImmediate(Boolean.TRUE);
+			cbOperator.setNullSelectionAllowed(Boolean.FALSE);
+			cbOperator.select(Operator.OR);
+			cbOperator.setWidth(5, UNITS_EM);
+			// hl.addComponent(cbOperator);
+			hl.addComponent(cbMetadataKey);
+			hl.addComponent(placeHolder);
+			hl.addComponent(btRemove);
+			if (keys.size() > 0) {
+				cbMetadataKey.select(keys.getIdByIndex(0));
+			}
+			setCompositionRoot(hl);
+		}
+
+		public void addListener(RemoveEntryListener listener) {
+			addListener(RemoveEntryEvent.class, listener, REMOVE_ENTRY_METHOD);
+		}
+
+		public MetadataKey getMetadataKey() {
+			return (MetadataKey) cbMetadataKey.getValue();
+		}
+
+		public Object getFieldValue() {
+			return property != null ? property.getValue() : null;
+		}
+
 	}
 
-	public Object getFieldValue() {
-	    return property != null ? property.getValue() : null;
+	private Component createSearchPanel() {
+		HorizontalLayout hl = new HorizontalLayout();
+		hl.setSpacing(true);
+		txtSearch.setWidth(24, UNITS_EM);
+
+		txtSearch.setImmediate(true);
+		txtSearch.addShortcutListener(new ShortcutListener("search", KeyCode.ENTER, null) {
+
+			@Override
+			public void handleAction(Object sender, Object target) {
+				doSearch((String) txtSearch.getValue());
+			}
+		});
+
+		Button btSearch = new Button("Pesquisar", new ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				doSearch((String) txtSearch.getValue());
+			}
+		});
+
+		Button btAdvSearch = new Button("Pesquisa Avançada", new ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				gsl.setCell("search", 0, 8, 8, advSearch);
+				isUsingSimpleSearch = false;
+			}
+		});
+		btAdvSearch.setStyleName(BaseTheme.BUTTON_LINK);
+		hl.addComponent(txtSearch);
+		hl.addComponent(btSearch);
+		hl.addComponent(btAdvSearch);
+		return hl;
 	}
-
-    }
-
-    private Component createSearchPanel() {
-	HorizontalLayout hl = new HorizontalLayout();
-	hl.setSpacing(true);
-	txtSearch.setWidth(24, UNITS_EM);
-
-	txtSearch.setImmediate(true);
-	txtSearch.addShortcutListener(new ShortcutListener("search", KeyCode.ENTER, null) {
-
-	    @Override
-	    public void handleAction(Object sender, Object target) {
-		doSearch((String) txtSearch.getValue());
-	    }
-	});
-
-	Button btSearch = new Button("Pesquisar", new ClickListener() {
-
-	    @Override
-	    public void buttonClick(ClickEvent event) {
-		doSearch((String) txtSearch.getValue());
-	    }
-	});
-
-	Button btAdvSearch = new Button("Pesquisa Avançada", new ClickListener() {
-
-	    @Override
-	    public void buttonClick(ClickEvent event) {
-		gsl.setCell("search", 0, 8, 8, advSearch);
-		isUsingSimpleSearch = false;
-	    }
-	});
-	btAdvSearch.setStyleName(BaseTheme.BUTTON_LINK);
-	hl.addComponent(txtSearch);
-	hl.addComponent(btSearch);
-	hl.addComponent(btAdvSearch);
-	return hl;
-    }
 
 }

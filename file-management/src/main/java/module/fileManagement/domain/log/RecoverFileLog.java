@@ -34,14 +34,14 @@ import pt.ist.bennu.core.domain.User;
  * 
  */
 public class RecoverFileLog extends RecoverFileLog_Base {
-    
-    public  RecoverFileLog() {
-        super();
-    }
-    
-    public RecoverFileLog(User user, ContextPath contextPath, FileNode fileNode) {
-   	super();
-   	init(user,contextPath,fileNode);
-       }
-    
+
+	public RecoverFileLog() {
+		super();
+	}
+
+	public RecoverFileLog(User user, ContextPath contextPath, FileNode fileNode) {
+		super();
+		init(user, contextPath, fileNode);
+	}
+
 }

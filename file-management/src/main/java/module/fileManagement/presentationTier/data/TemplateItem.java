@@ -38,6 +38,7 @@ import pt.ist.vaadinframework.data.AbstractBufferedItem;
 import pt.ist.vaadinframework.data.BufferedProperty;
 
 import com.vaadin.data.Property;
+import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.AbstractProperty;
 
@@ -48,90 +49,90 @@ import com.vaadin.data.util.AbstractProperty;
  * 
  */
 public class TemplateItem extends AbstractBufferedItem<MetadataKey, MetadataTemplate> implements ValueChangeListener {
-    public class StuffProperty extends AbstractProperty {
-	private final MetadataKey key;
+	public class StuffProperty extends AbstractProperty {
+		private final MetadataKey key;
 
-	public StuffProperty(MetadataKey key) {
-	    this.key = key;
+		public StuffProperty(MetadataKey key) {
+			this.key = key;
+		}
+
+		@Override
+		public Object getValue() {
+			final Set<Object> allValues = new HashSet<Object>();
+			for (Object item : selectedDocuments.getValue()) {
+				final Document document = (Document) item;
+				final DocumentItem documentItem = container.getItem(document);
+				final Property itemProperty = documentItem.getItemProperty(key);
+				allValues.add(itemProperty == null ? null : itemProperty.getValue());
+			}
+			return allValues.size() == 1 ? allValues.iterator().next() : null;
+		}
+
+		@Override
+		public void setValue(Object newValue) throws ReadOnlyException, ConversionException {
+			for (Object item : selectedDocuments.getValue()) {
+				Document document = (Document) item;
+				final DocumentItem documentItem = container.getItem(document);
+				final Property itemProperty = documentItem.getItemProperty(key);
+				itemProperty.setValue(newValue);
+			}
+		}
+
+		@Override
+		public Class<?> getType() {
+			return Metadata.getMetadataType(key.getMetadataValueType());
+		}
+
+	}
+
+	DocumentContainer container;
+	ObjectHintedProperty<Collection> selectedDocuments;
+
+	public TemplateItem(MetadataTemplate value, DocumentContainer container,
+			ObjectHintedProperty<Collection> selectedDocumentsProperty) {
+		super(MetadataTemplate.class);
+		setWriteThrough(true);
+		selectedDocuments = selectedDocumentsProperty;
+		setDocumentContainer(container);
+		addListener(this); // first null then listener then value
+		setValue(value);
+	}
+
+	public void setDocumentContainer(DocumentContainer container) {
+		this.container = container;
 	}
 
 	@Override
-	public Object getValue() {
-	    final Set<Object> allValues = new HashSet<Object>();
-	    for (Object item : selectedDocuments.getValue()) {
-		final Document document = (Document) item;
-		final DocumentItem documentItem = container.getItem(document);
-		final Property itemProperty = documentItem.getItemProperty(key);
-		allValues.add(itemProperty == null ? null : itemProperty.getValue());
-	    }
-	    return allValues.size() == 1 ? allValues.iterator().next() : null;
+	protected Property makeProperty(MetadataKey propertyId) {
+		BufferedProperty<String> property = new BufferedProperty<String>(new StuffProperty(propertyId));
+		property.setWriteThrough(true);
+		addItemProperty(propertyId, property);
+		return property;
 	}
 
 	@Override
-	public void setValue(Object newValue) throws ReadOnlyException, ConversionException {
-	    for (Object item : selectedDocuments.getValue()) {
-		Document document = (Document) item;
-		final DocumentItem documentItem = container.getItem(document);
-		final Property itemProperty = documentItem.getItemProperty(key);
-		itemProperty.setValue(newValue);
-	    }
+	public void valueChange(ValueChangeEvent event) {
+		final MetadataTemplate newTemplate = (MetadataTemplate) event.getProperty().getValue();
+		final MetadataKey templateKey = MetadataKey.getTemplateKey();
+		final Property itemProperty = getItemProperty(templateKey);
+		itemProperty.setValue(getValue().getName());
+
+		Collection<MetadataKey> oldPropertyIds = new HashSet<MetadataKey>(getItemPropertyIds());
+		for (MetadataKey oldKey : oldPropertyIds) {
+			if (!oldKey.equals(templateKey)) {
+				removeItemProperty(oldKey);
+			}
+		}
+
+		for (MetadataKey key : newTemplate.getPositionOrderedKeys()) {
+			getItemProperty(key);
+		}
 	}
 
-	@Override
-	public Class<?> getType() {
-	    return Metadata.getMetadataType(key.getMetadataValueType());
+	public Collection<?> getVisibleItemProperties() {
+		if (getValue() != null) {
+			return getValue().getPositionOrderedKeys();
+		}
+		return Collections.EMPTY_LIST;
 	}
-
-    }
-
-    DocumentContainer container;
-    ObjectHintedProperty<Collection> selectedDocuments;
-
-    public TemplateItem(MetadataTemplate value, DocumentContainer container,
-	    ObjectHintedProperty<Collection> selectedDocumentsProperty) {
-	super(MetadataTemplate.class);
-	setWriteThrough(true);
-	selectedDocuments = selectedDocumentsProperty;
-	setDocumentContainer(container);
-	addListener(this); // first null then listener then value
-	setValue(value);
-    }
-
-    public void setDocumentContainer(DocumentContainer container) {
-	this.container = container;
-    }
-
-    @Override
-    protected Property makeProperty(MetadataKey propertyId) {
-	BufferedProperty<String> property = new BufferedProperty<String>(new StuffProperty(propertyId));
-	property.setWriteThrough(true);
-	addItemProperty(propertyId, property);
-	return property;
-    }
-
-    @Override
-    public void valueChange(ValueChangeEvent event) {
-	final MetadataTemplate newTemplate = (MetadataTemplate) event.getProperty().getValue();
-	final MetadataKey templateKey = MetadataKey.getTemplateKey();
-	final Property itemProperty = getItemProperty(templateKey);
-	itemProperty.setValue(getValue().getName());
-
-	Collection<MetadataKey> oldPropertyIds = new HashSet<MetadataKey>(getItemPropertyIds());
-	for (MetadataKey oldKey : oldPropertyIds) {
-	    if (!oldKey.equals(templateKey)) {
-		removeItemProperty(oldKey);
-	    }
-	}
-
-	for (MetadataKey key : newTemplate.getPositionOrderedKeys()) {
-	    getItemProperty(key);
-	}
-    }
-
-    public Collection<?> getVisibleItemProperties() {
-	if (getValue() != null) {
-	    return getValue().getPositionOrderedKeys();
-	}
-	return Collections.EMPTY_LIST;
-    }
 }

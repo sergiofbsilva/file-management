@@ -13,57 +13,57 @@ import com.vaadin.ui.Window;
 
 public class RenameWindow extends Window {
 
-    public RenameWindow(final DomainItem<AbstractFileNode> nodeItem) {
-	super(getMessage("label.rename"));
+	public RenameWindow(final DomainItem<AbstractFileNode> nodeItem) {
+		super(getMessage("label.rename"));
 
-	setModal(true);
-	setWidth(50, UNITS_PERCENTAGE);
+		setModal(true);
+		setWidth(50, UNITS_PERCENTAGE);
 
-	final VerticalLayout layout = (VerticalLayout) getContent();
-	layout.setMargin(true);
-	layout.setSpacing(true);
-	final TransactionalForm form = new TransactionalForm(FileManagementSystem.getBundleName());
-	form.setWriteThrough(false);
-	form.addButton(getMessage("label.save"), new ClickListener() {
+		final VerticalLayout layout = (VerticalLayout) getContent();
+		layout.setMargin(true);
+		layout.setSpacing(true);
+		final TransactionalForm form = new TransactionalForm(FileManagementSystem.getBundleName());
+		form.setWriteThrough(false);
+		form.addButton(getMessage("label.save"), new ClickListener() {
 
-	    @Override
-	    public void buttonClick(ClickEvent event) {
-		form.commit();
-		close();
-	    }
+			@Override
+			public void buttonClick(ClickEvent event) {
+				form.commit();
+				close();
+			}
 
-	});
-	form.addButton(getMessage("label.close"), new ClickListener() {
+		});
+		form.addButton(getMessage("label.close"), new ClickListener() {
 
-	    @Override
-	    public void buttonClick(ClickEvent event) {
-		close();
-	    }
-	});
+			@Override
+			public void buttonClick(ClickEvent event) {
+				close();
+			}
+		});
 
-	form.setItemDataSource(nodeItem);
-	form.setVisibleItemProperties(new String[] { "displayName" });
-	// form.getField("displayName").addValidator(new Validator() {
-	//
-	// @Override
-	// public void validate(Object value) throws InvalidValueException {
-	// if (!isValid(value)) {
-	// throw new
-	// InvalidValueException("Já existe um ficheiro com esse nome");
-	// }
-	// }
-	//
-	// @Override
-	// public boolean isValid(Object value) {
-	// AbstractFileNode node = nodeItem.getValue();
-	// final DirNode dirNode = (DirNode) (node instanceof FileNode ?
-	// ((FileNode) node).getParent() : node);
-	// final String displayName = (String) value;
-	// return node.getDisplayName().equals(displayName) ||
-	// !dirNode.hasNode(displayName);
-	// }
-	//
-	// });
-	layout.addComponent(form);
-    }
+		form.setItemDataSource(nodeItem);
+		form.setVisibleItemProperties(new String[] { "displayName" });
+		// form.getField("displayName").addValidator(new Validator() {
+		//
+		// @Override
+		// public void validate(Object value) throws InvalidValueException {
+		// if (!isValid(value)) {
+		// throw new
+		// InvalidValueException("Já existe um ficheiro com esse nome");
+		// }
+		// }
+		//
+		// @Override
+		// public boolean isValid(Object value) {
+		// AbstractFileNode node = nodeItem.getValue();
+		// final DirNode dirNode = (DirNode) (node instanceof FileNode ?
+		// ((FileNode) node).getParent() : node);
+		// final String displayName = (String) value;
+		// return node.getDisplayName().equals(displayName) ||
+		// !dirNode.hasNode(displayName);
+		// }
+		//
+		// });
+		layout.addComponent(form);
+	}
 }

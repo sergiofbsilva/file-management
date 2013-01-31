@@ -6,8 +6,8 @@ import pt.ist.bennu.core.domain.Presentable;
 
 public interface HasPersistentGroupCreator {
 
-    public HasPersistentGroup createGroupFor(final Object itemId);
+	public HasPersistentGroup createGroupFor(final Object itemId);
 
-    public Collection<Presentable> getElements(String filterText);
+	public Collection<Presentable> getElements(String filterText);
 
 }

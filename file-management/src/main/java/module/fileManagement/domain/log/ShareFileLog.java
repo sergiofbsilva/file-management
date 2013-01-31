@@ -35,26 +35,27 @@ import pt.ist.bennu.core.domain.User;
  * 
  */
 public class ShareFileLog extends ShareFileLog_Base {
-    
-    public  ShareFileLog() {
-        super();
-    }
-    
-    public ShareFileLog(User user, ContextPath contextPath, FileNode fileNode, DirNode targetSharedFolder) {
-   	super();
-   	super.init(user, contextPath, fileNode);
-   	setTargetDirNode(targetSharedFolder);
-    }
-    
-    @Override
-    public String getOperationString(String... args) {
-	final DirNode sharedFolder = getCurrentUserFileRepository().getSharedFolder();
-	final String sharedWith = sharedFolder == getTargetDirNode() ? "consigo" : " com " + getTargetDirNode().getOwner().getPresentationName();
-        return super.getOperationString(sharedWith);
-    }
-    
-    @Override
-    public String toString() {
-	return String.format("(%s) %s %s %s", getLogTime(), getUserName(), getOperationString(), getFileNode().getDisplayName()); 
-    }
+
+	public ShareFileLog() {
+		super();
+	}
+
+	public ShareFileLog(User user, ContextPath contextPath, FileNode fileNode, DirNode targetSharedFolder) {
+		super();
+		super.init(user, contextPath, fileNode);
+		setTargetDirNode(targetSharedFolder);
+	}
+
+	@Override
+	public String getOperationString(String... args) {
+		final DirNode sharedFolder = getCurrentUserFileRepository().getSharedFolder();
+		final String sharedWith =
+				sharedFolder == getTargetDirNode() ? "consigo" : " com " + getTargetDirNode().getOwner().getPresentationName();
+		return super.getOperationString(sharedWith);
+	}
+
+	@Override
+	public String toString() {
+		return String.format("(%s) %s %s %s", getLogTime(), getUserName(), getOperationString(), getFileNode().getDisplayName());
+	}
 }

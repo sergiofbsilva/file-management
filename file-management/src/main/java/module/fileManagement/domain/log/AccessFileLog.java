@@ -6,13 +6,13 @@ import pt.ist.bennu.core.domain.User;
 
 public class AccessFileLog extends AccessFileLog_Base {
 
-    public AccessFileLog() {
-	super();
-    }
+	public AccessFileLog() {
+		super();
+	}
 
-    public AccessFileLog(User user, ContextPath contextPath, FileNode fileNode) {
-	super();
-	init(user, contextPath, fileNode);
-    }
+	public AccessFileLog(User user, ContextPath contextPath, FileNode fileNode) {
+		super();
+		init(user, contextPath, fileNode);
+	}
 
 }

@@ -82,264 +82,265 @@ import com.vaadin.ui.themes.BaseTheme;
  */
 public class DocumentHome extends CustomComponent implements EmbeddedComponentContainer {
 
-    private GridSystemLayout gsl;
-    private Component webdav;
+	private GridSystemLayout gsl;
+	private Component webdav;
 
-    @Override
-    public boolean isAllowedToOpen(Map<String, String> arguments) {
-	return Authenticate.getCurrentUser() != null;
-    }
-
-    @Override
-    public void setArguments(Map<String, String> arguments) {
-	// TODO Auto-generated method stub
-    }
-
-    private static class UnitContainer extends DomainContainer<Unit> {
-
-	public UnitContainer() {
-	    super(Unit.class);
-	}
-
-	public UnitContainer(Collection<Unit> elements, Class<? extends Unit> elementType,
-		pt.ist.vaadinframework.data.HintedProperty.Hint... hints) {
-	    super(elements, elementType, hints);
-	    // TODO Auto-generated constructor stub
-	}
-
-	public UnitContainer(Property wrapped, Class<? extends Unit> elementType,
-		pt.ist.vaadinframework.data.HintedProperty.Hint... hints) {
-	    super(wrapped, elementType, hints);
-	    // TODO Auto-generated constructor stub
-	}
-
-	public UnitContainer(Class<? extends Unit> elementType, pt.ist.vaadinframework.data.HintedProperty.Hint[] hints) {
-	    super(elementType, hints);
+	@Override
+	public boolean isAllowedToOpen(Map<String, String> arguments) {
+		return Authenticate.getCurrentUser() != null;
 	}
 
 	@Override
-	protected DSLState createFilterExpression(String filterText) {
-	    filterText = StringNormalizer.normalize(filterText);
-	    if (!StringUtils.isEmpty(filterText)) {
-		final String[] split = filterText.trim().split("\\s+");
-		BuildingState expr = new BuildingState();
-		for (int i = 0; i < split.length; i++) {
-		    final String normalizedSplit = StringNormalizer.normalize(split[i]);
-		    if (i == split.length - 1) {
-			return expr.matches(Unit.IndexableFields.UNIT_NAME, normalizedSplit).or()
-				.matches(Unit.IndexableFields.UNIT_ACRONYM, normalizedSplit);
-		    }
-		    expr = expr.matches(Unit.IndexableFields.UNIT_NAME, normalizedSplit).or()
-			    .matches(Unit.IndexableFields.UNIT_ACRONYM, normalizedSplit).or();
+	public void setArguments(Map<String, String> arguments) {
+		// TODO Auto-generated method stub
+	}
+
+	private static class UnitContainer extends DomainContainer<Unit> {
+
+		public UnitContainer() {
+			super(Unit.class);
 		}
-	    }
-	    return new BuildingState();
+
+		public UnitContainer(Collection<Unit> elements, Class<? extends Unit> elementType,
+				pt.ist.vaadinframework.data.HintedProperty.Hint... hints) {
+			super(elements, elementType, hints);
+			// TODO Auto-generated constructor stub
+		}
+
+		public UnitContainer(Property wrapped, Class<? extends Unit> elementType,
+				pt.ist.vaadinframework.data.HintedProperty.Hint... hints) {
+			super(wrapped, elementType, hints);
+			// TODO Auto-generated constructor stub
+		}
+
+		public UnitContainer(Class<? extends Unit> elementType, pt.ist.vaadinframework.data.HintedProperty.Hint[] hints) {
+			super(elementType, hints);
+		}
+
+		@Override
+		protected DSLState createFilterExpression(String filterText) {
+			filterText = StringNormalizer.normalize(filterText);
+			if (!StringUtils.isEmpty(filterText)) {
+				final String[] split = filterText.trim().split("\\s+");
+				BuildingState expr = new BuildingState();
+				for (int i = 0; i < split.length; i++) {
+					final String normalizedSplit = StringNormalizer.normalize(split[i]);
+					if (i == split.length - 1) {
+						return expr.matches(Unit.IndexableFields.UNIT_NAME, normalizedSplit).or()
+								.matches(Unit.IndexableFields.UNIT_ACRONYM, normalizedSplit);
+					}
+					expr =
+							expr.matches(Unit.IndexableFields.UNIT_NAME, normalizedSplit).or()
+									.matches(Unit.IndexableFields.UNIT_ACRONYM, normalizedSplit).or();
+				}
+			}
+			return new BuildingState();
+		}
 	}
-    }
 
-    private static class UnitSearchContainer extends AbstractSearchContainer {
+	private static class UnitSearchContainer extends AbstractSearchContainer {
 
-	public UnitSearchContainer(Class elementType, pt.ist.vaadinframework.data.HintedProperty.Hint... hints) {
-	    super(elementType, hints);
+		public UnitSearchContainer(Class elementType, pt.ist.vaadinframework.data.HintedProperty.Hint... hints) {
+			super(elementType, hints);
+		}
+
+		public UnitSearchContainer(List elements, Class elementType, pt.ist.vaadinframework.data.HintedProperty.Hint... hints) {
+			super(elements, elementType, hints);
+		}
+
+		public UnitSearchContainer(Property wrapped, Class elementType, pt.ist.vaadinframework.data.HintedProperty.Hint... hints) {
+			super(wrapped, elementType, hints);
+		}
+
+		@Override
+		public void search(String filterText) {
+			removeAllItems();
+			final UnitContainer unitContainer = new UnitContainer();
+			unitContainer.addContainerFilter(new Filter() {
+
+				@Override
+				public boolean passesFilter(Object itemId, Item item) throws UnsupportedOperationException {
+					final Unit unit = (Unit) itemId;
+					return unit.hasFileRepository()
+							&& (Authenticate.getCurrentUser().hasRoleType(RoleType.MANAGER) || unit.getFileRepository()
+									.isAccessible());
+				}
+
+				@Override
+				public boolean appliesToProperty(Object propertyId) {
+					return true;
+				}
+			});
+			unitContainer.search(filterText);
+			addItems((Collection<Presentable>) unitContainer.getItemIds());
+		}
 	}
 
-	public UnitSearchContainer(List elements, Class elementType, pt.ist.vaadinframework.data.HintedProperty.Hint... hints) {
-	    super(elements, elementType, hints);
+	public Panel createWelcomePanel() {
+		Panel welcomePanel = new Panel();
+		welcomePanel.setStyleName(BennuTheme.PANEL_LIGHT);
+		welcomePanel.setCaption(getMessage("welcome.title"));
+		welcomePanel.setScrollable(false);
+		final Layout hlWelcomeContent = new VerticalLayout();
+		Label lblWelcomeText = new Label(getMessage("welcome.content"), Label.CONTENT_XHTML);
+		hlWelcomeContent.addComponent(lblWelcomeText);
+		welcomePanel.setContent(hlWelcomeContent);
+		return welcomePanel;
 	}
 
-	public UnitSearchContainer(Property wrapped, Class elementType, pt.ist.vaadinframework.data.HintedProperty.Hint... hints) {
-	    super(wrapped, elementType, hints);
+	public GridLayout createGrid(Component recentlyShared, Component fileDetails) {
+		GridLayout grid = new GridLayout(2, 1);
+		grid.setSizeFull();
+		grid.setMargin(true, true, true, false);
+		grid.setSpacing(true);
+		grid.addComponent(recentlyShared, 0, 0);
+		grid.addComponent(fileDetails, 1, 0);
+		return grid;
+	}
+
+	public Panel createRecentlyShared() {
+		Panel recentlyPanel = new Panel(getMessage("label.recently.shared"));
+		Table tbShared = new Table();
+		tbShared.setSizeFull();
+		recentlyPanel.addComponent(tbShared);
+		return recentlyPanel;
+	}
+
+	public static Panel createFileDetails(FileNode fileNode) {
+		Panel pDetails = new Panel(getMessage("label.file.details"));
+		/*
+		 * DomainItem item = new DomainItem(fileNode);
+		 */return pDetails;
+	}
+
+	public static Panel createDirDetails() {
+		Panel pDetails = new Panel(getMessage("label.file.details"));
+		pDetails.addComponent(new Label("Name: document.doc", Label.CONTENT_TEXT));
+		pDetails.addComponent(new Label("Size: 120kb", Label.CONTENT_TEXT));
+		return pDetails;
+	}
+
+	public Component createRepositorySelect() {
+		final UnitSearchContainer unitSearchContainer = new UnitSearchContainer(Unit.class);
+		HorizontalLayout hl = new HorizontalLayout();
+		hl.setSpacing(Boolean.TRUE);
+		hl.setSizeFull();
+
+		final TimeoutSelect select = new TimeoutSelect();
+		select.setSizeFull();
+		select.setImmediate(true);
+		select.setContainerDataSource(unitSearchContainer);
+		select.setItemCaptionPropertyId("presentationName");
+		select.addListener(new TextChangeListener() {
+
+			@Override
+			public void textChange(TextChangeEvent event) {
+				unitSearchContainer.search(event.getText());
+			}
+
+		});
+
+		Button btNavigate = new Button("Navegar", new ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				final Party party = (Party) select.getValue();
+				if (party != null) {
+					final DirNode rootDir = party.getFileRepository();
+					EmbeddedApplication.open(getApplication(), DocumentBrowse.class, rootDir.getContextPath().toString());
+				}
+			}
+		});
+		// btNavigate.addStyleName(BennuTheme.BUTTON_LINK);
+		btNavigate.setSizeFull();
+
+		hl.addComponent(select);
+		hl.addComponent(btNavigate);
+		hl.setExpandRatio(select, 0.7f);
+		hl.setExpandRatio(btNavigate, 0.3f);
+
+		final Panel panel = new Panel("Procurar Repositório");
+		panel.setContent(hl);
+		panel.setStyleName(BennuTheme.PANEL_LIGHT);
+		return panel;
+	}
+
+	private Component createRepositoryDashboard() {
+		final Panel panel = new Panel("Repositórios Disponíveis");
+
+		panel.setStyleName(BennuTheme.PANEL_LIGHT);
+		((VerticalLayout) panel.getContent()).setSpacing(Boolean.TRUE);
+
+		final User currentUser = Authenticate.getCurrentUser();
+		final Person person = currentUser.getPerson();
+
+		final DirNode sharedFolder = person.getFileRepository().getSharedFolder();
+		panel.addComponent(getDirNodeLink(sharedFolder.getDisplayName(), sharedFolder));
+
+		for (final DirNode repository : FileRepository.getAvailableRepositories(currentUser)) {
+			panel.addComponent(addRepositoryButton(repository));
+		}
+		return panel;
+	}
+
+	private Button addRepositoryButton(final DirNode repository) {
+		return getDirNodeLink(repository.getParty().getPresentationName(), repository);
+	}
+
+	private Button getDirNodeLink(final String linkName, final DirNode dirNode) {
+		final Button btRepository = new Button(linkName, new ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				EmbeddedApplication.open(getApplication(), DocumentBrowse.class, dirNode.getContextPath().toString());
+			}
+		});
+		btRepository.addStyleName(BaseTheme.BUTTON_LINK);
+		return btRepository;
+	}
+
+	public void createPage() {
+		gsl.setCell("welcome", 16, createWelcomePanel());
+		gsl.setCell("available_repositories", 16, createRepositoryDashboard());
+		gsl.setCell("select_repository", 0, 9, 7, createRepositorySelect());
+		// gsl.setCell("testjersey", 16, createTestJersey());
+	}
+
+	// private Component createTestJersey() {
+	// VerticalLayout vl = new VerticalLayout();
+	// final Label lbl = new Label();
+	// lbl.setCaption("Request:");
+	// Button bt = new Button("do request", new ClickListener() {
+	//
+	// @Override
+	// public void buttonClick(ClickEvent event) {
+	//
+	// Map<String, String> args = new HashMap<String, String>();
+	// args.put("__username__", "1");
+	// args.put("__password__", "2");
+	// final String host =
+	// "http://ashtray.ist.utl.pt:8080/ciapl/jersey/services/";
+	// lbl.setValue(new
+	// JerseyClient().connect(host).method("helloworld").arg("__username__",
+	// "1")
+	// .arg("__password__", "3").get());
+	// }
+	// });
+	//
+	// vl.addComponent(lbl);
+	// vl.addComponent(bt);
+	// return vl;
+	// }
+
+	public DocumentHome() {
+		gsl = new GridSystemLayout();
+		setCompositionRoot(gsl);
 	}
 
 	@Override
-	public void search(String filterText) {
-	    removeAllItems();
-	    final UnitContainer unitContainer = new UnitContainer();
-	    unitContainer.addContainerFilter(new Filter() {
-
-		@Override
-		public boolean passesFilter(Object itemId, Item item) throws UnsupportedOperationException {
-		    final Unit unit = (Unit) itemId;
-		    return unit.hasFileRepository()
-			    && (Authenticate.getCurrentUser().hasRoleType(RoleType.MANAGER) || unit.getFileRepository()
-				    .isAccessible());
-		}
-
-		@Override
-		public boolean appliesToProperty(Object propertyId) {
-		    return true;
-		}
-	    });
-	    unitContainer.search(filterText);
-	    addItems((Collection<Presentable>) unitContainer.getItemIds());
+	public void attach() {
+		super.attach();
+		createPage();
 	}
-    }
-
-    public Panel createWelcomePanel() {
-	Panel welcomePanel = new Panel();
-	welcomePanel.setStyleName(BennuTheme.PANEL_LIGHT);
-	welcomePanel.setCaption(getMessage("welcome.title"));
-	welcomePanel.setScrollable(false);
-	final Layout hlWelcomeContent = new VerticalLayout();
-	Label lblWelcomeText = new Label(getMessage("welcome.content"), Label.CONTENT_XHTML);
-	hlWelcomeContent.addComponent(lblWelcomeText);
-	welcomePanel.setContent(hlWelcomeContent);
-	return welcomePanel;
-    }
-
-    public GridLayout createGrid(Component recentlyShared, Component fileDetails) {
-	GridLayout grid = new GridLayout(2, 1);
-	grid.setSizeFull();
-	grid.setMargin(true, true, true, false);
-	grid.setSpacing(true);
-	grid.addComponent(recentlyShared, 0, 0);
-	grid.addComponent(fileDetails, 1, 0);
-	return grid;
-    }
-
-    public Panel createRecentlyShared() {
-	Panel recentlyPanel = new Panel(getMessage("label.recently.shared"));
-	Table tbShared = new Table();
-	tbShared.setSizeFull();
-	recentlyPanel.addComponent(tbShared);
-	return recentlyPanel;
-    }
-
-    public static Panel createFileDetails(FileNode fileNode) {
-	Panel pDetails = new Panel(getMessage("label.file.details"));
-	/*
-	 * DomainItem item = new DomainItem(fileNode);
-	 */return pDetails;
-    }
-
-    public static Panel createDirDetails() {
-	Panel pDetails = new Panel(getMessage("label.file.details"));
-	pDetails.addComponent(new Label("Name: document.doc", Label.CONTENT_TEXT));
-	pDetails.addComponent(new Label("Size: 120kb", Label.CONTENT_TEXT));
-	return pDetails;
-    }
-
-    public Component createRepositorySelect() {
-	final UnitSearchContainer unitSearchContainer = new UnitSearchContainer(Unit.class);
-	HorizontalLayout hl = new HorizontalLayout();
-	hl.setSpacing(Boolean.TRUE);
-	hl.setSizeFull();
-
-	final TimeoutSelect select = new TimeoutSelect();
-	select.setSizeFull();
-	select.setImmediate(true);
-	select.setContainerDataSource(unitSearchContainer);
-	select.setItemCaptionPropertyId("presentationName");
-	select.addListener(new TextChangeListener() {
-
-	    @Override
-	    public void textChange(TextChangeEvent event) {
-		unitSearchContainer.search(event.getText());
-	    }
-
-	});
-
-	Button btNavigate = new Button("Navegar", new ClickListener() {
-
-	    @Override
-	    public void buttonClick(ClickEvent event) {
-		final Party party = (Party) select.getValue();
-		if (party != null) {
-		    final DirNode rootDir = party.getFileRepository();
-		    EmbeddedApplication.open(getApplication(), DocumentBrowse.class, rootDir.getContextPath().toString());
-		}
-	    }
-	});
-	// btNavigate.addStyleName(BennuTheme.BUTTON_LINK);
-	btNavigate.setSizeFull();
-
-	hl.addComponent(select);
-	hl.addComponent(btNavigate);
-	hl.setExpandRatio(select, 0.7f);
-	hl.setExpandRatio(btNavigate, 0.3f);
-
-	final Panel panel = new Panel("Procurar Repositório");
-	panel.setContent(hl);
-	panel.setStyleName(BennuTheme.PANEL_LIGHT);
-	return panel;
-    }
-
-    private Component createRepositoryDashboard() {
-	final Panel panel = new Panel("Repositórios Disponíveis");
-
-	panel.setStyleName(BennuTheme.PANEL_LIGHT);
-	((VerticalLayout) panel.getContent()).setSpacing(Boolean.TRUE);
-
-	final User currentUser = Authenticate.getCurrentUser();
-	final Person person = currentUser.getPerson();
-
-	final DirNode sharedFolder = person.getFileRepository().getSharedFolder();
-	panel.addComponent(getDirNodeLink(sharedFolder.getDisplayName(), sharedFolder));
-
-	for (final DirNode repository : FileRepository.getAvailableRepositories(currentUser)) {
-	    panel.addComponent(addRepositoryButton(repository));
-	}
-	return panel;
-    }
-
-    private Button addRepositoryButton(final DirNode repository) {
-	return getDirNodeLink(repository.getParty().getPresentationName(), repository);
-    }
-
-    private Button getDirNodeLink(final String linkName, final DirNode dirNode) {
-	final Button btRepository = new Button(linkName, new ClickListener() {
-
-	    @Override
-	    public void buttonClick(ClickEvent event) {
-		EmbeddedApplication.open(getApplication(), DocumentBrowse.class, dirNode.getContextPath().toString());
-	    }
-	});
-	btRepository.addStyleName(BaseTheme.BUTTON_LINK);
-	return btRepository;
-    }
-
-    public void createPage() {
-	gsl.setCell("welcome", 16, createWelcomePanel());
-	gsl.setCell("available_repositories", 16, createRepositoryDashboard());
-	gsl.setCell("select_repository", 0, 9, 7, createRepositorySelect());
-	// gsl.setCell("testjersey", 16, createTestJersey());
-    }
-
-    // private Component createTestJersey() {
-    // VerticalLayout vl = new VerticalLayout();
-    // final Label lbl = new Label();
-    // lbl.setCaption("Request:");
-    // Button bt = new Button("do request", new ClickListener() {
-    //
-    // @Override
-    // public void buttonClick(ClickEvent event) {
-    //
-    // Map<String, String> args = new HashMap<String, String>();
-    // args.put("__username__", "1");
-    // args.put("__password__", "2");
-    // final String host =
-    // "http://ashtray.ist.utl.pt:8080/ciapl/jersey/services/";
-    // lbl.setValue(new
-    // JerseyClient().connect(host).method("helloworld").arg("__username__",
-    // "1")
-    // .arg("__password__", "3").get());
-    // }
-    // });
-    //
-    // vl.addComponent(lbl);
-    // vl.addComponent(bt);
-    // return vl;
-    // }
-
-    public DocumentHome() {
-	gsl = new GridSystemLayout();
-	setCompositionRoot(gsl);
-    }
-
-    @Override
-    public void attach() {
-	super.attach();
-	createPage();
-    }
 
 }

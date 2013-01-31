@@ -44,562 +44,562 @@ import com.google.common.collect.Multimap;
  */
 public class DirNode extends DirNode_Base {
 
-    public static final long PERSON_REPOSITORY_QUOTA = 50 * 1024 * 1024;
-    public static final long UNIT_REPOSITORY_QUOTA = 1024 * 1024 * 1024;
-    private static final long TRASH_REPOSITORY_QUOTA = Long.MAX_VALUE;
-    public static final String SHARED_DIR_NAME = "Ficheiros Partilhados";
-    public static final String TRASH_DIR_NAME = "Lixo";
+	public static final long PERSON_REPOSITORY_QUOTA = 50 * 1024 * 1024;
+	public static final long UNIT_REPOSITORY_QUOTA = 1024 * 1024 * 1024;
+	private static final long TRASH_REPOSITORY_QUOTA = Long.MAX_VALUE;
+	public static final String SHARED_DIR_NAME = "Ficheiros Partilhados";
+	public static final String TRASH_DIR_NAME = "Lixo";
 
-    private static Set<String> INVALID_USER_DIR_NAMES = new HashSet<String>();
+	private static Set<String> INVALID_USER_DIR_NAMES = new HashSet<String>();
 
-    static {
-	INVALID_USER_DIR_NAMES.add(SHARED_DIR_NAME);
-	INVALID_USER_DIR_NAMES.add(TRASH_DIR_NAME);
-    }
-
-    // constructors
-
-    public DirNode() {
-	super();
-	setQuota(null);
-	setSize((long) 0);
-	setRoot(Boolean.FALSE);
-    }
-
-    public DirNode(final User user) {
-	this(user.getPerson());
-    }
-
-    public DirNode(final Party party) {
-	this();
-	setParty(party);
-	setName(party.getPresentationName());
-	setRoot(Boolean.TRUE);
-	if (party.isUnit()) {
-	    setUnitGroup((Unit) party);
-	    setQuota(UNIT_REPOSITORY_QUOTA);
-	} else {
-	    if (party.isPerson()) {
-		createSharedFolder();
-		final PersistentGroup group = SingleUserGroup.getOrCreateGroup(((Person) party).getUser());
-		setReadGroup(group);
-		setWriteGroup(group);
-		setQuota(PERSON_REPOSITORY_QUOTA);
-	    }
+	static {
+		INVALID_USER_DIR_NAMES.add(SHARED_DIR_NAME);
+		INVALID_USER_DIR_NAMES.add(TRASH_DIR_NAME);
 	}
-	createTrashFolder();
-    }
 
-    private void setUnitGroup(final Unit unit) {
-	// final AccountabilityType[] memberTypes = new AccountabilityType[] {
-	// AccountabilityType.readBy("Personnel") };
-	// final AccountabilityType[] childUnitTypes = new AccountabilityType[]
-	// { AccountabilityType.readBy("Organizational") };
-	// setReadGroup(UnitGroup.getOrCreateGroup(unit, memberTypes,
-	// childUnitTypes));
-	// setWriteGroup(UnitGroup.getOrCreateGroup(unit, memberTypes, null));
-	// final AccountabilityType[] memberTypes = new AccountabilityType[] {
-	// AccountabilityType.readBy("Personnel") };
-	final AccountabilityType[] childUnitTypes = new AccountabilityType[] { AccountabilityType.readBy("Organizational"),
-		AccountabilityType.readBy("Personnel") };
-	final UnitGroup group = UnitGroup.getOrCreateGroup(unit, childUnitTypes, childUnitTypes);
-	final UnionGroup unitManagerGroup = UnionGroup.getOrCreateUnionGroup(group, Role.createRole(RoleType.MANAGER));
-	setReadGroup(unitManagerGroup);
-	setWriteGroup(unitManagerGroup);
-    }
+	// constructors
 
-    public DirNode(final DirNode dirNode, final String name) {
-	this();
-	setParent(dirNode);
-	setName(name);
-    }
+	public DirNode() {
+		super();
+		setQuota(null);
+		setSize((long) 0);
+		setRoot(Boolean.FALSE);
+	}
 
-    public void createTrashFolder() {
-	final DirNode trash = new DirNode();
-	trash.setQuota(TRASH_REPOSITORY_QUOTA);
-	trash.setName(TRASH_DIR_NAME);
-	trash.setReadGroup(getReadGroup());
-	trash.setWriteGroup(getWriteGroup());
-	setTrash(trash);
-    }
+	public DirNode(final User user) {
+		this(user.getPerson());
+	}
 
-    // shared
-
-    public boolean isSharedFilesDirectory() {
-	return getName().equals(SHARED_DIR_NAME);
-    }
-
-    public DirNode createSharedFolder() {
-	final DirNode dirNode = new DirNode(this, SHARED_DIR_NAME);
-	dirNode.setWriteGroup(EmptyGroup.getInstance());
-	return dirNode;
-    }
-
-    public DirNode getSharedFolder() {
-	if (!hasParent()) { // is root
-	    for (final AbstractFileNode node : getChildSet()) {
-		if (node instanceof DirNode) {
-		    final DirNode dirNode = (DirNode) node;
-		    if (SHARED_DIR_NAME.equals(dirNode.getName())) {
-			return dirNode;
-		    }
+	public DirNode(final Party party) {
+		this();
+		setParty(party);
+		setName(party.getPresentationName());
+		setRoot(Boolean.TRUE);
+		if (party.isUnit()) {
+			setUnitGroup((Unit) party);
+			setQuota(UNIT_REPOSITORY_QUOTA);
+		} else {
+			if (party.isPerson()) {
+				createSharedFolder();
+				final PersistentGroup group = SingleUserGroup.getOrCreateGroup(((Person) party).getUser());
+				setReadGroup(group);
+				setWriteGroup(group);
+				setQuota(PERSON_REPOSITORY_QUOTA);
+			}
 		}
-	    }
-	    return createSharedFolder();
+		createTrashFolder();
 	}
-	return getParent().getSharedFolder();
-    }
 
-    @Override
-    public DirNode getTrash() {
-	return hasParent() ? getParent().getTrash() : super.getTrash();
-    }
-
-    public String getRepositoryName() {
-	return hasParent() ? getParent().getRepositoryName() : getName();
-    }
-
-    @Override
-    public boolean isDir() {
-	return true;
-    }
-
-    public DirNode createDir(final String dirName) {
-	return createDir(dirName, getContextPath());
-    }
-
-    @Service
-    public DirNode createDir(final String dirName, final ContextPath contextPath) {
-	final DirNode searchDir = searchDir(dirName);
-	if (searchDir != null) {
-	    throw new NodeDuplicateNameException(dirName);
+	private void setUnitGroup(final Unit unit) {
+		// final AccountabilityType[] memberTypes = new AccountabilityType[] {
+		// AccountabilityType.readBy("Personnel") };
+		// final AccountabilityType[] childUnitTypes = new AccountabilityType[]
+		// { AccountabilityType.readBy("Organizational") };
+		// setReadGroup(UnitGroup.getOrCreateGroup(unit, memberTypes,
+		// childUnitTypes));
+		// setWriteGroup(UnitGroup.getOrCreateGroup(unit, memberTypes, null));
+		// final AccountabilityType[] memberTypes = new AccountabilityType[] {
+		// AccountabilityType.readBy("Personnel") };
+		final AccountabilityType[] childUnitTypes =
+				new AccountabilityType[] { AccountabilityType.readBy("Organizational"), AccountabilityType.readBy("Personnel") };
+		final UnitGroup group = UnitGroup.getOrCreateGroup(unit, childUnitTypes, childUnitTypes);
+		final UnionGroup unitManagerGroup = UnionGroup.getOrCreateUnionGroup(group, Role.createRole(RoleType.MANAGER));
+		setReadGroup(unitManagerGroup);
+		setWriteGroup(unitManagerGroup);
 	}
-	final DirNode resultNode = new DirNode(this, dirName);
-	new CreateDirLog(Authenticate.getCurrentUser(), contextPath, resultNode);
-	return resultNode;
-    }
 
-    @Service
-    public DirNode createDir(final String dirName, final PersistentGroup readGroup, final PersistentGroup writeGroup,
-	    final ContextPath contextPath) {
-	final DirNode dirNode = createDir(dirName, contextPath);
-	dirNode.setReadGroup(readGroup);
-	dirNode.setWriteGroup(writeGroup);
-	return dirNode;
-    }
+	public DirNode(final DirNode dirNode, final String name) {
+		this();
+		setParent(dirNode);
+		setName(name);
+	}
 
-    public DirNode createDir(final String dirName, final PersistentGroup readGroup, final PersistentGroup writeGroup) {
-	final DirNode dirNode = createDir(dirName, this.getContextPath());
-	dirNode.setReadGroup(readGroup);
-	dirNode.setWriteGroup(writeGroup);
-	return dirNode;
-    }
+	public void createTrashFolder() {
+		final DirNode trash = new DirNode();
+		trash.setQuota(TRASH_REPOSITORY_QUOTA);
+		trash.setName(TRASH_DIR_NAME);
+		trash.setReadGroup(getReadGroup());
+		trash.setWriteGroup(getWriteGroup());
+		setTrash(trash);
+	}
 
-    @Override
-    public String getDisplayName() {
-	return hasUser() ? FileManagementSystem.getMessage("label.menu.home") : getName();
-    }
+	// shared
 
-    @Override
-    public boolean hasUser() {
-	return hasParty() && getParty() instanceof Person;
-    }
+	public boolean isSharedFilesDirectory() {
+		return getName().equals(SHARED_DIR_NAME);
+	}
 
-    @Override
-    public void setUser(User user) {
-    }
+	public DirNode createSharedFolder() {
+		final DirNode dirNode = new DirNode(this, SHARED_DIR_NAME);
+		dirNode.setWriteGroup(EmptyGroup.getInstance());
+		return dirNode;
+	}
 
-    @Override
-    public User getUser() {
-	return null;
-    }
+	public DirNode getSharedFolder() {
+		if (!hasParent()) { // is root
+			for (final AbstractFileNode node : getChildSet()) {
+				if (node instanceof DirNode) {
+					final DirNode dirNode = (DirNode) node;
+					if (SHARED_DIR_NAME.equals(dirNode.getName())) {
+						return dirNode;
+					}
+				}
+			}
+			return createSharedFolder();
+		}
+		return getParent().getSharedFolder();
+	}
 
-    @Override
-    @Service
-    public void setDisplayName(final String displayName) throws NodeDuplicateNameException {
-	super.setDisplayName(displayName);
-	setName(displayName);
-    }
+	@Override
+	public DirNode getTrash() {
+		return hasParent() ? getParent().getTrash() : super.getTrash();
+	}
 
-    @Override
-    public PersistentGroup getReadGroup() {
-	final PersistentGroup group = super.getReadGroup();
-	return group == null && hasParent() ? getParent().getReadGroup() : group;
-    }
+	public String getRepositoryName() {
+		return hasParent() ? getParent().getRepositoryName() : getName();
+	}
 
-    @Override
-    public PersistentGroup getWriteGroup() {
-	final PersistentGroup group = super.getWriteGroup();
-	return group == null && hasParent() ? getParent().getWriteGroup() : group;
-    }
+	@Override
+	public boolean isDir() {
+		return true;
+	}
 
-    @Override
-    public boolean search(final String searchText) {
-	return StringUtils.matches(getDisplayName(), searchText);
-    }
+	public DirNode createDir(final String dirName) {
+		return createDir(dirName, getContextPath());
+	}
 
-    public Set<AbstractFileNode> doSearch(final String searchText) {
-	final Set<AbstractFileNode> nodes = new HashSet<AbstractFileNode>();
+	@Service
+	public DirNode createDir(final String dirName, final ContextPath contextPath) {
+		final DirNode searchDir = searchDir(dirName);
+		if (searchDir != null) {
+			throw new NodeDuplicateNameException(dirName);
+		}
+		final DirNode resultNode = new DirNode(this, dirName);
+		new CreateDirLog(Authenticate.getCurrentUser(), contextPath, resultNode);
+		return resultNode;
+	}
+
+	@Service
+	public DirNode createDir(final String dirName, final PersistentGroup readGroup, final PersistentGroup writeGroup,
+			final ContextPath contextPath) {
+		final DirNode dirNode = createDir(dirName, contextPath);
+		dirNode.setReadGroup(readGroup);
+		dirNode.setWriteGroup(writeGroup);
+		return dirNode;
+	}
+
+	public DirNode createDir(final String dirName, final PersistentGroup readGroup, final PersistentGroup writeGroup) {
+		final DirNode dirNode = createDir(dirName, this.getContextPath());
+		dirNode.setReadGroup(readGroup);
+		dirNode.setWriteGroup(writeGroup);
+		return dirNode;
+	}
+
+	@Override
+	public String getDisplayName() {
+		return hasUser() ? FileManagementSystem.getMessage("label.menu.home") : getName();
+	}
+
+	@Override
+	public boolean hasUser() {
+		return hasParty() && getParty() instanceof Person;
+	}
+
+	@Override
+	public void setUser(User user) {
+	}
+
+	@Override
+	public User getUser() {
+		return null;
+	}
+
+	@Override
+	@Service
+	public void setDisplayName(final String displayName) throws NodeDuplicateNameException {
+		super.setDisplayName(displayName);
+		setName(displayName);
+	}
+
+	@Override
+	public PersistentGroup getReadGroup() {
+		final PersistentGroup group = super.getReadGroup();
+		return group == null && hasParent() ? getParent().getReadGroup() : group;
+	}
+
+	@Override
+	public PersistentGroup getWriteGroup() {
+		final PersistentGroup group = super.getWriteGroup();
+		return group == null && hasParent() ? getParent().getWriteGroup() : group;
+	}
+
+	@Override
+	public boolean search(final String searchText) {
+		return StringUtils.matches(getDisplayName(), searchText);
+	}
+
+	public Set<AbstractFileNode> doSearch(final String searchText) {
+		final Set<AbstractFileNode> nodes = new HashSet<AbstractFileNode>();
+		/*
+		 * if (search(searchText)) { nodes.add(this); }
+		 */
+
+		for (final AbstractFileNode child : getChild()) {
+			if (child.isDir()) {
+				nodes.addAll(((DirNode) child).doSearch(searchText));
+			}
+			if (child.isFile()) {
+				if (((FileNode) child).search(searchText)) {
+					nodes.add(child);
+				}
+			}
+		}
+
+		return nodes;
+	}
+
+	public Map<AbstractFileNode, Map<MetadataKey, Boolean>> doSearch(final Multimap<MetadataKey, Object> searchMap) {
+		final Map<AbstractFileNode, Map<MetadataKey, Boolean>> resultMap = Maps.newHashMap();
+
+		for (final AbstractFileNode child : getChild()) {
+			if (child.isDir()) {
+				resultMap.putAll(((DirNode) child).doSearch(searchMap));
+			}
+			if (child.isFile()) {
+				final FileNode file = (FileNode) child;
+				resultMap.put(file, file.search(searchMap));
+			}
+		}
+		return resultMap;
+	}
+
+	// file creation
+	@SuppressWarnings("unused")
+	@Service
+	public FileNode createFile(final byte[] fileContent, final String displayName, final String fileName, final long filesize,
+			final ContextPath contextPath) {
+		FileNode fileNode = searchFile(displayName);
+
+		if (fileNode != null) {
+
+			fileNode.addNewVersion(fileContent, fileName, displayName, filesize);
+			return fileNode;
+
+		} else {
+
+			if (!isWriteGroupMember()) {
+				throw new WriteDeniedException();
+			}
+
+			if (!hasAvailableQuota(filesize)) {
+				throw new NoAvailableQuotaException();
+			}
+
+			fileNode = new FileNode(this, fileContent, fileName, displayName);
+			new CreateFileLog(Authenticate.getCurrentUser(), contextPath, fileNode);
+			return fileNode;
+		}
+
+	}
+
+	@Service
+	public FileNode createFile(final File file, final String displayName, final String fileName, final long filesize,
+			final ContextPath contextPath) {
+		try {
+			return createFile(FileUtils.readFileToByteArray(file), displayName, fileName, filesize, contextPath);
+		} catch (final IOException e) {
+			throw new Error(e);
+		}
+
+	}
+
+	@Service
+	public FileNode createFile(final File file, final String displayName, final long filesize, final ContextPath contextPath) {
+		return createFile(file, displayName, displayName, filesize, contextPath);
+
+	}
+
+	@Service
+	public FileNode createFile(final File file, final String fileName, final PersistentGroup readGroup,
+			final PersistentGroup writeGroup) {
+		final FileNode fileNode = createFile(file, fileName, file.length(), new ContextPath(this));
+		fileNode.setReadGroup(readGroup);
+		fileNode.setWriteGroup(writeGroup);
+		return fileNode;
+	}
+
+	@Service
+	public FileNode createFile(final File file, final String fileName, final PersistentGroup readGroup,
+			final PersistentGroup writeGroup, final ContextPath contextPath) {
+		final FileNode fileNode = createFile(file, fileName, file.length(), contextPath);
+		fileNode.setReadGroup(readGroup);
+		fileNode.setWriteGroup(writeGroup);
+		return fileNode;
+	}
+
+	@Service
+	public FileNode createFile() {
+		if (hasSequenceNumber()) {
+			final Integer nextSequenceNumber = getNextSequenceNumber();
+			FileManagementSystem.FILENAME_TEMPLATE.setDirNode(this);
+			final String fileName = FileManagementSystem.FILENAME_TEMPLATE.getValue();
+			final Document document = new Document(fileName, fileName, org.apache.commons.lang.StringUtils.EMPTY.getBytes());
+			if (hasDefaultTemplate()) {
+				final MetadataTemplate defaultTemplate = getDefaultTemplate();
+				final Set<MetadataKey> seqNumberKeys = defaultTemplate.getKeysByMetadataType(SeqNumberMetadata.class);
+				for (final MetadataKey key : seqNumberKeys) {
+					document.addMetadata(key.createMetadata(nextSequenceNumber));
+				}
+				document.setMetadataTemplateAssociated(defaultTemplate);
+			}
+			return new FileNode(this, document);
+		}
+		return null;
+	}
+
+	// size and quota
+
+	@Override
+	public int getCountFiles() {
+		int result = 0;
+		for (final AbstractFileNode node : getChildSet()) {
+			if (node.isFile() || node.isShared()) {
+				result++;
+			} else {
+				result += ((DirNode) node).getCountFiles();
+			}
+		}
+		return result;
+	}
+
+	@Service
+	void addUsedSpace(final long filesize) {
+		if (hasParent()) {
+			getParent().addUsedSpace(filesize);
+		}
+		setSize(getSize() + filesize);
+	}
+
+	@Service
+	void removeUsedSpace(final long filesize) {
+		if (hasParent()) {
+			getParent().removeUsedSpace(filesize);
+		}
+		setSize(getSize() - filesize);
+	}
+
+	@Override
+	public String getPresentationFilesize() {
+		return VersionedFile.FILE_SIZE_UNIT.prettyPrint(getDirUsedSpace());
+	}
+
+	public String getPresentationQuota() {
+		return VersionedFile.FILE_SIZE_UNIT.prettyPrint(getQuota());
+	}
+
+	public String getPercentOfTotalUsedSpace() {
+		return new DecimalFormat("0.0#%").format(getUsedSpace() / (getQuota() * 1.0F));
+	}
+
+	public String getPresentationTotalUsedSpace() {
+		return VersionedFile.FILE_SIZE_UNIT.prettyPrint(getUsedSpace());
+	}
+
+	public long getAvailableSpace() {
+		return getQuota() - getUsedSpace();
+	}
+
+	@Override
+	public Long getQuota() {
+		return hasQuotaDefined() ? super.getQuota() : hasParent() ? getParent().getQuota() : 0;
+	}
+
+	public boolean hasQuotaDefined() {
+		return super.getQuota() != null;
+	}
+
 	/*
-	 * if (search(searchText)) { nodes.add(this); }
+	 * The actual size of the files and folders of this dir Shared files and dirs with defined quota are ignored for this purpose.
 	 */
+	private long getDirUsedSpace() {
+		return getSize();
+	}
 
-	for (final AbstractFileNode child : getChild()) {
-	    if (child.isDir()) {
-		nodes.addAll(((DirNode) child).doSearch(searchText));
-	    }
-	    if (child.isFile()) {
-		if (((FileNode) child).search(searchText)) {
-		    nodes.add(child);
+	/*
+	 * If this dir has quota then the used space is the sum of it's size and contained dirs. If no quota is defined then the used
+	 * space is calculated by the parent
+	 */
+	public long getUsedSpace() {
+		return hasQuotaDefined() ? getDirUsedSpace() : hasParent() ? getParent().getUsedSpace() : getDirUsedSpace();
+	}
+
+	@Override
+	public long getFilesize() {
+		return getSize();
+	}
+
+	public boolean hasAvailableQuota(final long length) {
+		return hasAvailableQuota(length, null);
+	}
+
+	public boolean hasAvailableQuota(final long length, final FileNode fileNode) {
+		if (fileNode != null && fileNode.isShared()) {
+			return fileNode.getParent().hasAvailableQuota(length, fileNode);
 		}
-	    }
-	}
 
-	return nodes;
-    }
-
-    public Map<AbstractFileNode, Map<MetadataKey, Boolean>> doSearch(final Multimap<MetadataKey, Object> searchMap) {
-	final Map<AbstractFileNode, Map<MetadataKey, Boolean>> resultMap = Maps.newHashMap();
-
-	for (final AbstractFileNode child : getChild()) {
-	    if (child.isDir()) {
-		resultMap.putAll(((DirNode) child).doSearch(searchMap));
-	    }
-	    if (child.isFile()) {
-		final FileNode file = (FileNode) child;
-		resultMap.put(file, file.search(searchMap));
-	    }
-	}
-	return resultMap;
-    }
-
-    // file creation
-    @SuppressWarnings("unused")
-    @Service
-    public FileNode createFile(final byte[] fileContent, final String displayName, final String fileName, final long filesize,
-	    final ContextPath contextPath) {
-	FileNode fileNode = searchFile(displayName);
-
-	if (fileNode != null) {
-
-	    fileNode.addNewVersion(fileContent, fileName, displayName, filesize);
-	    return fileNode;
-
-	} else {
-
-	    if (!isWriteGroupMember()) {
-		throw new WriteDeniedException();
-	    }
-
-	    if (!hasAvailableQuota(filesize)) {
-		throw new NoAvailableQuotaException();
-	    }
-
-	    fileNode = new FileNode(this, fileContent, fileName, displayName);
-	    new CreateFileLog(Authenticate.getCurrentUser(), contextPath, fileNode);
-	    return fileNode;
-	}
-
-    }
-
-    @Service
-    public FileNode createFile(final File file, final String displayName, final String fileName, final long filesize,
-	    final ContextPath contextPath) {
-	try {
-	    return createFile(FileUtils.readFileToByteArray(file), displayName, fileName, filesize, contextPath);
-	} catch (final IOException e) {
-	    throw new Error(e);
-	}
-
-    }
-
-    @Service
-    public FileNode createFile(final File file, final String displayName, final long filesize, final ContextPath contextPath) {
-	return createFile(file, displayName, displayName, filesize, contextPath);
-
-    }
-
-    @Service
-    public FileNode createFile(final File file, final String fileName, final PersistentGroup readGroup,
-	    final PersistentGroup writeGroup) {
-	final FileNode fileNode = createFile(file, fileName, file.length(), new ContextPath(this));
-	fileNode.setReadGroup(readGroup);
-	fileNode.setWriteGroup(writeGroup);
-	return fileNode;
-    }
-
-    @Service
-    public FileNode createFile(final File file, final String fileName, final PersistentGroup readGroup,
-	    final PersistentGroup writeGroup, final ContextPath contextPath) {
-	final FileNode fileNode = createFile(file, fileName, file.length(), contextPath);
-	fileNode.setReadGroup(readGroup);
-	fileNode.setWriteGroup(writeGroup);
-	return fileNode;
-    }
-
-    @Service
-    public FileNode createFile() {
-	if (hasSequenceNumber()) {
-	    final Integer nextSequenceNumber = getNextSequenceNumber();
-	    FileManagementSystem.FILENAME_TEMPLATE.setDirNode(this);
-	    final String fileName = FileManagementSystem.FILENAME_TEMPLATE.getValue();
-	    final Document document = new Document(fileName, fileName, org.apache.commons.lang.StringUtils.EMPTY.getBytes());
-	    if (hasDefaultTemplate()) {
-		final MetadataTemplate defaultTemplate = getDefaultTemplate();
-		final Set<MetadataKey> seqNumberKeys = defaultTemplate.getKeysByMetadataType(SeqNumberMetadata.class);
-		for (final MetadataKey key : seqNumberKeys) {
-		    document.addMetadata(key.createMetadata(nextSequenceNumber));
+		final Long quota = getQuota();
+		if (quota == Long.MAX_VALUE) {
+			return true;
 		}
-		document.setMetadataTemplateAssociated(defaultTemplate);
-	    }
-	    return new FileNode(this, document);
-	}
-	return null;
-    }
 
-    // size and quota
-
-    @Override
-    public int getCountFiles() {
-	int result = 0;
-	for (final AbstractFileNode node : getChildSet()) {
-	    if (node.isFile() || node.isShared()) {
-		result++;
-	    } else {
-		result += ((DirNode) node).getCountFiles();
-	    }
-	}
-	return result;
-    }
-
-    @Service
-    void addUsedSpace(final long filesize) {
-	if (hasParent()) {
-	    getParent().addUsedSpace(filesize);
-	}
-	setSize(getSize() + filesize);
-    }
-
-    @Service
-    void removeUsedSpace(final long filesize) {
-	if (hasParent()) {
-	    getParent().removeUsedSpace(filesize);
-	}
-	setSize(getSize() - filesize);
-    }
-
-    @Override
-    public String getPresentationFilesize() {
-	return VersionedFile.FILE_SIZE_UNIT.prettyPrint(getDirUsedSpace());
-    }
-
-    public String getPresentationQuota() {
-	return VersionedFile.FILE_SIZE_UNIT.prettyPrint(getQuota());
-    }
-
-    public String getPercentOfTotalUsedSpace() {
-	return new DecimalFormat("0.0#%").format(getUsedSpace() / (getQuota() * 1.0F));
-    }
-
-    public String getPresentationTotalUsedSpace() {
-	return VersionedFile.FILE_SIZE_UNIT.prettyPrint(getUsedSpace());
-    }
-
-    public long getAvailableSpace() {
-	return getQuota() - getUsedSpace();
-    }
-
-    @Override
-    public Long getQuota() {
-	return hasQuotaDefined() ? super.getQuota() : hasParent() ? getParent().getQuota() : 0;
-    }
-
-    public boolean hasQuotaDefined() {
-	return super.getQuota() != null;
-    }
-
-    /*
-     * The actual size of the files and folders of this dir Shared files and dirs with defined quota are ignored for this purpose.
-     */
-    private long getDirUsedSpace() {
-	return getSize();
-    }
-
-    /*
-     * If this dir has quota then the used space is the sum of it's size and contained dirs. If no quota is defined then the used
-     * space is calculated by the parent
-     */
-    public long getUsedSpace() {
-	return hasQuotaDefined() ? getDirUsedSpace() : hasParent() ? getParent().getUsedSpace() : getDirUsedSpace();
-    }
-
-    @Override
-    public long getFilesize() {
-	return getSize();
-    }
-
-    public boolean hasAvailableQuota(final long length) {
-	return hasAvailableQuota(length, null);
-    }
-
-    public boolean hasAvailableQuota(final long length, final FileNode fileNode) {
-	if (fileNode != null && fileNode.isShared()) {
-	    return fileNode.getParent().hasAvailableQuota(length, fileNode);
+		final long fileNodeSize = fileNode != null ? fileNode.getFilesize() : 0;
+		return getUsedSpace() + length <= quota + fileNodeSize;
 	}
 
-	final Long quota = getQuota();
-	if (quota == Long.MAX_VALUE) {
-	    return true;
-	}
-
-	final long fileNodeSize = fileNode != null ? fileNode.getFilesize() : 0;
-	return getUsedSpace() + length <= quota + fileNodeSize;
-    }
-
-    public AbstractFileNode searchNode(final String displayName) {
-	for (final AbstractFileNode node : getChildSet()) {
-	    if (node.getDisplayName().equals(displayName)) {
-		return node;
-	    }
-	}
-	return null;
-    }
-
-    public boolean hasNode(final String displayName) {
-	return searchNode(displayName) != null;
-    }
-
-    public FileNode searchFile(final String fileName) {
-	final AbstractFileNode searchNode = searchNode(fileName);
-	return searchNode != null && searchNode instanceof FileNode ? (FileNode) searchNode : null;
-    }
-
-    public DirNode searchDir(final String dirName) {
-	final AbstractFileNode searchNode = searchNode(dirName);
-	return searchNode != null && searchNode instanceof DirNode ? (DirNode) searchNode : null;
-    }
-
-    public boolean hasSharedNode(final AbstractFileNode selectedNode) {
-	for (final AbstractFileNode node : getChild()) {
-	    if (!(node instanceof SharedNode)) {
-		if (node.isDir()) {
-		    return ((DirNode) node).hasSharedNode(selectedNode);
+	public AbstractFileNode searchNode(final String displayName) {
+		for (final AbstractFileNode node : getChildSet()) {
+			if (node.getDisplayName().equals(displayName)) {
+				return node;
+			}
 		}
-	    } else {
-		if (selectedNode.equals(((SharedNode) node).getNode())) {
-		    return true;
+		return null;
+	}
+
+	public boolean hasNode(final String displayName) {
+		return searchNode(displayName) != null;
+	}
+
+	public FileNode searchFile(final String fileName) {
+		final AbstractFileNode searchNode = searchNode(fileName);
+		return searchNode != null && searchNode instanceof FileNode ? (FileNode) searchNode : null;
+	}
+
+	public DirNode searchDir(final String dirName) {
+		final AbstractFileNode searchNode = searchNode(dirName);
+		return searchNode != null && searchNode instanceof DirNode ? (DirNode) searchNode : null;
+	}
+
+	public boolean hasSharedNode(final AbstractFileNode selectedNode) {
+		for (final AbstractFileNode node : getChild()) {
+			if (!(node instanceof SharedNode)) {
+				if (node.isDir()) {
+					return ((DirNode) node).hasSharedNode(selectedNode);
+				}
+			} else {
+				if (selectedNode.equals(((SharedNode) node).getNode())) {
+					return true;
+				}
+			}
 		}
-	    }
+		return false;
 	}
-	return false;
-    }
 
-    public boolean hasAnyChildFile() {
-	for (final AbstractFileNode abstractFileNode : getChildSet()) {
-	    if (abstractFileNode.isFile()) {
-		return true;
-	    }
+	public boolean hasAnyChildFile() {
+		for (final AbstractFileNode abstractFileNode : getChildSet()) {
+			if (abstractFileNode.isFile()) {
+				return true;
+			}
+		}
+		return false;
 	}
-	return false;
-    }
 
-    public boolean hasAnyChildDir() {
-	for (final AbstractFileNode abstractFileNode : getChildSet()) {
-	    if (abstractFileNode.isDir()) {
-		return true;
-	    }
+	public boolean hasAnyChildDir() {
+		for (final AbstractFileNode abstractFileNode : getChildSet()) {
+			if (abstractFileNode.isDir()) {
+				return true;
+			}
+		}
+		return false;
 	}
-	return false;
-    }
 
-    @Override
-    public void addChild(final AbstractFileNode child) throws NodeDuplicateNameException {
-	if (!child.isShared()) {
-	    final String displayName = child.getDisplayName();
-	    final AbstractFileNode node = searchNode(displayName);
-	    if (node != null) {
-		throw new NodeDuplicateNameException(displayName);
-	    }
+	@Override
+	public void addChild(final AbstractFileNode child) throws NodeDuplicateNameException {
+		if (!child.isShared()) {
+			final String displayName = child.getDisplayName();
+			final AbstractFileNode node = searchNode(displayName);
+			if (node != null) {
+				throw new NodeDuplicateNameException(displayName);
+			}
+		}
+		super.addChild(child);
 	}
-	super.addChild(child);
-    }
 
-    @Override
-    public int compareTo(final AbstractFileNode node) {
-	return node.isFile() ? -1 : super.compareTo(node);
-    }
-
-    @Override
-    public void delete() {
-	removeUser();
-	for (final AbstractFileNode abstractFileNode : getChildSet()) {
-	    abstractFileNode.delete();
+	@Override
+	public int compareTo(final AbstractFileNode node) {
+		return node.isFile() ? -1 : super.compareTo(node);
 	}
-	super.delete();
-    }
 
-    @Override
-    public boolean isInTrash() {
-	if (hasParent()) {
-	    return getParent().isInTrash();
+	@Override
+	public void delete() {
+		removeUser();
+		for (final AbstractFileNode abstractFileNode : getChildSet()) {
+			abstractFileNode.delete();
+		}
+		super.delete();
 	}
-	return hasRootDirNode();
-    }
 
-    @Override
-    public DirNode getTopDirNode() {
-	if (hasParent()) {
-	    return getParent().getTopDirNode();
+	@Override
+	public boolean isInTrash() {
+		if (hasParent()) {
+			return getParent().isInTrash();
+		}
+		return hasRootDirNode();
 	}
-	return this;
-    }
 
-    /*
-     * This method guarantees that a directory is within other directory. If not it is a root.
-     */
-    @ConsistencyPredicate
-    public boolean checkParent() {
-	return hasParent() ? true : isRoot() || isInTrash();
-    }
-
-    private boolean isRoot() {
-	return getRoot() != null && getRoot();
-    }
-
-    @Override
-    public void unshare(final VisibilityGroup group) {
-	super.unshare(group);
-	for (final SharedDirNode sharedNode : getSharedDirNodes()) {
-	    sharedNode.deleteLink(new ContextPath(getParent()));
+	@Override
+	public DirNode getTopDirNode() {
+		if (hasParent()) {
+			return getParent().getTopDirNode();
+		}
+		return this;
 	}
-    }
 
-    /*
-     * sequencedNumber is used to provide an sequenced unique identifier for files within this dir
-     */
-    public void setSequenced() {
-	if (getSequenceNumber() == null) {
-	    setSequenceNumber(0);
+	/*
+	 * This method guarantees that a directory is within other directory. If not it is a root.
+	 */
+	@ConsistencyPredicate
+	public boolean checkParent() {
+		return hasParent() ? true : isRoot() || isInTrash();
 	}
-    }
 
-    public boolean hasSequenceNumber() {
-	return getSequenceNumber() != null;
-    }
-
-    @Service
-    public Integer getNextSequenceNumber() {
-	if (getSequenceNumber() == null) {
-	    throw new FFDomainException("Sequence Number is null: Must be 0 to use a sequence number");
+	private boolean isRoot() {
+		return getRoot() != null && getRoot();
 	}
-	setSequenceNumber(getSequenceNumber() + 1);
-	return getSequenceNumber();
-    }
 
-    @Override
-    @Service
-    public void recoverTo(DirNode targetDir) {
-	new RecoverDirLog(Authenticate.getCurrentUser(), targetDir.getContextPath(), this);
-	setParent(targetDir);
-    }
+	@Override
+	public void unshare(final VisibilityGroup group) {
+		super.unshare(group);
+		for (final SharedDirNode sharedNode : getSharedDirNodes()) {
+			sharedNode.deleteLink(new ContextPath(getParent()));
+		}
+	}
+
+	/*
+	 * sequencedNumber is used to provide an sequenced unique identifier for files within this dir
+	 */
+	public void setSequenced() {
+		if (getSequenceNumber() == null) {
+			setSequenceNumber(0);
+		}
+	}
+
+	public boolean hasSequenceNumber() {
+		return getSequenceNumber() != null;
+	}
+
+	@Service
+	public Integer getNextSequenceNumber() {
+		if (getSequenceNumber() == null) {
+			throw new FFDomainException("Sequence Number is null: Must be 0 to use a sequence number");
+		}
+		setSequenceNumber(getSequenceNumber() + 1);
+		return getSequenceNumber();
+	}
+
+	@Override
+	@Service
+	public void recoverTo(DirNode targetDir) {
+		new RecoverDirLog(Authenticate.getCurrentUser(), targetDir.getContextPath(), this);
+		setParent(targetDir);
+	}
 }

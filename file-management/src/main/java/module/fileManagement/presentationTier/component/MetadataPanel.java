@@ -53,92 +53,92 @@ import com.vaadin.ui.Select;
  */
 public class MetadataPanel extends Panel {
 
-    private Select selectTemplate;
-    protected TemplateItem metadataTemplateItem;
-    private TransactionalForm metadataForm;
-    private DocumentContainer documentContainer;
-    private ObjectHintedProperty<Collection> selectedDocuments;
+	private Select selectTemplate;
+	protected TemplateItem metadataTemplateItem;
+	private TransactionalForm metadataForm;
+	private DocumentContainer documentContainer;
+	private ObjectHintedProperty<Collection> selectedDocuments;
 
-    private void setMetadataItem(MetadataTemplate template) {
-	if (template == null) {
-	    metadataForm.setEnabled(false);
-	    metadataForm.setItemDataSource(null);
-	    metadataTemplateItem = null;
-	    return;
-	}
-	if (metadataTemplateItem == null) {
-	    selectTemplate.setEnabled(true);
-	    metadataTemplateItem = new TemplateItem(template, documentContainer, selectedDocuments);
-	    metadataForm.setFormFieldFactory(new FMSFieldFactory(FileManagementSystem.getBundleName(), template));
-	    metadataForm.setItemDataSource(metadataTemplateItem, metadataTemplateItem.getVisibleItemProperties());
-	    metadataForm.setImmediate(true);
-	    metadataForm.setWriteThrough(true);
-	    selectedDocuments.addListener(new ValueChangeListener() {
-
-		@Override
-		public void valueChange(ValueChangeEvent event) {
-		    metadataTemplateItem.discard();
+	private void setMetadataItem(MetadataTemplate template) {
+		if (template == null) {
+			metadataForm.setEnabled(false);
+			metadataForm.setItemDataSource(null);
+			metadataTemplateItem = null;
+			return;
 		}
-	    });
+		if (metadataTemplateItem == null) {
+			selectTemplate.setEnabled(true);
+			metadataTemplateItem = new TemplateItem(template, documentContainer, selectedDocuments);
+			metadataForm.setFormFieldFactory(new FMSFieldFactory(FileManagementSystem.getBundleName(), template));
+			metadataForm.setItemDataSource(metadataTemplateItem, metadataTemplateItem.getVisibleItemProperties());
+			metadataForm.setImmediate(true);
+			metadataForm.setWriteThrough(true);
+			selectedDocuments.addListener(new ValueChangeListener() {
 
-	} else {
-	    metadataTemplateItem.setValue(template);
-	    metadataForm.setItemDataSource(metadataTemplateItem, metadataTemplateItem.getVisibleItemProperties());
-	}
-    }
+				@Override
+				public void valueChange(ValueChangeEvent event) {
+					metadataTemplateItem.discard();
+				}
+			});
 
-    @SuppressWarnings("serial")
-    public MetadataPanel(DocumentContainer documentContainer, ObjectHintedProperty<Collection> selectedDocuments) {
-	super("Metadata");
-	this.documentContainer = documentContainer;
-	this.selectedDocuments = selectedDocuments;
-
-	selectTemplate = new Select("Tipologia");
-	selectTemplate.setImmediate(true);
-	selectTemplate.setEnabled(false);
-	selectTemplate.setContainerDataSource((Container) new DomainItem(FileManagementSystem.getInstance())
-		.getItemProperty("metadataTemplates"));
-	selectTemplate.setItemCaptionPropertyId("name");
-	selectTemplate.addListener(new ValueChangeListener() {
-	    @Override
-	    public void valueChange(ValueChangeEvent event) {
-		final MetadataTemplate template = (MetadataTemplate) event.getProperty().getValue();
-		setMetadataItem(template);
-	    }
-	});
-	addComponent(selectTemplate);
-	metadataForm = new TransactionalForm(FileManagementSystem.getBundleName());
-	metadataForm.setSizeFull();
-	addComponent(metadataForm);
-    }
-
-    public void selectDocuments(Collection<Document> documents) {
-	selectTemplate.setEnabled(true);
-	if (selectTemplate.getValue() == null) {
-	    Collection<Document> selectedDocuments = documents;
-	    Collection<String> templateNames = new HashSet<String>();
-	    for (Document doc : selectedDocuments) {
-		Metadata templateMetadata = doc.getMetadata(MetadataKey.getTemplateKey());
-		if (templateMetadata != null) {
-		    templateNames.add((String) templateMetadata.getValue());
+		} else {
+			metadataTemplateItem.setValue(template);
+			metadataForm.setItemDataSource(metadataTemplateItem, metadataTemplateItem.getVisibleItemProperties());
 		}
-	    }
-	    final String templateName = templateNames.size() < 1 ? null : templateNames.iterator().next();
-	    selectTemplate.select(templateName == null ? null : MetadataTemplate.getMetadataTemplate(templateName));
 	}
-    }
 
-    public boolean isValid() {
-	try {
-	    metadataForm.validate();
-	    return true;
-	} catch (InvalidValueException ive) {
-	    return false;
+	@SuppressWarnings("serial")
+	public MetadataPanel(DocumentContainer documentContainer, ObjectHintedProperty<Collection> selectedDocuments) {
+		super("Metadata");
+		this.documentContainer = documentContainer;
+		this.selectedDocuments = selectedDocuments;
+
+		selectTemplate = new Select("Tipologia");
+		selectTemplate.setImmediate(true);
+		selectTemplate.setEnabled(false);
+		selectTemplate.setContainerDataSource((Container) new DomainItem(FileManagementSystem.getInstance())
+				.getItemProperty("metadataTemplates"));
+		selectTemplate.setItemCaptionPropertyId("name");
+		selectTemplate.addListener(new ValueChangeListener() {
+			@Override
+			public void valueChange(ValueChangeEvent event) {
+				final MetadataTemplate template = (MetadataTemplate) event.getProperty().getValue();
+				setMetadataItem(template);
+			}
+		});
+		addComponent(selectTemplate);
+		metadataForm = new TransactionalForm(FileManagementSystem.getBundleName());
+		metadataForm.setSizeFull();
+		addComponent(metadataForm);
 	}
-    }
 
-    public void commit() {
-	metadataForm.commit();
-    }
+	public void selectDocuments(Collection<Document> documents) {
+		selectTemplate.setEnabled(true);
+		if (selectTemplate.getValue() == null) {
+			Collection<Document> selectedDocuments = documents;
+			Collection<String> templateNames = new HashSet<String>();
+			for (Document doc : selectedDocuments) {
+				Metadata templateMetadata = doc.getMetadata(MetadataKey.getTemplateKey());
+				if (templateMetadata != null) {
+					templateNames.add((String) templateMetadata.getValue());
+				}
+			}
+			final String templateName = templateNames.size() < 1 ? null : templateNames.iterator().next();
+			selectTemplate.select(templateName == null ? null : MetadataTemplate.getMetadataTemplate(templateName));
+		}
+	}
+
+	public boolean isValid() {
+		try {
+			metadataForm.validate();
+			return true;
+		} catch (InvalidValueException ive) {
+			return false;
+		}
+	}
+
+	public void commit() {
+		metadataForm.commit();
+	}
 
 }

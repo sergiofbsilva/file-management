@@ -87,324 +87,324 @@ import com.vaadin.ui.themes.Reindeer;
  */
 public class DocumentShare extends CustomComponent implements EmbeddedComponentContainer {
 
-    private AbstractFileNode fileNode;
-    private AbstractSearchContainer groupContainer;
-    private VerticalLayout groupSpecificLayout;
-    private HasPersistentGroup currentPersistentGroupHolder;
-    private VisibilityOperation currentVisibilityOperation;
-    private ContextPath contextPath;
-    private Table fileNodeGroupsTable;
-    private BeanContainer<VisibilityGroup, VisibilityGroupBean> visibilityGroupContainer;
+	private AbstractFileNode fileNode;
+	private AbstractSearchContainer groupContainer;
+	private VerticalLayout groupSpecificLayout;
+	private HasPersistentGroup currentPersistentGroupHolder;
+	private VisibilityOperation currentVisibilityOperation;
+	private ContextPath contextPath;
+	private Table fileNodeGroupsTable;
+	private BeanContainer<VisibilityGroup, VisibilityGroupBean> visibilityGroupContainer;
 
-    public class VisibilityGroupBean extends BeanItem<VisibilityGroup> {
+	public class VisibilityGroupBean extends BeanItem<VisibilityGroup> {
 
-	public VisibilityGroupBean(VisibilityGroup bean) {
-	    super(bean);
-	}
-
-	public String getPresentationName() {
-	    return getBean().persistentGroup.getPresentationName();
-	}
-
-	public void setPresentationName() {
-
-	}
-
-	public String getVisibilityName() {
-	    return getBean().visibilityOperation.getDescription();
-	}
-
-	public void setVisibilityName() {
-
-	}
-    }
-
-    @Override
-    public boolean isAllowedToOpen(Map<String, String> arguments) {
-	final String fileExternalId = arguments.get("fileNode");
-	final AbstractFileNode node = AbstractDomainObject.fromExternalId(fileExternalId);
-	if (node == null || node.isShared() || !node.isWriteGroupMember()) {
-	    return false;
-	}
-	return true;
-    }
-
-    @Override
-    public void setArguments(Map<String, String> arguments) {
-	final String fileExternalId = arguments.get("fileNode");
-	final String contextPath = arguments.get("contextPath");
-	fileNode = AbstractDomainObject.fromExternalId(fileExternalId);
-	this.contextPath = new ContextPath(contextPath);
-	updateGroupTable();
-    }
-
-    private void updateGroupTable() {
-	for (VisibilityGroup visibilityGroup : fileNode.getVisibilityGroups()) {
-	    // if (visibilityGroup.persistentGroup instanceof SingleUserGroup) {
-	    // final SingleUserGroup singleUserGroup = (SingleUserGroup)
-	    // visibilityGroup.persistentGroup;
-	    // if (singleUserGroup.isMember(Authenticate.getCurrentUser())) {
-	    // continue;
-	    // }
-	    // }
-	    visibilityGroupContainer.addBean(new VisibilityGroupBean(visibilityGroup));
-	}
-    }
-
-    private void unshare(VisibilityGroup group) {
-	fileNode.unshare(group);
-	visibilityGroupContainer.removeItem(group);
-    }
-
-    public Component createHeaderPanel() {
-	Panel welcomePanel = new Panel();
-	welcomePanel.setStyleName(BennuTheme.PANEL_LIGHT);
-	welcomePanel.setCaption(FileManagementSystem.getMessage("document.share.title"));
-	welcomePanel.setScrollable(false);
-	final Layout hlWelcomeContent = new VerticalLayout();
-	Label lblWelcomeText = new Label(FileManagementSystem.getMessage("welcome.share.content"), Label.CONTENT_XHTML);
-	hlWelcomeContent.addComponent(lblWelcomeText);
-	welcomePanel.setContent(hlWelcomeContent);
-	return welcomePanel;
-    }
-
-    private class VisibilityOperationSelect extends NativeSelect {
-
-	private VisibilityOperationSelect() {
-	    addContainerProperty("description", String.class, null);
-	    for (final VisibilityOperation operation : VisibilityOperation.values()) {
-		final Item item = addItem(operation);
-		item.getItemProperty("description").setValue(operation.getDescription());
-	    }
-	    setNullSelectionAllowed(false);
-	    setImmediate(true);
-	    setItemCaptionMode(ITEM_CAPTION_MODE_PROPERTY);
-	    setItemCaptionPropertyId("description");
-	    select(VisibilityOperation.READ);
-	}
-
-    }
-
-    private Component createSharePanel() {
-	final Panel pnlShare = new Panel(FileManagementSystem.getMessage("document.share.with"));
-	pnlShare.setStyleName(Reindeer.PANEL_LIGHT);
-	((VerticalLayout) pnlShare.getContent()).setSpacing(true);
-
-	final HorizontalLayout hlVisibilityGroup = new HorizontalLayout();
-	hlVisibilityGroup.setSizeFull();
-	hlVisibilityGroup.setSpacing(true);
-
-	final TimeoutSelect selectGroupToMake = new TimeoutSelect();
-	selectGroupToMake.setContainerDataSource(groupContainer);
-	selectGroupToMake.setItemCaptionPropertyId("presentationName");
-	selectGroupToMake.addListener(new TextChangeListener() {
-
-	    @Override
-	    public void textChange(TextChangeEvent event) {
-		groupContainer.search(event.getText());
-	    }
-	});
-
-	final VisibilityOperationSelect operationSelect = new VisibilityOperationSelect();
-	operationSelect.addListener(new ValueChangeListener() {
-
-	    @Override
-	    public void valueChange(ValueChangeEvent event) {
-		final VisibilityOperation operation = (VisibilityOperation) event.getProperty().getValue();
-		currentVisibilityOperation = operation;
-	    }
-	});
-
-	final Button btShare = new Button("Partilhar", new ClickListener() {
-
-	    @Override
-	    public void buttonClick(ClickEvent event) {
-		// if (fileNodeGroups.add(currentPersistentGroupHolder)) {
-		// final VisibilityGroup group = new
-		// VisibilityGroup(currentPersistentGroupHolder.getPersistentGroup(),
-		// currentVisibilityOperation);
-		// final VisibilityGroupBean groupBean = new
-		// VisibilityGroupBean(group);
-		// visibilityGroupContainer.addBean(groupBean);
-		// updateFileVisibility(group);
-		// } else {
-		// getWindow().showNotification("Elemento já se encontra atribuído");
-		// }
-		// selectGroupToMake.setValue(StringUtils.EMPTY);
-		// groupSpecificLayout.removeAllComponents();
-		final VisibilityGroup group = new VisibilityGroup(currentPersistentGroupHolder.getPersistentGroup(),
-			currentVisibilityOperation);
-		if (!visibilityGroupContainer.containsId(group)) {
-		    visibilityGroupContainer.addBean(new VisibilityGroupBean(group));
-		    updateFileVisibility(group);
-		} else {
-		    getWindow().showNotification(
-			    "Já está partilhado com o utilizador " + group.persistentGroup.getPresentationName());
-		}
-		selectGroupToMake.setValue(StringUtils.EMPTY);
-		groupSpecificLayout.removeAllComponents();
-	    }
-	});
-
-	selectGroupToMake.addListener(new ValueChangeListener() {
-
-	    @Override
-	    public void valueChange(ValueChangeEvent event) {
-		groupSpecificLayout.removeAllComponents();
-		Presentable presentable = (Presentable) event.getProperty().getValue();
-
-		for (final HasPersistentGroupCreator hasPersistentGroupCreator : GroupCreatorRegistry
-			.getPersistentGroupCreators()) {
-		    final HasPersistentGroup groupHolder = hasPersistentGroupCreator.createGroupFor(presentable);
-		    if (groupHolder != null) {
-			setCurrentPersistentGroupHolder(groupHolder);
-			groupHolder.renderGroupSpecificLayout(groupSpecificLayout);
-			groupSpecificLayout.addComponent(btShare);
-		    }
+		public VisibilityGroupBean(VisibilityGroup bean) {
+			super(bean);
 		}
 
-	    }
-	});
+		public String getPresentationName() {
+			return getBean().persistentGroup.getPresentationName();
+		}
 
-	hlVisibilityGroup.addComponent(selectGroupToMake);
-	hlVisibilityGroup.addComponent(operationSelect);
+		public void setPresentationName() {
 
-	pnlShare.addComponent(hlVisibilityGroup);
-	pnlShare.addComponent(groupSpecificLayout);
+		}
 
-	selectGroupToMake.setSizeFull();
-	hlVisibilityGroup.setExpandRatio(selectGroupToMake, 0.7f);
-	return pnlShare;
-    }
+		public String getVisibilityName() {
+			return getBean().visibilityOperation.getDescription();
+		}
 
-    protected void updateFileVisibility(VisibilityGroup group) {
-	fileNode.share(currentPersistentGroupHolder.getUser(), group, contextPath);
-    }
+		public void setVisibilityName() {
 
-    protected void setCurrentPersistentGroupHolder(HasPersistentGroup groupHolder) {
-	this.currentPersistentGroupHolder = groupHolder;
-    }
+		}
+	}
 
-    private Panel createFileDetails() {
-	return NodeDetails.makeDetails(new DomainItem<AbstractFileNode>(fileNode), false, true);
-    }
+	@Override
+	public boolean isAllowedToOpen(Map<String, String> arguments) {
+		final String fileExternalId = arguments.get("fileNode");
+		final AbstractFileNode node = AbstractDomainObject.fromExternalId(fileExternalId);
+		if (node == null || node.isShared() || !node.isWriteGroupMember()) {
+			return false;
+		}
+		return true;
+	}
 
-    private GridLayout createGrid() {
-	GridSystemLayout gsl = new GridSystemLayout();
-	gsl.setSizeFull();
-	gsl.setMargin(true, true, true, false);
-	gsl.setSpacing(true);
-	gsl.addComponent(10, createSharePanel());
-	gsl.addComponent(6, createFileDetails());
-	return gsl;
-    }
+	@Override
+	public void setArguments(Map<String, String> arguments) {
+		final String fileExternalId = arguments.get("fileNode");
+		final String contextPath = arguments.get("contextPath");
+		fileNode = AbstractDomainObject.fromExternalId(fileExternalId);
+		this.contextPath = new ContextPath(contextPath);
+		updateGroupTable();
+	}
 
-    public Component createPage() {
-	GridSystemLayout gsl = new GridSystemLayout();
-	gsl.setMargin(true);
-	gsl.setSpacing(true);
-	gsl.addComponent(16, createHeaderPanel());
-	gsl.addComponent(10, createSharePanel());
-	gsl.addComponent(6, createFileDetails());
-	gsl.addComponent(16, fileNodeGroupsTable);
-	gsl.addComponent(6, createBackLink());
+	private void updateGroupTable() {
+		for (VisibilityGroup visibilityGroup : fileNode.getVisibilityGroups()) {
+			// if (visibilityGroup.persistentGroup instanceof SingleUserGroup) {
+			// final SingleUserGroup singleUserGroup = (SingleUserGroup)
+			// visibilityGroup.persistentGroup;
+			// if (singleUserGroup.isMember(Authenticate.getCurrentUser())) {
+			// continue;
+			// }
+			// }
+			visibilityGroupContainer.addBean(new VisibilityGroupBean(visibilityGroup));
+		}
+	}
 
-	return gsl;
-    }
+	private void unshare(VisibilityGroup group) {
+		fileNode.unshare(group);
+		visibilityGroupContainer.removeItem(group);
+	}
 
-    private Component createBackLink() {
-	final Button btBack = new Button("Concluir");
-	btBack.addListener(new ClickListener() {
+	public Component createHeaderPanel() {
+		Panel welcomePanel = new Panel();
+		welcomePanel.setStyleName(BennuTheme.PANEL_LIGHT);
+		welcomePanel.setCaption(FileManagementSystem.getMessage("document.share.title"));
+		welcomePanel.setScrollable(false);
+		final Layout hlWelcomeContent = new VerticalLayout();
+		Label lblWelcomeText = new Label(FileManagementSystem.getMessage("welcome.share.content"), Label.CONTENT_XHTML);
+		hlWelcomeContent.addComponent(lblWelcomeText);
+		welcomePanel.setContent(hlWelcomeContent);
+		return welcomePanel;
+	}
 
-	    @Override
-	    public void buttonClick(ClickEvent event) {
-		EmbeddedApplication.back(getApplication());
-	    }
-	});
-	return btBack;
-    }
+	private class VisibilityOperationSelect extends NativeSelect {
 
-    public DocumentShare() {
-	fileNode = null;
-	groupContainer = new GroupContainer();
-	groupSpecificLayout = new VerticalLayout();
-	groupSpecificLayout.setSpacing(true);
-	visibilityGroupContainer = new BeanContainer<VisibilityGroup, VisibilityGroupBean>(VisibilityGroupBean.class);
-	visibilityGroupContainer.setBeanIdProperty("bean");
+		private VisibilityOperationSelect() {
+			addContainerProperty("description", String.class, null);
+			for (final VisibilityOperation operation : VisibilityOperation.values()) {
+				final Item item = addItem(operation);
+				item.getItemProperty("description").setValue(operation.getDescription());
+			}
+			setNullSelectionAllowed(false);
+			setImmediate(true);
+			setItemCaptionMode(ITEM_CAPTION_MODE_PROPERTY);
+			setItemCaptionPropertyId("description");
+			select(VisibilityOperation.READ);
+		}
 
-	currentVisibilityOperation = VisibilityOperation.READ;
+	}
 
-	fileNodeGroupsTable = new Table();
-	fileNodeGroupsTable.addStyleName("shareTable");
-	fileNodeGroupsTable.setVisible(false);
-	fileNodeGroupsTable.setImmediate(true);
-	fileNodeGroupsTable.setWidth("100%");
-	fileNodeGroupsTable.setPageLength(0);
-	fileNodeGroupsTable.setContainerDataSource(visibilityGroupContainer);
-	//fileNodeGroups = new HashSet<HasPersistentGroup>();
-	fileNodeGroupsTable.addListener(new ItemSetChangeListener() {
+	private Component createSharePanel() {
+		final Panel pnlShare = new Panel(FileManagementSystem.getMessage("document.share.with"));
+		pnlShare.setStyleName(Reindeer.PANEL_LIGHT);
+		((VerticalLayout) pnlShare.getContent()).setSpacing(true);
 
-	    @Override
-	    public void containerItemSetChange(ItemSetChangeEvent event) {
-		fileNodeGroupsTable.setVisible(event.getContainer().size() > 0);
-	    }
-	});
-	fileNodeGroupsTable.addGeneratedColumn("Nome", new ColumnGenerator() {
+		final HorizontalLayout hlVisibilityGroup = new HorizontalLayout();
+		hlVisibilityGroup.setSizeFull();
+		hlVisibilityGroup.setSpacing(true);
 
-	    @Override
-	    public Component generateCell(Table source, Object itemId, Object columnId) {
-		final VisibilityGroup visibilityGroup = (VisibilityGroup) itemId;
-		final Label lblName = new Label(visibilityGroup.persistentGroup.getPresentationName());
-		lblName.setHeight("30px");
-		return lblName;
-	    }
+		final TimeoutSelect selectGroupToMake = new TimeoutSelect();
+		selectGroupToMake.setContainerDataSource(groupContainer);
+		selectGroupToMake.setItemCaptionPropertyId("presentationName");
+		selectGroupToMake.addListener(new TextChangeListener() {
 
-	});
+			@Override
+			public void textChange(TextChangeEvent event) {
+				groupContainer.search(event.getText());
+			}
+		});
 
-	fileNodeGroupsTable.addGeneratedColumn("Remover", new ColumnGenerator() {
+		final VisibilityOperationSelect operationSelect = new VisibilityOperationSelect();
+		operationSelect.addListener(new ValueChangeListener() {
 
-	    @Override
-	    public Component generateCell(Table source, Object itemId, Object columnId) {
-		final VisibilityGroup visibilityGroup = (VisibilityGroup) itemId;
-		Button btRemoveGroup = new Button("Remover", new ClickListener() {
+			@Override
+			public void valueChange(ValueChangeEvent event) {
+				final VisibilityOperation operation = (VisibilityOperation) event.getProperty().getValue();
+				currentVisibilityOperation = operation;
+			}
+		});
 
-		    @Override
-		    public void buttonClick(ClickEvent event) {
-			if (visibilityGroup.persistentGroup.isMember(Authenticate.getCurrentUser())) {
-			    ConfirmDialog.show(getWindow(), "Atenção",
-				    "Encontra-se neste grupo. Tem a certeza que o deseja remover ? ", "Sim", "Não",
-				    new ConfirmDialog.Listener() {
+		final Button btShare = new Button("Partilhar", new ClickListener() {
 
-					@Override
-					public void onClose(ConfirmDialog dialog) {
-					    if (dialog.isConfirmed()) {
-						unshare(visibilityGroup);
-					    }
+			@Override
+			public void buttonClick(ClickEvent event) {
+				// if (fileNodeGroups.add(currentPersistentGroupHolder)) {
+				// final VisibilityGroup group = new
+				// VisibilityGroup(currentPersistentGroupHolder.getPersistentGroup(),
+				// currentVisibilityOperation);
+				// final VisibilityGroupBean groupBean = new
+				// VisibilityGroupBean(group);
+				// visibilityGroupContainer.addBean(groupBean);
+				// updateFileVisibility(group);
+				// } else {
+				// getWindow().showNotification("Elemento já se encontra atribuído");
+				// }
+				// selectGroupToMake.setValue(StringUtils.EMPTY);
+				// groupSpecificLayout.removeAllComponents();
+				final VisibilityGroup group =
+						new VisibilityGroup(currentPersistentGroupHolder.getPersistentGroup(), currentVisibilityOperation);
+				if (!visibilityGroupContainer.containsId(group)) {
+					visibilityGroupContainer.addBean(new VisibilityGroupBean(group));
+					updateFileVisibility(group);
+				} else {
+					getWindow().showNotification(
+							"Já está partilhado com o utilizador " + group.persistentGroup.getPresentationName());
+				}
+				selectGroupToMake.setValue(StringUtils.EMPTY);
+				groupSpecificLayout.removeAllComponents();
+			}
+		});
+
+		selectGroupToMake.addListener(new ValueChangeListener() {
+
+			@Override
+			public void valueChange(ValueChangeEvent event) {
+				groupSpecificLayout.removeAllComponents();
+				Presentable presentable = (Presentable) event.getProperty().getValue();
+
+				for (final HasPersistentGroupCreator hasPersistentGroupCreator : GroupCreatorRegistry
+						.getPersistentGroupCreators()) {
+					final HasPersistentGroup groupHolder = hasPersistentGroupCreator.createGroupFor(presentable);
+					if (groupHolder != null) {
+						setCurrentPersistentGroupHolder(groupHolder);
+						groupHolder.renderGroupSpecificLayout(groupSpecificLayout);
+						groupSpecificLayout.addComponent(btShare);
 					}
-				    });
-			} else {
-			    unshare(visibilityGroup);
+				}
+
+			}
+		});
+
+		hlVisibilityGroup.addComponent(selectGroupToMake);
+		hlVisibilityGroup.addComponent(operationSelect);
+
+		pnlShare.addComponent(hlVisibilityGroup);
+		pnlShare.addComponent(groupSpecificLayout);
+
+		selectGroupToMake.setSizeFull();
+		hlVisibilityGroup.setExpandRatio(selectGroupToMake, 0.7f);
+		return pnlShare;
+	}
+
+	protected void updateFileVisibility(VisibilityGroup group) {
+		fileNode.share(currentPersistentGroupHolder.getUser(), group, contextPath);
+	}
+
+	protected void setCurrentPersistentGroupHolder(HasPersistentGroup groupHolder) {
+		this.currentPersistentGroupHolder = groupHolder;
+	}
+
+	private Panel createFileDetails() {
+		return NodeDetails.makeDetails(new DomainItem<AbstractFileNode>(fileNode), false, true);
+	}
+
+	private GridLayout createGrid() {
+		GridSystemLayout gsl = new GridSystemLayout();
+		gsl.setSizeFull();
+		gsl.setMargin(true, true, true, false);
+		gsl.setSpacing(true);
+		gsl.addComponent(10, createSharePanel());
+		gsl.addComponent(6, createFileDetails());
+		return gsl;
+	}
+
+	public Component createPage() {
+		GridSystemLayout gsl = new GridSystemLayout();
+		gsl.setMargin(true);
+		gsl.setSpacing(true);
+		gsl.addComponent(16, createHeaderPanel());
+		gsl.addComponent(10, createSharePanel());
+		gsl.addComponent(6, createFileDetails());
+		gsl.addComponent(16, fileNodeGroupsTable);
+		gsl.addComponent(6, createBackLink());
+
+		return gsl;
+	}
+
+	private Component createBackLink() {
+		final Button btBack = new Button("Concluir");
+		btBack.addListener(new ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				EmbeddedApplication.back(getApplication());
+			}
+		});
+		return btBack;
+	}
+
+	public DocumentShare() {
+		fileNode = null;
+		groupContainer = new GroupContainer();
+		groupSpecificLayout = new VerticalLayout();
+		groupSpecificLayout.setSpacing(true);
+		visibilityGroupContainer = new BeanContainer<VisibilityGroup, VisibilityGroupBean>(VisibilityGroupBean.class);
+		visibilityGroupContainer.setBeanIdProperty("bean");
+
+		currentVisibilityOperation = VisibilityOperation.READ;
+
+		fileNodeGroupsTable = new Table();
+		fileNodeGroupsTable.addStyleName("shareTable");
+		fileNodeGroupsTable.setVisible(false);
+		fileNodeGroupsTable.setImmediate(true);
+		fileNodeGroupsTable.setWidth("100%");
+		fileNodeGroupsTable.setPageLength(0);
+		fileNodeGroupsTable.setContainerDataSource(visibilityGroupContainer);
+		//fileNodeGroups = new HashSet<HasPersistentGroup>();
+		fileNodeGroupsTable.addListener(new ItemSetChangeListener() {
+
+			@Override
+			public void containerItemSetChange(ItemSetChangeEvent event) {
+				fileNodeGroupsTable.setVisible(event.getContainer().size() > 0);
+			}
+		});
+		fileNodeGroupsTable.addGeneratedColumn("Nome", new ColumnGenerator() {
+
+			@Override
+			public Component generateCell(Table source, Object itemId, Object columnId) {
+				final VisibilityGroup visibilityGroup = (VisibilityGroup) itemId;
+				final Label lblName = new Label(visibilityGroup.persistentGroup.getPresentationName());
+				lblName.setHeight("30px");
+				return lblName;
 			}
 
-		    }
 		});
-		btRemoveGroup.setStyleName(BaseTheme.BUTTON_LINK);
-		return btRemoveGroup;
-	    }
 
-	});
+		fileNodeGroupsTable.addGeneratedColumn("Remover", new ColumnGenerator() {
 
-	fileNodeGroupsTable.setVisibleColumns(new String[] { "Nome", "visibilityName", "Remover" });
-	fileNodeGroupsTable.setColumnHeaders(new String[] { "Nome", "Visibilidade", "Acções" });
-	fileNodeGroupsTable.setColumnWidth("Nome", 670);
-	fileNodeGroupsTable.setColumnReorderingAllowed(false);
-	fileNodeGroupsTable.setColumnCollapsingAllowed(false);
-	fileNodeGroupsTable.setSortDisabled(true);
-    }
+			@Override
+			public Component generateCell(Table source, Object itemId, Object columnId) {
+				final VisibilityGroup visibilityGroup = (VisibilityGroup) itemId;
+				Button btRemoveGroup = new Button("Remover", new ClickListener() {
 
-    @Override
-    public void attach() {
-	super.attach();
-	setCompositionRoot(createPage());
-    }
+					@Override
+					public void buttonClick(ClickEvent event) {
+						if (visibilityGroup.persistentGroup.isMember(Authenticate.getCurrentUser())) {
+							ConfirmDialog.show(getWindow(), "Atenção",
+									"Encontra-se neste grupo. Tem a certeza que o deseja remover ? ", "Sim", "Não",
+									new ConfirmDialog.Listener() {
+
+										@Override
+										public void onClose(ConfirmDialog dialog) {
+											if (dialog.isConfirmed()) {
+												unshare(visibilityGroup);
+											}
+										}
+									});
+						} else {
+							unshare(visibilityGroup);
+						}
+
+					}
+				});
+				btRemoveGroup.setStyleName(BaseTheme.BUTTON_LINK);
+				return btRemoveGroup;
+			}
+
+		});
+
+		fileNodeGroupsTable.setVisibleColumns(new String[] { "Nome", "visibilityName", "Remover" });
+		fileNodeGroupsTable.setColumnHeaders(new String[] { "Nome", "Visibilidade", "Acções" });
+		fileNodeGroupsTable.setColumnWidth("Nome", 670);
+		fileNodeGroupsTable.setColumnReorderingAllowed(false);
+		fileNodeGroupsTable.setColumnCollapsingAllowed(false);
+		fileNodeGroupsTable.setSortDisabled(true);
+	}
+
+	@Override
+	public void attach() {
+		super.attach();
+		setCompositionRoot(createPage());
+	}
 }

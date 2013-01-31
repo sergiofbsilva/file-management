@@ -42,69 +42,69 @@ import com.vaadin.ui.Link;
  * 
  */
 public class LinkViewer extends CustomComponent implements Viewer, ValueChangeListener {
-    private Property source;
+	private Property source;
 
-    protected String urlText;
+	protected String urlText;
 
-    private String targetName;
+	private String targetName;
 
-    public LinkViewer() {
-	setCompositionRoot(new Label());
-    }
-
-    public LinkViewer(Property newDataSource) {
-	this();
-	setPropertyDataSource(newDataSource);
-    }
-
-    public LinkViewer(String urlText, Property newDataSource) {
-	this(newDataSource);
-	this.urlText = urlText;
-    }
-
-    public LinkViewer(String urlText, String targetName, Property newDataSource) {
-	this(urlText, newDataSource);
-	this.targetName = targetName;
-    }
-
-    public LinkViewer(String urlText, String targetName) {
-	this(urlText, targetName, null);
-    }
-
-    @Override
-    public void setPropertyDataSource(Property newDataSource) {
-	if (source != null) {
-	    if (source instanceof ValueChangeNotifier) {
-		((ValueChangeNotifier) source).removeListener(this);
-	    }
+	public LinkViewer() {
+		setCompositionRoot(new Label());
 	}
-	this.source = newDataSource;
-	if (source instanceof ValueChangeNotifier) {
-	    ((ValueChangeNotifier) source).addListener(this);
+
+	public LinkViewer(Property newDataSource) {
+		this();
+		setPropertyDataSource(newDataSource);
 	}
-	updateContent();
-    }
 
-    @Override
-    public Property getPropertyDataSource() {
-	return source;
-    }
-
-    @Override
-    public void valueChange(ValueChangeEvent event) {
-	updateContent();
-    }
-
-    protected void updateContent() {
-	URL url = source != null ? (URL) source.getValue() : null;
-	if (url != null) {
-	    Link link = new Link(urlText != null ? urlText : url.toString(), new ExternalResource(url));
-	    if (targetName != null) {
-		link.setTargetName(targetName);
-	    }
-	    setCompositionRoot(link);
-	} else {
-	    setCompositionRoot(new Label());
+	public LinkViewer(String urlText, Property newDataSource) {
+		this(newDataSource);
+		this.urlText = urlText;
 	}
-    }
+
+	public LinkViewer(String urlText, String targetName, Property newDataSource) {
+		this(urlText, newDataSource);
+		this.targetName = targetName;
+	}
+
+	public LinkViewer(String urlText, String targetName) {
+		this(urlText, targetName, null);
+	}
+
+	@Override
+	public void setPropertyDataSource(Property newDataSource) {
+		if (source != null) {
+			if (source instanceof ValueChangeNotifier) {
+				((ValueChangeNotifier) source).removeListener(this);
+			}
+		}
+		this.source = newDataSource;
+		if (source instanceof ValueChangeNotifier) {
+			((ValueChangeNotifier) source).addListener(this);
+		}
+		updateContent();
+	}
+
+	@Override
+	public Property getPropertyDataSource() {
+		return source;
+	}
+
+	@Override
+	public void valueChange(ValueChangeEvent event) {
+		updateContent();
+	}
+
+	protected void updateContent() {
+		URL url = source != null ? (URL) source.getValue() : null;
+		if (url != null) {
+			Link link = new Link(urlText != null ? urlText : url.toString(), new ExternalResource(url));
+			if (targetName != null) {
+				link.setTargetName(targetName);
+			}
+			setCompositionRoot(link);
+		} else {
+			setCompositionRoot(new Label());
+		}
+	}
 }

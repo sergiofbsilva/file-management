@@ -6,7 +6,7 @@ import com.vaadin.ui.Component;
 
 public interface AbstractLogViewer extends Component {
 
-    public boolean hasOperations();
+	public boolean hasOperations();
 
-    public List<Component> getOperations();
+	public List<Component> getOperations();
 }

@@ -20,40 +20,41 @@ import pt.ist.fenixframework.pstm.AbstractDomainObject;
 @Mapping(path = "/fileManagementOrganizationModel")
 public class OrganizationModelPluginAction extends ContextBaseAction {
 
-    public static class FileRepositoryView extends PartyViewHook {
+	public static class FileRepositoryView extends PartyViewHook {
 
-	@Override
-	public String hook(final HttpServletRequest request, final OrganizationalModel organizationalModel, final Party party) {
-	    return "/fileManagement/organizationModelDocumentView.jsp";
+		@Override
+		public String hook(final HttpServletRequest request, final OrganizationalModel organizationalModel, final Party party) {
+			return "/fileManagement/organizationModelDocumentView.jsp";
+		}
+
+		@Override
+		public String getViewName() {
+			return "04_documentView";
+		}
+
+		@Override
+		public String getPresentationName() {
+			return FileManagementSystem.getMessage("add.node.file.management.interface");
+		}
+
+		@Override
+		public boolean isAvailableFor(final Party party) {
+			return party != null && party.isUnit();
+		}
 	}
 
-	@Override
-	public String getViewName() {
-	    return "04_documentView";
+	public ActionForward createFileRepository(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+		final String partyOid = getAttribute(request, "partyOid");
+		final String organizationalModelOid = getAttribute(request, "organizationalModelOid");
+		final Party party = AbstractDomainObject.fromExternalId(partyOid);
+		FileRepository.getOrCreateFileRepository(party);
+		request.setAttribute("party", party);
+		final String redirect =
+				String.format(
+						"/organizationModel.do?method=viewModel&organizationalModelOid=%s&partyOid=%s&viewName=04_documentView",
+						organizationalModelOid, partyOid);
+		return new ActionForward(redirect, true);
 	}
-
-	@Override
-	public String getPresentationName() {
-	    return FileManagementSystem.getMessage("add.node.file.management.interface");
-	}
-
-	@Override
-	public boolean isAvailableFor(final Party party) {
-	    return party != null && party.isUnit();
-	}
-    }
-
-    public ActionForward createFileRepository(ActionMapping mapping, ActionForm form, HttpServletRequest request,
-	    HttpServletResponse response) throws Exception {
-	final String partyOid = getAttribute(request, "partyOid");
-	final String organizationalModelOid = getAttribute(request, "organizationalModelOid");
-	final Party party = AbstractDomainObject.fromExternalId(partyOid);
-	FileRepository.getOrCreateFileRepository(party);
-	request.setAttribute("party", party);
-	final String redirect = String.format(
-		"/organizationModel.do?method=viewModel&organizationalModelOid=%s&partyOid=%s&viewName=04_documentView",
-		organizationalModelOid, partyOid);
-	return new ActionForward(redirect, true);
-    }
 
 }
