@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import jvstm.cps.ConsistencyPredicate;
 import module.fileManagement.domain.log.AbstractLog;
 import module.fileManagement.domain.log.DirLog;
 import pt.ist.bennu.core.domain.User;
@@ -206,6 +207,7 @@ public class SharedDirNode extends SharedDirNode_Base implements SharedNode {
     }
 
     @Override
+    @ConsistencyPredicate
     public boolean checkParent() {
 	return true;
     }
