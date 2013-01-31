@@ -9,11 +9,11 @@ public class FileRestUtilsInitializer implements ServletContextListener {
 
 	@Override
 	public void contextInitialized(ServletContextEvent event) {
-		
+
 	}
-	
+
 	@Override
-    public void contextDestroyed(ServletContextEvent event) {
-		
-    }
+	public void contextDestroyed(ServletContextEvent event) {
+
+	}
 }

@@ -9,44 +9,44 @@ import pt.ist.file.rest.utils.client.IDocument;
 
 public class RemoteFolder extends RemoteFolder_Base {
 
-    private Folder folder;
+	private Folder folder;
 
-    public RemoteFolder(final Folder folder) {
-	this(folder.getFMSRestClient(), folder.getRemoteExternalId());
-	this.folder = folder;
-    }
-
-    private RemoteFolder(final FMSRestClient fmsRestClient, final String remoteExternalId) {
-	this(fmsRestClient.getClientHost(), fmsRestClient.getUserToLogin(), remoteExternalId);
-    }
-
-    private RemoteFolder(final ClientHost clientHost, final String userToLogin, final String remoteExternalId) {
-	super();
-	setClientHost(clientHost);
-	setRemoteExternalId(remoteExternalId);
-	setUsername(userToLogin);
-    }
-
-    private Folder getFolder() {
-	if (folder == null) {
-	    folder = new Folder(new FMSRestClient(getClientHost(), getUsername()), getRemoteExternalId());
+	public RemoteFolder(final Folder folder) {
+		this(folder.getFMSRestClient(), folder.getRemoteExternalId());
+		this.folder = folder;
 	}
-	return folder;
-    }
 
-    @Override
-    public IDocument createDocument(final File file2upload) {
-	return getFolder().createDocument(file2upload);
-    }
+	private RemoteFolder(final FMSRestClient fmsRestClient, final String remoteExternalId) {
+		this(fmsRestClient.getClientHost(), fmsRestClient.getUserToLogin(), remoteExternalId);
+	}
 
-    @Override
-    public Folder createFolder(final String name) {
-	return getFolder().createFolder(name);
-    }
+	private RemoteFolder(final ClientHost clientHost, final String userToLogin, final String remoteExternalId) {
+		super();
+		setClientHost(clientHost);
+		setRemoteExternalId(remoteExternalId);
+		setUsername(userToLogin);
+	}
 
-    @Override
-    public FMSRestClient getFMSRestClient() {
-	throw new UnsupportedOperationException();
-    }
+	private Folder getFolder() {
+		if (folder == null) {
+			folder = new Folder(new FMSRestClient(getClientHost(), getUsername()), getRemoteExternalId());
+		}
+		return folder;
+	}
+
+	@Override
+	public IDocument createDocument(final File file2upload) {
+		return getFolder().createDocument(file2upload);
+	}
+
+	@Override
+	public Folder createFolder(final String name) {
+		return getFolder().createFolder(name);
+	}
+
+	@Override
+	public FMSRestClient getFMSRestClient() {
+		throw new UnsupportedOperationException();
+	}
 
 }
