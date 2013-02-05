@@ -1,0 +1,74 @@
+package pt.ist.file.rest.utils;
+
+/*
+ * @(#)file-rest-utils.dml
+ *
+ * Copyright 2012 Instituto Superior Técnico
+ * Founding Authors: João Figueiredo, Luis Cruz, Paulo Abrantes, Susana Fernandes
+ * 
+ *      https://fenix-ashes.ist.utl.pt/
+ * 
+ *   This file is part of the Bennu web application infrastructure.
+ *
+ *   Bennu is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU Lesser General Public License as published
+ *   by the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.*
+ *
+ *   Bennu is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *   GNU Lesser General Public License for more details.
+ *
+ *   You should have received a copy of the GNU Lesser General Public License
+ *   along with MyOrg. If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
+ 
+ class domain.RemoteFolder implements client.IFolder {
+ 	String remoteExternalId;
+ 	String username;
+ }
+ 
+ class domain.RemoteDocument implements client.IDocument {
+ 	String remoteExternalId;
+ 	String username;
+ }
+ 
+ relation ClientHostFolders {
+ 	.module.webserviceutils.domain.ClientHost playsRole clientHost;
+ 	domain.RemoteFolder playsRole remoteFolder {
+ 		multiplicity *;
+ 	}
+ }
+ 
+ relation ClientHostFiles {
+ 	.module.webserviceutils.domain.ClientHost playsRole clientHost;
+ 	domain.RemoteDocument playsRole remoteFile {
+ 		multiplicity *;
+ 	}
+ }
+ 
+ // This class is only for testing, it should not be deployed
+ class domain.FileRestUtilsSystem {
+ 
+ }
+
+relation FileRestUtilsSystemDocument {
+ 	domain.FileRestUtilsSystem playsRole system;
+ 	domain.RemoteDocument playsRole document {
+ 		multiplicity *;
+ 	}
+}
+ 
+relation FileRestUtilsSystemFolders {
+ 	domain.FileRestUtilsSystem playsRole system;
+ 	domain.RemoteFolder playsRole folder {
+ 		multiplicity *;
+ 	}
+}
+
+relation MyOrgFileRestUtilsSystem {
+	.pt.ist.bennu.core.domain.MyOrg playsRole myOrg;
+	domain.FileRestUtilsSystem playsRole fileRestUtilsSystem;
+}
