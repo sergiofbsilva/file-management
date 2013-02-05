@@ -4,13 +4,13 @@ import pt.ist.bennu.core.domain.exceptions.DomainException;
 
 public class WriteDeniedException extends DomainException {
 
-	public WriteDeniedException() {
-		super();
-	}
+    public WriteDeniedException() {
+        super();
+    }
 
-	@Override
-	public String getMessage() {
-		return FileManagementSystem.getMessage(getClass().getName());
-	}
+    @Override
+    public String getMessage() {
+        return FileManagementSystem.getMessage(getClass().getName());
+    }
 
 }

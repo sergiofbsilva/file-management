@@ -40,67 +40,67 @@ import com.vaadin.data.Property.ValueChangeListener;
  */
 public class VisibilityListViewer extends com.vaadin.ui.Label implements ValueChangeListener {
 
-	public enum VisibilityType {
-		PRIVATE("label.visibility.private"), SHARED("label.visibility.shared"), PUBLIC("label.visibility.public");
+    public enum VisibilityType {
+        PRIVATE("label.visibility.private"), SHARED("label.visibility.shared"), PUBLIC("label.visibility.public");
 
-		private final String typeKey;
+        private final String typeKey;
 
-		VisibilityType(String type) {
-			typeKey = type;
-		}
+        VisibilityType(String type) {
+            typeKey = type;
+        }
 
-		public String getTypeKey() {
-			return typeKey;
-		}
-	}
+        public String getTypeKey() {
+            return typeKey;
+        }
+    }
 
-	public VisibilityListViewer() {
-		addStyleName("visibility-viewer");
-	}
+    public VisibilityListViewer() {
+        addStyleName("visibility-viewer");
+    }
 
-	public VisibilityList getPropertyValue() {
-		return (VisibilityList) getValue();
-	}
+    public VisibilityList getPropertyValue() {
+        return (VisibilityList) getValue();
+    }
 
-	// public String getVisibility() {
-	// final PersistentGroup readGroup = getReadGroup();
-	// final String key = readGroup instanceof SingleUserGroup ?
-	// "label.visibility.private"
-	// : readGroup instanceof AnyoneGroup ? "label.visibility.public" :
-	// "label.visibility.shared";
-	// return FileManagementSystem.getMessage(key);
-	// }
+    // public String getVisibility() {
+    // final PersistentGroup readGroup = getReadGroup();
+    // final String key = readGroup instanceof SingleUserGroup ?
+    // "label.visibility.private"
+    // : readGroup instanceof AnyoneGroup ? "label.visibility.public" :
+    // "label.visibility.shared";
+    // return FileManagementSystem.getMessage(key);
+    // }
 
-	public boolean isPublicAccess() {
-		for (VisibilityGroup group : getPropertyValue()) {
-			if (group.persistentGroup instanceof AnyoneGroup) {
-				return true;
-			}
-		}
-		return false;
-	}
+    public boolean isPublicAccess() {
+        for (VisibilityGroup group : getPropertyValue()) {
+            if (group.persistentGroup instanceof AnyoneGroup) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	protected VisibilityType getVisibilityType() {
-		final VisibilityList list = getPropertyValue();
-		if (isPublicAccess()) {
-			return VisibilityType.PUBLIC;
-		} else {
-			if (list.size() == 1 && list.contains(SingleUserGroup.class) || list.size() == 2
-					&& list.contains(SingleUserGroup.class) && list.contains(EmptyGroup.class)) {
-				return VisibilityType.PRIVATE;
-			} else {
-				return VisibilityType.SHARED;
-			}
-		}
-	}
+    protected VisibilityType getVisibilityType() {
+        final VisibilityList list = getPropertyValue();
+        if (isPublicAccess()) {
+            return VisibilityType.PUBLIC;
+        } else {
+            if (list.size() == 1 && list.contains(SingleUserGroup.class) || list.size() == 2
+                    && list.contains(SingleUserGroup.class) && list.contains(EmptyGroup.class)) {
+                return VisibilityType.PRIVATE;
+            } else {
+                return VisibilityType.SHARED;
+            }
+        }
+    }
 
-	@Override
-	public String toString() {
-		return FileManagementSystem.getMessage(getVisibilityType().getTypeKey());
-	}
+    @Override
+    public String toString() {
+        return FileManagementSystem.getMessage(getVisibilityType().getTypeKey());
+    }
 
-	@Override
-	public String getDescription() {
-		return getPropertyValue().getDescription();
-	}
+    @Override
+    public String getDescription() {
+        return getPropertyValue().getDescription();
+    }
 }

@@ -34,190 +34,190 @@ import com.vaadin.ui.themes.BaseTheme;
 
 public class UploadFilePanel extends CustomComponent implements ValueChangeNotifier {
 
-	private final UploadFileArea uploadArea;
-	private final Table documents;
-	private DocumentContainer documentContainer;
-	private ObjectHintedProperty<Collection> selectedDocumentsProperty;
-	private ContextPath contextPath;
-	private final UploadPage uploadPage;
-	private final Label submittedDocumentsLabel;
-	private final Label lblOr = new Label("ou");
+    private final UploadFileArea uploadArea;
+    private final Table documents;
+    private DocumentContainer documentContainer;
+    private ObjectHintedProperty<Collection> selectedDocumentsProperty;
+    private ContextPath contextPath;
+    private final UploadPage uploadPage;
+    private final Label submittedDocumentsLabel;
+    private final Label lblOr = new Label("ou");
 
-	class UploadListener implements FileUploadListener {
+    class UploadListener implements FileUploadListener {
 
-		@Override
-		public void uploadedFile(OnFileUploadEvent event) {
-			final DirNode uploadDir = getUploadDir();
-			if (uploadDir.hasSequenceNumber()) {
-				seqNumberUpload(event);
-			} else {
-				normalUpload(event);
-			}
-		}
+        @Override
+        public void uploadedFile(OnFileUploadEvent event) {
+            final DirNode uploadDir = getUploadDir();
+            if (uploadDir.hasSequenceNumber()) {
+                seqNumberUpload(event);
+            } else {
+                normalUpload(event);
+            }
+        }
 
-		private void normalUpload(OnFileUploadEvent event) {
-			final DirNode uploadDir = getUploadDir();
-			if (uploadDir != null) {
-				try {
-					final FileNode fileNode =
-							uploadDir.createFile(event.getFile(), event.getFileName(), event.getLength(), contextPath);
-					addDocument(fileNode.getDocument());
-				} catch (FFDomainException ffde) {
-					uploadArea.setError(ffde.getMessage());
-				}
-			}
-		}
+        private void normalUpload(OnFileUploadEvent event) {
+            final DirNode uploadDir = getUploadDir();
+            if (uploadDir != null) {
+                try {
+                    final FileNode fileNode =
+                            uploadDir.createFile(event.getFile(), event.getFileName(), event.getLength(), contextPath);
+                    addDocument(fileNode.getDocument());
+                } catch (FFDomainException ffde) {
+                    uploadArea.setError(ffde.getMessage());
+                }
+            }
+        }
 
-		@Service
-		private void seqNumberUpload(OnFileUploadEvent event) {
-			final Collection<Document> selectedDocument = selectedDocumentsProperty.getValue();
-			assert documentContainer.size() == 1 && selectedDocument.size() == 1;
-			Document document = selectedDocument.iterator().next();
-			final String fileName = event.getFileName();
-			final String displayName = FileManagementSystem.getNewDisplayName(document.getDisplayName(), fileName);
-			document.getFileNode().get(0).addNewVersion(event.getFile(), fileName, displayName, event.getLength());
-			documentContainer.getItem(document).getItemProperty("displayName").setValue(displayName);
-		}
-	}
+        @Service
+        private void seqNumberUpload(OnFileUploadEvent event) {
+            final Collection<Document> selectedDocument = selectedDocumentsProperty.getValue();
+            assert documentContainer.size() == 1 && selectedDocument.size() == 1;
+            Document document = selectedDocument.iterator().next();
+            final String fileName = event.getFileName();
+            final String displayName = FileManagementSystem.getNewDisplayName(document.getDisplayName(), fileName);
+            document.getFileNode().get(0).addNewVersion(event.getFile(), fileName, displayName, event.getLength());
+            documentContainer.getItem(document).getItemProperty("displayName").setValue(displayName);
+        }
+    }
 
-	public UploadFilePanel(final UploadPage uploadPage) {
-		super();
-		documentContainer = new DocumentContainer();
-		selectedDocumentsProperty = new ObjectHintedProperty<Collection>(new HashSet<Document>(), Collection.class);
-		this.documents = createDocumentTable();
+    public UploadFilePanel(final UploadPage uploadPage) {
+        super();
+        documentContainer = new DocumentContainer();
+        selectedDocumentsProperty = new ObjectHintedProperty<Collection>(new HashSet<Document>(), Collection.class);
+        this.documents = createDocumentTable();
 
-		uploadArea = new UploadFileArea();
-		uploadArea.addListener(new UploadListener());
+        uploadArea = new UploadFileArea();
+        uploadArea.addListener(new UploadListener());
 
-		this.uploadPage = uploadPage;
-		submittedDocumentsLabel = new Label("<h3> Documentos Submetidos </h3>", Label.CONTENT_XHTML);
-		submittedDocumentsLabel.setVisible(false);
-	}
+        this.uploadPage = uploadPage;
+        submittedDocumentsLabel = new Label("<h3> Documentos Submetidos </h3>", Label.CONTENT_XHTML);
+        submittedDocumentsLabel.setVisible(false);
+    }
 
-	public UploadFilePanel(ContextPath contextPath, final UploadPage uploadPage) {
-		this(uploadPage);
-		this.contextPath = contextPath;
-		uploadArea.setContextPath(contextPath);
-	}
+    public UploadFilePanel(ContextPath contextPath, final UploadPage uploadPage) {
+        this(uploadPage);
+        this.contextPath = contextPath;
+        uploadArea.setContextPath(contextPath);
+    }
 
-	@Override
-	public void attach() {
-		super.attach();
-		VerticalLayout vl = new VerticalLayout();
-		vl.setSizeFull();
-		vl.setSpacing(true);
-		vl.setMargin(true, false, false, false);
-		VerticalLayout vlUpload = new VerticalLayout();
+    @Override
+    public void attach() {
+        super.attach();
+        VerticalLayout vl = new VerticalLayout();
+        vl.setSizeFull();
+        vl.setSpacing(true);
+        vl.setMargin(true, false, false, false);
+        VerticalLayout vlUpload = new VerticalLayout();
 
-		vlUpload.setSizeFull();
-		vlUpload.setSpacing(true);
-		vlUpload.addComponent(uploadArea);
+        vlUpload.setSizeFull();
+        vlUpload.setSpacing(true);
+        vlUpload.addComponent(uploadArea);
 
-		HorizontalLayout hlUploadEditMetadata = new HorizontalLayout();
-		final Button btFinishUpload = new Button("Finalizar Upload", new ClickListener() {
+        HorizontalLayout hlUploadEditMetadata = new HorizontalLayout();
+        final Button btFinishUpload = new Button("Finalizar Upload", new ClickListener() {
 
-			@Override
-			public void buttonClick(ClickEvent event) {
-				// if (!uploadPage.getMetadataPanel().isValid()) {
-				// return;
-				// }
-				uploadPage.getMetadataPanel().commit();
-				documentContainer.commit();
-				EmbeddedApplication.open(getApplication(), DocumentBrowse.class, contextPath.toString());
-			}
-		});
-		hlUploadEditMetadata.addComponent(btFinishUpload);
+            @Override
+            public void buttonClick(ClickEvent event) {
+                // if (!uploadPage.getMetadataPanel().isValid()) {
+                // return;
+                // }
+                uploadPage.getMetadataPanel().commit();
+                documentContainer.commit();
+                EmbeddedApplication.open(getApplication(), DocumentBrowse.class, contextPath.toString());
+            }
+        });
+        hlUploadEditMetadata.addComponent(btFinishUpload);
 
-		Button btEditMetadata = new Button("Editar Metadata", new ClickListener() {
+        Button btEditMetadata = new Button("Editar Metadata", new ClickListener() {
 
-			@Override
-			public void buttonClick(ClickEvent event) {
-				uploadPage.metadataPanelVisible(true);
-				lblOr.setVisible(false);
-				event.getButton().setVisible(false);
-			}
-		});
+            @Override
+            public void buttonClick(ClickEvent event) {
+                uploadPage.metadataPanelVisible(true);
+                lblOr.setVisible(false);
+                event.getButton().setVisible(false);
+            }
+        });
 
-		btEditMetadata.setStyleName(BaseTheme.BUTTON_LINK);
-		hlUploadEditMetadata.setSpacing(true);
-		hlUploadEditMetadata.addComponent(btFinishUpload);
-		hlUploadEditMetadata.addComponent(lblOr);
-		hlUploadEditMetadata.addComponent(btEditMetadata);
+        btEditMetadata.setStyleName(BaseTheme.BUTTON_LINK);
+        hlUploadEditMetadata.setSpacing(true);
+        hlUploadEditMetadata.addComponent(btFinishUpload);
+        hlUploadEditMetadata.addComponent(lblOr);
+        hlUploadEditMetadata.addComponent(btEditMetadata);
 
-		vl.addComponent(uploadArea.getErrorLayout());
-		vl.addComponent(vlUpload);
-		vl.addComponent(submittedDocumentsLabel);
-		vl.addComponent(documents);
-		vl.addComponent(hlUploadEditMetadata);
-		documents.addListener(new ItemSetChangeListener() {
+        vl.addComponent(uploadArea.getErrorLayout());
+        vl.addComponent(vlUpload);
+        vl.addComponent(submittedDocumentsLabel);
+        vl.addComponent(documents);
+        vl.addComponent(hlUploadEditMetadata);
+        documents.addListener(new ItemSetChangeListener() {
 
-			@Override
-			public void containerItemSetChange(ItemSetChangeEvent event) {
-				submittedDocumentsLabel.setVisible(event.getContainer().size() > 0);
-			}
-		});
-		setCompositionRoot(vl);
-	}
+            @Override
+            public void containerItemSetChange(ItemSetChangeEvent event) {
+                submittedDocumentsLabel.setVisible(event.getContainer().size() > 0);
+            }
+        });
+        setCompositionRoot(vl);
+    }
 
-	private Table createDocumentTable() {
-		final Table table = new Table();
-		table.setSizeFull();
-		// table.setVisible(false);
-		table.setSelectable(true);
-		table.setMultiSelect(true);
-		table.setImmediate(true);
-		table.setColumnHeaderMode(Table.COLUMN_HEADER_MODE_HIDDEN);
-		table.setSortDisabled(true);
-		table.setContainerDataSource(documentContainer);
-		table.setPropertyDataSource(selectedDocumentsProperty);
-		table.setVisibleColumns(new Object[] { "displayName" });
-		return table;
-	}
+    private Table createDocumentTable() {
+        final Table table = new Table();
+        table.setSizeFull();
+        // table.setVisible(false);
+        table.setSelectable(true);
+        table.setMultiSelect(true);
+        table.setImmediate(true);
+        table.setColumnHeaderMode(Table.COLUMN_HEADER_MODE_HIDDEN);
+        table.setSortDisabled(true);
+        table.setContainerDataSource(documentContainer);
+        table.setPropertyDataSource(selectedDocumentsProperty);
+        table.setVisibleColumns(new Object[] { "displayName" });
+        return table;
+    }
 
-	private void forceDocumentVisibility() {
-		documents.setVisible(documents.getItemIds().size() > 0);
-	}
+    private void forceDocumentVisibility() {
+        documents.setVisible(documents.getItemIds().size() > 0);
+    }
 
-	private void addDocument(Document doc) {
-		documentContainer.addItem(doc);
-		forceDocumentVisibility();
-	}
+    private void addDocument(Document doc) {
+        documentContainer.addItem(doc);
+        forceDocumentVisibility();
+    }
 
-	public boolean hasUploadedAnyDocument() {
-		return documents.getItemIds().size() > 0;
-	}
+    public boolean hasUploadedAnyDocument() {
+        return documents.getItemIds().size() > 0;
+    }
 
-	@Override
-	public void addListener(ValueChangeListener listener) {
-		selectedDocumentsProperty.addListener(listener);
-	}
+    @Override
+    public void addListener(ValueChangeListener listener) {
+        selectedDocumentsProperty.addListener(listener);
+    }
 
-	@Override
-	public void removeListener(ValueChangeListener listener) {
-		selectedDocumentsProperty.removeListener(listener);
-	}
+    @Override
+    public void removeListener(ValueChangeListener listener) {
+        selectedDocumentsProperty.removeListener(listener);
+    }
 
-	public DirNode getUploadDir() {
-		return uploadArea.getUploadDir();
-	}
+    public DirNode getUploadDir() {
+        return uploadArea.getUploadDir();
+    }
 
-	public DocumentContainer getDocumentContainer() {
-		return documentContainer;
-	}
+    public DocumentContainer getDocumentContainer() {
+        return documentContainer;
+    }
 
-	public ObjectHintedProperty<Collection> getSelectedDocumentsProperty() {
-		return selectedDocumentsProperty;
-	}
+    public ObjectHintedProperty<Collection> getSelectedDocumentsProperty() {
+        return selectedDocumentsProperty;
+    }
 
-	public void setContextPath(ContextPath ContextPath) {
-		uploadArea.setContextPath(contextPath);
-	}
+    public void setContextPath(ContextPath ContextPath) {
+        uploadArea.setContextPath(contextPath);
+    }
 
-	public void selectDocument(Document document) {
-		if (!documents.containsId(document)) {
-			documents.addItem(document);
-		}
-		documents.select(document);
-	}
+    public void selectDocument(Document document) {
+        if (!documents.containsId(document)) {
+            documents.addItem(document);
+        }
+        documents.select(document);
+    }
 
 }

@@ -15,54 +15,54 @@ import com.sun.jersey.api.client.filter.ClientFilter;
 
 public class FMSRestClient {
 
-	private final WebResource webResource;
-	private final ClientHost clientHost;
-	private final String userToLogin;
+    private final WebResource webResource;
+    private final ClientHost clientHost;
+    private final String userToLogin;
 
-	public FMSRestClient(final String clientHostName, final String userToLogin) {
-		this(HostSystem.getClientHost(clientHostName), userToLogin);
-	}
+    public FMSRestClient(final String clientHostName, final String userToLogin) {
+        this(HostSystem.getClientHost(clientHostName), userToLogin);
+    }
 
-	public FMSRestClient(final ClientHost clientHost, final String userToLogin) {
-		this.clientHost = clientHost;
-		this.userToLogin = userToLogin;
-		final Client client = new Client();
-		client.addFilter(new AuthFilter());
-		webResource = client.resource(clientHost.getServerUrl());
-	}
+    public FMSRestClient(final ClientHost clientHost, final String userToLogin) {
+        this.clientHost = clientHost;
+        this.userToLogin = userToLogin;
+        final Client client = new Client();
+        client.addFilter(new AuthFilter());
+        webResource = client.resource(clientHost.getServerUrl());
+    }
 
-	class AuthFilter extends ClientFilter {
+    class AuthFilter extends ClientFilter {
 
-		@Override
-		public ClientResponse handle(final ClientRequest cr) throws ClientHandlerException {
-			if (!clientHost.isEnabled()) {
-				throw new WebApplicationException(Status.FORBIDDEN);
-			}
-			cr.getHeaders().putSingle("__username__", clientHost.getUsername());
-			cr.getHeaders().putSingle("__password__", clientHost.getPassword());
-			cr.getHeaders().putSingle("__userToLogin__", userToLogin);
-			return getNext().handle(cr);
-		}
+        @Override
+        public ClientResponse handle(final ClientRequest cr) throws ClientHandlerException {
+            if (!clientHost.isEnabled()) {
+                throw new WebApplicationException(Status.FORBIDDEN);
+            }
+            cr.getHeaders().putSingle("__username__", clientHost.getUsername());
+            cr.getHeaders().putSingle("__password__", clientHost.getPassword());
+            cr.getHeaders().putSingle("__userToLogin__", userToLogin);
+            return getNext().handle(cr);
+        }
 
-	}
+    }
 
-	public Folder getRootDirectory() {
-		return getDirectory(null);
-	}
+    public Folder getRootDirectory() {
+        return getDirectory(null);
+    }
 
-	public ClientHost getClientHost() {
-		return clientHost;
-	}
+    public ClientHost getClientHost() {
+        return clientHost;
+    }
 
-	public String getUserToLogin() {
-		return userToLogin;
-	}
+    public String getUserToLogin() {
+        return userToLogin;
+    }
 
-	public Folder getDirectory(final String remoteOid) {
-		return clientHost == null ? null : new Folder(this, remoteOid);
-	}
+    public Folder getDirectory(final String remoteOid) {
+        return clientHost == null ? null : new Folder(this, remoteOid);
+    }
 
-	public WebResource getWebResource() {
-		return webResource;
-	}
+    public WebResource getWebResource() {
+        return webResource;
+    }
 }

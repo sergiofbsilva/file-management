@@ -26,167 +26,167 @@ import com.vaadin.ui.themes.BaseTheme;
 
 public class SelectDestinationDialog extends Window {
 
-	private DirNode selectedDirNode;
+    private DirNode selectedDirNode;
 
-	private DomainContainer<DirNode> childs;
-	private ContainerHierarchicalWrapper wrapper;
-	private Tree tree;
-	private AbstractFileNode toMoveNode;
+    private DomainContainer<DirNode> childs;
+    private ContainerHierarchicalWrapper wrapper;
+    private Tree tree;
+    private AbstractFileNode toMoveNode;
 
-	public SelectDestinationDialog() {
-		this(null);
-	}
+    public SelectDestinationDialog() {
+        this(null);
+    }
 
-	public SelectDestinationDialog(final AbstractFileNode toMoveNode) {
-		super();
-		setModal(true);
-		setResizable(false);
-		this.toMoveNode = toMoveNode;
+    public SelectDestinationDialog(final AbstractFileNode toMoveNode) {
+        super();
+        setModal(true);
+        setResizable(false);
+        this.toMoveNode = toMoveNode;
 
-		setCaption("Seleccionar Directoria");
+        setCaption("Seleccionar Directoria");
 
-		Set<DirNode> availableRepositories = FileRepository.getAvailableRepositories(Authenticate.getCurrentUser());
+        Set<DirNode> availableRepositories = FileRepository.getAvailableRepositories(Authenticate.getCurrentUser());
 
-		childs = new DomainContainer<DirNode>(DirNode.class);
-		childs.setContainerProperties("displayName");
-		wrapper = new ContainerHierarchicalWrapper(childs);
+        childs = new DomainContainer<DirNode>(DirNode.class);
+        childs.setContainerProperties("displayName");
+        wrapper = new ContainerHierarchicalWrapper(childs);
 
-		for (DirNode dirNode : availableRepositories) {
-			if (dirNode != toMoveNode) {
-				final Item addItem = wrapper.addItem(dirNode);
-				addItem.addItemProperty("icon", new ObjectProperty<ThemeResource>(DocumentFileBrowser.getThemeResourceForDir()));
-				createChildContainer(dirNode);
-			}
-		}
-		wrapper.addContainerProperty("icon", ThemeResource.class, DocumentFileBrowser.getThemeResourceForDir());
-		wrapper.updateHierarchicalWrapper();
-		buildDefaultLayout();
-	}
+        for (DirNode dirNode : availableRepositories) {
+            if (dirNode != toMoveNode) {
+                final Item addItem = wrapper.addItem(dirNode);
+                addItem.addItemProperty("icon", new ObjectProperty<ThemeResource>(DocumentFileBrowser.getThemeResourceForDir()));
+                createChildContainer(dirNode);
+            }
+        }
+        wrapper.addContainerProperty("icon", ThemeResource.class, DocumentFileBrowser.getThemeResourceForDir());
+        wrapper.updateHierarchicalWrapper();
+        buildDefaultLayout();
+    }
 
-	public DirNode getSelectedDirNode() {
-		return selectedDirNode;
-	}
+    public DirNode getSelectedDirNode() {
+        return selectedDirNode;
+    }
 
-	public void setSelectedDirNode(DirNode selectedDirNode) {
-		this.selectedDirNode = selectedDirNode;
-	}
+    public void setSelectedDirNode(DirNode selectedDirNode) {
+        this.selectedDirNode = selectedDirNode;
+    }
 
-	private void createChildContainer(DirNode root) {
-		boolean hasDirChilds = false;
-		for (AbstractFileNode child : root.getChild()) {
-			if (child == toMoveNode) {
-				continue;
-			}
-			if (child.isDir() && child.isWriteGroupMember()) {
-				hasDirChilds = true;
-				final DirNode childDirNode = (DirNode) child;
-				final Item addItem = wrapper.addItem(childDirNode);
-				addItem.addItemProperty("icon", new ObjectProperty<ThemeResource>(DocumentFileBrowser.getThemeResourceForDir()));
-				wrapper.setParent(childDirNode, root);
-				createChildContainer(childDirNode);
-			}
-		}
-		wrapper.setChildrenAllowed(root, hasDirChilds);
-	}
+    private void createChildContainer(DirNode root) {
+        boolean hasDirChilds = false;
+        for (AbstractFileNode child : root.getChild()) {
+            if (child == toMoveNode) {
+                continue;
+            }
+            if (child.isDir() && child.isWriteGroupMember()) {
+                hasDirChilds = true;
+                final DirNode childDirNode = (DirNode) child;
+                final Item addItem = wrapper.addItem(childDirNode);
+                addItem.addItemProperty("icon", new ObjectProperty<ThemeResource>(DocumentFileBrowser.getThemeResourceForDir()));
+                wrapper.setParent(childDirNode, root);
+                createChildContainer(childDirNode);
+            }
+        }
+        wrapper.setChildrenAllowed(root, hasDirChilds);
+    }
 
-	public void buildDefaultLayout() {
-		Panel pnlDialog = new Panel("Por favor seleccione uma directoria");
-		pnlDialog.setScrollable(true);
+    public void buildDefaultLayout() {
+        Panel pnlDialog = new Panel("Por favor seleccione uma directoria");
+        pnlDialog.setScrollable(true);
 
-		pnlDialog.setWidth("400px");
-		pnlDialog.setHeight("400px");
+        pnlDialog.setWidth("400px");
+        pnlDialog.setHeight("400px");
 
-		tree = new Tree();
-		tree.setImmediate(true);
-		tree.setContainerDataSource(wrapper);
-		tree.setItemIconPropertyId("icon");
-		tree.setItemCaptionPropertyId("displayName");
-		expandAll();
+        tree = new Tree();
+        tree.setImmediate(true);
+        tree.setContainerDataSource(wrapper);
+        tree.setItemIconPropertyId("icon");
+        tree.setItemCaptionPropertyId("displayName");
+        expandAll();
 
-		HorizontalLayout hlButtons = new HorizontalLayout();
-		hlButtons.setSizeUndefined();
-		hlButtons.setSpacing(true);
+        HorizontalLayout hlButtons = new HorizontalLayout();
+        hlButtons.setSizeUndefined();
+        hlButtons.setSpacing(true);
 
-		final Button btOk = new Button("Seleccionar", new ClickListener() {
+        final Button btOk = new Button("Seleccionar", new ClickListener() {
 
-			@Override
-			public void buttonClick(ClickEvent event) {
-				selectedDirNode = (DirNode) tree.getValue();
-				close();
-			}
+            @Override
+            public void buttonClick(ClickEvent event) {
+                selectedDirNode = (DirNode) tree.getValue();
+                close();
+            }
 
-		});
+        });
 
-		btOk.setEnabled(false);
+        btOk.setEnabled(false);
 
-		final Button btCancel = new Button("Cancelar");
-		btCancel.addListener(new ClickListener() {
+        final Button btCancel = new Button("Cancelar");
+        btCancel.addListener(new ClickListener() {
 
-			@Override
-			public void buttonClick(ClickEvent event) {
-				close();
-			}
-		});
+            @Override
+            public void buttonClick(ClickEvent event) {
+                close();
+            }
+        });
 
-		hlButtons.addComponent(btOk);
-		hlButtons.addComponent(btCancel);
+        hlButtons.addComponent(btOk);
+        hlButtons.addComponent(btCancel);
 
-		tree.addListener(new ValueChangeListener() {
+        tree.addListener(new ValueChangeListener() {
 
-			@Override
-			public void valueChange(ValueChangeEvent event) {
-				btOk.setEnabled(event.getProperty().getValue() != null);
-			}
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                btOk.setEnabled(event.getProperty().getValue() != null);
+            }
 
-		});
+        });
 
-		pnlDialog.addComponent(tree);
+        pnlDialog.addComponent(tree);
 
-		// collapse , expand buttons
+        // collapse , expand buttons
 
-		HorizontalLayout hlTreeOps = new HorizontalLayout();
-		hlTreeOps.setSpacing(true);
-		hlTreeOps.setMargin(false, false, true, false);
+        HorizontalLayout hlTreeOps = new HorizontalLayout();
+        hlTreeOps.setSpacing(true);
+        hlTreeOps.setMargin(false, false, true, false);
 
-		final Button btCollapseAll = new Button("Colapsar Tudo");
-		btCollapseAll.setStyleName(BaseTheme.BUTTON_LINK);
-		btCollapseAll.addListener(new ClickListener() {
+        final Button btCollapseAll = new Button("Colapsar Tudo");
+        btCollapseAll.setStyleName(BaseTheme.BUTTON_LINK);
+        btCollapseAll.addListener(new ClickListener() {
 
-			@Override
-			public void buttonClick(ClickEvent event) {
-				collapseAll();
-			}
-		});
+            @Override
+            public void buttonClick(ClickEvent event) {
+                collapseAll();
+            }
+        });
 
-		final Button btExpandAll = new Button("Expandir Tudo");
-		btExpandAll.setStyleName(BaseTheme.BUTTON_LINK);
-		btExpandAll.addListener(new ClickListener() {
+        final Button btExpandAll = new Button("Expandir Tudo");
+        btExpandAll.setStyleName(BaseTheme.BUTTON_LINK);
+        btExpandAll.addListener(new ClickListener() {
 
-			@Override
-			public void buttonClick(ClickEvent event) {
-				expandAll();
-			}
-		});
+            @Override
+            public void buttonClick(ClickEvent event) {
+                expandAll();
+            }
+        });
 
-		hlTreeOps.addComponent(btCollapseAll);
-		hlTreeOps.addComponent(btExpandAll);
+        hlTreeOps.addComponent(btCollapseAll);
+        hlTreeOps.addComponent(btExpandAll);
 
-		addComponent(pnlDialog);
-		addComponent(hlTreeOps);
-		addComponent(hlButtons);
-		getContent().setSizeUndefined();
-	}
+        addComponent(pnlDialog);
+        addComponent(hlTreeOps);
+        addComponent(hlButtons);
+        getContent().setSizeUndefined();
+    }
 
-	private void expandAll() {
-		for (Object item : wrapper.rootItemIds()) {
-			tree.expandItemsRecursively(item);
-		}
-	}
+    private void expandAll() {
+        for (Object item : wrapper.rootItemIds()) {
+            tree.expandItemsRecursively(item);
+        }
+    }
 
-	private void collapseAll() {
-		for (Object item : wrapper.rootItemIds()) {
-			tree.collapseItemsRecursively(item);
-		}
-	}
+    private void collapseAll() {
+        for (Object item : wrapper.rootItemIds()) {
+            tree.collapseItemsRecursively(item);
+        }
+    }
 
 }

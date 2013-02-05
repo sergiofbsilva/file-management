@@ -6,13 +6,13 @@ import pt.ist.bennu.core.domain.User;
 
 public class DeleteDirLog extends DeleteDirLog_Base {
 
-	public DeleteDirLog() {
-		super();
-	}
+    public DeleteDirLog() {
+        super();
+    }
 
-	public DeleteDirLog(User user, ContextPath contextPath, DirNode dirNode) {
-		super();
-		init(user, contextPath, dirNode);
-	}
+    public DeleteDirLog(User user, ContextPath contextPath, DirNode dirNode) {
+        super();
+        init(user, contextPath, dirNode);
+    }
 
 }

@@ -4,9 +4,9 @@ import java.util.Map;
 
 public interface IDocument extends IFileNode {
 
-	public String info();
+    public String info();
 
-	public byte[] content();
+    public byte[] content();
 
-	public String metadata(final Map<String, String> metadataMap);
+    public String metadata(final Map<String, String> metadataMap);
 }

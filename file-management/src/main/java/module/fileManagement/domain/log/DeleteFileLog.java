@@ -35,13 +35,13 @@ import pt.ist.bennu.core.domain.User;
  */
 public class DeleteFileLog extends DeleteFileLog_Base {
 
-	public DeleteFileLog() {
-		super();
-	}
+    public DeleteFileLog() {
+        super();
+    }
 
-	public DeleteFileLog(User user, ContextPath contextPath, FileNode fileNode) {
-		super();
-		init(user, contextPath, fileNode);
-	}
+    public DeleteFileLog(User user, ContextPath contextPath, FileNode fileNode) {
+        super();
+        init(user, contextPath, fileNode);
+    }
 
 }

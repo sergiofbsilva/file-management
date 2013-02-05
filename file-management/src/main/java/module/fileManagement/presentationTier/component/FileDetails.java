@@ -59,144 +59,144 @@ import com.vaadin.ui.themes.BaseTheme;
  */
 public class FileDetails extends NodeDetails {
 
-	public FileDetails(DomainItem<AbstractFileNode> nodeItem, boolean operationsVisible, boolean infoVisible) {
-		super(nodeItem, operationsVisible, infoVisible);
-		addVisibleProperty("document.versionNumber");
-		addVisibleProperty("document.lastModifiedDate");
-		addVisibleProperty("document.typology");
-	}
+    public FileDetails(DomainItem<AbstractFileNode> nodeItem, boolean operationsVisible, boolean infoVisible) {
+        super(nodeItem, operationsVisible, infoVisible);
+        addVisibleProperty("document.versionNumber");
+        addVisibleProperty("document.lastModifiedDate");
+        addVisibleProperty("document.typology");
+    }
 
-	public FileDetails(DomainItem<AbstractFileNode> nodeItem) {
-		this(nodeItem, true, true);
-	}
+    public FileDetails(DomainItem<AbstractFileNode> nodeItem) {
+        this(nodeItem, true, true);
+    }
 
-	@Override
-	public FileNode getNode() {
-		return (FileNode) super.getNode();
-	}
+    @Override
+    public FileNode getNode() {
+        return (FileNode) super.getNode();
+    }
 
-	public Button createExtendedInfoLink() {
-		Button btExtendedInfoLink = new Button(getMessage("label.extended.info"), new Button.ClickListener() {
+    public Button createExtendedInfoLink() {
+        Button btExtendedInfoLink = new Button(getMessage("label.extended.info"), new Button.ClickListener() {
 
-			@Override
-			public void buttonClick(ClickEvent event) {
-				EmbeddedApplication.open(getApplication(), DocumentExtendedInfo.class, getNode().getExternalId());
-			}
-		});
-		btExtendedInfoLink.setStyleName(BaseTheme.BUTTON_LINK);
-		return btExtendedInfoLink;
-	}
+            @Override
+            public void buttonClick(ClickEvent event) {
+                EmbeddedApplication.open(getApplication(), DocumentExtendedInfo.class, getNode().getExternalId());
+            }
+        });
+        btExtendedInfoLink.setStyleName(BaseTheme.BUTTON_LINK);
+        return btExtendedInfoLink;
+    }
 
-	public Button createDeleteFileLink() {
-		Button btDeleteFileLink = new Button(getMessage("label.delete"), new Button.ClickListener() {
+    public Button createDeleteFileLink() {
+        Button btDeleteFileLink = new Button(getMessage("label.delete"), new Button.ClickListener() {
 
-			@Override
-			public void buttonClick(ClickEvent event) {
-				showDeleteDialog();
-			}
-		});
-		btDeleteFileLink.setStyleName(BaseTheme.BUTTON_LINK);
-		return btDeleteFileLink;
-	}
+            @Override
+            public void buttonClick(ClickEvent event) {
+                showDeleteDialog();
+            }
+        });
+        btDeleteFileLink.setStyleName(BaseTheme.BUTTON_LINK);
+        return btDeleteFileLink;
+    }
 
-	@Override
-	public void updateOperations() {
-		if (isInfoVisible()) {
-			addOperation(createExtendedInfoLink());
-		}
-		addOperation(createDownloadLink());
-		if (getNode().isWriteGroupMember()) {
-			addOperation(createRenameLink());
-			addOperation(createShareLink());
-			if (!getNode().isShared()) {
-				addOperation(createMoveLink());
-			}
-			addOperation(createDeleteFileLink());
-			addOperation(createUploadLink());
-		} else {
-			if (getNode().isShared()) {
-				addOperation(createDeleteFileLink());
-			}
-		}
-	}
+    @Override
+    public void updateOperations() {
+        if (isInfoVisible()) {
+            addOperation(createExtendedInfoLink());
+        }
+        addOperation(createDownloadLink());
+        if (getNode().isWriteGroupMember()) {
+            addOperation(createRenameLink());
+            addOperation(createShareLink());
+            if (!getNode().isShared()) {
+                addOperation(createMoveLink());
+            }
+            addOperation(createDeleteFileLink());
+            addOperation(createUploadLink());
+        } else {
+            if (getNode().isShared()) {
+                addOperation(createDeleteFileLink());
+            }
+        }
+    }
 
-	private class SingleFileUpload extends Upload implements Upload.SucceededListener, Upload.FailedListener, Receiver {
-		private File file;
-		private String sameNameFailed;
+    private class SingleFileUpload extends Upload implements Upload.SucceededListener, Upload.FailedListener, Receiver {
+        private File file;
+        private String sameNameFailed;
 
-		public SingleFileUpload() {
-			super();
-			setImmediate(true);
-			setReceiver(this);
-			addListener((SucceededListener) this);
-			addListener((FailedListener) this);
-			setButtonCaption("Upload Nova Versão");
-			addStyleName(BaseTheme.BUTTON_LINK);
-			sameNameFailed = StringUtils.EMPTY;
-		}
+        public SingleFileUpload() {
+            super();
+            setImmediate(true);
+            setReceiver(this);
+            addListener((SucceededListener) this);
+            addListener((FailedListener) this);
+            setButtonCaption("Upload Nova Versão");
+            addStyleName(BaseTheme.BUTTON_LINK);
+            sameNameFailed = StringUtils.EMPTY;
+        }
 
-		private boolean dirHasFile(String filename) {
-			AbstractFileNode searchNode = getNode().getParent().searchNode(filename);
-			return searchNode != null && !searchNode.equals(getNode());
-		}
+        private boolean dirHasFile(String filename) {
+            AbstractFileNode searchNode = getNode().getParent().searchNode(filename);
+            return searchNode != null && !searchNode.equals(getNode());
+        }
 
-		@Override
-		public OutputStream receiveUpload(String filename, String mimeType) {
-			try {
-				file = UploadFileArea.DEFAULT_FACTORY.createFile(filename, mimeType);
-				final String displayName = FileManagementSystem.getNewDisplayName(getDocument().getDisplayName(), filename);
-				if (dirHasFile(displayName)) {
-					interruptUpload();
-					sameNameFailed = displayName;
-					return new OutputStream() {
+        @Override
+        public OutputStream receiveUpload(String filename, String mimeType) {
+            try {
+                file = UploadFileArea.DEFAULT_FACTORY.createFile(filename, mimeType);
+                final String displayName = FileManagementSystem.getNewDisplayName(getDocument().getDisplayName(), filename);
+                if (dirHasFile(displayName)) {
+                    interruptUpload();
+                    sameNameFailed = displayName;
+                    return new OutputStream() {
 
-						@Override
-						public void write(int b) throws IOException {
-						}
-					};
-				}
-				return new FileOutputStream(file);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
-			return null;
-		}
+                        @Override
+                        public void write(int b) throws IOException {
+                        }
+                    };
+                }
+                return new FileOutputStream(file);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
 
-		public Document getDocument() {
-			return getNode().getDocument();
-		}
+        public Document getDocument() {
+            return getNode().getDocument();
+        }
 
-		@Override
-		public void uploadFailed(FailedEvent event) {
-			if (!sameNameFailed.equals(StringUtils.EMPTY)) {
-				String warnMsg = String.format("Já existe um ficheiro com esse nome %s", sameNameFailed);
-				FileManagementSystem.showWarning(getApplication(), warnMsg);
-				sameNameFailed = StringUtils.EMPTY;
-			} else {
-				FileManagementSystem.showWarning(getApplication(), "Upload falhou. Tente novamente!");
-			}
-		}
+        @Override
+        public void uploadFailed(FailedEvent event) {
+            if (!sameNameFailed.equals(StringUtils.EMPTY)) {
+                String warnMsg = String.format("Já existe um ficheiro com esse nome %s", sameNameFailed);
+                FileManagementSystem.showWarning(getApplication(), warnMsg);
+                sameNameFailed = StringUtils.EMPTY;
+            } else {
+                FileManagementSystem.showWarning(getApplication(), "Upload falhou. Tente novamente!");
+            }
+        }
 
-		@Override
-		@Service
-		public void uploadSucceeded(SucceededEvent event) {
-			final Document document = getDocument();
-			final String displayName = FileManagementSystem.getNewDisplayName(document.getDisplayName(), event.getFilename());
-			getNode().addNewVersion(file, event.getFilename(), displayName, event.getLength());
-			getNodeItem().setValue(getNode());
-			String msg = String.format("Nova versão %s", document.getVersionNumber());
-			FileManagementSystem.show(getApplication(), "Upload", msg, Window.Notification.TYPE_HUMANIZED_MESSAGE);
-			sameNameFailed = StringUtils.EMPTY;
-		}
+        @Override
+        @Service
+        public void uploadSucceeded(SucceededEvent event) {
+            final Document document = getDocument();
+            final String displayName = FileManagementSystem.getNewDisplayName(document.getDisplayName(), event.getFilename());
+            getNode().addNewVersion(file, event.getFilename(), displayName, event.getLength());
+            getNodeItem().setValue(getNode());
+            String msg = String.format("Nova versão %s", document.getVersionNumber());
+            FileManagementSystem.show(getApplication(), "Upload", msg, Window.Notification.TYPE_HUMANIZED_MESSAGE);
+            sameNameFailed = StringUtils.EMPTY;
+        }
 
-	}
+    }
 
-	public Component createUploadLink() {
-		return new SingleFileUpload();
-	}
+    public Component createUploadLink() {
+        return new SingleFileUpload();
+    }
 
-	@Override
-	public <T extends AbstractFileNode> T getNodeToDownload() {
-		return (T) getNode();
-	}
+    @Override
+    public <T extends AbstractFileNode> T getNodeToDownload() {
+        return (T) getNode();
+    }
 }

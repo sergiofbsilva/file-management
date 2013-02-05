@@ -56,206 +56,206 @@ import com.google.common.collect.Multimap;
  */
 public class FileNode extends FileNode_Base {
 
-	/**
-	 * 
-	 * @param dirNode
-	 *            it creates a new FileNode on the given {@link DirNode}
-	 * @param file
-	 *            the {@link File}
-	 * @param fileName
-	 *            this will be used as a display and filename. If you want to
-	 *            use a different name for the displayName, use {@link #FileNode(DirNode, File, String)}
-	 * @throws IOException
-	 */
-	public FileNode(final DirNode dirNode, final File file, final String fileName) throws IOException {
-		// note: here the displayName and the fileName are the same
+    /**
+     * 
+     * @param dirNode
+     *            it creates a new FileNode on the given {@link DirNode}
+     * @param file
+     *            the {@link File}
+     * @param fileName
+     *            this will be used as a display and filename. If you want to
+     *            use a different name for the displayName, use {@link #FileNode(DirNode, File, String)}
+     * @throws IOException
+     */
+    public FileNode(final DirNode dirNode, final File file, final String fileName) throws IOException {
+        // note: here the displayName and the fileName are the same
 
-		// super();
-		// if (dirNode == null) {
-		// throw new
-		// DomainException("must.specify.a.dir.node.when.creating.a.file.node");
-		// }
-		// setDocument(new Document(file, fileName));
-		// setParent(dirNode);
-		this(dirNode, new Document(file, fileName));
-	}
+        // super();
+        // if (dirNode == null) {
+        // throw new
+        // DomainException("must.specify.a.dir.node.when.creating.a.file.node");
+        // }
+        // setDocument(new Document(file, fileName));
+        // setParent(dirNode);
+        this(dirNode, new Document(file, fileName));
+    }
 
-	public FileNode(final DirNode dirNode, final File file, final String fileName, final String displayName) throws IOException {
-		this(dirNode, new Document(file, fileName, displayName));
-	}
+    public FileNode(final DirNode dirNode, final File file, final String fileName, final String displayName) throws IOException {
+        this(dirNode, new Document(file, fileName, displayName));
+    }
 
-	public FileNode(final DirNode dirNode, final byte[] fileContent, final String fileName, final String displayName) {
-		this(dirNode, new Document(fileContent, fileName, displayName));
-	}
+    public FileNode(final DirNode dirNode, final byte[] fileContent, final String fileName, final String displayName) {
+        this(dirNode, new Document(fileContent, fileName, displayName));
+    }
 
-	public FileNode(final DirNode dirNode, final Document document) {
-		super();
-		if (dirNode == null) {
-			throw new DomainException("must.specify.a.dir.node.when.creating.a.file.node");
-		}
-		setDocument(document);
-		setParent(dirNode);
-	}
+    public FileNode(final DirNode dirNode, final Document document) {
+        super();
+        if (dirNode == null) {
+            throw new DomainException("must.specify.a.dir.node.when.creating.a.file.node");
+        }
+        setDocument(document);
+        setParent(dirNode);
+    }
 
-	public FileNode() {
-		super();
-	}
+    public FileNode() {
+        super();
+    }
 
-	@Override
-	public boolean isFile() {
-		return true;
-	}
+    @Override
+    public boolean isFile() {
+        return true;
+    }
 
-	@Override
-	@Service
-	public void delete() {
-		final Document document = getDocument();
-		document.delete();
-		getParent().removeChild(this);
-		deleteDomainObject();
-	}
+    @Override
+    @Service
+    public void delete() {
+        final Document document = getDocument();
+        document.delete();
+        getParent().removeChild(this);
+        deleteDomainObject();
+    }
 
-	void deleteFromDocument() {
-		removeDocument();
-		super.delete();
-	}
+    void deleteFromDocument() {
+        removeDocument();
+        super.delete();
+    }
 
-	@Override
-	@Service
-	public void deleteService() {
-		delete();
-	}
+    @Override
+    @Service
+    public void deleteService() {
+        delete();
+    }
 
-	@Override
-	public PersistentGroup getReadGroup() {
-		final PersistentGroup group = getDocument().getReadGroup();
-		return group == null && hasParent() ? getParent().getReadGroup() : group;
-	}
+    @Override
+    public PersistentGroup getReadGroup() {
+        final PersistentGroup group = getDocument().getReadGroup();
+        return group == null && hasParent() ? getParent().getReadGroup() : group;
+    }
 
-	@Override
-	public PersistentGroup getWriteGroup() {
-		final PersistentGroup group = getDocument().getWriteGroup();
-		return group == null && hasParent() ? getParent().getWriteGroup() : group;
-	}
+    @Override
+    public PersistentGroup getWriteGroup() {
+        final PersistentGroup group = getDocument().getWriteGroup();
+        return group == null && hasParent() ? getParent().getWriteGroup() : group;
+    }
 
-	@Override
-	public String getDisplayName() {
-		final Document document = getDocument();
-		return document.getDisplayName();
-	}
+    @Override
+    public String getDisplayName() {
+        final Document document = getDocument();
+        return document.getDisplayName();
+    }
 
-	@Override
-	public void setDisplayName(final String displayName) throws NodeDuplicateNameException {
-		super.setDisplayName(displayName);
-		getDocument().setDisplayName(displayName);
-	}
+    @Override
+    public void setDisplayName(final String displayName) throws NodeDuplicateNameException {
+        super.setDisplayName(displayName);
+        getDocument().setDisplayName(displayName);
+    }
 
-	@Override
-	public int compareTo(final AbstractFileNode node) {
-		return node.isDir() ? 1 : super.compareTo(node);
-	}
+    @Override
+    public int compareTo(final AbstractFileNode node) {
+        return node.isDir() ? 1 : super.compareTo(node);
+    }
 
-	@Override
-	protected void setReadGroup(final PersistentGroup persistentGroup) {
-		final Document document = getDocument();
-		document.setReadGroup(persistentGroup);
-	}
+    @Override
+    protected void setReadGroup(final PersistentGroup persistentGroup) {
+        final Document document = getDocument();
+        document.setReadGroup(persistentGroup);
+    }
 
-	@Override
-	protected void setWriteGroup(PersistentGroup persistentGroup) {
-		final Document document = getDocument();
-		document.setWriteGroup(persistentGroup);
-	}
+    @Override
+    protected void setWriteGroup(PersistentGroup persistentGroup) {
+        final Document document = getDocument();
+        document.setWriteGroup(persistentGroup);
+    }
 
-	@Override
-	public boolean search(String searchText) {
-		return getDocument().search(searchText);
-	}
+    @Override
+    public boolean search(String searchText) {
+        return getDocument().search(searchText);
+    }
 
-	public Map<MetadataKey, Boolean> search(final Multimap<MetadataKey, Object> searchMap) {
-		return getDocument().search(searchMap);
-	}
+    public Map<MetadataKey, Boolean> search(final Multimap<MetadataKey, Object> searchMap) {
+        return getDocument().search(searchMap);
+    }
 
-	@Override
-	public String getPresentationFilesize() {
-		final Document document = getDocument();
-		return document.getPresentationFilesize();
-	}
+    @Override
+    public String getPresentationFilesize() {
+        final Document document = getDocument();
+        return document.getPresentationFilesize();
+    }
 
-	@Override
-	public long getFilesize() {
-		return getDocument().getFilesize();
-	}
+    @Override
+    public long getFilesize() {
+        return getDocument().getFilesize();
+    }
 
-	@Override
-	public Set<FileLog> getFileLogSet() {
-		final HashSet<FileLog> logs = new HashSet<FileLog>(super.getFileLogSet());
-		if (hasAnySharedFileNodes()) {
-			for (SharedFileNode sharedNode : getSharedFileNodes()) {
-				logs.addAll(sharedNode.getFileLogSet());
-			}
-		}
-		return logs;
-	}
+    @Override
+    public Set<FileLog> getFileLogSet() {
+        final HashSet<FileLog> logs = new HashSet<FileLog>(super.getFileLogSet());
+        if (hasAnySharedFileNodes()) {
+            for (SharedFileNode sharedNode : getSharedFileNodes()) {
+                logs.addAll(sharedNode.getFileLogSet());
+            }
+        }
+        return logs;
+    }
 
-	@Override
-	@Service
-	public void unshare(VisibilityGroup group) {
-		super.unshare(group);
-		for (SharedFileNode sharedNode : getSharedFileNodes()) {
-			new UnshareFileLog(Authenticate.getCurrentUser(), sharedNode);
-			sharedNode.deleteLink(new ContextPath(getParent()));
-		}
-	}
+    @Override
+    @Service
+    public void unshare(VisibilityGroup group) {
+        super.unshare(group);
+        for (SharedFileNode sharedNode : getSharedFileNodes()) {
+            new UnshareFileLog(Authenticate.getCurrentUser(), sharedNode);
+            sharedNode.deleteLink(new ContextPath(getParent()));
+        }
+    }
 
-	@Override
-	@Service
-	public void recoverTo(DirNode targetDir) {
-		new RecoverFileLog(Authenticate.getCurrentUser(), targetDir.getContextPath(), this);
-		setParent(targetDir);
-	}
+    @Override
+    @Service
+    public void recoverTo(DirNode targetDir) {
+        new RecoverFileLog(Authenticate.getCurrentUser(), targetDir.getContextPath(), this);
+        setParent(targetDir);
+    }
 
-	@Override
-	public int getCountFiles() {
-		return 1;
-	}
+    @Override
+    public int getCountFiles() {
+        return 1;
+    }
 
-	public DirNode getRealParent() {
-		return getParent();
-	}
+    public DirNode getRealParent() {
+        return getParent();
+    }
 
-	@Service
-	public void addNewVersion(byte[] fileContent, String fileName, String displayName, long filesize) {
-		if (!isWriteGroupMember()) {
-			throw new CannotCreateFileException(fileName);
-		}
+    @Service
+    public void addNewVersion(byte[] fileContent, String fileName, String displayName, long filesize) {
+        if (!isWriteGroupMember()) {
+            throw new CannotCreateFileException(fileName);
+        }
 
-		if (!getParent().hasAvailableQuota(filesize, this)) {
-			throw new NoAvailableQuotaException();
-		}
+        if (!getParent().hasAvailableQuota(filesize, this)) {
+            throw new NoAvailableQuotaException();
+        }
 
-		getRealParent().removeUsedSpace(getFilesize());
-		getRealParent().addUsedSpace(filesize);
+        getRealParent().removeUsedSpace(getFilesize());
+        getRealParent().addUsedSpace(filesize);
 
-		final Document document = getDocument();
-		document.addVersion(fileContent, fileName);
-		document.setDisplayName(displayName);
+        final Document document = getDocument();
+        document.addVersion(fileContent, fileName);
+        document.setDisplayName(displayName);
 
-		new CreateNewVersionLog(Authenticate.getCurrentUser(), getParent().getContextPath(), this);
+        new CreateNewVersionLog(Authenticate.getCurrentUser(), getParent().getContextPath(), this);
 
-	}
+    }
 
-	@Service
-	public void addNewVersion(File file, String fileName, String displayName, long filesize) {
-		try {
-			addNewVersion(FileUtils.readFileToByteArray(file), fileName, displayName, filesize);
-		} catch (IOException e) {
-			throw new Error(e);
-		}
-	}
+    @Service
+    public void addNewVersion(File file, String fileName, String displayName, long filesize) {
+        try {
+            addNewVersion(FileUtils.readFileToByteArray(file), fileName, displayName, filesize);
+        } catch (IOException e) {
+            throw new Error(e);
+        }
+    }
 
-	@Override
-	public DirNode getTopDirNode() {
-		return getParent();
-	};
+    @Override
+    public DirNode getTopDirNode() {
+        return getParent();
+    };
 }

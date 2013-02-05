@@ -38,29 +38,29 @@ import com.vaadin.ui.AbstractOrderedLayout;
  */
 public abstract class HasPersistentGroup {
 
-	public abstract PersistentGroup getPersistentGroup();
+    public abstract PersistentGroup getPersistentGroup();
 
-	public abstract void renderGroupSpecificLayout(final AbstractOrderedLayout abstractOrderedLayout);
+    public abstract void renderGroupSpecificLayout(final AbstractOrderedLayout abstractOrderedLayout);
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj instanceof HasPersistentGroup) {
-			return getPersistentGroup().getPresentationName().equals(
-					((HasPersistentGroup) obj).getPersistentGroup().getPresentationName());
-		}
-		return false;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof HasPersistentGroup) {
+            return getPersistentGroup().getPresentationName().equals(
+                    ((HasPersistentGroup) obj).getPersistentGroup().getPresentationName());
+        }
+        return false;
+    }
 
-	@Override
-	public int hashCode() {
-		return getPersistentGroup().getPresentationName().hashCode();
-	}
+    @Override
+    public int hashCode() {
+        return getPersistentGroup().getPresentationName().hashCode();
+    }
 
-	public boolean shouldCreateLink() {
-		return false;
-	}
+    public boolean shouldCreateLink() {
+        return false;
+    }
 
-	public User getUser() {
-		throw new InvalidOperationException("Not implemented.");
-	}
+    public User getUser() {
+        throw new InvalidOperationException("Not implemented.");
+    }
 }

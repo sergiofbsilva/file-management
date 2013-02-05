@@ -11,34 +11,34 @@ import com.vaadin.data.Property;
 
 public abstract class AbstractSearchContainer extends AbstractBufferedContainer<Presentable, Object, DomainItem<Presentable>> {
 
-	public AbstractSearchContainer(Class elementType, Hint... hints) {
-		super(elementType, hints);
-	}
+    public AbstractSearchContainer(Class elementType, Hint... hints) {
+        super(elementType, hints);
+    }
 
-	public AbstractSearchContainer(Property wrapped, Class elementType, Hint... hints) {
-		super(wrapped, elementType, hints);
-	}
+    public AbstractSearchContainer(Property wrapped, Class elementType, Hint... hints) {
+        super(wrapped, elementType, hints);
+    }
 
-	public AbstractSearchContainer(List elements, Class elementType, Hint... hints) {
-		super(elements, elementType, hints);
-	}
+    public AbstractSearchContainer(List elements, Class elementType, Hint... hints) {
+        super(elements, elementType, hints);
+    }
 
-	public abstract void search(String filterText);
+    public abstract void search(String filterText);
 
-	protected void addItems(Collection<Presentable> presentables) {
-		for (Presentable presentable : presentables) {
-			addItem(presentable);
-		}
-	}
+    protected void addItems(Collection<Presentable> presentables) {
+        for (Presentable presentable : presentables) {
+            addItem(presentable);
+        }
+    }
 
-	@Override
-	protected DomainItem<Presentable> makeItem(Presentable presentable) {
-		return new DomainItem<Presentable>(presentable);
-	}
+    @Override
+    protected DomainItem<Presentable> makeItem(Presentable presentable) {
+        return new DomainItem<Presentable>(presentable);
+    }
 
-	@Override
-	protected DomainItem<Presentable> makeItem(Class<? extends Presentable> type) {
-		return new DomainItem<Presentable>(type);
-	}
+    @Override
+    protected DomainItem<Presentable> makeItem(Class<? extends Presentable> type) {
+        return new DomainItem<Presentable>(type);
+    }
 
 }

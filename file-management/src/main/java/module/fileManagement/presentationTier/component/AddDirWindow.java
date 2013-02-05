@@ -46,81 +46,81 @@ import com.vaadin.ui.Window;
  * 
  */
 public class AddDirWindow extends Window {
-	private DocumentFileBrowser browser;
-	private final AddDirWindow addDirWindow;
-	private final TextField editor = new TextField();
-	private final Label lblError;
+    private DocumentFileBrowser browser;
+    private final AddDirWindow addDirWindow;
+    private final TextField editor = new TextField();
+    private final Label lblError;
 
-	private class CloseButton extends Button implements ClickListener {
+    private class CloseButton extends Button implements ClickListener {
 
-		CloseButton(final String labelKey) {
-			super(getMessage(labelKey));
-			ClickListener clickListener = this;
-			addListener(clickListener);
-		}
+        CloseButton(final String labelKey) {
+            super(getMessage(labelKey));
+            ClickListener clickListener = this;
+            addListener(clickListener);
+        }
 
-		CloseButton() {
-			this("label.close");
-		}
+        CloseButton() {
+            this("label.close");
+        }
 
-		@Override
-		public void buttonClick(final ClickEvent event) {
-			// getWindow().removeWindow(addDirWindow);
-			addDirWindow.close();
-		}
-	}
+        @Override
+        public void buttonClick(final ClickEvent event) {
+            // getWindow().removeWindow(addDirWindow);
+            addDirWindow.close();
+        }
+    }
 
-	private class SaveButton extends CloseButton implements ClickListener {
+    private class SaveButton extends CloseButton implements ClickListener {
 
-		SaveButton() {
-			super("label.save");
-		}
+        SaveButton() {
+            super("label.save");
+        }
 
-		@Override
-		public void buttonClick(final ClickEvent event) {
-			String value = (String) editor.getValue();
-			if (!StringUtils.isBlank(value)) {
-				try {
-					final DirNode newDirNode = browser.getDirNode().createDir(value, browser.getContextPath());
-					browser.addItem(newDirNode);
-					lblError.setVisible(false);
-					super.buttonClick(event);
-				} catch (DomainException de) {
-					setError(getMessage(de.getClass().getName()));
-				}
-			} else {
-				setError(getMessage("label.file.repository.empty.dir.name"));
-			}
-		}
-	}
+        @Override
+        public void buttonClick(final ClickEvent event) {
+            String value = (String) editor.getValue();
+            if (!StringUtils.isBlank(value)) {
+                try {
+                    final DirNode newDirNode = browser.getDirNode().createDir(value, browser.getContextPath());
+                    browser.addItem(newDirNode);
+                    lblError.setVisible(false);
+                    super.buttonClick(event);
+                } catch (DomainException de) {
+                    setError(getMessage(de.getClass().getName()));
+                }
+            } else {
+                setError(getMessage("label.file.repository.empty.dir.name"));
+            }
+        }
+    }
 
-	private void setError(final String message) {
-		if (!lblError.isVisible()) {
-			lblError.setVisible(true);
-		}
-		lblError.setValue(message);
-	}
+    private void setError(final String message) {
+        if (!lblError.isVisible()) {
+            lblError.setVisible(true);
+        }
+        lblError.setValue(message);
+    }
 
-	public AddDirWindow(DocumentFileBrowser browser) {
-		super(getMessage("label.file.repository.add.dir"));
-		addDirWindow = this;
-		this.browser = browser;
-		setModal(true);
-		setWidth(50, UNITS_PERCENTAGE);
-		lblError = new Label();
-		lblError.addStyleName(BennuTheme.LABEL_ERROR);
+    public AddDirWindow(DocumentFileBrowser browser) {
+        super(getMessage("label.file.repository.add.dir"));
+        addDirWindow = this;
+        this.browser = browser;
+        setModal(true);
+        setWidth(50, UNITS_PERCENTAGE);
+        lblError = new Label();
+        lblError.addStyleName(BennuTheme.LABEL_ERROR);
 
-		final VerticalLayout layout = (VerticalLayout) getContent();
-		layout.setMargin(true);
-		layout.setSpacing(true);
-		addComponent(lblError);
-		editor.setWidth(100, UNITS_PERCENTAGE);
-		addComponent(editor);
+        final VerticalLayout layout = (VerticalLayout) getContent();
+        layout.setMargin(true);
+        layout.setSpacing(true);
+        addComponent(lblError);
+        editor.setWidth(100, UNITS_PERCENTAGE);
+        addComponent(editor);
 
-		final HorizontalLayout horizontalLayout = new HorizontalLayout();
-		layout.addComponent(horizontalLayout);
-		horizontalLayout.addComponent(new SaveButton());
-		horizontalLayout.addComponent(new CloseButton());
-	}
+        final HorizontalLayout horizontalLayout = new HorizontalLayout();
+        layout.addComponent(horizontalLayout);
+        horizontalLayout.addComponent(new SaveButton());
+        horizontalLayout.addComponent(new CloseButton());
+    }
 
 }

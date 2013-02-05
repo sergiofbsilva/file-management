@@ -45,175 +45,175 @@ import com.google.common.collect.Sets;
  */
 public class MetadataTemplate extends MetadataTemplate_Base {
 
-	final static Function<MetadataTemplateRule, MetadataKey> RULE_KEY_FUNCTION =
-			new Function<MetadataTemplateRule, MetadataKey>() {
+    final static Function<MetadataTemplateRule, MetadataKey> RULE_KEY_FUNCTION =
+            new Function<MetadataTemplateRule, MetadataKey>() {
 
-				@Override
-				public MetadataKey apply(MetadataTemplateRule arg0) {
-					return arg0.getKey();
-				}
-			};
+                @Override
+                public MetadataKey apply(MetadataTemplateRule arg0) {
+                    return arg0.getKey();
+                }
+            };
 
-	public MetadataTemplate() {
-		super();
-		FileManagementSystem.getInstance().addMetadataTemplates(this);
-	}
+    public MetadataTemplate() {
+        super();
+        FileManagementSystem.getInstance().addMetadataTemplates(this);
+    }
 
-	public MetadataTemplate(String name) {
-		this();
-		setName(name);
-	}
+    public MetadataTemplate(String name) {
+        this();
+        setName(name);
+    }
 
-	public MetadataTemplate(String name, Set<String> keys) {
-		this();
-		setName(name);
-		addKeysStrings(keys);
-	}
+    public MetadataTemplate(String name, Set<String> keys) {
+        this();
+        setName(name);
+        addKeysStrings(keys);
+    }
 
-	public static MetadataTemplate getMetadataTemplate(String name) {
-		for (MetadataTemplate template : FileManagementSystem.getInstance().getMetadataTemplates()) {
-			if (template.getName().equals(name)) {
-				return template;
-			}
-		}
-		return null;
-	}
+    public static MetadataTemplate getMetadataTemplate(String name) {
+        for (MetadataTemplate template : FileManagementSystem.getInstance().getMetadataTemplates()) {
+            if (template.getName().equals(name)) {
+                return template;
+            }
+        }
+        return null;
+    }
 
-	@Service
-	public void delete() {
-		getKeys().clear();
-		for (MetadataTemplateRule rule : getRule()) {
-			rule.delete();
-		}
-		for (MetadataTemplate child : getChilds()) {
-			removeChilds(child);
-		}
-		setFileManagementSystem(null);
-		deleteDomainObject();
-	}
+    @Service
+    public void delete() {
+        getKeys().clear();
+        for (MetadataTemplateRule rule : getRule()) {
+            rule.delete();
+        }
+        for (MetadataTemplate child : getChilds()) {
+            removeChilds(child);
+        }
+        setFileManagementSystem(null);
+        deleteDomainObject();
+    }
 
-	private void removeKey(MetadataKey key) {
-		final MetadataTemplateRule rule = getRule(key);
-		if (rule != null) {
-			rule.delete();
-		}
-	}
+    private void removeKey(MetadataKey key) {
+        final MetadataTemplateRule rule = getRule(key);
+        if (rule != null) {
+            rule.delete();
+        }
+    }
 
-	public MetadataTemplateRule getRule(final MetadataKey key) {
-		for (MetadataTemplateRule rule : getRule()) {
-			if (rule.getKey().equals(key)) {
-				return rule;
-			}
-		}
-		return null;
-	}
+    public MetadataTemplateRule getRule(final MetadataKey key) {
+        for (MetadataTemplateRule rule : getRule()) {
+            if (rule.getKey().equals(key)) {
+                return rule;
+            }
+        }
+        return null;
+    }
 
-	@Service
-	public static MetadataTemplate getOrCreateInstance(String name) {
-		MetadataTemplate instance = getMetadataTemplate(name);
-		if (instance == null) {
-			instance = new MetadataTemplate(name);
-		}
-		return instance;
-	}
+    @Service
+    public static MetadataTemplate getOrCreateInstance(String name) {
+        MetadataTemplate instance = getMetadataTemplate(name);
+        if (instance == null) {
+            instance = new MetadataTemplate(name);
+        }
+        return instance;
+    }
 
-	@Service
-	public void addKeysStrings(Set<String> keys) {
-		for (String key : keys) {
-			addKey(MetadataKey.getOrCreateInstance(key), getRule().size() + 1);
-		}
-	}
+    @Service
+    public void addKeysStrings(Set<String> keys) {
+        for (String key : keys) {
+            addKey(MetadataKey.getOrCreateInstance(key), getRule().size() + 1);
+        }
+    }
 
-	private void addKey(MetadataKey key, Integer position) {
-		addKey(key, position, Boolean.FALSE, Boolean.FALSE);
-	}
+    private void addKey(MetadataKey key, Integer position) {
+        addKey(key, position, Boolean.FALSE, Boolean.FALSE);
+    }
 
-	public void addKey(MetadataKey key, Integer position, Boolean required) {
-		addKey(key, position, required, Boolean.FALSE);
-	}
+    public void addKey(MetadataKey key, Integer position, Boolean required) {
+        addKey(key, position, required, Boolean.FALSE);
+    }
 
-	@Service
-	public void addKey(MetadataKey key, Integer position, Boolean required, Boolean readOnly) {
-		addRule(new MetadataTemplateRule(this, key, position, required, readOnly));
-	}
+    @Service
+    public void addKey(MetadataKey key, Integer position, Boolean required, Boolean readOnly) {
+        addRule(new MetadataTemplateRule(this, key, position, required, readOnly));
+    }
 
-	public Set<String> getKeyNames() {
-		return FluentIterable.from(getKey()).transform(new Function<MetadataKey, String>() {
+    public Set<String> getKeyNames() {
+        return FluentIterable.from(getKey()).transform(new Function<MetadataKey, String>() {
 
-			@Override
-			public String apply(MetadataKey arg0) {
-				return arg0.getKeyValue();
-			}
-		}).toImmutableSet();
-	}
+            @Override
+            public String apply(MetadataKey arg0) {
+                return arg0.getKeyValue();
+            }
+        }).toImmutableSet();
+    }
 
-	@SuppressWarnings("unchecked")
-	public static MetadataTemplate fromExternalId(String templateOid) {
-		if (templateOid == null || templateOid.isEmpty()) {
-			return null;
-		} else {
-			return AbstractDomainObject.fromExternalId(templateOid);
-		}
-	}
+    @SuppressWarnings("unchecked")
+    public static MetadataTemplate fromExternalId(String templateOid) {
+        if (templateOid == null || templateOid.isEmpty()) {
+            return null;
+        } else {
+            return AbstractDomainObject.fromExternalId(templateOid);
+        }
+    }
 
-	public MetadataKey getKey(final MetadataKey key) {
-		final Iterator<MetadataKey> iterator = getKeysFluentIterable().filter(new Predicate<MetadataKey>() {
+    public MetadataKey getKey(final MetadataKey key) {
+        final Iterator<MetadataKey> iterator = getKeysFluentIterable().filter(new Predicate<MetadataKey>() {
 
-			@Override
-			public boolean apply(MetadataKey argKey) {
-				return argKey.equals(key);
-			}
-		}).iterator();
-		return iterator.hasNext() ? iterator.next() : null;
-	}
+            @Override
+            public boolean apply(MetadataKey argKey) {
+                return argKey.equals(key);
+            }
+        }).iterator();
+        return iterator.hasNext() ? iterator.next() : null;
+    }
 
-	public boolean hasKey(final MetadataKey key) {
-		return getKey(key) != null;
-	}
+    public boolean hasKey(final MetadataKey key) {
+        return getKey(key) != null;
+    }
 
-	public Set<MetadataKey> getKey() {
-		return getPositionOrderedKeys();
-	}
+    public Set<MetadataKey> getKey() {
+        return getPositionOrderedKeys();
+    }
 
-	private FluentIterable<MetadataKey> getKeysFluentIterable() {
-		return FluentIterable.from(getRuleSet()).transform(RULE_KEY_FUNCTION);
-	}
+    private FluentIterable<MetadataKey> getKeysFluentIterable() {
+        return FluentIterable.from(getRuleSet()).transform(RULE_KEY_FUNCTION);
+    }
 
-	public Set<MetadataKey> getPositionOrderedKeys() {
-		return FluentIterable.from(Sets.newTreeSet(getRuleSet())).transform(RULE_KEY_FUNCTION).toImmutableSet();
-	}
+    public Set<MetadataKey> getPositionOrderedKeys() {
+        return FluentIterable.from(Sets.newTreeSet(getRuleSet())).transform(RULE_KEY_FUNCTION).toImmutableSet();
+    }
 
-	public List<MetadataKey> getPositionOrderedKeysList() {
-		return FluentIterable.from(Sets.newTreeSet(getRuleSet())).transform(RULE_KEY_FUNCTION).toImmutableList();
-	}
+    public List<MetadataKey> getPositionOrderedKeysList() {
+        return FluentIterable.from(Sets.newTreeSet(getRuleSet())).transform(RULE_KEY_FUNCTION).toImmutableList();
+    }
 
-	public TreeSet<MetadataTemplateRule> getPositionOrderedRules() {
-		return Sets.newTreeSet(getRuleSet());
-	}
+    public TreeSet<MetadataTemplateRule> getPositionOrderedRules() {
+        return Sets.newTreeSet(getRuleSet());
+    }
 
-	public Set<MetadataKey> getKeysByMetadataType(final Class<? extends Metadata> metadata) {
-		return getKeysFluentIterable().filter(new Predicate<MetadataKey>() {
-			@Override
-			public boolean apply(MetadataKey key) {
-				return key.getMetadataValueType().equals(metadata);
-			}
-		}).toImmutableSet();
-	}
+    public Set<MetadataKey> getKeysByMetadataType(final Class<? extends Metadata> metadata) {
+        return getKeysFluentIterable().filter(new Predicate<MetadataKey>() {
+            @Override
+            public boolean apply(MetadataKey key) {
+                return key.getMetadataValueType().equals(metadata);
+            }
+        }).toImmutableSet();
+    }
 
-	@Service
-	public void clear() {
-		Set<MetadataTemplateRule> rules = Sets.newHashSet(getRuleSet());
-		for (MetadataTemplateRule rule : rules) {
-			rule.delete();
-		}
-	}
+    @Service
+    public void clear() {
+        Set<MetadataTemplateRule> rules = Sets.newHashSet(getRuleSet());
+        for (MetadataTemplateRule rule : rules) {
+            rule.delete();
+        }
+    }
 
-	public boolean hasAnyKey() {
-		return hasAnyRule();
-	}
+    public boolean hasAnyKey() {
+        return hasAnyRule();
+    }
 
-	@Override
-	public String toString() {
-		return getName();
-	}
+    @Override
+    public String toString() {
+        return getName();
+    }
 }

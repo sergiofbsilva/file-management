@@ -4,8 +4,8 @@ import java.io.File;
 
 public interface IFolder extends IFileNode {
 
-	public IDocument createDocument(final File file2upload);
+    public IDocument createDocument(final File file2upload);
 
-	public IFolder createFolder(final String name);
+    public IFolder createFolder(final String name);
 
 }

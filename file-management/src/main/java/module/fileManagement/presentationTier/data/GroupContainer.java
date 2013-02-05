@@ -5,20 +5,20 @@ import module.fileManagement.presentationTier.component.groups.HasPersistentGrou
 import pt.ist.bennu.core.domain.Presentable;
 
 public class GroupContainer extends AbstractSearchContainer {
-	public GroupContainer() {
-		super(Presentable.class);
-	}
+    public GroupContainer() {
+        super(Presentable.class);
+    }
 
-	{
-		// addContainerProperty("presentationName", String.class,
-		// StringUtils.EMPTY);
-	}
+    {
+        // addContainerProperty("presentationName", String.class,
+        // StringUtils.EMPTY);
+    }
 
-	@Override
-	public void search(String filterText) {
-		removeAllItems();
-		for (HasPersistentGroupCreator groupCreator : GroupCreatorRegistry.getPersistentGroupCreators()) {
-			addItems(groupCreator.getElements(filterText));
-		}
-	}
+    @Override
+    public void search(String filterText) {
+        removeAllItems();
+        for (HasPersistentGroupCreator groupCreator : GroupCreatorRegistry.getPersistentGroupCreators()) {
+            addItems(groupCreator.getElements(filterText));
+        }
+    }
 }

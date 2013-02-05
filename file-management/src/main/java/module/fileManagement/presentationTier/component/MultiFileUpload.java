@@ -52,239 +52,239 @@ import com.vaadin.ui.ProgressIndicator;
 @SuppressWarnings("serial")
 public abstract class MultiFileUpload extends CssLayout implements DropHandler {
 
-	private CssLayout progressBars = new CssLayout();
-	private CssLayout uploads = new CssLayout();
+    private CssLayout progressBars = new CssLayout();
+    private CssLayout uploads = new CssLayout();
 
-	public MultiFileUpload() {
-		addComponent(progressBars);
-		uploads.setStyleName("v-multifileupload-uploads");
-		addComponent(uploads);
-		prepareUpload();
-	}
+    public MultiFileUpload() {
+        addComponent(progressBars);
+        uploads.setStyleName("v-multifileupload-uploads");
+        addComponent(uploads);
+        prepareUpload();
+    }
 
-	private void prepareUpload() {
-		final FileBuffer reciever = createReceiver();
+    private void prepareUpload() {
+        final FileBuffer reciever = createReceiver();
 
-		final MultiUpload upload = new MultiUpload();
-		MultiUploadHandler handler = new MultiUploadHandler() {
-			private LinkedList<ProgressIndicator> indicators;
+        final MultiUpload upload = new MultiUpload();
+        MultiUploadHandler handler = new MultiUploadHandler() {
+            private LinkedList<ProgressIndicator> indicators;
 
-			@Override
-			public void streamingStarted(StreamingStartEvent event) {
+            @Override
+            public void streamingStarted(StreamingStartEvent event) {
 //		System.err.println("Started" + event.getFileName() + " size " + event.getContentLength());
-			}
+            }
 
-			@Override
-			public void streamingFinished(StreamingEndEvent event) {
-				if (!indicators.isEmpty()) {
-					progressBars.removeComponent(indicators.remove(0));
-				}
-				File file = reciever.getFile();
-				handleFile(file, event.getFileName(), event.getMimeType(), event.getBytesReceived());
-				reciever.setValue(null);
-			}
+            @Override
+            public void streamingFinished(StreamingEndEvent event) {
+                if (!indicators.isEmpty()) {
+                    progressBars.removeComponent(indicators.remove(0));
+                }
+                File file = reciever.getFile();
+                handleFile(file, event.getFileName(), event.getMimeType(), event.getBytesReceived());
+                reciever.setValue(null);
+            }
 
-			@Override
-			public void streamingFailed(StreamingErrorEvent event) {
-				event.getException().printStackTrace();
+            @Override
+            public void streamingFailed(StreamingErrorEvent event) {
+                event.getException().printStackTrace();
 
-				for (ProgressIndicator progressIndicator : indicators) {
-					progressBars.removeComponent(progressIndicator);
-				}
+                for (ProgressIndicator progressIndicator : indicators) {
+                    progressBars.removeComponent(progressIndicator);
+                }
 
-			}
+            }
 
-			@Override
-			public void onProgress(StreamingProgressEvent event) {
-				long readBytes = event.getBytesReceived();
-				long contentLength = event.getContentLength();
-				float f = (float) readBytes / (float) contentLength;
-				indicators.get(0).setValue(f);
-			}
+            @Override
+            public void onProgress(StreamingProgressEvent event) {
+                long readBytes = event.getBytesReceived();
+                long contentLength = event.getContentLength();
+                float f = (float) readBytes / (float) contentLength;
+                indicators.get(0).setValue(f);
+            }
 
-			@Override
-			public OutputStream getOutputStream() {
-				FileDetail next = upload.getPendingFileNames().iterator().next();
-				return reciever.receiveUpload(next.getFileName(), next.getMimeType());
-			}
+            @Override
+            public OutputStream getOutputStream() {
+                FileDetail next = upload.getPendingFileNames().iterator().next();
+                return reciever.receiveUpload(next.getFileName(), next.getMimeType());
+            }
 
-			@Override
-			public void filesQueued(Collection<FileDetail> pendingFileNames) {
-				if (indicators == null) {
-					indicators = new LinkedList<ProgressIndicator>();
-				}
-				for (FileDetail f : pendingFileNames) {
+            @Override
+            public void filesQueued(Collection<FileDetail> pendingFileNames) {
+                if (indicators == null) {
+                    indicators = new LinkedList<ProgressIndicator>();
+                }
+                for (FileDetail f : pendingFileNames) {
 //		    System.err.println("Info to handler about file: " + f.getFileName());
-					ProgressIndicator pi = createProgressIndicator();
-					progressBars.addComponent(pi);
-					pi.setCaption(f.getFileName());
-					pi.setVisible(true);
-					indicators.add(pi);
-				}
-			}
-		};
-		upload.setHandler(handler);
-		upload.setButtonCaption(getUploadButtonCaption());
-		uploads.addComponent(upload);
+                    ProgressIndicator pi = createProgressIndicator();
+                    progressBars.addComponent(pi);
+                    pi.setCaption(f.getFileName());
+                    pi.setVisible(true);
+                    indicators.add(pi);
+                }
+            }
+        };
+        upload.setHandler(handler);
+        upload.setButtonCaption(getUploadButtonCaption());
+        uploads.addComponent(upload);
 
-	}
+    }
 
-	private ProgressIndicator createProgressIndicator() {
-		ProgressIndicator progressIndicator = new ProgressIndicator();
-		progressIndicator.setPollingInterval(300);
-		progressIndicator.setValue(0);
-		return progressIndicator;
-	}
+    private ProgressIndicator createProgressIndicator() {
+        ProgressIndicator progressIndicator = new ProgressIndicator();
+        progressIndicator.setPollingInterval(300);
+        progressIndicator.setValue(0);
+        return progressIndicator;
+    }
 
-	protected String getUploadButtonCaption() {
-		return "...";
-	}
+    protected String getUploadButtonCaption() {
+        return "...";
+    }
 
-	private FileFactory fileFactory;
+    private FileFactory fileFactory;
 
-	public FileFactory getFileFactory() {
-		return fileFactory;
-	}
+    public FileFactory getFileFactory() {
+        return fileFactory;
+    }
 
-	public void setFileFactory(FileFactory fileFactory) {
-		this.fileFactory = fileFactory;
-	}
+    public void setFileFactory(FileFactory fileFactory) {
+        this.fileFactory = fileFactory;
+    }
 
-	protected FileBuffer createReceiver() {
-		return new FileBuffer() {
-			@Override
-			public FileFactory getFileFactory() {
-				return MultiFileUpload.this.getFileFactory();
-			}
-		};
-	}
+    protected FileBuffer createReceiver() {
+        return new FileBuffer() {
+            @Override
+            public FileFactory getFileFactory() {
+                return MultiFileUpload.this.getFileFactory();
+            }
+        };
+    }
 
-	protected int getPollinInterval() {
-		return 500;
-	}
+    protected int getPollinInterval() {
+        return 500;
+    }
 
-	@Override
-	public void attach() {
-		super.attach();
-		if (supportsFileDrops()) {
-			prepareDropZone();
-		}
-	}
+    @Override
+    public void attach() {
+        super.attach();
+        if (supportsFileDrops()) {
+            prepareDropZone();
+        }
+    }
 
-	private DragAndDropWrapper dropZone;
+    private DragAndDropWrapper dropZone;
 
-	/**
-	 * Sets up DragAndDropWrapper to accept multi file drops.
-	 */
-	private void prepareDropZone() {
-		Component label = new Label(getAreaText(), Label.CONTENT_XHTML);
-		label.setSizeUndefined();
-		dropZone = new DragAndDropWrapper(label);
-		dropZone.setStyleName("v-multifileupload-dropzone");
+    /**
+     * Sets up DragAndDropWrapper to accept multi file drops.
+     */
+    private void prepareDropZone() {
+        Component label = new Label(getAreaText(), Label.CONTENT_XHTML);
+        label.setSizeUndefined();
+        dropZone = new DragAndDropWrapper(label);
+        dropZone.setStyleName("v-multifileupload-dropzone");
 //	dropZone.setSizeUndefined();
 //	dropZone.setSizeFull();
-		dropZone.setWidth(50, UNITS_PERCENTAGE);
-		addComponent(dropZone, 1);
-		dropZone.setDropHandler(this);
-		addStyleName("no-horizontal-drag-hints");
-		addStyleName("no-vertical-drag-hints");
-	}
+        dropZone.setWidth(50, UNITS_PERCENTAGE);
+        addComponent(dropZone, 1);
+        dropZone.setDropHandler(this);
+        addStyleName("no-horizontal-drag-hints");
+        addStyleName("no-vertical-drag-hints");
+    }
 
-	protected String getAreaText() {
-		return "<small>DROP<br/>FILES</small>";
-	}
+    protected String getAreaText() {
+        return "<small>DROP<br/>FILES</small>";
+    }
 
-	protected boolean supportsFileDrops() {
-		AbstractWebApplicationContext context = (AbstractWebApplicationContext) getApplication().getContext();
-		WebBrowser browser = context.getBrowser();
-		if (browser.isChrome()) {
-			return true;
-		} else if (browser.isFirefox()) {
-			return true;
-		} else if (browser.isSafari()) {
-			return true;
-		}
-		return false;
-	}
+    protected boolean supportsFileDrops() {
+        AbstractWebApplicationContext context = (AbstractWebApplicationContext) getApplication().getContext();
+        WebBrowser browser = context.getBrowser();
+        if (browser.isChrome()) {
+            return true;
+        } else if (browser.isFirefox()) {
+            return true;
+        } else if (browser.isSafari()) {
+            return true;
+        }
+        return false;
+    }
 
-	abstract protected void handleFile(File file, String fileName, String mimeType, long length);
+    abstract protected void handleFile(File file, String fileName, String mimeType, long length);
 
-	/**
-	 * A helper method to set DirectoryFileFactory with given pathname as
-	 * directory.
-	 * 
-	 * @param file
-	 */
-	public void setRootDirectory(String directoryWhereToUpload) {
-		setFileFactory(new DirectoryFileFactory(new File(directoryWhereToUpload)));
-	}
+    /**
+     * A helper method to set DirectoryFileFactory with given pathname as
+     * directory.
+     * 
+     * @param file
+     */
+    public void setRootDirectory(String directoryWhereToUpload) {
+        setFileFactory(new DirectoryFileFactory(new File(directoryWhereToUpload)));
+    }
 
-	@Override
-	public AcceptCriterion getAcceptCriterion() {
-		// TODO accept only files
-		// return new And(new TargetDetailIs("verticalLocation","MIDDLE"), new
-		// TargetDetailIs("horizontalLoction", "MIDDLE"));
-		return AcceptAll.get();
-	}
+    @Override
+    public AcceptCriterion getAcceptCriterion() {
+        // TODO accept only files
+        // return new And(new TargetDetailIs("verticalLocation","MIDDLE"), new
+        // TargetDetailIs("horizontalLoction", "MIDDLE"));
+        return AcceptAll.get();
+    }
 
-	@Override
-	public void drop(DragAndDropEvent event) {
-		DragAndDropWrapper.WrapperTransferable transferable = (WrapperTransferable) event.getTransferable();
-		Html5File[] files = transferable.getFiles();
-		for (final Html5File html5File : files) {
-			final ProgressIndicator pi = new ProgressIndicator();
-			pi.setCaption(html5File.getFileName());
-			progressBars.addComponent(pi);
-			final FileBuffer receiver = createReceiver();
-			html5File.setStreamVariable(new StreamVariable() {
+    @Override
+    public void drop(DragAndDropEvent event) {
+        DragAndDropWrapper.WrapperTransferable transferable = (WrapperTransferable) event.getTransferable();
+        Html5File[] files = transferable.getFiles();
+        for (final Html5File html5File : files) {
+            final ProgressIndicator pi = new ProgressIndicator();
+            pi.setCaption(html5File.getFileName());
+            progressBars.addComponent(pi);
+            final FileBuffer receiver = createReceiver();
+            html5File.setStreamVariable(new StreamVariable() {
 
-				private String name;
-				private String mime;
+                private String name;
+                private String mime;
 
-				@Override
-				public OutputStream getOutputStream() {
-					return receiver.receiveUpload(name, mime);
-				}
+                @Override
+                public OutputStream getOutputStream() {
+                    return receiver.receiveUpload(name, mime);
+                }
 
-				@Override
-				public boolean listenProgress() {
-					return true;
-				}
+                @Override
+                public boolean listenProgress() {
+                    return true;
+                }
 
-				@Override
-				public void onProgress(StreamingProgressEvent event) {
-					float p = (float) event.getBytesReceived() / (float) event.getContentLength();
-					pi.setValue(p);
-				}
+                @Override
+                public void onProgress(StreamingProgressEvent event) {
+                    float p = (float) event.getBytesReceived() / (float) event.getContentLength();
+                    pi.setValue(p);
+                }
 
-				@Override
-				public void streamingStarted(StreamingStartEvent event) {
-					name = event.getFileName();
-					mime = event.getMimeType();
+                @Override
+                public void streamingStarted(StreamingStartEvent event) {
+                    name = event.getFileName();
+                    mime = event.getMimeType();
 
-				}
+                }
 
-				@Override
-				public void streamingFinished(StreamingEndEvent event) {
-					progressBars.removeComponent(pi);
-					handleFile(receiver.getFile(), html5File.getFileName(), html5File.getType(), html5File.getFileSize());
-				}
+                @Override
+                public void streamingFinished(StreamingEndEvent event) {
+                    progressBars.removeComponent(pi);
+                    handleFile(receiver.getFile(), html5File.getFileName(), html5File.getType(), html5File.getFileSize());
+                }
 
-				@Override
-				public void streamingFailed(StreamingErrorEvent event) {
-					progressBars.removeComponent(pi);
-				}
+                @Override
+                public void streamingFailed(StreamingErrorEvent event) {
+                    progressBars.removeComponent(pi);
+                }
 
-				@Override
-				public boolean isInterrupted() {
-					return false;
-				}
-			});
-		}
+                @Override
+                public boolean isInterrupted() {
+                    return false;
+                }
+            });
+        }
 
-	}
+    }
 
-	public void hideProgressBars() {
-		progressBars.setVisible(false);
-	}
+    public void hideProgressBars() {
+        progressBars.setVisible(false);
+    }
 }

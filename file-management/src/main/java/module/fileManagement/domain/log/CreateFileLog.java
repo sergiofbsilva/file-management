@@ -6,13 +6,13 @@ import pt.ist.bennu.core.domain.User;
 
 public class CreateFileLog extends CreateFileLog_Base {
 
-	public CreateFileLog() {
-		super();
-	}
+    public CreateFileLog() {
+        super();
+    }
 
-	public CreateFileLog(User user, ContextPath contextPath, FileNode fileNode) {
-		super();
-		init(user, contextPath, fileNode);
-	}
+    public CreateFileLog(User user, ContextPath contextPath, FileNode fileNode) {
+        super();
+        init(user, contextPath, fileNode);
+    }
 
 }

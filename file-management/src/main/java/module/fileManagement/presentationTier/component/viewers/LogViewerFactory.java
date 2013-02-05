@@ -54,144 +54,144 @@ import com.vaadin.ui.themes.BaseTheme;
  */
 class FileLogViewer extends AbstractLogLabel<FileLog> {
 
-	public FileLogViewer(FileLog fileLog) {
-		super(fileLog);
-	}
+    public FileLogViewer(FileLog fileLog) {
+        super(fileLog);
+    }
 
-	@Override
-	public String createTargetNodeLink() {
-		final FileNode fileNode = getLog().getFileNode();
-		if (fileNode.isAccessible()) {
-			final String url = DownloadUtil.getDownloadUrl(getApplication(), fileNode.getDocument());
-			return String.format("<a href=\"%s\">%s</a>", url, fileNode.getDisplayName());
-		} else {
-			return fileNode.getDisplayName();
-		}
-	}
+    @Override
+    public String createTargetNodeLink() {
+        final FileNode fileNode = getLog().getFileNode();
+        if (fileNode.isAccessible()) {
+            final String url = DownloadUtil.getDownloadUrl(getApplication(), fileNode.getDocument());
+            return String.format("<a href=\"%s\">%s</a>", url, fileNode.getDisplayName());
+        } else {
+            return fileNode.getDisplayName();
+        }
+    }
 }
 
 class DirLogViewer extends AbstractLogLabel<DirLog> {
 
-	public DirLogViewer(DirLog log) {
-		super(log);
-	}
+    public DirLogViewer(DirLog log) {
+        super(log);
+    }
 
-	@Override
-	public String createTargetNodeLink() {
-		final ContextPath targetNodePath = getLog().getContextPath().concat(getLog().getDirNode());
-		return createDirNodeLink(targetNodePath);
-	}
+    @Override
+    public String createTargetNodeLink() {
+        final ContextPath targetNodePath = getLog().getContextPath().concat(getLog().getDirNode());
+        return createDirNodeLink(targetNodePath);
+    }
 }
 
 class DeleteFileLogViewer extends FileLogViewer {
 
-	public DeleteFileLogViewer(FileLog log) {
-		super(log);
-	}
+    public DeleteFileLogViewer(FileLog log) {
+        super(log);
+    }
 
-	@Override
-	public boolean hasOperations() {
-		return getLog().getFileNode().isInTrash();
-	}
+    @Override
+    public boolean hasOperations() {
+        return getLog().getFileNode().isInTrash();
+    }
 
-	@Override
-	public String createTargetNodeLink() {
-		return getLog().getFileNode().getDisplayName();
-	}
+    @Override
+    public String createTargetNodeLink() {
+        return getLog().getFileNode().getDisplayName();
+    }
 
-	private void updateParent() {
+    private void updateParent() {
 
-	}
+    }
 
-	@Override
-	public List<Component> getOperations() {
-		final Component btSelectDir = new Button("Recuperar");
-		btSelectDir.setStyleName(BaseTheme.BUTTON_LINK);
-		((Button) btSelectDir).addListener(new ClickListener() {
+    @Override
+    public List<Component> getOperations() {
+        final Component btSelectDir = new Button("Recuperar");
+        btSelectDir.setStyleName(BaseTheme.BUTTON_LINK);
+        ((Button) btSelectDir).addListener(new ClickListener() {
 
-			@Override
-			public void buttonClick(ClickEvent event) {
-				final SelectDestinationDialog window = new SelectDestinationDialog();
-				getWindow().addWindow(window);
-				window.addListener(new CloseListener() {
+            @Override
+            public void buttonClick(ClickEvent event) {
+                final SelectDestinationDialog window = new SelectDestinationDialog();
+                getWindow().addWindow(window);
+                window.addListener(new CloseListener() {
 
-					@Override
-					public void windowClose(CloseEvent e) {
-						final DirNode targetDir = window.getSelectedDirNode();
-						if (targetDir != null) {
-							getLog().getFileNode().recoverTo(targetDir);
-							getParentContainer().reloadContent();
-						}
-					}
-				});
-			}
-		});
-		return Collections.singletonList(btSelectDir);
-	}
+                    @Override
+                    public void windowClose(CloseEvent e) {
+                        final DirNode targetDir = window.getSelectedDirNode();
+                        if (targetDir != null) {
+                            getLog().getFileNode().recoverTo(targetDir);
+                            getParentContainer().reloadContent();
+                        }
+                    }
+                });
+            }
+        });
+        return Collections.singletonList(btSelectDir);
+    }
 }
 
 class DeleteDirLogViewer extends DirLogViewer {
 
-	public DeleteDirLogViewer(DirLog log) {
-		super(log);
-	}
+    public DeleteDirLogViewer(DirLog log) {
+        super(log);
+    }
 
-	@Override
-	public boolean hasOperations() {
-		return getLog().getDirNode().isInTrash();
-	}
+    @Override
+    public boolean hasOperations() {
+        return getLog().getDirNode().isInTrash();
+    }
 
-	@Override
-	public String createTargetNodeLink() {
-		return getLog().getDirNode().getDisplayName();
-	}
+    @Override
+    public String createTargetNodeLink() {
+        return getLog().getDirNode().getDisplayName();
+    }
 
-	private void updateParent() {
+    private void updateParent() {
 
-	}
+    }
 
-	@Override
-	public List<Component> getOperations() {
-		final Component btSelectDir = new Button("Recuperar");
-		btSelectDir.setStyleName(BaseTheme.BUTTON_LINK);
-		((Button) btSelectDir).addListener(new ClickListener() {
+    @Override
+    public List<Component> getOperations() {
+        final Component btSelectDir = new Button("Recuperar");
+        btSelectDir.setStyleName(BaseTheme.BUTTON_LINK);
+        ((Button) btSelectDir).addListener(new ClickListener() {
 
-			@Override
-			public void buttonClick(ClickEvent event) {
-				final SelectDestinationDialog window = new SelectDestinationDialog();
-				getWindow().addWindow(window);
-				window.addListener(new CloseListener() {
+            @Override
+            public void buttonClick(ClickEvent event) {
+                final SelectDestinationDialog window = new SelectDestinationDialog();
+                getWindow().addWindow(window);
+                window.addListener(new CloseListener() {
 
-					@Override
-					public void windowClose(CloseEvent e) {
-						final DirNode targetDir = window.getSelectedDirNode();
-						if (targetDir != null) {
-							getLog().getDirNode().recoverTo(targetDir);
-							getParentContainer().reloadContent();
-						}
-					}
-				});
-			}
-		});
-		return Collections.singletonList(btSelectDir);
-	}
+                    @Override
+                    public void windowClose(CloseEvent e) {
+                        final DirNode targetDir = window.getSelectedDirNode();
+                        if (targetDir != null) {
+                            getLog().getDirNode().recoverTo(targetDir);
+                            getParentContainer().reloadContent();
+                        }
+                    }
+                });
+            }
+        });
+        return Collections.singletonList(btSelectDir);
+    }
 }
 
 public class LogViewerFactory {
 
-	public static Component createViewer(AbstractLog log) {
-		if (log instanceof FileLog) {
-			if (log instanceof DeleteFileLog) {
-				return new DeleteFileLogViewer((FileLog) log);
-			}
-			return new FileLogViewer((FileLog) log);
-		}
-		if (log instanceof DirLog) {
-			if (log instanceof DeleteDirLog) {
-				return new DeleteDirLogViewer((DirLog) log);
-			}
-			return new DirLogViewer((DirLog) log);
-		}
-		return new Label();
-	}
+    public static Component createViewer(AbstractLog log) {
+        if (log instanceof FileLog) {
+            if (log instanceof DeleteFileLog) {
+                return new DeleteFileLogViewer((FileLog) log);
+            }
+            return new FileLogViewer((FileLog) log);
+        }
+        if (log instanceof DirLog) {
+            if (log instanceof DeleteDirLog) {
+                return new DeleteDirLogViewer((DirLog) log);
+            }
+            return new DirLogViewer((DirLog) log);
+        }
+        return new Label();
+    }
 }

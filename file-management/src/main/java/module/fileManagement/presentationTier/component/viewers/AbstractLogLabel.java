@@ -44,63 +44,63 @@ import com.vaadin.ui.themes.BaseTheme;
  * 
  */
 public abstract class AbstractLogLabel<T extends AbstractLog> extends Label implements AbstractLogViewer {
-	private final T log;
-	private LogPage parentContainer;
+    private final T log;
+    private LogPage parentContainer;
 
-	public AbstractLogLabel(T log) {
-		super();
-		setSizeFull();
-		setStyleName(BaseTheme.BUTTON_LINK);
-		setContentMode(Label.CONTENT_XHTML);
-		this.log = log;
-	}
+    public AbstractLogLabel(T log) {
+        super();
+        setSizeFull();
+        setStyleName(BaseTheme.BUTTON_LINK);
+        setContentMode(Label.CONTENT_XHTML);
+        this.log = log;
+    }
 
-	public T getLog() {
-		return log;
-	}
+    public T getLog() {
+        return log;
+    }
 
-	public String createTargetDirLink() {
-		return createDirNodeLink(getLog().getContextPath());
-	}
+    public String createTargetDirLink() {
+        return createDirNodeLink(getLog().getContextPath());
+    }
 
-	public final String createDirNodeLink(final ContextPath contextPath) {
-		final DirNode targetDir = contextPath.getLastDirNode();
-		return targetDir.isAccessible() ? String.format("<a href=\"#%s\">%s</a>", new FragmentQuery(DocumentBrowse.class,
-				contextPath.toString()).getQueryString(), targetDir.getDisplayName()) : targetDir.getDisplayName();
-	}
+    public final String createDirNodeLink(final ContextPath contextPath) {
+        final DirNode targetDir = contextPath.getLastDirNode();
+        return targetDir.isAccessible() ? String.format("<a href=\"#%s\">%s</a>", new FragmentQuery(DocumentBrowse.class,
+                contextPath.toString()).getQueryString(), targetDir.getDisplayName()) : targetDir.getDisplayName();
+    }
 
-	public abstract String createTargetNodeLink();
+    public abstract String createTargetNodeLink();
 
-	@Override
-	public void attach() {
-		super.attach();
-		setValue(createEntry());
-	}
+    @Override
+    public void attach() {
+        super.attach();
+        setValue(createEntry());
+    }
 
-	private String createEntry() {
-		final StringBuilder builder = new StringBuilder();
-		builder.append(String.format("(%s) Em %s, ", log.getLogTime(), createTargetDirLink()));
-		builder.append(String.format(" %s ", log.getUserName()));
-		builder.append(String.format(" %s ", log.getOperationString()));
-		builder.append(String.format(" %s ", createTargetNodeLink()));
-		return builder.toString();
-	}
+    private String createEntry() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append(String.format("(%s) Em %s, ", log.getLogTime(), createTargetDirLink()));
+        builder.append(String.format(" %s ", log.getUserName()));
+        builder.append(String.format(" %s ", log.getOperationString()));
+        builder.append(String.format(" %s ", createTargetNodeLink()));
+        return builder.toString();
+    }
 
-	@Override
-	public boolean hasOperations() {
-		return false;
-	}
+    @Override
+    public boolean hasOperations() {
+        return false;
+    }
 
-	@Override
-	public List<Component> getOperations() {
-		return Collections.EMPTY_LIST;
-	}
+    @Override
+    public List<Component> getOperations() {
+        return Collections.EMPTY_LIST;
+    }
 
-	public void setParentContainer(LogPage parent) {
-		this.parentContainer = parent;
-	}
+    public void setParentContainer(LogPage parent) {
+        this.parentContainer = parent;
+    }
 
-	public LogPage getParentContainer() {
-		return this.parentContainer;
-	}
+    public LogPage getParentContainer() {
+        return this.parentContainer;
+    }
 }

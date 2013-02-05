@@ -1,7 +1,7 @@
 package module.fileManagement.tools;
 
 public interface AttributeResolver {
-	String get();
+    String get();
 
-	String resolve();
+    String resolve();
 }

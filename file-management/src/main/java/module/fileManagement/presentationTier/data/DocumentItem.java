@@ -40,54 +40,54 @@ import com.vaadin.data.util.AbstractProperty;
  * 
  */
 public class DocumentItem extends DomainItem<Document> {
-	public class MetadataKeyProperty extends AbstractProperty {
-		private final MetadataKey key;
+    public class MetadataKeyProperty extends AbstractProperty {
+        private final MetadataKey key;
 
-		public MetadataKeyProperty(MetadataKey key) {
-			this.key = key;
-		}
+        public MetadataKeyProperty(MetadataKey key) {
+            this.key = key;
+        }
 
-		@Override
-		public Object getValue() {
-			Document document = DocumentItem.this.getValue();
-			if (document != null) {
-				Metadata metadata = document.getMetadataRecentlyChanged(key);
-				return metadata != null ? metadata.getValue() : null;
-			}
-			return null;
-		}
+        @Override
+        public Object getValue() {
+            Document document = DocumentItem.this.getValue();
+            if (document != null) {
+                Metadata metadata = document.getMetadataRecentlyChanged(key);
+                return metadata != null ? metadata.getValue() : null;
+            }
+            return null;
+        }
 
-		@Override
-		public void setValue(Object newValue) {
-			Document document = DocumentItem.this.getValue();
-			document.addMetadata(key.createMetadata(newValue));
-		}
+        @Override
+        public void setValue(Object newValue) {
+            Document document = DocumentItem.this.getValue();
+            document.addMetadata(key.createMetadata(newValue));
+        }
 
-		@Override
-		public Class<?> getType() {
-			return String.class;
-		}
-	}
+        @Override
+        public Class<?> getType() {
+            return String.class;
+        }
+    }
 
-	public DocumentItem(Document document) {
-		super(document);
-	}
+    public DocumentItem(Document document) {
+        super(document);
+    }
 
-	public DocumentItem(Class<? extends Document> type) {
-		super(type);
-	}
+    public DocumentItem(Class<? extends Document> type) {
+        super(type);
+    }
 
-	{
-		setWriteThrough(false);
-	}
+    {
+        setWriteThrough(false);
+    }
 
-	@Override
-	protected Property makeProperty(Object propertyId) {
-		if (propertyId instanceof MetadataKey) {
-			BufferedProperty<String> property = new BufferedProperty<String>(new MetadataKeyProperty((MetadataKey) propertyId));
-			addItemProperty(propertyId, property);
-			return property;
-		}
-		return super.makeProperty(propertyId);
-	}
+    @Override
+    protected Property makeProperty(Object propertyId) {
+        if (propertyId instanceof MetadataKey) {
+            BufferedProperty<String> property = new BufferedProperty<String>(new MetadataKeyProperty((MetadataKey) propertyId));
+            addItemProperty(propertyId, property);
+            return property;
+        }
+        return super.makeProperty(propertyId);
+    }
 }

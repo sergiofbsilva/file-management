@@ -5,20 +5,20 @@ import pt.ist.fenixWebFramework.services.Service;
 
 public class FileRestUtilsSystem extends FileRestUtilsSystem_Base {
 
-	private FileRestUtilsSystem() {
-		super();
-	}
+    private FileRestUtilsSystem() {
+        super();
+    }
 
-	public static FileRestUtilsSystem getInstance() {
-		if (!MyOrg.getInstance().hasFileRestUtilsSystem()) {
-			init();
-		}
-		return MyOrg.getInstance().getFileRestUtilsSystem();
-	}
+    public static FileRestUtilsSystem getInstance() {
+        if (!MyOrg.getInstance().hasFileRestUtilsSystem()) {
+            init();
+        }
+        return MyOrg.getInstance().getFileRestUtilsSystem();
+    }
 
-	@Service
-	private static void init() {
-		MyOrg.getInstance().setFileRestUtilsSystem(new FileRestUtilsSystem());
-	}
+    @Service
+    private static void init() {
+        MyOrg.getInstance().setFileRestUtilsSystem(new FileRestUtilsSystem());
+    }
 
 }

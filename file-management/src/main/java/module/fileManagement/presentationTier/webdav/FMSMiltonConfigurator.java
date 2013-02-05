@@ -14,37 +14,37 @@ import java.util.HashMap;
 import java.util.List;
 
 public class FMSMiltonConfigurator extends DefaultMiltonConfigurator {
-	public static final String REALM = "WebDavDocs";
+    public static final String REALM = "WebDavDocs";
 
-	@Override
-	protected void build() {
-		builder.setEnableBasicAuth(false);
-		builder.setEnableCookieAuth(false);
-		builder.setFsRealm(REALM);
-		SimpleSecurityManager securityManager = new FMSSecurityManager(builder.getFsRealm(), new HashMap<String, String>());
-		securityManager.setDigestGenerator(new DigestGenerator());
+    @Override
+    protected void build() {
+        builder.setEnableBasicAuth(false);
+        builder.setEnableCookieAuth(false);
+        builder.setFsRealm(REALM);
+        SimpleSecurityManager securityManager = new FMSSecurityManager(builder.getFsRealm(), new HashMap<String, String>());
+        securityManager.setDigestGenerator(new DigestGenerator());
 
-		builder.setSecurityManager(securityManager);
+        builder.setSecurityManager(securityManager);
 
-		final ExpiredNonceRemover expiredNonceRemover =
-				new ExpiredNonceRemover(builder.getNonces(), builder.getNonceValiditySeconds());
-		builder.setExpiredNonceRemover(expiredNonceRemover);
+        final ExpiredNonceRemover expiredNonceRemover =
+                new ExpiredNonceRemover(builder.getNonces(), builder.getNonceValiditySeconds());
+        builder.setExpiredNonceRemover(expiredNonceRemover);
 
-		final SimpleMemoryNonceProvider nonceProvider =
-				new SimpleMemoryNonceProvider(builder.getNonceValiditySeconds(), expiredNonceRemover, builder.getNonces());
-		builder.setNonceProvider(nonceProvider);
+        final SimpleMemoryNonceProvider nonceProvider =
+                new SimpleMemoryNonceProvider(builder.getNonceValiditySeconds(), expiredNonceRemover, builder.getNonces());
+        builder.setNonceProvider(nonceProvider);
 
-		List<AuthenticationHandler> authHandlers = new ArrayList<AuthenticationHandler>();
-		authHandlers.add(new SecurityManagerDigestAuthenticationHandler(nonceProvider, securityManager));
-		builder.setAuthenticationHandlers(authHandlers);
+        List<AuthenticationHandler> authHandlers = new ArrayList<AuthenticationHandler>();
+        authHandlers.add(new SecurityManagerDigestAuthenticationHandler(nonceProvider, securityManager));
+        builder.setAuthenticationHandlers(authHandlers);
 
-		builder.init();
+        builder.init();
 
-		final List<Filter> filters = new ArrayList<Filter>();
-		filters.add(new FMSPreAuthenticationFilter(builder.getHttp11ResponseHandler(), builder.getAuthenticationHandlers()));
-		filters.addAll(builder.getFilters());
-		builder.setFilters(filters);
+        final List<Filter> filters = new ArrayList<Filter>();
+        filters.add(new FMSPreAuthenticationFilter(builder.getHttp11ResponseHandler(), builder.getAuthenticationHandlers()));
+        filters.addAll(builder.getFilters());
+        builder.setFilters(filters);
 
-		super.build();
-	}
+        super.build();
+    }
 }

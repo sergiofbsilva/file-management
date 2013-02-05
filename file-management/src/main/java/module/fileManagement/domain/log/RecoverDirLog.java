@@ -6,13 +6,13 @@ import pt.ist.bennu.core.domain.User;
 
 public class RecoverDirLog extends RecoverDirLog_Base {
 
-	public RecoverDirLog() {
-		super();
-	}
+    public RecoverDirLog() {
+        super();
+    }
 
-	public RecoverDirLog(User user, ContextPath contextPath, DirNode dirNode) {
-		super();
-		init(user, contextPath, dirNode);
-	}
+    public RecoverDirLog(User user, ContextPath contextPath, DirNode dirNode) {
+        super();
+        init(user, contextPath, dirNode);
+    }
 
 }

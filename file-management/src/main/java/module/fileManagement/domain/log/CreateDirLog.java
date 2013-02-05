@@ -35,13 +35,13 @@ import pt.ist.bennu.core.domain.User;
  */
 public class CreateDirLog extends CreateDirLog_Base {
 
-	public CreateDirLog() {
-		super();
-	}
+    public CreateDirLog() {
+        super();
+    }
 
-	public CreateDirLog(User user, ContextPath contextPath, DirNode dirNode) {
-		super();
-		init(user, contextPath, dirNode);
-	}
+    public CreateDirLog(User user, ContextPath contextPath, DirNode dirNode) {
+        super();
+        init(user, contextPath, dirNode);
+    }
 
 }
