@@ -3,7 +3,10 @@ package module.fileManagement.domain;
 import java.io.File;
 import java.io.IOException;
 
+import jvstm.cps.ConsistencyPredicate;
+
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 
 public class VersionedFile extends VersionedFile_Base {
 
@@ -84,6 +87,11 @@ public class VersionedFile extends VersionedFile_Base {
 
     public Document getConnectedDocument() {
         return hasDocument() ? getDocument() : (hasNextVersion() ? getNextVersion().getConnectedDocument() : null);
+    }
+
+    @ConsistencyPredicate
+    public boolean checkDisplayName() {
+        return !StringUtils.isBlank(getDisplayName());
     }
 
 }
