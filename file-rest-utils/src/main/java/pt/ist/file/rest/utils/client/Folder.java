@@ -4,7 +4,7 @@ import java.io.File;
 
 import javax.ws.rs.core.MediaType;
 
-import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.fenixframework.Atomic;
 import pt.ist.file.rest.utils.domain.RemoteFolder;
 
 import com.sun.jersey.api.client.ClientHandlerException;
@@ -64,7 +64,7 @@ public class Folder implements IFolder {
         return new Folder(fmsRestClient, newDir);
     }
 
-    @Service
+    @Atomic
     public RemoteFolder persist() {
         return new RemoteFolder(this);
     }

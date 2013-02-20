@@ -1,7 +1,7 @@
 package pt.ist.file.rest.utils.domain;
 
 import pt.ist.bennu.core.domain.MyOrg;
-import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.fenixframework.Atomic;
 
 public class FileRestUtilsSystem extends FileRestUtilsSystem_Base {
 
@@ -16,7 +16,7 @@ public class FileRestUtilsSystem extends FileRestUtilsSystem_Base {
         return MyOrg.getInstance().getFileRestUtilsSystem();
     }
 
-    @Service
+    @Atomic
     private static void init() {
         MyOrg.getInstance().setFileRestUtilsSystem(new FileRestUtilsSystem());
     }

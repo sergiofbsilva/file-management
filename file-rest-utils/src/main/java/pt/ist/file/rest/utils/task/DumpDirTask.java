@@ -71,7 +71,7 @@ public class DumpDirTask extends WriteCustomTask {
                 out.println(doc.info());
             }
         }
-        final RemoteFolder remoteFolder = system.getFolder().get(0);
+        final RemoteFolder remoteFolder = system.getFolder().iterator().next();
         final String random = UUID.randomUUID().toString();
         final Folder folder = remoteFolder.createFolder(random);
         final RemoteDocument doc = folder.createDocument(file2upload).persist();
