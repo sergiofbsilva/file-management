@@ -26,13 +26,12 @@ package module.fileManagement.domain;
 
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import module.fileManagement.domain.log.FileLog;
 import pt.ist.bennu.core.domain.User;
 import pt.ist.bennu.core.domain.groups.PersistentGroup;
-import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.fenixframework.Atomic;
 
 /**
  * 
@@ -147,7 +146,7 @@ public class SharedFileNode extends SharedFileNode_Base implements SharedNode {
     }
 
     @Override
-    public List<SharedFileNode> getSharedFileNodes() {
+    public Set<SharedFileNode> getSharedFileNodes() {
         return getNode().getSharedFileNodes();
     }
 
@@ -174,11 +173,6 @@ public class SharedFileNode extends SharedFileNode_Base implements SharedNode {
     @Override
     public boolean hasDocument() {
         return getNode() == null ? super.hasDocument() : getNode().hasDocument();
-    }
-
-    @Override
-    public boolean isDeleted() {
-        return getNode().isDeleted();
     }
 
     @Override
@@ -233,7 +227,7 @@ public class SharedFileNode extends SharedFileNode_Base implements SharedNode {
         super.removeParent();
     }
 
-    @Service
+    @Atomic
     public void deleteLink(ContextPath contextPath) {
         if (!isInTrash()) {
             final DirNode trash = super.getParent().getTrash();

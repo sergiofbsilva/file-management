@@ -30,8 +30,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import module.fileManagement.domain.FileManagementSystem;
-import pt.ist.fenixWebFramework.services.Service;
-import pt.ist.fenixframework.pstm.AbstractDomainObject;
+import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.FenixFramework;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -79,7 +79,7 @@ public class MetadataTemplate extends MetadataTemplate_Base {
         return null;
     }
 
-    @Service
+    @Atomic
     public void delete() {
         getKeys().clear();
         for (MetadataTemplateRule rule : getRule()) {
@@ -108,7 +108,7 @@ public class MetadataTemplate extends MetadataTemplate_Base {
         return null;
     }
 
-    @Service
+    @Atomic
     public static MetadataTemplate getOrCreateInstance(String name) {
         MetadataTemplate instance = getMetadataTemplate(name);
         if (instance == null) {
@@ -117,7 +117,7 @@ public class MetadataTemplate extends MetadataTemplate_Base {
         return instance;
     }
 
-    @Service
+    @Atomic
     public void addKeysStrings(Set<String> keys) {
         for (String key : keys) {
             addKey(MetadataKey.getOrCreateInstance(key), getRule().size() + 1);
@@ -132,7 +132,7 @@ public class MetadataTemplate extends MetadataTemplate_Base {
         addKey(key, position, required, Boolean.FALSE);
     }
 
-    @Service
+    @Atomic
     public void addKey(MetadataKey key, Integer position, Boolean required, Boolean readOnly) {
         addRule(new MetadataTemplateRule(this, key, position, required, readOnly));
     }
@@ -152,7 +152,7 @@ public class MetadataTemplate extends MetadataTemplate_Base {
         if (templateOid == null || templateOid.isEmpty()) {
             return null;
         } else {
-            return AbstractDomainObject.fromExternalId(templateOid);
+            return FenixFramework.getDomainObject(templateOid);
         }
     }
 
@@ -200,7 +200,7 @@ public class MetadataTemplate extends MetadataTemplate_Base {
         }).toImmutableSet();
     }
 
-    @Service
+    @Atomic
     public void clear() {
         Set<MetadataTemplateRule> rules = Sets.newHashSet(getRuleSet());
         for (MetadataTemplateRule rule : rules) {

@@ -11,13 +11,13 @@ import io.milton.resource.PropFindableResource;
 import module.fileManagement.domain.AbstractFileNode;
 import module.fileManagement.domain.DirNode;
 import pt.ist.bennu.core.domain.exceptions.DomainException;
-import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.fenixframework.Atomic;
 
 public abstract class AbstractResource<T extends AbstractFileNode> extends Authenticator implements PropFindableResource,
         DeletableResource, MoveableResource {
 
     private final T node;
-    private FolderResource parent;
+    private final FolderResource parent;
 
     public AbstractResource(T node, FolderResource parent) {
         this.node = node;
@@ -52,8 +52,8 @@ public abstract class AbstractResource<T extends AbstractFileNode> extends Authe
         return null;
     }
 
+    @Atomic
     @Override
-    @Service
     public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
         getNode().trash();
     }
@@ -79,7 +79,7 @@ public abstract class AbstractResource<T extends AbstractFileNode> extends Authe
         }
     }
 
-    @Service
+    @Atomic
     private void rename(String name) {
         getNode().setDisplayName(name);
     }

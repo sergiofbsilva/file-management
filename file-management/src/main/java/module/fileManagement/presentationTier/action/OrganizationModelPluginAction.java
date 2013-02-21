@@ -15,7 +15,7 @@ import org.apache.struts.action.ActionMapping;
 
 import pt.ist.bennu.core.presentationTier.actions.ContextBaseAction;
 import pt.ist.fenixWebFramework.struts.annotations.Mapping;
-import pt.ist.fenixframework.pstm.AbstractDomainObject;
+import pt.ist.fenixframework.FenixFramework;
 
 @Mapping(path = "/fileManagementOrganizationModel")
 public class OrganizationModelPluginAction extends ContextBaseAction {
@@ -47,7 +47,7 @@ public class OrganizationModelPluginAction extends ContextBaseAction {
             HttpServletResponse response) throws Exception {
         final String partyOid = getAttribute(request, "partyOid");
         final String organizationalModelOid = getAttribute(request, "organizationalModelOid");
-        final Party party = AbstractDomainObject.fromExternalId(partyOid);
+        final Party party = FenixFramework.getDomainObject(partyOid);
         FileRepository.getOrCreateFileRepository(party);
         request.setAttribute("party", party);
         final String redirect =

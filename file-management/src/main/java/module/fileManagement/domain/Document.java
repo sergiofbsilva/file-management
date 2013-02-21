@@ -19,7 +19,7 @@ import org.joda.time.DateTime;
 
 import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.User;
-import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.fenixframework.Atomic;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
@@ -76,7 +76,7 @@ public class Document extends Document_Base {
         file.setDisplayName(displayName);
     }
 
-    @Service
+    @Atomic
     public void delete() {
         removeReadGroup();
         removeWriteGroup();
@@ -231,26 +231,26 @@ public class Document extends Document_Base {
         return now;
     }
 
-    @Service
+    @Atomic
     public void addMetadata(final Collection<Metadata> metadata) {
         for (final Metadata md : metadata) {
             addMetadata(md.hasDocument() ? md.getCopy() : md);
         }
     }
 
-    @Service
+    @Atomic
     public void addMetadata(final String key, final String value) {
         addMetadata(MetadataKey.getOrCreateInstance(key), value);
     }
 
-    @Service
+    @Atomic
     public void addMetadata(final Map<String, String> keyValueMap) {
         for (final Map.Entry<String, String> entry : keyValueMap.entrySet()) {
             addMetadata(entry.getKey(), entry.getValue());
         }
     }
 
-    @Service
+    @Atomic
     public void addMetadata(final MetadataKey key, final String value) {
         addMetadata(key.createMetadata(value));
     }
@@ -365,7 +365,7 @@ public class Document extends Document_Base {
      * @param value
      *            if value is empty or null removeMetadata object
      */
-    @Service
+    @Atomic
     public void replaceMetadata(final MetadataKey key, final String value) {
         boolean changed = false;
         for (final Metadata metadata : getMetadataSet()) {
@@ -385,7 +385,7 @@ public class Document extends Document_Base {
         }
     }
 
-    @Service
+    @Atomic
     public void clearAllMetadata() {
         for (final Metadata md : getMetadata()) {
             md.delete();

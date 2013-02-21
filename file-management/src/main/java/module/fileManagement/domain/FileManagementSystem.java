@@ -36,15 +36,14 @@ import module.fileManagement.tools.FilenameTemplate;
 import module.organization.presentationTier.actions.OrganizationModelAction;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import pt.ist.bennu.core.domain.ModuleInitializer;
 import pt.ist.bennu.core.domain.MyOrg;
 import pt.ist.bennu.core.domain.exceptions.DomainException;
 import pt.ist.bennu.core.util.BundleUtil;
-import pt.ist.fenixWebFramework.services.Service;
-import pt.ist.vaadinframework.VaadinFrameworkLogger;
+import pt.ist.fenixframework.Atomic;
 
 import com.vaadin.Application;
 import com.vaadin.ui.Window;
@@ -60,13 +59,9 @@ public class FileManagementSystem extends FileManagementSystem_Base implements M
     private static FileManagementSystem system;
     public static final String BUNDLE = "resources.FileManagementResources";
 
-    private static final Logger logger = Logger.getLogger(FileManagementSystem.class);
+    private static final Logger logger = LoggerFactory.getLogger(FileManagementSystem.class);
 
     public static final FilenameTemplate FILENAME_TEMPLATE = new FilenameTemplate();
-
-    static {
-        VaadinFrameworkLogger.getLogger().setLevel(Level.ALL);
-    }
 
     private FileManagementSystem() {
         super();
@@ -121,7 +116,7 @@ public class FileManagementSystem extends FileManagementSystem_Base implements M
         return displayName;
     }
 
-    @Service
+    @Atomic
     private static FileManagementSystem getOrCreateInstance() {
         final MyOrg myorg = MyOrg.getInstance();
         if (!myorg.hasFileManagementSystem()) {

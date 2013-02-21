@@ -17,11 +17,11 @@ import pt.ist.bennu.core.domain.exceptions.DomainException;
 import pt.ist.bennu.core.domain.groups.AnyoneGroup;
 import pt.ist.bennu.core.domain.groups.PersistentGroup;
 import pt.ist.bennu.core.domain.groups.SingleUserGroup;
-import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.dml.runtime.DirectRelation;
+import pt.ist.fenixframework.dml.runtime.Relation;
+import pt.ist.fenixframework.dml.runtime.RelationListener;
 import pt.utl.ist.fenix.tools.util.NaturalOrderComparator;
-import dml.runtime.DirectRelation;
-import dml.runtime.Relation;
-import dml.runtime.RelationListener;
 
 public abstract class AbstractFileNode extends AbstractFileNode_Base implements Comparable<AbstractFileNode> {
     final static NaturalOrderComparator STRING_NATURAL_COMPARATOR;
@@ -83,7 +83,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
         deleteDomainObject();
     }
 
-    @Service
+    @Atomic
     public void deleteService() {
         delete();
     }
@@ -122,7 +122,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
         trash(getContextPath());
     }
 
-    @Service
+    @Atomic
     public void trash(ContextPath contextPath) {
         if (!isWriteGroupMember()) {
             throw new DomainException("no.write.permissions", FileManagementSystem.getBundle(), getDisplayName());
@@ -190,7 +190,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
 
     public abstract String getDisplayName();
 
-    @Service
+    @Atomic
     public Boolean moveTo(final DirNode dirNode) throws NodeDuplicateNameException {
         if (dirNode != null) {
             if (dirNode.isWriteGroupMember()) {
@@ -261,7 +261,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
         setVisibility(visibilityGroups);
     }
 
-    @Service
+    @Atomic
     public void setVisibility(final VisibilityList visibilityList) {
         final PersistentGroup writeGroup = getWriteGroup();
         final PersistentGroup newWriteGroup = visibilityList.getWriteGroup();
@@ -295,7 +295,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
         return node.hasParent() ? hasSharedNode(targetFolder, node.getParent()) : false;
     }
 
-    @Service
+    @Atomic
     public void share(User user, VisibilityGroup group, ContextPath contextPath) {
         if (isShared()) {
             return;

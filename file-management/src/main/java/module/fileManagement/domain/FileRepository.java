@@ -35,7 +35,7 @@ import module.organization.domain.Party;
 import module.organization.domain.Person;
 import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.User;
-import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.fenixframework.Atomic;
 
 /**
  * 
@@ -53,7 +53,7 @@ public class FileRepository {
         return party.hasFileRepository() ? party.getFileRepository() : createFileRepository(party);
     }
 
-    @Service
+    @Atomic
     private static DirNode createFileRepository(Party party) {
         return new DirNode(party);
     }

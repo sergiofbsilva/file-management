@@ -28,13 +28,13 @@ import org.apache.commons.io.FileUtils;
 import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.RoleType;
 import pt.ist.bennu.core.domain.User;
+import pt.ist.bennu.core.domain.exceptions.DomainException;
 import pt.ist.bennu.core.domain.groups.EmptyGroup;
 import pt.ist.bennu.core.domain.groups.PersistentGroup;
 import pt.ist.bennu.core.domain.groups.Role;
 import pt.ist.bennu.core.domain.groups.SingleUserGroup;
 import pt.ist.bennu.core.domain.groups.UnionGroup;
-import pt.ist.fenixWebFramework.services.Service;
-import pt.ist.fenixframework.FFDomainException;
+import pt.ist.fenixframework.Atomic;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -168,7 +168,7 @@ public class DirNode extends DirNode_Base {
         return createDir(dirName, getContextPath());
     }
 
-    @Service
+    @Atomic
     public DirNode createDir(final String dirName, final ContextPath contextPath) {
         final DirNode searchDir = searchDir(dirName);
         if (searchDir != null) {
@@ -179,7 +179,7 @@ public class DirNode extends DirNode_Base {
         return resultNode;
     }
 
-    @Service
+    @Atomic
     public DirNode createDir(final String dirName, final PersistentGroup readGroup, final PersistentGroup writeGroup,
             final ContextPath contextPath) {
         final DirNode dirNode = createDir(dirName, contextPath);
@@ -215,7 +215,7 @@ public class DirNode extends DirNode_Base {
     }
 
     @Override
-    @Service
+    @Atomic
     public void setDisplayName(final String displayName) throws NodeDuplicateNameException {
         super.setDisplayName(displayName);
         setName(displayName);
@@ -275,7 +275,7 @@ public class DirNode extends DirNode_Base {
 
     // file creation
     @SuppressWarnings("unused")
-    @Service
+    @Atomic
     public FileNode createFile(final byte[] fileContent, final String displayName, final String fileName, final long filesize,
             final ContextPath contextPath) {
         FileNode fileNode = searchFile(displayName);
@@ -302,7 +302,7 @@ public class DirNode extends DirNode_Base {
 
     }
 
-    @Service
+    @Atomic
     public FileNode createFile(final File file, final String displayName, final String fileName, final long filesize,
             final ContextPath contextPath) {
         try {
@@ -313,13 +313,13 @@ public class DirNode extends DirNode_Base {
 
     }
 
-    @Service
+    @Atomic
     public FileNode createFile(final File file, final String displayName, final long filesize, final ContextPath contextPath) {
         return createFile(file, displayName, displayName, filesize, contextPath);
 
     }
 
-    @Service
+    @Atomic
     public FileNode createFile(final File file, final String fileName, final PersistentGroup readGroup,
             final PersistentGroup writeGroup) {
         final FileNode fileNode = createFile(file, fileName, file.length(), new ContextPath(this));
@@ -328,7 +328,7 @@ public class DirNode extends DirNode_Base {
         return fileNode;
     }
 
-    @Service
+    @Atomic
     public FileNode createFile(final File file, final String fileName, final PersistentGroup readGroup,
             final PersistentGroup writeGroup, final ContextPath contextPath) {
         final FileNode fileNode = createFile(file, fileName, file.length(), contextPath);
@@ -337,7 +337,7 @@ public class DirNode extends DirNode_Base {
         return fileNode;
     }
 
-    @Service
+    @Atomic
     public FileNode createFile() {
         if (hasSequenceNumber()) {
             final Integer nextSequenceNumber = getNextSequenceNumber();
@@ -372,7 +372,7 @@ public class DirNode extends DirNode_Base {
         return result;
     }
 
-    @Service
+    @Atomic
     void addUsedSpace(final long filesize) {
         if (hasParent()) {
             getParent().addUsedSpace(filesize);
@@ -380,7 +380,7 @@ public class DirNode extends DirNode_Base {
         setSize(getSize() + filesize);
     }
 
-    @Service
+    @Atomic
     void removeUsedSpace(final long filesize) {
         if (hasParent()) {
             getParent().removeUsedSpace(filesize);
@@ -587,17 +587,17 @@ public class DirNode extends DirNode_Base {
         return getSequenceNumber() != null;
     }
 
-    @Service
+    @Atomic
     public Integer getNextSequenceNumber() {
         if (getSequenceNumber() == null) {
-            throw new FFDomainException("Sequence Number is null: Must be 0 to use a sequence number");
+            throw new DomainException("Sequence Number is null: Must be 0 to use a sequence number");
         }
         setSequenceNumber(getSequenceNumber() + 1);
         return getSequenceNumber();
     }
 
     @Override
-    @Service
+    @Atomic
     public void recoverTo(DirNode targetDir) {
         new RecoverDirLog(Authenticate.getCurrentUser(), targetDir.getContextPath(), this);
         setParent(targetDir);

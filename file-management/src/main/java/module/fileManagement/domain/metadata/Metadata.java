@@ -8,8 +8,8 @@ import java.util.Set;
 import org.joda.time.DateTime;
 
 import pt.ist.fenixframework.FenixFramework;
-import dml.DomainClass;
-import dml.DomainModel;
+import pt.ist.fenixframework.dml.DomainClass;
+import pt.ist.fenixframework.dml.DomainModel;
 
 public abstract class Metadata extends Metadata_Base implements Comparable<Metadata> {
 

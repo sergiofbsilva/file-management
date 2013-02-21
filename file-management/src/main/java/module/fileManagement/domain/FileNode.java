@@ -44,7 +44,7 @@ import org.apache.commons.io.FileUtils;
 import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.exceptions.DomainException;
 import pt.ist.bennu.core.domain.groups.PersistentGroup;
-import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.fenixframework.Atomic;
 
 import com.google.common.collect.Multimap;
 
@@ -106,8 +106,8 @@ public class FileNode extends FileNode_Base {
         return true;
     }
 
+    @Atomic
     @Override
-    @Service
     public void delete() {
         final Document document = getDocument();
         document.delete();
@@ -120,8 +120,8 @@ public class FileNode extends FileNode_Base {
         super.delete();
     }
 
+    @Atomic
     @Override
-    @Service
     public void deleteService() {
         delete();
     }
@@ -198,8 +198,8 @@ public class FileNode extends FileNode_Base {
         return logs;
     }
 
+    @Atomic
     @Override
-    @Service
     public void unshare(VisibilityGroup group) {
         super.unshare(group);
         for (SharedFileNode sharedNode : getSharedFileNodes()) {
@@ -208,8 +208,8 @@ public class FileNode extends FileNode_Base {
         }
     }
 
+    @Atomic
     @Override
-    @Service
     public void recoverTo(DirNode targetDir) {
         new RecoverFileLog(Authenticate.getCurrentUser(), targetDir.getContextPath(), this);
         setParent(targetDir);
@@ -224,7 +224,7 @@ public class FileNode extends FileNode_Base {
         return getParent();
     }
 
-    @Service
+    @Atomic
     public void addNewVersion(byte[] fileContent, String fileName, String displayName, long filesize) {
         if (!isWriteGroupMember()) {
             throw new CannotCreateFileException(fileName);
@@ -245,7 +245,7 @@ public class FileNode extends FileNode_Base {
 
     }
 
-    @Service
+    @Atomic
     public void addNewVersion(File file, String fileName, String displayName, long filesize) {
         try {
             addNewVersion(FileUtils.readFileToByteArray(file), fileName, displayName, filesize);

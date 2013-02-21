@@ -23,7 +23,7 @@ import org.joda.time.DateTime;
 
 import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.User;
-import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.fenixframework.Atomic;
 import pt.ist.vaadinframework.VaadinFrameworkLogger;
 
 public class PopulateRootDirTask extends PopulateRootDirTask_Base {
@@ -33,8 +33,8 @@ public class PopulateRootDirTask extends PopulateRootDirTask_Base {
         return getClass().getName();
     }
 
+    @Atomic
     @Override
-    @Service
     public void executeTask() {
         doService();
     }

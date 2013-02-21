@@ -42,7 +42,7 @@ import com.vaadin.ui.VerticalLayout;
 public class LogPage extends CustomComponent implements EmbeddedComponentContainer {
 
     private Date selectionDate;
-    private Layout logsLayout;
+    private final Layout logsLayout;
 
     @Override
     public boolean isAllowedToOpen(Map<String, String> arguments) {
@@ -138,7 +138,7 @@ public class LogPage extends CustomComponent implements EmbeddedComponentContain
         final User currentUser = Authenticate.getCurrentUser();
 
         final TreeSet<AbstractLog> sortedLogs = new TreeSet<AbstractLog>(AbstractLog.TIMESTAMP_COMPARATOR);
-        final List<AbstractLog> operationLogs = currentUser.getOperationLog();
+        final Set<AbstractLog> operationLogs = currentUser.getOperationLog();
         final DirNode rootDir = FileRepository.getOrCreateFileRepository(currentUser);
 
         sortedLogs.addAll(operationLogs);

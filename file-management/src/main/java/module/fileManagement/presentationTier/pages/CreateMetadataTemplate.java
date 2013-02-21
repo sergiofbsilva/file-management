@@ -35,7 +35,7 @@ import module.fileManagement.domain.metadata.StringMetadata;
 
 import org.apache.commons.lang.StringUtils;
 
-import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.fenixframework.Atomic;
 import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
@@ -97,7 +97,7 @@ public class CreateMetadataTemplate extends CustomComponent implements EmbeddedC
         }
     }
 
-    @Service
+    @Atomic
     private void editOrCreateTemplate(Form form) {
         final String templateName = (String) form.getItemProperty("name").getValue();
         MetadataTemplate currentTemplate;
