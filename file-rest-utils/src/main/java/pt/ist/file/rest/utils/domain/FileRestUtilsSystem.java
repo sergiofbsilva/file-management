@@ -10,7 +10,7 @@ public class FileRestUtilsSystem extends FileRestUtilsSystem_Base {
     }
 
     public static FileRestUtilsSystem getInstance() {
-        if (!MyOrg.getInstance().hasFileRestUtilsSystem()) {
+        if (MyOrg.getInstance().getFileRestUtilsSystem() == null) {
             init();
         }
         return MyOrg.getInstance().getFileRestUtilsSystem();
@@ -19,6 +19,16 @@ public class FileRestUtilsSystem extends FileRestUtilsSystem_Base {
     @Atomic
     private static void init() {
         MyOrg.getInstance().setFileRestUtilsSystem(new FileRestUtilsSystem());
+    }
+
+    @Deprecated
+    public java.util.Set<pt.ist.file.rest.utils.domain.RemoteDocument> getDocument() {
+        return getDocumentSet();
+    }
+
+    @Deprecated
+    public java.util.Set<pt.ist.file.rest.utils.domain.RemoteFolder> getFolder() {
+        return getFolderSet();
     }
 
 }
