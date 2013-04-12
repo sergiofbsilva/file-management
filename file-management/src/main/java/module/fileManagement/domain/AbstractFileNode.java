@@ -79,7 +79,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
     }
 
     public void delete() {
-        removeParent();
+        setParent(null);
         deleteDomainObject();
     }
 
@@ -110,7 +110,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
     }
 
     private void getPath(final AbstractFileNode child, final List<DirNode> nodes) {
-        if (child.hasParent()) {
+        if (child.getParent() != null) {
             getPath(child.getParent(), nodes);
         }
         if (child instanceof DirNode) {
@@ -185,7 +185,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
     }
 
     public boolean isInTrash() {
-        return hasParent() ? getParent().isInTrash() : false;
+        return (getParent() != null) ? getParent().isInTrash() : false;
     }
 
     public abstract String getDisplayName();
@@ -292,7 +292,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
         if (targetFolder.hasSharedNode(node)) {
             return true;
         }
-        return node.hasParent() ? hasSharedNode(targetFolder, node.getParent()) : false;
+        return node.getParent() != null ? hasSharedNode(targetFolder, node.getParent()) : false;
     }
 
     @Atomic
@@ -348,7 +348,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
     }
 
     public User getOwner() {
-        return hasParent() ? getParent().getOwner() : null;
+        return (getParent() != null) ? getParent().getOwner() : null;
     }
 
     public void unshare(VisibilityGroup group) {

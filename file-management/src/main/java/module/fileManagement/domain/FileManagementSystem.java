@@ -119,7 +119,7 @@ public class FileManagementSystem extends FileManagementSystem_Base implements M
     @Atomic
     private static FileManagementSystem getOrCreateInstance() {
         final MyOrg myorg = MyOrg.getInstance();
-        if (!myorg.hasFileManagementSystem()) {
+        if (myorg.getFileManagementSystem() == null) {
             final FileManagementSystem fileManagementSystem = new FileManagementSystem();
             myorg.setFileManagementSystem(fileManagementSystem);
 
@@ -180,6 +180,21 @@ public class FileManagementSystem extends FileManagementSystem_Base implements M
 
     private static void initDocumentOrganizationModelView() {
         OrganizationModelAction.partyViewHookManager.register(new FileRepositoryView());
+    }
+
+    @Deprecated
+    public java.util.Set<module.fileManagement.domain.metadata.MetadataKey> getMetadataKeys() {
+        return getMetadataKeysSet();
+    }
+
+    @Deprecated
+    public java.util.Set<module.fileManagement.domain.DirNode> getDirNode() {
+        return getDirNodeSet();
+    }
+
+    @Deprecated
+    public java.util.Set<module.fileManagement.domain.metadata.MetadataTemplate> getMetadataTemplates() {
+        return getMetadataTemplatesSet();
     }
 
 }

@@ -209,11 +209,27 @@ public class MetadataTemplate extends MetadataTemplate_Base {
     }
 
     public boolean hasAnyKey() {
-        return hasAnyRule();
+        return !getRuleSet().isEmpty();
     }
 
     @Override
     public String toString() {
         return getName();
     }
+
+    @Deprecated
+    public java.util.Set<module.fileManagement.domain.metadata.MetadataKey> getKeys() {
+        return getKeysSet();
+    }
+
+    @Deprecated
+    public java.util.Set<module.fileManagement.domain.metadata.MetadataTemplateRule> getRule() {
+        return getRuleSet();
+    }
+
+    @Deprecated
+    public java.util.Set<module.fileManagement.domain.metadata.MetadataTemplate> getChilds() {
+        return getChildsSet();
+    }
+
 }

@@ -26,7 +26,6 @@ package module.fileManagement.domain;
 
 import java.io.File;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import jvstm.cps.ConsistencyPredicate;
@@ -150,28 +149,8 @@ public class SharedDirNode extends SharedDirNode_Base implements SharedNode {
     }
 
     @Override
-    public boolean hasReadGroup() {
-        return getNode() == null ? super.hasReadGroup() : getNode().hasReadGroup();
-    }
-
-    @Override
-    public int getChildCount() {
-        return getNode().getChildCount();
-    }
-
-    @Override
     public Set<AbstractFileNode> getChildSet() {
         return getNode().getChildSet();
-    }
-
-    @Override
-    public Set<AbstractFileNode> getChild() {
-        return getNode().getChild();
-    }
-
-    @Override
-    public Iterator<AbstractFileNode> getChildIterator() {
-        return getNode().getChildIterator();
     }
 
     @Atomic

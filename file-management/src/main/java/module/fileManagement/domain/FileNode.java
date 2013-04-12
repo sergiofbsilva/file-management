@@ -116,7 +116,7 @@ public class FileNode extends FileNode_Base {
     }
 
     void deleteFromDocument() {
-        removeDocument();
+        setDocument(null);
         super.delete();
     }
 
@@ -129,13 +129,13 @@ public class FileNode extends FileNode_Base {
     @Override
     public PersistentGroup getReadGroup() {
         final PersistentGroup group = getDocument().getReadGroup();
-        return group == null && hasParent() ? getParent().getReadGroup() : group;
+        return group == null && (getParent() != null) ? getParent().getReadGroup() : group;
     }
 
     @Override
     public PersistentGroup getWriteGroup() {
         final PersistentGroup group = getDocument().getWriteGroup();
-        return group == null && hasParent() ? getParent().getWriteGroup() : group;
+        return group == null && (getParent() != null) ? getParent().getWriteGroup() : group;
     }
 
     @Override
@@ -190,7 +190,7 @@ public class FileNode extends FileNode_Base {
     @Override
     public Set<FileLog> getFileLogSet() {
         final HashSet<FileLog> logs = new HashSet<FileLog>(super.getFileLogSet());
-        if (hasAnySharedFileNodes()) {
+        if (!getSharedFileNodesSet().isEmpty()) {
             for (SharedFileNode sharedNode : getSharedFileNodes()) {
                 logs.addAll(sharedNode.getFileLogSet());
             }
@@ -258,4 +258,15 @@ public class FileNode extends FileNode_Base {
     public DirNode getTopDirNode() {
         return getParent();
     };
+
+    @Deprecated
+    public java.util.Set<module.fileManagement.domain.log.FileLog> getFileLog() {
+        return getFileLogSet();
+    }
+
+    @Deprecated
+    public java.util.Set<module.fileManagement.domain.SharedFileNode> getSharedFileNodes() {
+        return getSharedFileNodesSet();
+    }
+
 }

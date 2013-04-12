@@ -574,7 +574,7 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
     }
 
     private boolean lastLineOfDefense(DirNode dirNode) {
-        return dirNode.isAccessible() && !dirNode.hasRootDirNode()
+        return dirNode.isAccessible() && dirNode.getRootDirNode() == null
                 || Role.getRole(RoleType.MANAGER).isMember(Authenticate.getCurrentUser());
     }
 

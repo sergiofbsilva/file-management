@@ -25,7 +25,7 @@ public class WebdavAuthentication extends WebdavAuthentication_Base {
 
     @Atomic
     public static WebdavAuthentication getOrCreateWebdavAuthentication(User user) {
-        if (user.hasWebdavAuthentication()) {
+        if (user.getWebdavAuthentication() != null) {
             return user.getWebdavAuthentication();
         }
         return new WebdavAuthentication(user);

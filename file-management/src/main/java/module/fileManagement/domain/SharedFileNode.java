@@ -25,7 +25,6 @@
 package module.fileManagement.domain;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import module.fileManagement.domain.log.FileLog;
@@ -111,21 +110,6 @@ public class SharedFileNode extends SharedFileNode_Base implements SharedNode {
     }
 
     @Override
-    public int getSharedFileNodesCount() {
-        return getNode().getSharedFileNodesCount();
-    }
-
-    @Override
-    public boolean hasAnySharedFileNodes() {
-        return getNode() == null ? super.hasAnySharedFileNodes() : getNode().hasAnySharedFileNodes();
-    }
-
-    @Override
-    public boolean hasSharedFileNodes(SharedFileNode sharedFileNodes) {
-        return getNode().hasSharedFileNodes(sharedFileNodes);
-    }
-
-    @Override
     public Set<SharedFileNode> getSharedFileNodesSet() {
         return getNode().getSharedFileNodesSet();
     }
@@ -146,16 +130,6 @@ public class SharedFileNode extends SharedFileNode_Base implements SharedNode {
     }
 
     @Override
-    public Set<SharedFileNode> getSharedFileNodes() {
-        return getNode().getSharedFileNodes();
-    }
-
-    @Override
-    public Iterator<SharedFileNode> getSharedFileNodesIterator() {
-        return getNode().getSharedFileNodesIterator();
-    }
-
-    @Override
     public Document getDocument() {
         return getNode().getDocument();
     }
@@ -171,11 +145,6 @@ public class SharedFileNode extends SharedFileNode_Base implements SharedNode {
     }
 
     @Override
-    public boolean hasDocument() {
-        return getNode() == null ? super.hasDocument() : getNode().hasDocument();
-    }
-
-    @Override
     public boolean isReadGroupMember() {
         return getNode().isReadGroupMember();
     }
@@ -183,11 +152,6 @@ public class SharedFileNode extends SharedFileNode_Base implements SharedNode {
     @Override
     public boolean isWriteGroupMember() {
         return getNode().isWriteGroupMember();
-    }
-
-    @Override
-    public void removeDocument() {
-        getNode().removeDocument();
     }
 
     @Override
@@ -215,16 +179,6 @@ public class SharedFileNode extends SharedFileNode_Base implements SharedNode {
     @Override
     public DirNode getParent() {
         return super.getParent();
-    }
-
-    @Override
-    public boolean hasParent() {
-        return super.hasParent();
-    }
-
-    @Override
-    public void removeParent() {
-        super.removeParent();
     }
 
     @Atomic

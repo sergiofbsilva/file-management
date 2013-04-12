@@ -50,7 +50,7 @@ public class FileRepository {
     }
 
     public static DirNode getOrCreateFileRepository(final Party party) {
-        return party.hasFileRepository() ? party.getFileRepository() : createFileRepository(party);
+        return party.getFileRepository() != null ? party.getFileRepository() : createFileRepository(party);
     }
 
     @Atomic
@@ -65,7 +65,7 @@ public class FileRepository {
 
     private static List<Party> getParentUnits(final Party party, List<Party> processed) {
         final List<Party> result = new ArrayList<Party>();
-        if (party.hasFileRepository() && party.getFileRepository().isAccessible()) {
+        if (party.getFileRepository() != null && party.getFileRepository().isAccessible()) {
             result.add(party);
         }
         for (Accountability accountability : party.getParentAccountabilities()) {

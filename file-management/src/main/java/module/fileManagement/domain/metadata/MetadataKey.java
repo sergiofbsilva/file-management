@@ -71,7 +71,7 @@ public class MetadataKey extends MetadataKey_Base implements Comparable<Metadata
 
     @Atomic
     public void delete() {
-        if (hasAnyMetadata() || hasAnyRule()) {
+        if (!getMetadataSet().isEmpty() || !getRuleSet().isEmpty()) {
             return;
         }
         getTemplates().clear();
@@ -110,6 +110,21 @@ public class MetadataKey extends MetadataKey_Base implements Comparable<Metadata
     @Override
     public String toString() {
         return String.format("%s : %s (%s)", getKeyValue(), getMetadataValueType().getSimpleName(), isReserved());
+    }
+
+    @Deprecated
+    public java.util.Set<module.fileManagement.domain.metadata.MetadataTemplate> getTemplates() {
+        return getTemplatesSet();
+    }
+
+    @Deprecated
+    public java.util.Set<module.fileManagement.domain.metadata.Metadata> getMetadata() {
+        return getMetadataSet();
+    }
+
+    @Deprecated
+    public java.util.Set<module.fileManagement.domain.metadata.MetadataTemplateRule> getRule() {
+        return getRuleSet();
     }
 
 }

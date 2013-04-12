@@ -540,7 +540,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 
                 @Override
                 public void buttonClick(final ClickEvent event) {
-                    if (selectedNode.hasParent()) {
+                    if (selectedNode.getParent() != null) {
                         final DirNode parent = selectedNode.getParent();
                         if (parent != null) {
                             selectedNode.deleteService();
@@ -652,7 +652,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
                 horizontalLayout.setSpacing(true);
                 addComponent(horizontalLayout);
 
-                if (selectedNode.hasParent() && selectedNode.isWriteGroupMember()) {
+                if (selectedNode.getParent() != null && selectedNode.isWriteGroupMember()) {
                     horizontalLayout.addComponent(new EditNodeButton());
 
                     horizontalLayout.addComponent(new DeleteNodeButton());
@@ -660,7 +660,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
                 if (selectedNode.isFile() && selectedNode.isAccessible()) {
                     horizontalLayout.addComponent(new DownloadButton());
                 }
-                if (selectedNode.hasParent() && selectedNode.isWriteGroupMember()) {
+                if (selectedNode.getParent() != null && selectedNode.isWriteGroupMember()) {
                     addComponent(textField);
                 }
             }

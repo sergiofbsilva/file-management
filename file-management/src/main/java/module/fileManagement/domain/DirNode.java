@@ -136,7 +136,7 @@ public class DirNode extends DirNode_Base {
     }
 
     public DirNode getSharedFolder() {
-        if (!hasParent()) { // is root
+        if (!(getParent() != null)) { // is root
             for (final AbstractFileNode node : getChildSet()) {
                 if (node instanceof DirNode) {
                     final DirNode dirNode = (DirNode) node;
@@ -152,11 +152,11 @@ public class DirNode extends DirNode_Base {
 
     @Override
     public DirNode getTrash() {
-        return hasParent() ? getParent().getTrash() : super.getTrash();
+        return (getParent() != null) ? getParent().getTrash() : super.getTrash();
     }
 
     public String getRepositoryName() {
-        return hasParent() ? getParent().getRepositoryName() : getName();
+        return (getParent() != null) ? getParent().getRepositoryName() : getName();
     }
 
     @Override
@@ -197,12 +197,7 @@ public class DirNode extends DirNode_Base {
 
     @Override
     public String getDisplayName() {
-        return hasUser() ? FileManagementSystem.getMessage("label.menu.home") : getName();
-    }
-
-    @Override
-    public boolean hasUser() {
-        return hasParty() && getParty() instanceof Person;
+        return (getUser() != null) ? FileManagementSystem.getMessage("label.menu.home") : getName();
     }
 
     @Override
@@ -224,13 +219,13 @@ public class DirNode extends DirNode_Base {
     @Override
     public PersistentGroup getReadGroup() {
         final PersistentGroup group = super.getReadGroup();
-        return group == null && hasParent() ? getParent().getReadGroup() : group;
+        return group == null && (getParent() != null) ? getParent().getReadGroup() : group;
     }
 
     @Override
     public PersistentGroup getWriteGroup() {
         final PersistentGroup group = super.getWriteGroup();
-        return group == null && hasParent() ? getParent().getWriteGroup() : group;
+        return group == null && (getParent() != null) ? getParent().getWriteGroup() : group;
     }
 
     @Override
@@ -339,12 +334,12 @@ public class DirNode extends DirNode_Base {
 
     @Atomic
     public FileNode createFile() {
-        if (hasSequenceNumber()) {
+        if ((getSequenceNumber() != null)) {
             final Integer nextSequenceNumber = getNextSequenceNumber();
             FileManagementSystem.FILENAME_TEMPLATE.setDirNode(this);
             final String fileName = FileManagementSystem.FILENAME_TEMPLATE.getValue();
             final Document document = new Document(fileName, fileName, org.apache.commons.lang.StringUtils.EMPTY.getBytes());
-            if (hasDefaultTemplate()) {
+            if ((getDefaultTemplate() != null)) {
                 final MetadataTemplate defaultTemplate = getDefaultTemplate();
                 final Set<MetadataKey> seqNumberKeys = defaultTemplate.getKeysByMetadataType(SeqNumberMetadata.class);
                 for (final MetadataKey key : seqNumberKeys) {
@@ -374,7 +369,7 @@ public class DirNode extends DirNode_Base {
 
     @Atomic
     void addUsedSpace(final long filesize) {
-        if (hasParent()) {
+        if ((getParent() != null)) {
             getParent().addUsedSpace(filesize);
         }
         setSize(getSize() + filesize);
@@ -382,7 +377,7 @@ public class DirNode extends DirNode_Base {
 
     @Atomic
     void removeUsedSpace(final long filesize) {
-        if (hasParent()) {
+        if ((getParent() != null)) {
             getParent().removeUsedSpace(filesize);
         }
         setSize(getSize() - filesize);
@@ -411,7 +406,7 @@ public class DirNode extends DirNode_Base {
 
     @Override
     public Long getQuota() {
-        return hasQuotaDefined() ? super.getQuota() : hasParent() ? getParent().getQuota() : 0;
+        return hasQuotaDefined() ? super.getQuota() : (getParent() != null) ? getParent().getQuota() : 0;
     }
 
     public boolean hasQuotaDefined() {
@@ -430,7 +425,7 @@ public class DirNode extends DirNode_Base {
      * space is calculated by the parent
      */
     public long getUsedSpace() {
-        return hasQuotaDefined() ? getDirUsedSpace() : hasParent() ? getParent().getUsedSpace() : getDirUsedSpace();
+        return hasQuotaDefined() ? getDirUsedSpace() : (getParent() != null) ? getParent().getUsedSpace() : getDirUsedSpace();
     }
 
     @Override
@@ -531,7 +526,7 @@ public class DirNode extends DirNode_Base {
 
     @Override
     public void delete() {
-        removeUser();
+        setUser(null);
         for (final AbstractFileNode abstractFileNode : getChildSet()) {
             abstractFileNode.delete();
         }
@@ -540,15 +535,15 @@ public class DirNode extends DirNode_Base {
 
     @Override
     public boolean isInTrash() {
-        if (hasParent()) {
+        if ((getParent() != null)) {
             return getParent().isInTrash();
         }
-        return hasRootDirNode();
+        return (getRootDirNode() != null);
     }
 
     @Override
     public DirNode getTopDirNode() {
-        if (hasParent()) {
+        if ((getParent() != null)) {
             return getParent().getTopDirNode();
         }
         return this;
@@ -559,7 +554,7 @@ public class DirNode extends DirNode_Base {
      */
     @ConsistencyPredicate
     public boolean checkParent() {
-        return hasParent() ? true : isRoot() || isInTrash();
+        return (getParent() != null) ? true : isRoot() || isInTrash();
     }
 
     private boolean isRoot() {
@@ -602,4 +597,25 @@ public class DirNode extends DirNode_Base {
         new RecoverDirLog(Authenticate.getCurrentUser(), targetDir.getContextPath(), this);
         setParent(targetDir);
     }
+
+    @Deprecated
+    public java.util.Set<module.fileManagement.domain.SharedDirNode> getSharedDirNodes() {
+        return getSharedDirNodesSet();
+    }
+
+    @Deprecated
+    public java.util.Set<module.fileManagement.domain.log.DirLog> getDirLog() {
+        return getDirLogSet();
+    }
+
+    @Deprecated
+    public java.util.Set<module.fileManagement.domain.log.AbstractLog> getTargetLog() {
+        return getTargetLogSet();
+    }
+
+    @Deprecated
+    public java.util.Set<module.fileManagement.domain.AbstractFileNode> getChild() {
+        return getChildSet();
+    }
+
 }

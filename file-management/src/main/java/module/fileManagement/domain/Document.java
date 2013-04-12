@@ -78,15 +78,15 @@ public class Document extends Document_Base {
 
     @Atomic
     public void delete() {
-        removeReadGroup();
-        removeWriteGroup();
+        setReadGroup(null);
+        setWriteGroup(null);
         for (final Metadata metadata : getMetadataSet()) {
             metadata.delete();
         }
         for (final FileNode fileNode : getFileNodeSet()) {
             fileNode.deleteFromDocument();
         }
-        while (hasLastVersionedFile()) {
+        while ((getLastVersionedFile() != null)) {
             getLastVersionedFile().delete();
         }
         deleteDomainObject();
@@ -175,7 +175,7 @@ public class Document extends Document_Base {
     }
 
     private int getVersionNumber(final VersionedFile file) {
-        return file.hasPreviousVersion() ? 1 + getVersionNumber(file.getPreviousVersion()) : 1;
+        return file.getPreviousVersion() != null ? 1 + getVersionNumber(file.getPreviousVersion()) : 1;
     }
 
     public int getVersionNumber() {
@@ -234,7 +234,7 @@ public class Document extends Document_Base {
     @Atomic
     public void addMetadata(final Collection<Metadata> metadata) {
         for (final Metadata md : metadata) {
-            addMetadata(md.hasDocument() ? md.getCopy() : md);
+            addMetadata(md.getDocument() != null ? md.getCopy() : md);
         }
     }
 
@@ -464,11 +464,21 @@ public class Document extends Document_Base {
 
     public DateTime getCreationDate() {
         VersionedFile lastVersionedFile;
-        for (lastVersionedFile = getLastVersionedFile(); lastVersionedFile.hasPreviousVersion(); lastVersionedFile =
+        for (lastVersionedFile = getLastVersionedFile(); lastVersionedFile.getPreviousVersion() != null; lastVersionedFile =
                 lastVersionedFile.getPreviousVersion()) {
             ;
         }
         return lastVersionedFile.getCreationDate();
+    }
+
+    @Deprecated
+    public java.util.Set<module.fileManagement.domain.metadata.Metadata> getMetadata() {
+        return getMetadataSet();
+    }
+
+    @Deprecated
+    public java.util.Set<module.fileManagement.domain.FileNode> getFileNode() {
+        return getFileNodeSet();
     }
 
 }

@@ -23,7 +23,7 @@ public class CreateDefaultMetadataTemplates extends CreateDefaultMetadataTemplat
     public void resetTemplatesAndKeys() {
         for (MetadataTemplate template : FileManagementSystem.getInstance().getMetadataTemplatesSet()) {
             for (MetadataKey key : template.getKeys()) {
-                if (!key.hasAnyMetadata()) {
+                if (key.getMetadataSet().isEmpty()) {
                     key.delete();
                 }
             }

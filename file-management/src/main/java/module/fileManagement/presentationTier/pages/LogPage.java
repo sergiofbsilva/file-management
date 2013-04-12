@@ -138,7 +138,7 @@ public class LogPage extends CustomComponent implements EmbeddedComponentContain
         final User currentUser = Authenticate.getCurrentUser();
 
         final TreeSet<AbstractLog> sortedLogs = new TreeSet<AbstractLog>(AbstractLog.TIMESTAMP_COMPARATOR);
-        final Set<AbstractLog> operationLogs = currentUser.getOperationLog();
+        final Set<AbstractLog> operationLogs = currentUser.getOperationLogSet();
         final DirNode rootDir = FileRepository.getOrCreateFileRepository(currentUser);
 
         sortedLogs.addAll(operationLogs);
