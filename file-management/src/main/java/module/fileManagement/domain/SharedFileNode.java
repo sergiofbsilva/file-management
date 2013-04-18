@@ -196,8 +196,8 @@ public class SharedFileNode extends SharedFileNode_Base implements SharedNode {
 
     @Override
     public Set<FileLog> getFileLogSet() {
-        final Set<FileLog> fileLog = new HashSet<FileLog>(super.getFileLog());
-        fileLog.addAll(getNode().getFileLog());
+        final Set<FileLog> fileLog = new HashSet<FileLog>(super.getFileLogSet());
+        fileLog.addAll(getNode().getFileLogSet());
         return fileLog;
     }
 
