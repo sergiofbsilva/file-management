@@ -33,7 +33,7 @@ public class DirDetails extends NodeDetails {
 
     @Override
     public String getDeleteDialogMessage() {
-        if (getNode().hasAnyChild()) {
+        if (!getNode().getChildSet().isEmpty()) {
             return getMessage("label.node.notempty.delete.message", getNode().getDisplayName());
         } else {
             return super.getDeleteDialogMessage();
@@ -59,7 +59,7 @@ public class DirDetails extends NodeDetails {
 
     @Override
     public void updateOperations() {
-        if (getNode().hasParent()) {
+        if (getNode().getParent() != null) {
             if (getNode().isReadGroupMember()) {
                 addOperation(createDownloadLink());
             }

@@ -62,16 +62,16 @@ public class DumpDirTask extends WriteCustomTask {
     private void testPersist(final Folder myRootDirectory) {
         final File file2upload = new File("/home/sfbs/Desktop/dmatos-full.html");
         final FileRestUtilsSystem system = FileRestUtilsSystem.getInstance();
-        if (!system.hasAnyFolder()) {
+        if (system.getFolderSet().isEmpty()) {
             system.addFolder(myRootDirectory.createFolder("testPersist").persist());
             out.println("create testPersist");
         }
-        if (system.hasAnyDocument()) {
+        if (system.getDocumentSet().isEmpty()) {
             for (final RemoteDocument doc : system.getDocument()) {
                 out.println(doc.info());
             }
         }
-        final RemoteFolder remoteFolder = system.getFolder().get(0);
+        final RemoteFolder remoteFolder = system.getFolder().iterator().next();
         final String random = UUID.randomUUID().toString();
         final Folder folder = remoteFolder.createFolder(random);
         final RemoteDocument doc = folder.createDocument(file2upload).persist();

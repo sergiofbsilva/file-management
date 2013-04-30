@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.json.simple.JSONObject;
 
-import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.fenixframework.Atomic;
 import pt.ist.file.rest.utils.domain.RemoteDocument;
 
 import com.sun.jersey.api.client.WebResource;
@@ -52,7 +52,7 @@ public class Document implements IDocument {
         return fmsRestClient;
     }
 
-    @Service
+    @Atomic
     public RemoteDocument persist() {
         return new RemoteDocument(this);
     }

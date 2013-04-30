@@ -34,7 +34,7 @@ public class FMSSecurityManager extends SimpleSecurityManager {
         }
         final String username = digestRequest.getUser();
         final User user = User.findByUsername(username);
-        if (user.hasWebdavAuthentication()) {
+        if (user.getWebdavAuthentication() != null) {
             final WebdavAuthentication webDavAuth = user.getWebdavAuthentication();
             String actualPassword = webDavAuth.getToken();
             String serverResponse = getDigestGenerator().generateDigest(digestRequest, actualPassword);

@@ -24,7 +24,7 @@ import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.RoleType;
 import pt.ist.bennu.core.domain.User;
 import pt.ist.bennu.core.domain.groups.Role;
-import pt.ist.fenixframework.pstm.AbstractDomainObject;
+import pt.ist.fenixframework.DomainObject;
 import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.data.AbstractBufferedItem;
 import pt.ist.vaadinframework.data.VBoxProperty;
@@ -120,9 +120,9 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
                 @Override
                 public void drop(DragAndDropEvent event) {
                     final DataBoundTransferable transferable = (DataBoundTransferable) event.getTransferable();
-                    final AbstractDomainObject sourceItemId = (AbstractDomainObject) transferable.getItemId();
+                    final DomainObject sourceItemId = (DomainObject) transferable.getItemId();
                     AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) event.getTargetDetails();
-                    final AbstractDomainObject targetItemId = (AbstractDomainObject) dropData.getItemIdOver();
+                    final DomainObject targetItemId = (DomainObject) dropData.getItemIdOver();
 
                     // No move if source and target are the same, or there is no
                     // target
@@ -152,7 +152,7 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
                         @Override
                         public boolean accept(DragAndDropEvent dragEvent) {
                             AbstractSelectTargetDetails dropData = (AbstractSelectTargetDetails) dragEvent.getTargetDetails();
-                            final AbstractDomainObject targetItemId = (AbstractDomainObject) dropData.getItemIdOver();
+                            final DomainObject targetItemId = (DomainObject) dropData.getItemIdOver();
 
                             if (targetItemId == null) {
                                 return false;
@@ -574,7 +574,7 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
     }
 
     private boolean lastLineOfDefense(DirNode dirNode) {
-        return dirNode.isAccessible() && !dirNode.hasRootDirNode()
+        return dirNode.isAccessible() && dirNode.getRootDirNode() == null
                 || Role.getRole(RoleType.MANAGER).isMember(Authenticate.getCurrentUser());
     }
 

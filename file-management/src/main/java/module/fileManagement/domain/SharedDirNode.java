@@ -26,8 +26,6 @@ package module.fileManagement.domain;
 
 import java.io.File;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import jvstm.cps.ConsistencyPredicate;
@@ -35,7 +33,7 @@ import module.fileManagement.domain.log.AbstractLog;
 import module.fileManagement.domain.log.DirLog;
 import pt.ist.bennu.core.domain.User;
 import pt.ist.bennu.core.domain.groups.PersistentGroup;
-import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.fenixframework.Atomic;
 
 /**
  * 
@@ -151,38 +149,18 @@ public class SharedDirNode extends SharedDirNode_Base implements SharedNode {
     }
 
     @Override
-    public boolean hasReadGroup() {
-        return getNode() == null ? super.hasReadGroup() : getNode().hasReadGroup();
-    }
-
-    @Override
-    public int getChildCount() {
-        return getNode().getChildCount();
-    }
-
-    @Override
     public Set<AbstractFileNode> getChildSet() {
         return getNode().getChildSet();
     }
 
-    @Override
-    public List<AbstractFileNode> getChild() {
-        return getNode().getChild();
-    }
-
-    @Override
-    public Iterator<AbstractFileNode> getChildIterator() {
-        return getNode().getChildIterator();
-    }
-
-    @Service
+    @Atomic
     public void deleteLink() {
         super.setParent(null);
         super.setNode(null);
         deleteDomainObject();
     }
 
-    @Service
+    @Atomic
     public void deleteLink(ContextPath currentPath) {
         setParent(getTrash());
     }

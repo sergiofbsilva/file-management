@@ -1,7 +1,7 @@
 package module.fileManagement.domain.metadata;
 
 import module.fileManagement.domain.FileManagementSystem;
-import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.fenixframework.Atomic;
 
 public class MetadataKey extends MetadataKey_Base implements Comparable<MetadataKey> {
 
@@ -59,7 +59,7 @@ public class MetadataKey extends MetadataKey_Base implements Comparable<Metadata
         return getOrCreateInstance(keyValue, reserved, StringMetadata.class);
     }
 
-    @Service
+    @Atomic
     public static MetadataKey getOrCreateInstance(final String keyValue, final Boolean reserved,
             final Class<? extends Metadata> classType) {
         MetadataKey metadataKey = FileManagementSystem.getInstance().getMetadataKey(keyValue, reserved, classType);
@@ -69,9 +69,9 @@ public class MetadataKey extends MetadataKey_Base implements Comparable<Metadata
         return metadataKey;
     }
 
-    @Service
+    @Atomic
     public void delete() {
-        if (hasAnyMetadata() || hasAnyRule()) {
+        if (!getMetadataSet().isEmpty() || !getRuleSet().isEmpty()) {
             return;
         }
         getTemplates().clear();
@@ -110,6 +110,21 @@ public class MetadataKey extends MetadataKey_Base implements Comparable<Metadata
     @Override
     public String toString() {
         return String.format("%s : %s (%s)", getKeyValue(), getMetadataValueType().getSimpleName(), isReserved());
+    }
+
+    @Deprecated
+    public java.util.Set<module.fileManagement.domain.metadata.MetadataTemplate> getTemplates() {
+        return getTemplatesSet();
+    }
+
+    @Deprecated
+    public java.util.Set<module.fileManagement.domain.metadata.Metadata> getMetadata() {
+        return getMetadataSet();
+    }
+
+    @Deprecated
+    public java.util.Set<module.fileManagement.domain.metadata.MetadataTemplateRule> getRule() {
+        return getRuleSet();
     }
 
 }

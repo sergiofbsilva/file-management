@@ -5,7 +5,7 @@ import java.util.List;
 
 import module.fileManagement.domain.ContextPath;
 import module.fileManagement.domain.DirNode;
-import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.fenixframework.Atomic;
 
 public class DirNodePath extends DirNodePath_Base {
 
@@ -18,7 +18,7 @@ public class DirNodePath extends DirNodePath_Base {
         setNode(dirNode);
     }
 
-    @Service
+    @Atomic
     public static DirNodePath createPath(ContextPath contextPath) {
         DirNodePath prev = null;
         DirNodePath start = null;

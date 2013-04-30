@@ -53,7 +53,7 @@ import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.Presentable;
 import pt.ist.bennu.core.domain.User;
 import pt.ist.bennu.core.domain.exceptions.DomainException;
-import pt.ist.fenixframework.pstm.AbstractDomainObject;
+import pt.ist.fenixframework.FenixFramework;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
 
@@ -161,8 +161,8 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 
                 @Override
                 public int compare(final Object itemId1, final Object itemId2) {
-                    final AbstractFileNode node1 = AbstractDomainObject.fromExternalId((String) itemId1);
-                    final AbstractFileNode node2 = AbstractDomainObject.fromExternalId((String) itemId2);
+                    final AbstractFileNode node1 = FenixFramework.getDomainObject((String) itemId1);
+                    final AbstractFileNode node2 = FenixFramework.getDomainObject((String) itemId2);
                     return node1.compareTo(node2);
                 }
 
@@ -229,8 +229,8 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
                 if (selection != null && selection instanceof String) {
                     final String externalId = (String) selection;
                     final AbstractFileNode abstractFileNode =
-                            null != externalId && !externalId.isEmpty() ? (AbstractFileNode) AbstractDomainObject
-                                    .fromExternalId(externalId) : null;
+                            null != externalId && !externalId.isEmpty() ? (AbstractFileNode) FenixFramework
+                                    .getDomainObject(externalId) : null;
                     changeSelectedNode(abstractFileNode);
                 } else {
                     changeSelectedNode(dirNode);
@@ -241,7 +241,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
         @Override
         public void itemClick(final ItemClickEvent event) {
             final String oid = (String) event.getItemId();
-            final AbstractFileNode abstractFileNode = AbstractDomainObject.fromExternalId(oid);
+            final AbstractFileNode abstractFileNode = FenixFramework.getDomainObject(oid);
 
             if (event.isDoubleClick()) {
                 if (abstractFileNode.isDir()) {
@@ -540,7 +540,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 
                 @Override
                 public void buttonClick(final ClickEvent event) {
-                    if (selectedNode.hasParent()) {
+                    if (selectedNode.getParent() != null) {
                         final DirNode parent = selectedNode.getParent();
                         if (parent != null) {
                             selectedNode.deleteService();
@@ -652,7 +652,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
                 horizontalLayout.setSpacing(true);
                 addComponent(horizontalLayout);
 
-                if (selectedNode.hasParent() && selectedNode.isWriteGroupMember()) {
+                if (selectedNode.getParent() != null && selectedNode.isWriteGroupMember()) {
                     horizontalLayout.addComponent(new EditNodeButton());
 
                     horizontalLayout.addComponent(new DeleteNodeButton());
@@ -660,7 +660,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
                 if (selectedNode.isFile() && selectedNode.isAccessible()) {
                     horizontalLayout.addComponent(new DownloadButton());
                 }
-                if (selectedNode.hasParent() && selectedNode.isWriteGroupMember()) {
+                if (selectedNode.getParent() != null && selectedNode.isWriteGroupMember()) {
                     addComponent(textField);
                 }
             }

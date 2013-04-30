@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 
 import pt.ist.bennu.core.domain.User;
-import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.fenixframework.Atomic;
 
 public class WebdavAuthentication extends WebdavAuthentication_Base {
 
@@ -18,14 +18,14 @@ public class WebdavAuthentication extends WebdavAuthentication_Base {
         return new BigInteger(130, new SecureRandom()).toString(32);
     }
 
-    @Service
+    @Atomic
     public void generateNewToken() {
         setToken(generateToken());
     }
 
-    @Service
+    @Atomic
     public static WebdavAuthentication getOrCreateWebdavAuthentication(User user) {
-        if (user.hasWebdavAuthentication()) {
+        if (user.getWebdavAuthentication() != null) {
             return user.getWebdavAuthentication();
         }
         return new WebdavAuthentication(user);

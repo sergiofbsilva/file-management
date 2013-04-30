@@ -1,7 +1,7 @@
 package module.fileManagement.presentationTier.pages;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import module.fileManagement.domain.DirNode;
 import module.fileManagement.domain.FileManagementSystem;
@@ -9,7 +9,7 @@ import module.fileManagement.domain.metadata.MetadataTemplate;
 import module.organization.domain.Unit;
 import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.RoleType;
-import pt.ist.fenixframework.pstm.AbstractDomainObject;
+import pt.ist.fenixframework.FenixFramework;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.ItemConstructor;
 import pt.ist.vaadinframework.data.hints.Options;
@@ -39,8 +39,8 @@ public class ManageDirProperties extends CustomComponent implements EmbeddedComp
         }
     }
 
-    private DomainItem<DirNode> dirNodeItem;
-    private VerticalLayout mainLayout;
+    private final DomainItem<DirNode> dirNodeItem;
+    private final VerticalLayout mainLayout;
 
     @Override
     public boolean isAllowedToOpen(Map<String, String> args) {
@@ -50,7 +50,7 @@ public class ManageDirProperties extends CustomComponent implements EmbeddedComp
     @Override
     public void setArguments(Map<String, String> args) {
         String dirNodeOid = args.get("dirNode");
-        setDirNode((DirNode) AbstractDomainObject.fromExternalId(dirNodeOid));
+        setDirNode(FenixFramework.<DirNode> getDomainObject(dirNodeOid));
     }
 
     private void setDirNode(DirNode dirNode) {
@@ -96,7 +96,7 @@ public class ManageDirProperties extends CustomComponent implements EmbeddedComp
     }
 
     private void setTemplateSelect() {
-        final List<MetadataTemplate> metadataTemplates = FileManagementSystem.getInstance().getMetadataTemplates();
+        final Set<MetadataTemplate> metadataTemplates = FileManagementSystem.getInstance().getMetadataTemplates();
         final DomainItem<MetadataTemplate> defaultTemplate =
                 (DomainItem<MetadataTemplate>) dirNodeItem.getItemProperty("defaultTemplate");
         final DomainContainer<MetadataTemplate> domainContainer =

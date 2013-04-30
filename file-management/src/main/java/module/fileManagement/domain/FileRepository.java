@@ -35,7 +35,7 @@ import module.organization.domain.Party;
 import module.organization.domain.Person;
 import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.User;
-import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.fenixframework.Atomic;
 
 /**
  * 
@@ -50,10 +50,10 @@ public class FileRepository {
     }
 
     public static DirNode getOrCreateFileRepository(final Party party) {
-        return party.hasFileRepository() ? party.getFileRepository() : createFileRepository(party);
+        return party.getFileRepository() != null ? party.getFileRepository() : createFileRepository(party);
     }
 
-    @Service
+    @Atomic
     private static DirNode createFileRepository(Party party) {
         return new DirNode(party);
     }
@@ -65,7 +65,7 @@ public class FileRepository {
 
     private static List<Party> getParentUnits(final Party party, List<Party> processed) {
         final List<Party> result = new ArrayList<Party>();
-        if (party.hasFileRepository() && party.getFileRepository().isAccessible()) {
+        if (party.getFileRepository() != null && party.getFileRepository().isAccessible()) {
             result.add(party);
         }
         for (Accountability accountability : party.getParentAccountabilities()) {

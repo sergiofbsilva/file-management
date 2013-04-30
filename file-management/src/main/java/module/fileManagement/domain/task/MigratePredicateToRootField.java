@@ -11,7 +11,7 @@ public class MigratePredicateToRootField extends WriteCustomTask {
     @Override
     protected void doService() {
         for (final Party party : MyOrg.getInstance().getPartiesSet()) {
-            if (party.hasFileRepository()) {
+            if (party.getFileRepository() != null) {
                 final DirNode rootDirNode = party.getFileRepository();
                 rootDirNode.setRoot(Boolean.TRUE);
                 rootDirNode.setFileManagementSystem(FileManagementSystem.getInstance());

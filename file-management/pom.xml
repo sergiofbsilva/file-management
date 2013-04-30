@@ -3,7 +3,7 @@
   <parent>
     <groupId>pt.ist</groupId>
     <artifactId>bennu-project</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0-rc1</version>
   </parent>
   <groupId>pt.ist</groupId>
   <artifactId>file-management</artifactId>
@@ -11,12 +11,12 @@
   <packaging>jar</packaging>
   <name>file-management</name>
   <properties>
-    <version.pt.ist.bennu.core>1.0.0</version.pt.ist.bennu.core>
-    <version.pt.ist.file.support>1.0.0</version.pt.ist.file.support>
-    <version.pt.ist.bennu.vaadin>1.0.0</version.pt.ist.bennu.vaadin>
-    <version.pt.ist.organization>1.0.0</version.pt.ist.organization>
-    <version.pt.ist.scheduler>1.0.0</version.pt.ist.scheduler>
-    <version.pt.ist.web.service.utils>1.0.0</version.pt.ist.web.service.utils>
+    <version.pt.ist.bennu.core>1.1.0-rc1</version.pt.ist.bennu.core>
+    <version.pt.ist.file.support>1.1.0-rc1</version.pt.ist.file.support>
+    <version.pt.ist.bennu.vaadin>1.1.0-rc1</version.pt.ist.bennu.vaadin>
+    <version.pt.ist.organization>1.1.0-rc1</version.pt.ist.organization>
+    <version.pt.ist.scheduler>1.1.0-rc1</version.pt.ist.scheduler>
+    <version.pt.ist.web.service.utils>1.1.0-rc1</version.pt.ist.web.service.utils>
     <version.io.milton.milton.server.ce>2.3.0.4</version.io.milton.milton.server.ce>
   </properties>
   <dependencies>
@@ -54,15 +54,16 @@
       <groupId>com.googlecode.json-simple</groupId>
       <artifactId>json-simple</artifactId>
     </dependency>
-    <dependency>
-		<groupId>io.milton</groupId>
-        <artifactId>milton-server-ce</artifactId>
-        <version>${version.io.milton.milton.server.ce}</version>
-	</dependency>
 	<dependency>
-		<groupId>org.slf4j</groupId>
-		<artifactId>slf4j-log4j12</artifactId>
-		<version>1.5.2</version>
+		<groupId>io.milton</groupId>
+		<artifactId>milton-server-ce</artifactId>
+		<version>${version.io.milton.milton.server.ce}</version>
+		<exclusions>
+			<exclusion>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+			</exclusion>
+		</exclusions>
 	</dependency>
   </dependencies>
   <repositories>

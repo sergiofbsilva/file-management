@@ -28,13 +28,13 @@ import org.apache.commons.io.FileUtils;
 import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.RoleType;
 import pt.ist.bennu.core.domain.User;
+import pt.ist.bennu.core.domain.exceptions.DomainException;
 import pt.ist.bennu.core.domain.groups.EmptyGroup;
 import pt.ist.bennu.core.domain.groups.PersistentGroup;
 import pt.ist.bennu.core.domain.groups.Role;
 import pt.ist.bennu.core.domain.groups.SingleUserGroup;
 import pt.ist.bennu.core.domain.groups.UnionGroup;
-import pt.ist.fenixWebFramework.services.Service;
-import pt.ist.fenixframework.FFDomainException;
+import pt.ist.fenixframework.Atomic;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -136,7 +136,7 @@ public class DirNode extends DirNode_Base {
     }
 
     public DirNode getSharedFolder() {
-        if (!hasParent()) { // is root
+        if (!(getParent() != null)) { // is root
             for (final AbstractFileNode node : getChildSet()) {
                 if (node instanceof DirNode) {
                     final DirNode dirNode = (DirNode) node;
@@ -152,11 +152,11 @@ public class DirNode extends DirNode_Base {
 
     @Override
     public DirNode getTrash() {
-        return hasParent() ? getParent().getTrash() : super.getTrash();
+        return (getParent() != null) ? getParent().getTrash() : super.getTrash();
     }
 
     public String getRepositoryName() {
-        return hasParent() ? getParent().getRepositoryName() : getName();
+        return (getParent() != null) ? getParent().getRepositoryName() : getName();
     }
 
     @Override
@@ -168,7 +168,7 @@ public class DirNode extends DirNode_Base {
         return createDir(dirName, getContextPath());
     }
 
-    @Service
+    @Atomic
     public DirNode createDir(final String dirName, final ContextPath contextPath) {
         final DirNode searchDir = searchDir(dirName);
         if (searchDir != null) {
@@ -179,7 +179,7 @@ public class DirNode extends DirNode_Base {
         return resultNode;
     }
 
-    @Service
+    @Atomic
     public DirNode createDir(final String dirName, final PersistentGroup readGroup, final PersistentGroup writeGroup,
             final ContextPath contextPath) {
         final DirNode dirNode = createDir(dirName, contextPath);
@@ -197,12 +197,7 @@ public class DirNode extends DirNode_Base {
 
     @Override
     public String getDisplayName() {
-        return hasUser() ? FileManagementSystem.getMessage("label.menu.home") : getName();
-    }
-
-    @Override
-    public boolean hasUser() {
-        return hasParty() && getParty() instanceof Person;
+        return (getUser() != null) ? FileManagementSystem.getMessage("label.menu.home") : getName();
     }
 
     @Override
@@ -215,7 +210,7 @@ public class DirNode extends DirNode_Base {
     }
 
     @Override
-    @Service
+    @Atomic
     public void setDisplayName(final String displayName) throws NodeDuplicateNameException {
         super.setDisplayName(displayName);
         setName(displayName);
@@ -224,13 +219,13 @@ public class DirNode extends DirNode_Base {
     @Override
     public PersistentGroup getReadGroup() {
         final PersistentGroup group = super.getReadGroup();
-        return group == null && hasParent() ? getParent().getReadGroup() : group;
+        return group == null && (getParent() != null) ? getParent().getReadGroup() : group;
     }
 
     @Override
     public PersistentGroup getWriteGroup() {
         final PersistentGroup group = super.getWriteGroup();
-        return group == null && hasParent() ? getParent().getWriteGroup() : group;
+        return group == null && (getParent() != null) ? getParent().getWriteGroup() : group;
     }
 
     @Override
@@ -275,7 +270,7 @@ public class DirNode extends DirNode_Base {
 
     // file creation
     @SuppressWarnings("unused")
-    @Service
+    @Atomic
     public FileNode createFile(final byte[] fileContent, final String displayName, final String fileName, final long filesize,
             final ContextPath contextPath) {
         FileNode fileNode = searchFile(displayName);
@@ -302,7 +297,7 @@ public class DirNode extends DirNode_Base {
 
     }
 
-    @Service
+    @Atomic
     public FileNode createFile(final File file, final String displayName, final String fileName, final long filesize,
             final ContextPath contextPath) {
         try {
@@ -313,13 +308,13 @@ public class DirNode extends DirNode_Base {
 
     }
 
-    @Service
+    @Atomic
     public FileNode createFile(final File file, final String displayName, final long filesize, final ContextPath contextPath) {
         return createFile(file, displayName, displayName, filesize, contextPath);
 
     }
 
-    @Service
+    @Atomic
     public FileNode createFile(final File file, final String fileName, final PersistentGroup readGroup,
             final PersistentGroup writeGroup) {
         final FileNode fileNode = createFile(file, fileName, file.length(), new ContextPath(this));
@@ -328,7 +323,7 @@ public class DirNode extends DirNode_Base {
         return fileNode;
     }
 
-    @Service
+    @Atomic
     public FileNode createFile(final File file, final String fileName, final PersistentGroup readGroup,
             final PersistentGroup writeGroup, final ContextPath contextPath) {
         final FileNode fileNode = createFile(file, fileName, file.length(), contextPath);
@@ -337,14 +332,14 @@ public class DirNode extends DirNode_Base {
         return fileNode;
     }
 
-    @Service
+    @Atomic
     public FileNode createFile() {
-        if (hasSequenceNumber()) {
+        if ((getSequenceNumber() != null)) {
             final Integer nextSequenceNumber = getNextSequenceNumber();
             FileManagementSystem.FILENAME_TEMPLATE.setDirNode(this);
             final String fileName = FileManagementSystem.FILENAME_TEMPLATE.getValue();
             final Document document = new Document(fileName, fileName, org.apache.commons.lang.StringUtils.EMPTY.getBytes());
-            if (hasDefaultTemplate()) {
+            if ((getDefaultTemplate() != null)) {
                 final MetadataTemplate defaultTemplate = getDefaultTemplate();
                 final Set<MetadataKey> seqNumberKeys = defaultTemplate.getKeysByMetadataType(SeqNumberMetadata.class);
                 for (final MetadataKey key : seqNumberKeys) {
@@ -372,17 +367,17 @@ public class DirNode extends DirNode_Base {
         return result;
     }
 
-    @Service
+    @Atomic
     void addUsedSpace(final long filesize) {
-        if (hasParent()) {
+        if ((getParent() != null)) {
             getParent().addUsedSpace(filesize);
         }
         setSize(getSize() + filesize);
     }
 
-    @Service
+    @Atomic
     void removeUsedSpace(final long filesize) {
-        if (hasParent()) {
+        if ((getParent() != null)) {
             getParent().removeUsedSpace(filesize);
         }
         setSize(getSize() - filesize);
@@ -411,7 +406,7 @@ public class DirNode extends DirNode_Base {
 
     @Override
     public Long getQuota() {
-        return hasQuotaDefined() ? super.getQuota() : hasParent() ? getParent().getQuota() : 0;
+        return hasQuotaDefined() ? super.getQuota() : (getParent() != null) ? getParent().getQuota() : 0;
     }
 
     public boolean hasQuotaDefined() {
@@ -430,7 +425,7 @@ public class DirNode extends DirNode_Base {
      * space is calculated by the parent
      */
     public long getUsedSpace() {
-        return hasQuotaDefined() ? getDirUsedSpace() : hasParent() ? getParent().getUsedSpace() : getDirUsedSpace();
+        return hasQuotaDefined() ? getDirUsedSpace() : (getParent() != null) ? getParent().getUsedSpace() : getDirUsedSpace();
     }
 
     @Override
@@ -531,7 +526,7 @@ public class DirNode extends DirNode_Base {
 
     @Override
     public void delete() {
-        removeUser();
+        setUser(null);
         for (final AbstractFileNode abstractFileNode : getChildSet()) {
             abstractFileNode.delete();
         }
@@ -540,15 +535,15 @@ public class DirNode extends DirNode_Base {
 
     @Override
     public boolean isInTrash() {
-        if (hasParent()) {
+        if ((getParent() != null)) {
             return getParent().isInTrash();
         }
-        return hasRootDirNode();
+        return (getRootDirNode() != null);
     }
 
     @Override
     public DirNode getTopDirNode() {
-        if (hasParent()) {
+        if ((getParent() != null)) {
             return getParent().getTopDirNode();
         }
         return this;
@@ -559,7 +554,7 @@ public class DirNode extends DirNode_Base {
      */
     @ConsistencyPredicate
     public boolean checkParent() {
-        return hasParent() ? true : isRoot() || isInTrash();
+        return (getParent() != null) ? true : isRoot() || isInTrash();
     }
 
     private boolean isRoot() {
@@ -587,19 +582,40 @@ public class DirNode extends DirNode_Base {
         return getSequenceNumber() != null;
     }
 
-    @Service
+    @Atomic
     public Integer getNextSequenceNumber() {
         if (getSequenceNumber() == null) {
-            throw new FFDomainException("Sequence Number is null: Must be 0 to use a sequence number");
+            throw new DomainException("Sequence Number is null: Must be 0 to use a sequence number");
         }
         setSequenceNumber(getSequenceNumber() + 1);
         return getSequenceNumber();
     }
 
     @Override
-    @Service
+    @Atomic
     public void recoverTo(DirNode targetDir) {
         new RecoverDirLog(Authenticate.getCurrentUser(), targetDir.getContextPath(), this);
         setParent(targetDir);
     }
+
+    @Deprecated
+    public java.util.Set<module.fileManagement.domain.SharedDirNode> getSharedDirNodes() {
+        return getSharedDirNodesSet();
+    }
+
+    @Deprecated
+    public java.util.Set<module.fileManagement.domain.log.DirLog> getDirLog() {
+        return getDirLogSet();
+    }
+
+    @Deprecated
+    public java.util.Set<module.fileManagement.domain.log.AbstractLog> getTargetLog() {
+        return getTargetLogSet();
+    }
+
+    @Deprecated
+    public java.util.Set<module.fileManagement.domain.AbstractFileNode> getChild() {
+        return getChildSet();
+    }
+
 }
