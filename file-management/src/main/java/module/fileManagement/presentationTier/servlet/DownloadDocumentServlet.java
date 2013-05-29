@@ -22,9 +22,9 @@ import pt.ist.bennu.core.domain.User;
 import pt.ist.bennu.core.domain.exceptions.DomainException;
 import pt.ist.fenixWebFramework.Config.CasConfig;
 import pt.ist.fenixWebFramework.FenixWebFramework;
-import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.DomainObject;
-import pt.ist.fenixframework.pstm.AbstractDomainObject;
+import pt.ist.fenixframework.FenixFramework;
 
 public class DownloadDocumentServlet extends HttpServlet {
 
@@ -45,7 +45,7 @@ public class DownloadDocumentServlet extends HttpServlet {
         final int lastIndexOf = uri.lastIndexOf('/');
         if (lastIndexOf >= 0) {
             final String oid = uri.substring(lastIndexOf + 1);
-            final DomainObject domainObject = AbstractDomainObject.fromExternalId(oid);
+            final DomainObject domainObject = FenixFramework.getDomainObject(oid);
             if (domainObject != null) {
                 dispatch(request, response, domainObject);
             }
@@ -68,7 +68,7 @@ public class DownloadDocumentServlet extends HttpServlet {
         }
     }
 
-    @Service
+    @Atomic
     private static void saveAccessLog(FileNode fileNode) {
         new AccessFileLog(Authenticate.getCurrentUser(), fileNode.getParent().getContextPath(), fileNode);
     }

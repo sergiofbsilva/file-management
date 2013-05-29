@@ -5,8 +5,8 @@ import java.io.InputStream;
 
 import module.fileManagement.domain.Document;
 import module.fileManagement.domain.FileNode;
+import pt.ist.fenixframework.FenixFramework;
 import pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile;
-import pt.ist.fenixframework.pstm.AbstractDomainObject;
 
 import com.vaadin.terminal.StreamResource.StreamSource;
 
@@ -27,7 +27,7 @@ public class FileNodeStreamSource extends InputStream implements StreamSource {
     @Override
     public InputStream getStream() {
         if (stream == null) {
-            final FileNode fileNode = AbstractDomainObject.fromExternalId(fileNodeOid);
+            final FileNode fileNode = FenixFramework.getDomainObject(fileNodeOid);
             final Document document = fileNode.getDocument();
             final GenericFile file = document.getLastVersionedFile();
             stream = file.getStream();

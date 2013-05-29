@@ -1,12 +1,5 @@
 package module.fileManagement.domain;
 
-valueType java.lang.Class as Class {
-	externalizeWith {
-		String getName();
-	}
-	internalizeWith pt.ist.bennu.core.domain.util.ClassInternalizer.internalize();
-}
-
  class task.PopulateRootDirTask extends .pt.ist.bennu.core.domain.scheduler.Task { }
 
 

@@ -54,7 +54,7 @@ import com.vaadin.ui.VerticalLayout;
  */
 public class WebdavHome extends CustomComponent implements EmbeddedComponentContainer {
 
-    private GridSystemLayout gsl;
+    private final GridSystemLayout gsl;
 
     @Override
     public boolean isAllowedToOpen(Map<String, String> arguments) {
@@ -69,7 +69,7 @@ public class WebdavHome extends CustomComponent implements EmbeddedComponentCont
 
     private void createWebdavLink(final Layout content) {
         final User currentUser = Authenticate.getCurrentUser();
-        final boolean hasWebDavAuth = currentUser.hasWebdavAuthentication();
+        final boolean hasWebDavAuth = currentUser.getWebdavAuthentication() != null;
         if (hasWebDavAuth) {
             Label lblInstructions =
                     new Label(getMessage("webdav.message.instructions", currentUser.getUsername(), currentUser

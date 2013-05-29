@@ -47,7 +47,7 @@ import module.fileManagement.presentationTier.component.viewers.VisibilityListVi
 import module.fileManagement.presentationTier.data.DocumentContainer;
 import module.vaadin.data.util.ObjectHintedProperty;
 import module.vaadin.ui.BennuTheme;
-import pt.ist.fenixframework.pstm.AbstractDomainObject;
+import pt.ist.fenixframework.FenixFramework;
 import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.reflect.DomainContainer;
@@ -90,7 +90,7 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
 
     @Override
     public boolean isAllowedToOpen(Map<String, String> arguments) {
-        AbstractFileNode node = AbstractDomainObject.fromExternalId(arguments.get("node"));
+        AbstractFileNode node = FenixFramework.getDomainObject(arguments.get("node"));
         if (node == null || node.isDir() || !(node.isReadGroupMember() || node.isWriteGroupMember())) {
             return false;
         }
@@ -99,7 +99,7 @@ public class DocumentExtendedInfo extends CustomComponent implements EmbeddedCom
 
     @Override
     public void setArguments(Map<String, String> arguments) {
-        fileNode = AbstractDomainObject.fromExternalId(arguments.get("node"));
+        fileNode = FenixFramework.getDomainObject(arguments.get("node"));
     }
 
     public void update() {

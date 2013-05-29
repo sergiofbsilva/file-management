@@ -82,7 +82,7 @@ import com.vaadin.ui.themes.BaseTheme;
  */
 public class DocumentHome extends CustomComponent implements EmbeddedComponentContainer {
 
-    private GridSystemLayout gsl;
+    private final GridSystemLayout gsl;
     private Component webdav;
 
     @Override
@@ -161,7 +161,7 @@ public class DocumentHome extends CustomComponent implements EmbeddedComponentCo
                 @Override
                 public boolean passesFilter(Object itemId, Item item) throws UnsupportedOperationException {
                     final Unit unit = (Unit) itemId;
-                    return unit.hasFileRepository()
+                    return unit.getFileRepository() != null
                             && (Authenticate.getCurrentUser().hasRoleType(RoleType.MANAGER) || unit.getFileRepository()
                                     .isAccessible());
                 }

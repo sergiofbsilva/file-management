@@ -31,7 +31,7 @@ import org.json.simple.JSONValue;
 import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.User;
 import pt.ist.bennu.core.domain.exceptions.DomainException;
-import pt.ist.fenixframework.pstm.AbstractDomainObject;
+import pt.ist.fenixframework.FenixFramework;
 
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
@@ -41,7 +41,7 @@ public class FMSJerseyServices {
 
     private Document resolveDocument(final String documentOid) {
         // Authenticate.authenticate(User.findByUsername("ist152416"));
-        final Document doc = AbstractDomainObject.fromExternalId(documentOid);
+        final Document doc = FenixFramework.getDomainObject(documentOid);
         if (doc == null) {
             throw new WebApplicationException(Status.NOT_FOUND);
         }
@@ -93,7 +93,7 @@ public class FMSJerseyServices {
     public String upload(@PathParam("dirNodeOid") final String dirNodeOid, @FormDataParam("file") final File file,
             @FormDataParam("file") final FormDataContentDisposition fileDetails) {
         Authenticate.authenticate(User.findByUsername("ist152416"));
-        final DirNode dirNode = AbstractDomainObject.fromExternalId(dirNodeOid);
+        final DirNode dirNode = FenixFramework.getDomainObject(dirNodeOid);
         try {
             final FileNode createFile =
                     dirNode.createFile(file, fileDetails.getFileName(), fileDetails.getSize(), dirNode.getContextPath());
@@ -139,7 +139,7 @@ public class FMSJerseyServices {
         if ("-1".equals(rootDirNodeOid)) {
 
         }
-        final DirNode fileRepository = AbstractDomainObject.fromExternalId(rootDirNodeOid);
+        final DirNode fileRepository = FenixFramework.getDomainObject(rootDirNodeOid);
         DirNode searchDir = fileRepository.searchDir(name);
         if (searchDir == null) {
             searchDir = fileRepository.createDir(name, fileRepository.getContextPath());

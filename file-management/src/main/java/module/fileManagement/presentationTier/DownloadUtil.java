@@ -73,7 +73,7 @@ public class DownloadUtil {
         try {
             return new URL(getDownloadUrl(application, domainObject));
         } catch (MalformedURLException e) {
-            FileManagementSystem.getLogger().error(e);
+            FileManagementSystem.getLogger().error(e.getLocalizedMessage(), e);
         }
         return null;
     }

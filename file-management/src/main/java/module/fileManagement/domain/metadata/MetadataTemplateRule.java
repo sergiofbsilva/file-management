@@ -1,6 +1,6 @@
 package module.fileManagement.domain.metadata;
 
-import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.fenixframework.Atomic;
 
 public class MetadataTemplateRule extends MetadataTemplateRule_Base implements Comparable<MetadataTemplateRule> {
 
@@ -18,7 +18,7 @@ public class MetadataTemplateRule extends MetadataTemplateRule_Base implements C
         return getPosition().compareTo(o.getPosition());
     }
 
-    @Service
+    @Atomic
     public void delete() {
         setTemplate(null);
         setKey(null);

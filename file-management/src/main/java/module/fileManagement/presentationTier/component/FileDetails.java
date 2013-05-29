@@ -40,7 +40,7 @@ import module.fileManagement.presentationTier.pages.DocumentExtendedInfo;
 
 import org.apache.commons.lang.StringUtils;
 
-import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.fenixframework.Atomic;
 import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
 
@@ -177,8 +177,8 @@ public class FileDetails extends NodeDetails {
             }
         }
 
+        @Atomic
         @Override
-        @Service
         public void uploadSucceeded(SucceededEvent event) {
             final Document document = getDocument();
             final String displayName = FileManagementSystem.getNewDisplayName(document.getDisplayName(), event.getFilename());

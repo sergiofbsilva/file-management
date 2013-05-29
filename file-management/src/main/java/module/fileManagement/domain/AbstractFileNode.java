@@ -17,40 +17,40 @@ import pt.ist.bennu.core.domain.exceptions.DomainException;
 import pt.ist.bennu.core.domain.groups.AnyoneGroup;
 import pt.ist.bennu.core.domain.groups.PersistentGroup;
 import pt.ist.bennu.core.domain.groups.SingleUserGroup;
-import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.dml.runtime.DirectRelation;
+import pt.ist.fenixframework.dml.runtime.Relation;
+import pt.ist.fenixframework.dml.runtime.RelationListener;
 import pt.utl.ist.fenix.tools.util.NaturalOrderComparator;
-import dml.runtime.DirectRelation;
-import dml.runtime.Relation;
-import dml.runtime.RelationListener;
 
 public abstract class AbstractFileNode extends AbstractFileNode_Base implements Comparable<AbstractFileNode> {
     final static NaturalOrderComparator STRING_NATURAL_COMPARATOR;
 
     static {
-        DirectRelation<AbstractFileNode, DirNode> child = DirNodeAbstractFileNode;
-        child.addListener(new RelationListener<AbstractFileNode, DirNode>() {
+        DirectRelation<DirNode, AbstractFileNode> child = getRelationDirNodeAbstractFileNode();
+        child.addListener(new RelationListener<DirNode, AbstractFileNode>() {
 
             @Override
-            public void afterAdd(Relation<AbstractFileNode, DirNode> arg0, AbstractFileNode arg1, DirNode arg2) {
+            public void afterAdd(Relation<DirNode, AbstractFileNode> arg0, DirNode arg2, AbstractFileNode arg1) {
                 if (arg1 != null && arg2 != null && !arg1.isShared()) {
                     arg2.addUsedSpace(arg1.getFilesize());
                 }
             }
 
             @Override
-            public void afterRemove(Relation<AbstractFileNode, DirNode> arg0, AbstractFileNode arg1, DirNode arg2) {
+            public void afterRemove(Relation<DirNode, AbstractFileNode> arg0, DirNode arg2, AbstractFileNode arg1) {
                 if (arg1 != null && arg2 != null && !arg1.isShared()) {
                     arg2.removeUsedSpace(arg1.getFilesize());
                 }
             }
 
             @Override
-            public void beforeAdd(Relation<AbstractFileNode, DirNode> arg0, AbstractFileNode arg1, DirNode arg2) {
+            public void beforeAdd(Relation<DirNode, AbstractFileNode> arg0, DirNode arg2, AbstractFileNode arg1) {
 
             }
 
             @Override
-            public void beforeRemove(Relation<AbstractFileNode, DirNode> arg0, AbstractFileNode arg1, DirNode arg2) {
+            public void beforeRemove(Relation<DirNode, AbstractFileNode> arg0, DirNode arg2, AbstractFileNode arg1) {
                 // TODO Auto-generated method stub
 
             }
@@ -79,11 +79,11 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
     }
 
     public void delete() {
-        removeParent();
+        setParent(null);
         deleteDomainObject();
     }
 
-    @Service
+    @Atomic
     public void deleteService() {
         delete();
     }
@@ -110,7 +110,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
     }
 
     private void getPath(final AbstractFileNode child, final List<DirNode> nodes) {
-        if (child.hasParent()) {
+        if (child.getParent() != null) {
             getPath(child.getParent(), nodes);
         }
         if (child instanceof DirNode) {
@@ -122,7 +122,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
         trash(getContextPath());
     }
 
-    @Service
+    @Atomic
     public void trash(ContextPath contextPath) {
         if (!isWriteGroupMember()) {
             throw new DomainException("no.write.permissions", FileManagementSystem.getBundle(), getDisplayName());
@@ -185,12 +185,12 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
     }
 
     public boolean isInTrash() {
-        return hasParent() ? getParent().isInTrash() : false;
+        return (getParent() != null) ? getParent().isInTrash() : false;
     }
 
     public abstract String getDisplayName();
 
-    @Service
+    @Atomic
     public Boolean moveTo(final DirNode dirNode) throws NodeDuplicateNameException {
         if (dirNode != null) {
             if (dirNode.isWriteGroupMember()) {
@@ -261,7 +261,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
         setVisibility(visibilityGroups);
     }
 
-    @Service
+    @Atomic
     public void setVisibility(final VisibilityList visibilityList) {
         final PersistentGroup writeGroup = getWriteGroup();
         final PersistentGroup newWriteGroup = visibilityList.getWriteGroup();
@@ -292,10 +292,10 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
         if (targetFolder.hasSharedNode(node)) {
             return true;
         }
-        return node.hasParent() ? hasSharedNode(targetFolder, node.getParent()) : false;
+        return node.getParent() != null ? hasSharedNode(targetFolder, node.getParent()) : false;
     }
 
-    @Service
+    @Atomic
     public void share(User user, VisibilityGroup group, ContextPath contextPath) {
         if (isShared()) {
             return;
@@ -348,7 +348,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
     }
 
     public User getOwner() {
-        return hasParent() ? getParent().getOwner() : null;
+        return (getParent() != null) ? getParent().getOwner() : null;
     }
 
     public void unshare(VisibilityGroup group) {

@@ -81,12 +81,12 @@ public class VersionedFile extends VersionedFile_Base {
     public void delete() {
         final Document document = getDocument();
         document.setLastVersionedFile(getPreviousVersion());
-        removePreviousVersion();
+        setPreviousVersion(null);
         super.delete();
     }
 
     public Document getConnectedDocument() {
-        return hasDocument() ? getDocument() : (hasNextVersion() ? getNextVersion().getConnectedDocument() : null);
+        return (getDocument() != null) ? getDocument() : (getNextVersion() != null ? getNextVersion().getConnectedDocument() : null);
     }
 
     @ConsistencyPredicate

@@ -44,7 +44,7 @@ import org.vaadin.dialogs.ConfirmDialog;
 
 import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.Presentable;
-import pt.ist.fenixframework.pstm.AbstractDomainObject;
+import pt.ist.fenixframework.FenixFramework;
 import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
@@ -122,7 +122,7 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
     @Override
     public boolean isAllowedToOpen(Map<String, String> arguments) {
         final String fileExternalId = arguments.get("fileNode");
-        final AbstractFileNode node = AbstractDomainObject.fromExternalId(fileExternalId);
+        final AbstractFileNode node = FenixFramework.getDomainObject(fileExternalId);
         if (node == null || node.isShared() || !node.isWriteGroupMember()) {
             return false;
         }
@@ -133,7 +133,7 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
     public void setArguments(Map<String, String> arguments) {
         final String fileExternalId = arguments.get("fileNode");
         final String contextPath = arguments.get("contextPath");
-        fileNode = AbstractDomainObject.fromExternalId(fileExternalId);
+        fileNode = FenixFramework.getDomainObject(fileExternalId);
         this.contextPath = new ContextPath(contextPath);
         updateGroupTable();
     }

@@ -44,7 +44,7 @@ import org.apache.commons.io.FileUtils;
 import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.exceptions.DomainException;
 import pt.ist.bennu.core.domain.groups.PersistentGroup;
-import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.fenixframework.Atomic;
 
 import com.google.common.collect.Multimap;
 
@@ -106,8 +106,8 @@ public class FileNode extends FileNode_Base {
         return true;
     }
 
+    @Atomic
     @Override
-    @Service
     public void delete() {
         final Document document = getDocument();
         document.delete();
@@ -116,12 +116,12 @@ public class FileNode extends FileNode_Base {
     }
 
     void deleteFromDocument() {
-        removeDocument();
+        setDocument(null);
         super.delete();
     }
 
+    @Atomic
     @Override
-    @Service
     public void deleteService() {
         delete();
     }
@@ -129,13 +129,13 @@ public class FileNode extends FileNode_Base {
     @Override
     public PersistentGroup getReadGroup() {
         final PersistentGroup group = getDocument().getReadGroup();
-        return group == null && hasParent() ? getParent().getReadGroup() : group;
+        return group == null && (getParent() != null) ? getParent().getReadGroup() : group;
     }
 
     @Override
     public PersistentGroup getWriteGroup() {
         final PersistentGroup group = getDocument().getWriteGroup();
-        return group == null && hasParent() ? getParent().getWriteGroup() : group;
+        return group == null && (getParent() != null) ? getParent().getWriteGroup() : group;
     }
 
     @Override
@@ -190,7 +190,7 @@ public class FileNode extends FileNode_Base {
     @Override
     public Set<FileLog> getFileLogSet() {
         final HashSet<FileLog> logs = new HashSet<FileLog>(super.getFileLogSet());
-        if (hasAnySharedFileNodes()) {
+        if (!getSharedFileNodesSet().isEmpty()) {
             for (SharedFileNode sharedNode : getSharedFileNodes()) {
                 logs.addAll(sharedNode.getFileLogSet());
             }
@@ -198,8 +198,8 @@ public class FileNode extends FileNode_Base {
         return logs;
     }
 
+    @Atomic
     @Override
-    @Service
     public void unshare(VisibilityGroup group) {
         super.unshare(group);
         for (SharedFileNode sharedNode : getSharedFileNodes()) {
@@ -208,8 +208,8 @@ public class FileNode extends FileNode_Base {
         }
     }
 
+    @Atomic
     @Override
-    @Service
     public void recoverTo(DirNode targetDir) {
         new RecoverFileLog(Authenticate.getCurrentUser(), targetDir.getContextPath(), this);
         setParent(targetDir);
@@ -224,7 +224,7 @@ public class FileNode extends FileNode_Base {
         return getParent();
     }
 
-    @Service
+    @Atomic
     public void addNewVersion(byte[] fileContent, String fileName, String displayName, long filesize) {
         if (!isWriteGroupMember()) {
             throw new CannotCreateFileException(fileName);
@@ -245,7 +245,7 @@ public class FileNode extends FileNode_Base {
 
     }
 
-    @Service
+    @Atomic
     public void addNewVersion(File file, String fileName, String displayName, long filesize) {
         try {
             addNewVersion(FileUtils.readFileToByteArray(file), fileName, displayName, filesize);
@@ -258,4 +258,15 @@ public class FileNode extends FileNode_Base {
     public DirNode getTopDirNode() {
         return getParent();
     };
+
+    @Deprecated
+    public java.util.Set<module.fileManagement.domain.log.FileLog> getFileLog() {
+        return getFileLogSet();
+    }
+
+    @Deprecated
+    public java.util.Set<module.fileManagement.domain.SharedFileNode> getSharedFileNodes() {
+        return getSharedFileNodesSet();
+    }
+
 }

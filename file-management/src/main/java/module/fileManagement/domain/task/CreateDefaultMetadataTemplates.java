@@ -7,7 +7,7 @@ import module.fileManagement.domain.metadata.MetadataKey;
 import module.fileManagement.domain.metadata.MetadataTemplate;
 import module.fileManagement.domain.metadata.PersonMetadata;
 import module.fileManagement.domain.metadata.SeqNumberMetadata;
-import pt.ist.fenixWebFramework.services.Service;
+import pt.ist.fenixframework.Atomic;
 
 public class CreateDefaultMetadataTemplates extends CreateDefaultMetadataTemplates_Base {
 
@@ -23,7 +23,7 @@ public class CreateDefaultMetadataTemplates extends CreateDefaultMetadataTemplat
     public void resetTemplatesAndKeys() {
         for (MetadataTemplate template : FileManagementSystem.getInstance().getMetadataTemplatesSet()) {
             for (MetadataKey key : template.getKeys()) {
-                if (!key.hasAnyMetadata()) {
+                if (key.getMetadataSet().isEmpty()) {
                     key.delete();
                 }
             }
@@ -62,8 +62,8 @@ public class CreateDefaultMetadataTemplates extends CreateDefaultMetadataTemplat
         }
     }
 
+    @Atomic
     @Override
-    @Service
     public void executeTask() {
         createDocumentTemplate();
         createDRHDeclarationTemplate();

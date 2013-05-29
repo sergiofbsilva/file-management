@@ -8,8 +8,8 @@ import java.util.Set;
 import org.joda.time.DateTime;
 
 import pt.ist.fenixframework.FenixFramework;
-import dml.DomainClass;
-import dml.DomainModel;
+import pt.ist.fenixframework.dml.DomainClass;
+import pt.ist.fenixframework.dml.DomainModel;
 
 public abstract class Metadata extends Metadata_Base implements Comparable<Metadata> {
 
@@ -47,8 +47,8 @@ public abstract class Metadata extends Metadata_Base implements Comparable<Metad
     }
 
     public void delete() {
-        removeDocument();
-        removeMetadataKey();
+        setDocument(null);
+        setMetadataKey(null);
         deleteDomainObject();
     }
 
@@ -83,7 +83,7 @@ public abstract class Metadata extends Metadata_Base implements Comparable<Metad
         if (clazz.equals(metadataClass)) {
             return true;
         }
-        if (clazz.hasSuperclass()) {
+        if (clazz.getSuperclass() != null) {
             return isMetadataClass((DomainClass) clazz.getSuperclass());
         }
         return false;

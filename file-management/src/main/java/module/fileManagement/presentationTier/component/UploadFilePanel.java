@@ -14,8 +14,8 @@ import module.fileManagement.presentationTier.data.DocumentContainer;
 import module.fileManagement.presentationTier.pages.DocumentBrowse;
 import module.fileManagement.presentationTier.pages.UploadPage;
 import module.vaadin.data.util.ObjectHintedProperty;
-import pt.ist.fenixWebFramework.services.Service;
-import pt.ist.fenixframework.FFDomainException;
+import pt.ist.bennu.core.domain.exceptions.DomainException;
+import pt.ist.fenixframework.Atomic;
 import pt.ist.vaadinframework.EmbeddedApplication;
 
 import com.vaadin.data.Container.ItemSetChangeEvent;
@@ -36,8 +36,8 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
 
     private final UploadFileArea uploadArea;
     private final Table documents;
-    private DocumentContainer documentContainer;
-    private ObjectHintedProperty<Collection> selectedDocumentsProperty;
+    private final DocumentContainer documentContainer;
+    private final ObjectHintedProperty<Collection> selectedDocumentsProperty;
     private ContextPath contextPath;
     private final UploadPage uploadPage;
     private final Label submittedDocumentsLabel;
@@ -62,20 +62,20 @@ public class UploadFilePanel extends CustomComponent implements ValueChangeNotif
                     final FileNode fileNode =
                             uploadDir.createFile(event.getFile(), event.getFileName(), event.getLength(), contextPath);
                     addDocument(fileNode.getDocument());
-                } catch (FFDomainException ffde) {
+                } catch (DomainException ffde) {
                     uploadArea.setError(ffde.getMessage());
                 }
             }
         }
 
-        @Service
+        @Atomic
         private void seqNumberUpload(OnFileUploadEvent event) {
             final Collection<Document> selectedDocument = selectedDocumentsProperty.getValue();
             assert documentContainer.size() == 1 && selectedDocument.size() == 1;
             Document document = selectedDocument.iterator().next();
             final String fileName = event.getFileName();
             final String displayName = FileManagementSystem.getNewDisplayName(document.getDisplayName(), fileName);
-            document.getFileNode().get(0).addNewVersion(event.getFile(), fileName, displayName, event.getLength());
+            document.getFileNode().iterator().next().addNewVersion(event.getFile(), fileName, displayName, event.getLength());
             documentContainer.getItem(document).getItemProperty("displayName").setValue(displayName);
         }
     }

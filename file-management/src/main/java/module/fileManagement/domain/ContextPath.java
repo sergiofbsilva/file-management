@@ -32,7 +32,7 @@ import module.fileManagement.domain.log.DirNodePath;
 
 import org.apache.commons.lang.StringUtils;
 
-import pt.ist.fenixframework.pstm.AbstractDomainObject;
+import pt.ist.fenixframework.FenixFramework;
 
 /**
  * 
@@ -68,7 +68,7 @@ public class ContextPath {
         final List<DirNode> dirNodes = new ArrayList<DirNode>();
         final String[] split = StringUtils.split(pathString, '/');
         for (String node : split) {
-            final DirNode dirNode = AbstractDomainObject.fromExternalId(node);
+            final DirNode dirNode = FenixFramework.getDomainObject(node);
             dirNodes.add(dirNode);
         }
         return Collections.unmodifiableList(dirNodes);
