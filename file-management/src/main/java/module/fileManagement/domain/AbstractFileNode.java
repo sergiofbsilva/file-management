@@ -18,43 +18,12 @@ import pt.ist.bennu.core.domain.groups.AnyoneGroup;
 import pt.ist.bennu.core.domain.groups.PersistentGroup;
 import pt.ist.bennu.core.domain.groups.SingleUserGroup;
 import pt.ist.fenixframework.Atomic;
-import pt.ist.fenixframework.dml.runtime.DirectRelation;
-import pt.ist.fenixframework.dml.runtime.Relation;
-import pt.ist.fenixframework.dml.runtime.RelationListener;
 import pt.utl.ist.fenix.tools.util.NaturalOrderComparator;
 
 public abstract class AbstractFileNode extends AbstractFileNode_Base implements Comparable<AbstractFileNode> {
     final static NaturalOrderComparator STRING_NATURAL_COMPARATOR;
 
     static {
-        DirectRelation<DirNode, AbstractFileNode> child = getRelationDirNodeAbstractFileNode();
-        child.addListener(new RelationListener<DirNode, AbstractFileNode>() {
-
-            @Override
-            public void afterAdd(Relation<DirNode, AbstractFileNode> arg0, DirNode arg2, AbstractFileNode arg1) {
-                if (arg1 != null && arg2 != null && !arg1.isShared()) {
-                    arg2.addUsedSpace(arg1.getFilesize());
-                }
-            }
-
-            @Override
-            public void afterRemove(Relation<DirNode, AbstractFileNode> arg0, DirNode arg2, AbstractFileNode arg1) {
-                if (arg1 != null && arg2 != null && !arg1.isShared()) {
-                    arg2.removeUsedSpace(arg1.getFilesize());
-                }
-            }
-
-            @Override
-            public void beforeAdd(Relation<DirNode, AbstractFileNode> arg0, DirNode arg2, AbstractFileNode arg1) {
-
-            }
-
-            @Override
-            public void beforeRemove(Relation<DirNode, AbstractFileNode> arg0, DirNode arg2, AbstractFileNode arg1) {
-                // TODO Auto-generated method stub
-
-            }
-        });
         STRING_NATURAL_COMPARATOR = new NaturalOrderComparator();
     }
 
