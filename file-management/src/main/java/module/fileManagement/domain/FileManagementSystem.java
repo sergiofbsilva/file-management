@@ -41,12 +41,9 @@ import org.slf4j.LoggerFactory;
 
 import pt.ist.bennu.core.domain.ModuleInitializer;
 import pt.ist.bennu.core.domain.MyOrg;
-import pt.ist.bennu.core.domain.exceptions.DomainException;
 import pt.ist.bennu.core.util.BundleUtil;
 import pt.ist.fenixframework.Atomic;
 
-import com.vaadin.Application;
-import com.vaadin.ui.Window;
 
 /**
  * 
@@ -137,26 +134,6 @@ public class FileManagementSystem extends FileManagementSystem_Base implements M
 
     public static Logger getLogger() {
         return logger;
-    }
-
-    public static void showException(Application app, DomainException e) {
-        Window.Notification notif =
-                new Window.Notification(FileManagementSystem.getMessage("label.operation.not.allowed"), e.getMessage(),
-                        Window.Notification.TYPE_TRAY_NOTIFICATION);
-        notif.setDelayMsec(-1);
-        app.getMainWindow().showNotification(notif);
-    }
-
-    public static void showWarning(Application app, final String message) {
-        show(app, getMessage("label.operation.not.allowed"), message, Window.Notification.TYPE_WARNING_MESSAGE);
-    }
-
-    public static void show(Application app, final String caption, final String message, int type) {
-        Window.Notification notif = new Window.Notification(caption, type);
-        notif.setDescription(message);
-        //notif.setDelayMsec(1000);
-        notif.setPosition(Window.Notification.POSITION_CENTERED);
-        app.getMainWindow().showNotification(notif);
     }
 
     public void setMetadataRulesReadOnlyFalse(FileManagementSystem root) {

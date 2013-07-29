@@ -24,15 +24,11 @@
  */
 package module.fileManagement.presentationTier;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 
 import javax.servlet.http.HttpServletRequest;
 
-import module.fileManagement.domain.FileManagementSystem;
 import pt.ist.fenixframework.DomainObject;
 
-import com.vaadin.Application;
 
 /**
  * 
@@ -47,13 +43,7 @@ public class DownloadUtil {
                 domainObject);
     }
 
-    public static String getDownloadUrl(final Application application, final DomainObject domainObject) {
-        final URL url = application.getURL();
-        final String path = url.getPath();
-        return getDownloadUrl(url.getProtocol(), url.getHost(), url.getPort(), path.substring(0, path.length() - 7), domainObject);
-    }
-
-    private static String getDownloadUrl(final String scheme, final String servername, final int serverPort,
+    static String getDownloadUrl(final String scheme, final String servername, final int serverPort,
             final String contextPath, final DomainObject domainObject) {
         final StringBuilder url = new StringBuilder();
         url.append(scheme);
@@ -67,14 +57,5 @@ public class DownloadUtil {
         url.append("/download/");
         url.append(domainObject.getExternalId());
         return url.toString();
-    }
-
-    public URL getURL(final Application application, final DomainObject domainObject) {
-        try {
-            return new URL(getDownloadUrl(application, domainObject));
-        } catch (MalformedURLException e) {
-            FileManagementSystem.getLogger().error(e.getLocalizedMessage(), e);
-        }
-        return null;
     }
 }

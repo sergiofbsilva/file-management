@@ -24,7 +24,6 @@ import org.joda.time.DateTime;
 import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.User;
 import pt.ist.fenixframework.Atomic;
-import pt.ist.vaadinframework.VaadinFrameworkLogger;
 
 public class PopulateRootDirTask extends PopulateRootDirTask_Base {
 
@@ -153,7 +152,7 @@ public class PopulateRootDirTask extends PopulateRootDirTask_Base {
         }
         int n = nfiles.get(nfilesindex);
         nfilesindex++;
-        VaadinFrameworkLogger.getLogger().debug(String.format("fill %s with %d files\n", node.getName(), n));
+        logInfo(String.format("fill %s with %d files\n", node.getName(), n));
         while (n-- > 0 && !files.isEmpty()) {
             createFile(node, files.pop());
         }

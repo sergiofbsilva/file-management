@@ -10,14 +10,13 @@
 
     <groupId>pt.ist</groupId>
     <artifactId>file-management</artifactId>
-    <version>1.2.0-SNAPSHOT</version>
+    <version>1.2.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>file-management</name>
 
     <properties>
         <version.pt.ist.bennu.core>1.1.0</version.pt.ist.bennu.core>
         <version.pt.ist.file.support>1.1.0</version.pt.ist.file.support>
-        <version.pt.ist.bennu.vaadin>1.1.0</version.pt.ist.bennu.vaadin>
         <version.pt.ist.organization>1.1.0</version.pt.ist.organization>
         <version.pt.ist.scheduler>1.1.0</version.pt.ist.scheduler>
         <version.pt.ist.web.service.utils>1.1.0</version.pt.ist.web.service.utils>
@@ -34,11 +33,6 @@
             <groupId>pt.ist</groupId>
             <artifactId>file-support</artifactId>
             <version>${version.pt.ist.file.support}</version>
-        </dependency>
-        <dependency>
-            <groupId>pt.ist</groupId>
-            <artifactId>bennu-vaadin</artifactId>
-            <version>${version.pt.ist.bennu.vaadin}</version>
         </dependency>
         <dependency>
             <groupId>pt.ist</groupId>
