@@ -41,9 +41,8 @@ import org.slf4j.LoggerFactory;
 
 import pt.ist.bennu.core.domain.ModuleInitializer;
 import pt.ist.bennu.core.domain.MyOrg;
-import pt.ist.bennu.core.util.BundleUtil;
+import pt.ist.bennu.core.i18n.BundleUtil;
 import pt.ist.fenixframework.Atomic;
-
 
 /**
  * 
@@ -65,7 +64,7 @@ public class FileManagementSystem extends FileManagementSystem_Base implements M
     }
 
     public static String getMessage(final String key, String... args) {
-        return BundleUtil.getFormattedStringFromResourceBundle(BUNDLE, key, args);
+        return BundleUtil.getString(BUNDLE, key, args);
     }
 
     public MetadataKey getMetadataKey(String keyValue) {

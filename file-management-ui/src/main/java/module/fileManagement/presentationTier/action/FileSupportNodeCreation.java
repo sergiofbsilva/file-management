@@ -24,21 +24,7 @@
  */
 package module.fileManagement.presentationTier.action;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-
-import pt.ist.bennu.core.domain.RoleType;
-import pt.ist.bennu.core.domain.VirtualHost;
-import pt.ist.bennu.core.domain.contents.Node;
-import pt.ist.bennu.core.domain.groups.Role;
-import pt.ist.bennu.core.domain.groups.UserGroup;
 import pt.ist.bennu.core.presentationTier.actions.ContextBaseAction;
-import pt.ist.bennu.vaadin.domain.contents.VaadinNode;
-import pt.ist.fenixWebFramework.servlets.functionalities.CreateNodeAction;
 import pt.ist.fenixWebFramework.struts.annotations.Mapping;
 
 @Mapping(path = "/fileManagementNodeCreation")
@@ -50,42 +36,42 @@ import pt.ist.fenixWebFramework.struts.annotations.Mapping;
  */
 public class FileSupportNodeCreation extends ContextBaseAction {
 
-    @CreateNodeAction(bundle = "FILE_MANAGEMENT_RESOURCES", key = "add.node.file.management.interface",
-            groupKey = "label.module.fileSupport")
-    public final ActionForward createFileManagerInterface(final ActionMapping mapping, final ActionForm form,
-            final HttpServletRequest request, final HttpServletResponse response) throws Exception {
-        final VirtualHost virtualHost = getDomainObject(request, "virtualHostToManageId");
-        final Node node = getDomainObject(request, "parentOfNodesToManageId");
-        final String FILEMANAGEMENT_RESOURCES = "resources.FileManagementResources";
-
-        final VaadinNode documentHome =
-                VaadinNode.createVaadinNode(virtualHost, node, FILEMANAGEMENT_RESOURCES, "label.link.documents", "DocumentHome",
-                        UserGroup.getInstance()
-                /* Role.getRole(RoleType.MANAGER) */);
-
-        VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.home", "DocumentHome",
-                UserGroup.getInstance());
-
-        VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.browse", "DocumentBrowse",
-                UserGroup.getInstance());
-
-        VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.webdav", "WebdavHome",
-                Role.getRole(RoleType.MANAGER));
-
-        VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.logs", "LogPage",
-                UserGroup.getInstance());
-
-        VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.search", "DocumentSearch",
-                UserGroup.getInstance());
-
-        // VaadinNode.createVaadinNode(virtualHost, documentHome,
-        // FILEMANAGEMENT_RESOURCES, "label.link.old.documents",
-        // "DocumentFrontPage", UserGroup.getInstance());
-
-        VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.metadata.templates",
-                "ManageMetadataTemplates", Role.getRole(RoleType.MANAGER));
-
-        return forwardToMuneConfiguration(request, virtualHost, node);
-    }
+//    @CreateNodeAction(bundle = "FILE_MANAGEMENT_RESOURCES", key = "add.node.file.management.interface",
+//            groupKey = "label.module.fileSupport")
+//    public final ActionForward createFileManagerInterface(final ActionMapping mapping, final ActionForm form,
+//            final HttpServletRequest request, final HttpServletResponse response) throws Exception {
+//        final VirtualHost virtualHost = getDomainObject(request, "virtualHostToManageId");
+//        final Node node = getDomainObject(request, "parentOfNodesToManageId");
+//        final String FILEMANAGEMENT_RESOURCES = "resources.FileManagementResources";
+//
+//        final VaadinNode documentHome =
+//                VaadinNode.createVaadinNode(virtualHost, node, FILEMANAGEMENT_RESOURCES, "label.link.documents", "DocumentHome",
+//                        UserGroup.getInstance()
+//                /* Role.getRole(RoleType.MANAGER) */);
+//
+//        VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.home", "DocumentHome",
+//                UserGroup.getInstance());
+//
+//        VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.browse", "DocumentBrowse",
+//                UserGroup.getInstance());
+//
+//        VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.webdav", "WebdavHome",
+//                Role.getRole(RoleType.MANAGER));
+//
+//        VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.logs", "LogPage",
+//                UserGroup.getInstance());
+//
+//        VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.search", "DocumentSearch",
+//                UserGroup.getInstance());
+//
+//        // VaadinNode.createVaadinNode(virtualHost, documentHome,
+//        // FILEMANAGEMENT_RESOURCES, "label.link.old.documents",
+//        // "DocumentFrontPage", UserGroup.getInstance());
+//
+//        VaadinNode.createVaadinNode(virtualHost, documentHome, FILEMANAGEMENT_RESOURCES, "label.link.metadata.templates",
+//                "ManageMetadataTemplates", Role.getRole(RoleType.MANAGER));
+//
+//        return forwardToMuneConfiguration(request, virtualHost, node);
+//    }
 
 }

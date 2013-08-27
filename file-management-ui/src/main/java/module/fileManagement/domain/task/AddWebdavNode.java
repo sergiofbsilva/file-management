@@ -2,18 +2,18 @@ package module.fileManagement.domain.task;
 
 import pt.ist.bennu.core.domain.RoleType;
 import pt.ist.bennu.core.domain.VirtualHost;
-import pt.ist.bennu.core.domain.contents.Node;
-import pt.ist.bennu.core.domain.groups.Role;
-import pt.ist.bennu.core.domain.scheduler.WriteCustomTask;
-import pt.ist.bennu.vaadin.domain.contents.VaadinNode;
+import pt.ist.bennu.core.domain.contents.legacy.Node;
+import pt.ist.bennu.core.domain.contents.legacy.VaadinNode;
+import pt.ist.bennu.core.domain.groups.legacy.Role;
+import pt.ist.bennu.scheduler.custom.CustomTask;
 import pt.ist.fenixframework.DomainObject;
 import pt.ist.fenixframework.FenixFramework;
 
-public class AddWebdavNode extends WriteCustomTask {
+public class AddWebdavNode extends CustomTask {
     final String FILEMANAGEMENT_RESOURCES = "resources.FileManagementResources";
 
     @Override
-    protected void doService() {
+    public void runTask() {
         addNode(FenixFramework.getDomainObject("395136991834"), FenixFramework.getDomainObject("6597069782265"));
         addNode(FenixFramework.getDomainObject("395136992236"), FenixFramework.getDomainObject("6597069783265"));
     }

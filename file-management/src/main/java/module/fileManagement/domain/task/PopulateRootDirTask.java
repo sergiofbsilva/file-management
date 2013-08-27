@@ -21,21 +21,14 @@ import module.fileManagement.domain.FileRepository;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 
-import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.User;
-import pt.ist.fenixframework.Atomic;
+import pt.ist.bennu.scheduler.custom.CustomTask;
 
-public class PopulateRootDirTask extends PopulateRootDirTask_Base {
+public class PopulateRootDirTask extends CustomTask {
 
     @Override
     public String getLocalizedName() {
         return getClass().getName();
-    }
-
-    @Atomic
-    @Override
-    public void executeTask() {
-        doService();
     }
 
     public enum KeyEnum {
@@ -152,7 +145,7 @@ public class PopulateRootDirTask extends PopulateRootDirTask_Base {
         }
         int n = nfiles.get(nfilesindex);
         nfilesindex++;
-        logInfo(String.format("fill %s with %d files\n", node.getName(), n));
+        taskLog(String.format("fill %s with %d files\n", node.getName(), n));
         while (n-- > 0 && !files.isEmpty()) {
             createFile(node, files.pop());
         }
@@ -198,7 +191,7 @@ public class PopulateRootDirTask extends PopulateRootDirTask_Base {
         final User user = User.findByUsername("ist24439");
         final DirNode rootDir = FileRepository.getOrCreateFileRepository(user);
         DirNode node1, node2;
-        Authenticate.authenticate(user);
+//        Authenticate.setUser(user);
         final int MAX = 4;
         for (int i = 1; i <= MAX; i++) {
             String name = Integer.toString(i);
@@ -212,7 +205,12 @@ public class PopulateRootDirTask extends PopulateRootDirTask_Base {
                 }
             }
         }
-        pt.ist.fenixWebFramework.security.UserView.setUser(null);
+//        Authenticate.setUser(null);
+    }
+
+    @Override
+    public void runTask() {
+        doService();
     }
 
 }

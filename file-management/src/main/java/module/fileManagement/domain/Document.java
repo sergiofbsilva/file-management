@@ -17,8 +17,8 @@ import module.fileManagement.tools.StringUtils;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 
-import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.User;
+import pt.ist.bennu.core.security.Authenticate;
 import pt.ist.fenixframework.Atomic;
 
 import com.google.common.base.Predicate;
@@ -352,7 +352,7 @@ public class Document extends Document_Base {
     }
 
     private void addNewVersionMetadata() {
-        final User currentUser = Authenticate.getCurrentUser();
+        final User currentUser = Authenticate.getUser();
         addMetadata(MetadataKey.getNewDocumentVersionKey(),
                 currentUser == null ? FileManagementSystem.getMessage("user.script") : currentUser.getShortPresentationName());
         setModifiedDateNow();
@@ -458,7 +458,7 @@ public class Document extends Document_Base {
      *         otherwise
      */
     public boolean canWrite() {
-        return getWriteGroup().isMember(Authenticate.getCurrentUser());
+        return getWriteGroup().isMember(Authenticate.getUser());
 
     }
 

@@ -14,11 +14,15 @@
    <name>lucene-indexing-plugin</name>
    <name>file-support-plugin</name>
    <name>file-management</name>
-   <name>file-support</name>
+   <name>bennu-core</name>
+   <name>bennu-legacy</name>
+   <name>bennu-io</name>
+   <name>bennu-portal</name>
+   <name>bennu-email</name>
+   <name>bennu-scheduler</name>
+   <name>bennu-renderers</name>
    <name>organization</name>
-   <name>lucene</name>
-   <name>scheduler</name>
-   <name>scheduler-plugin</name>
+   <name>bennu-search</name>
    <name>web-service-utils</name>
    <!-- [END OF BENNU GENERATED FRAGMENT] -->
 		</after>

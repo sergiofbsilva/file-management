@@ -30,9 +30,10 @@ import java.util.Map;
 
 import module.fileManagement.domain.webdav.WebdavAuthentication;
 import module.vaadin.ui.BennuTheme;
-import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.RoleType;
 import pt.ist.bennu.core.domain.User;
+import pt.ist.bennu.core.security.Authenticate;
+import pt.ist.bennu.core.util.legacy.LegacyUtil;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
 import pt.ist.vaadinframework.ui.GridSystemLayout;
@@ -58,8 +59,7 @@ public class WebdavHome extends CustomComponent implements EmbeddedComponentCont
 
     @Override
     public boolean isAllowedToOpen(Map<String, String> arguments) {
-        final User currentUser = Authenticate.getCurrentUser();
-        return currentUser != null && currentUser.hasRoleType(RoleType.MANAGER);
+        return LegacyUtil.hasRoleType(Authenticate.getUser(), RoleType.MANAGER);
     }
 
     @Override
@@ -68,7 +68,7 @@ public class WebdavHome extends CustomComponent implements EmbeddedComponentCont
     }
 
     private void createWebdavLink(final Layout content) {
-        final User currentUser = Authenticate.getCurrentUser();
+        final User currentUser = Authenticate.getUser();
         final boolean hasWebDavAuth = currentUser.getWebdavAuthentication() != null;
         if (hasWebDavAuth) {
             Label lblInstructions =

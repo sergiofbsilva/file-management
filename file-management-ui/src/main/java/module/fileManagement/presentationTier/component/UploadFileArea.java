@@ -12,7 +12,7 @@ import module.fileManagement.domain.DirNode;
 
 import org.vaadin.easyuploads.FileFactory;
 
-import pt.ist.bennu.core.applicationTier.Authenticate;
+import pt.ist.bennu.core.security.Authenticate;
 
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
@@ -49,7 +49,7 @@ public class UploadFileArea extends CustomComponent {
 
         @Override
         public File createFile(String fileName, String mimeType) {
-            final String tempFileName = "upload_tmpfile_" + Authenticate.getCurrentUser().getUsername();
+            final String tempFileName = "upload_tmpfile_" + Authenticate.getUser().getUsername();
             try {
                 return File.createTempFile(tempFileName, "_" + System.currentTimeMillis());
             } catch (IOException e) {

@@ -7,8 +7,9 @@ import module.fileManagement.domain.DirNode;
 import module.fileManagement.domain.FileManagementSystem;
 import module.fileManagement.domain.metadata.MetadataTemplate;
 import module.organization.domain.Unit;
-import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.RoleType;
+import pt.ist.bennu.core.security.Authenticate;
+import pt.ist.bennu.core.util.legacy.LegacyUtil;
 import pt.ist.fenixframework.FenixFramework;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.ItemConstructor;
@@ -44,7 +45,7 @@ public class ManageDirProperties extends CustomComponent implements EmbeddedComp
 
     @Override
     public boolean isAllowedToOpen(Map<String, String> args) {
-        return Authenticate.getCurrentUser().hasRoleType(RoleType.MANAGER);
+        return LegacyUtil.hasRoleType(Authenticate.getUser(), RoleType.MANAGER);
     }
 
     @Override

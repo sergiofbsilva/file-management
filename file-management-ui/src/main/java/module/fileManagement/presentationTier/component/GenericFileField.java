@@ -10,7 +10,7 @@ import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.vaadin.easyuploads.DirectoryFileFactory;
 
-import pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile;
+import pt.ist.bennu.io.domain.GenericFile;
 
 import com.vaadin.data.Validator.InvalidValueException;
 import com.vaadin.ui.CustomField;

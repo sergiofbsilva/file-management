@@ -33,8 +33,8 @@ import module.fileManagement.domain.FileRepository;
 
 import org.joda.time.DateTime;
 
-import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.User;
+import pt.ist.bennu.core.security.Authenticate;
 
 /**
  * 
@@ -90,7 +90,7 @@ public abstract class AbstractLog extends AbstractLog_Base {
     }
 
     public DirNode getCurrentUserFileRepository() {
-        return FileRepository.getOrCreateFileRepository(Authenticate.getCurrentUser());
+        return FileRepository.getOrCreateFileRepository(Authenticate.getUser());
     }
 
 }

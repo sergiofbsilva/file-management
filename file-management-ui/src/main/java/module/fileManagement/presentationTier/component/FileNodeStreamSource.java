@@ -5,8 +5,8 @@ import java.io.InputStream;
 
 import module.fileManagement.domain.Document;
 import module.fileManagement.domain.FileNode;
+import pt.ist.bennu.io.domain.GenericFile;
 import pt.ist.fenixframework.FenixFramework;
-import pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile;
 
 import com.vaadin.terminal.StreamResource.StreamSource;
 

@@ -29,7 +29,7 @@ import java.util.HashSet;
 
 import pt.ist.bennu.core.domain.MyOrg;
 import pt.ist.bennu.core.domain.Presentable;
-import pt.ist.bennu.core.domain.groups.PersistentGroup;
+import pt.ist.bennu.core.domain.groups.legacy.PersistentGroup;
 
 /**
  * 

@@ -1,6 +1,6 @@
 package module.fileManagement.presentationTier.component;
 
-import pt.ist.bennu.core.util.BundleUtil;
+import pt.ist.bennu.core.i18n.BundleUtil;
 
 import com.vaadin.data.Item;
 import com.vaadin.ui.OptionGroup;
@@ -12,7 +12,7 @@ public class YesNoOptionGroup extends OptionGroup {
     }
 
     protected static String getMessage(final String key, final String... args) {
-        return BundleUtil.getFormattedStringFromResourceBundle(getBundle(), key, args);
+        return BundleUtil.getString(getBundle(), key, args);
     }
 
     public YesNoOptionGroup(final String labelKey, final String yesKey, final String noKey) {

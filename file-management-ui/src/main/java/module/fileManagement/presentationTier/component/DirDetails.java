@@ -4,8 +4,9 @@ import static module.fileManagement.domain.FileManagementSystem.getMessage;
 import module.fileManagement.domain.AbstractFileNode;
 import module.fileManagement.domain.DirNode;
 import module.fileManagement.presentationTier.pages.ManageDirProperties;
-import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.RoleType;
+import pt.ist.bennu.core.security.Authenticate;
+import pt.ist.bennu.core.util.legacy.LegacyUtil;
 import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
 
@@ -54,7 +55,7 @@ public class DirDetails extends NodeDetails {
     }
 
     private boolean userIsManager() {
-        return Authenticate.getCurrentUser().hasRoleType(RoleType.MANAGER);
+        return LegacyUtil.hasRoleType(Authenticate.getUser(), RoleType.MANAGER);
     }
 
     @Override

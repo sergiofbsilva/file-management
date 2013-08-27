@@ -20,10 +20,10 @@ import module.fileManagement.presentationTier.pages.DocumentBrowse;
 import org.apache.commons.lang.StringUtils;
 import org.vaadin.dialogs.ConfirmDialog;
 
-import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.RoleType;
 import pt.ist.bennu.core.domain.User;
-import pt.ist.bennu.core.domain.groups.Role;
+import pt.ist.bennu.core.security.Authenticate;
+import pt.ist.bennu.core.util.legacy.LegacyUtil;
 import pt.ist.fenixframework.DomainObject;
 import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.data.AbstractBufferedItem;
@@ -478,7 +478,7 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
     }
 
     public String getNodeName(final AbstractFileNode node) {
-        final User user = Authenticate.getCurrentUser();
+        final User user = Authenticate.getUser();
         final DirNode fileRepository = FileRepository.getOrCreateFileRepository(user);
         if (fileRepository == node) {
             return getMessage("label.menu.home");
@@ -575,7 +575,7 @@ public class DocumentFileBrowser extends CustomComponent implements ValueChangeN
 
     private boolean lastLineOfDefense(DirNode dirNode) {
         return dirNode.isAccessible() && dirNode.getRootDirNode() == null
-                || Role.getRole(RoleType.MANAGER).isMember(Authenticate.getCurrentUser());
+                || LegacyUtil.hasRoleType(Authenticate.getUser(), RoleType.MANAGER);
     }
 
     public DocumentMenu getDocumentMenu() {

@@ -3,8 +3,8 @@ package module.fileManagement.presentationTier.component.fields;
 import java.util.Collection;
 
 import module.organization.domain.Person;
-import pt.ist.fenixframework.plugins.luceneIndexing.queryBuilder.dsl.BuildingState;
-import pt.ist.fenixframework.plugins.luceneIndexing.queryBuilder.dsl.DSLState;
+import pt.ist.bennu.search.queryBuilder.dsl.BuildingState;
+import pt.ist.bennu.search.queryBuilder.dsl.DSLState;
 import pt.ist.vaadinframework.data.reflect.DomainContainer;
 import pt.ist.vaadinframework.ui.TimeoutSelect;
 

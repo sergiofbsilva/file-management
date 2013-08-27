@@ -17,11 +17,11 @@ import module.fileManagement.domain.FileNode;
 import module.fileManagement.domain.VersionedFile;
 import module.fileManagement.domain.log.AccessFileLog;
 import module.fileManagement.presentationTier.DownloadUtil;
-import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.User;
 import pt.ist.bennu.core.domain.exceptions.DomainException;
-import pt.ist.fenixWebFramework.Config.CasConfig;
-import pt.ist.fenixWebFramework.FenixWebFramework;
+import pt.ist.bennu.core.security.Authenticate;
+import pt.ist.bennu.core.util.ConfigurationManager;
+import pt.ist.bennu.core.util.ConfigurationManager.CasConfig;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.DomainObject;
 import pt.ist.fenixframework.FenixFramework;
@@ -70,7 +70,7 @@ public class DownloadDocumentServlet extends HttpServlet {
 
     @Atomic
     private static void saveAccessLog(FileNode fileNode) {
-        new AccessFileLog(Authenticate.getCurrentUser(), fileNode.getParent().getContextPath(), fileNode);
+        new AccessFileLog(Authenticate.getUser(), fileNode.getParent().getContextPath(), fileNode);
     }
 
     public static void downloadFileNode(final HttpServletRequest request, final HttpServletResponse response,
@@ -121,12 +121,11 @@ public class DownloadDocumentServlet extends HttpServlet {
 
     private static void redirect(final HttpServletRequest request, final HttpServletResponse response,
             final DomainObject domainObject) throws IOException {
-        final User user = Authenticate.getCurrentUser();
+        final User user = Authenticate.getUser();
         if (user == null) {
-            final String serverName = request.getServerName();
-            final CasConfig casConfig = FenixWebFramework.getConfig().getCasConfig(serverName);
+            final CasConfig casConfig = ConfigurationManager.getCasConfig();
             if (casConfig != null && casConfig.isCasEnabled()) {
-                final String casLoginUrl = casConfig.getCasLoginUrl();
+                final String casLoginUrl = casConfig.getCasLoginUrl(request);
                 final StringBuilder url = new StringBuilder();
                 url.append(casLoginUrl);
                 url.append(DownloadUtil.getDownloadUrl(request, domainObject));

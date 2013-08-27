@@ -27,9 +27,9 @@ package module.fileManagement.presentationTier.component.viewers;
 import module.fileManagement.domain.FileManagementSystem;
 import module.fileManagement.domain.VisibilityGroup;
 import module.fileManagement.domain.VisibilityList;
-import pt.ist.bennu.core.domain.groups.AnyoneGroup;
-import pt.ist.bennu.core.domain.groups.EmptyGroup;
-import pt.ist.bennu.core.domain.groups.SingleUserGroup;
+import pt.ist.bennu.core.domain.groups.legacy.AnyoneGroup;
+import pt.ist.bennu.core.domain.groups.legacy.EmptyGroup;
+import pt.ist.bennu.core.domain.groups.legacy.SingleUserGroup;
 
 import com.vaadin.data.Property.ValueChangeListener;
 

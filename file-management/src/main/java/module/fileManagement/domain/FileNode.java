@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 
 import module.fileManagement.domain.exception.CannotCreateFileException;
+import module.fileManagement.domain.exception.FileManagementDomainException;
 import module.fileManagement.domain.exception.NoAvailableQuotaException;
 import module.fileManagement.domain.exception.NodeDuplicateNameException;
 import module.fileManagement.domain.log.CreateNewVersionLog;
@@ -41,9 +42,8 @@ import module.fileManagement.domain.metadata.MetadataKey;
 
 import org.apache.commons.io.FileUtils;
 
-import pt.ist.bennu.core.applicationTier.Authenticate;
-import pt.ist.bennu.core.domain.exceptions.DomainException;
-import pt.ist.bennu.core.domain.groups.PersistentGroup;
+import pt.ist.bennu.core.domain.groups.legacy.PersistentGroup;
+import pt.ist.bennu.core.security.Authenticate;
 import pt.ist.fenixframework.Atomic;
 
 import com.google.common.collect.Multimap;
@@ -91,7 +91,7 @@ public class FileNode extends FileNode_Base {
     public FileNode(final DirNode dirNode, final Document document) {
         super();
         if (dirNode == null) {
-            throw new DomainException("must.specify.a.dir.node.when.creating.a.file.node");
+            throw new FileManagementDomainException("must.specify.a.dir.node.when.creating.a.file.node");
         }
         setDocument(document);
         setParent(dirNode);
@@ -203,7 +203,7 @@ public class FileNode extends FileNode_Base {
     public void unshare(VisibilityGroup group) {
         super.unshare(group);
         for (SharedFileNode sharedNode : getSharedFileNodes()) {
-            new UnshareFileLog(Authenticate.getCurrentUser(), sharedNode);
+            new UnshareFileLog(Authenticate.getUser(), sharedNode);
             sharedNode.deleteLink(new ContextPath(getParent()));
         }
     }
@@ -211,7 +211,7 @@ public class FileNode extends FileNode_Base {
     @Atomic
     @Override
     public void recoverTo(DirNode targetDir) {
-        new RecoverFileLog(Authenticate.getCurrentUser(), targetDir.getContextPath(), this);
+        new RecoverFileLog(Authenticate.getUser(), targetDir.getContextPath(), this);
         setParent(targetDir);
     }
 
@@ -241,7 +241,7 @@ public class FileNode extends FileNode_Base {
         document.addVersion(fileContent, fileName);
         document.setDisplayName(displayName);
 
-        new CreateNewVersionLog(Authenticate.getCurrentUser(), getParent().getContextPath(), this);
+        new CreateNewVersionLog(Authenticate.getUser(), getParent().getContextPath(), this);
 
     }
 

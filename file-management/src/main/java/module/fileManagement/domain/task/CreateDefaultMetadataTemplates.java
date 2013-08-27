@@ -7,9 +7,11 @@ import module.fileManagement.domain.metadata.MetadataKey;
 import module.fileManagement.domain.metadata.MetadataTemplate;
 import module.fileManagement.domain.metadata.PersonMetadata;
 import module.fileManagement.domain.metadata.SeqNumberMetadata;
-import pt.ist.fenixframework.Atomic;
+import pt.ist.bennu.scheduler.CronTask;
+import pt.ist.bennu.scheduler.annotation.Task;
 
-public class CreateDefaultMetadataTemplates extends CreateDefaultMetadataTemplates_Base {
+@Task(englishTitle = "Create default metadata templates")
+public class CreateDefaultMetadataTemplates extends CronTask {
 
     public CreateDefaultMetadataTemplates() {
         super();
@@ -62,9 +64,8 @@ public class CreateDefaultMetadataTemplates extends CreateDefaultMetadataTemplat
         }
     }
 
-    @Atomic
     @Override
-    public void executeTask() {
+    public void runTask() {
         createDocumentTemplate();
         createDRHDeclarationTemplate();
     }

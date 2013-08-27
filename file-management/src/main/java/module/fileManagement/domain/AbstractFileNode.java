@@ -6,17 +6,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import module.fileManagement.domain.exception.FileManagementDomainException;
 import module.fileManagement.domain.exception.NodeDuplicateNameException;
 import module.fileManagement.domain.log.DeleteDirLog;
 import module.fileManagement.domain.log.DeleteFileLog;
 import module.fileManagement.domain.log.ShareDirLog;
 import module.fileManagement.domain.log.ShareFileLog;
-import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.User;
-import pt.ist.bennu.core.domain.exceptions.DomainException;
-import pt.ist.bennu.core.domain.groups.AnyoneGroup;
-import pt.ist.bennu.core.domain.groups.PersistentGroup;
-import pt.ist.bennu.core.domain.groups.SingleUserGroup;
+import pt.ist.bennu.core.domain.groups.legacy.AnyoneGroup;
+import pt.ist.bennu.core.domain.groups.legacy.PersistentGroup;
+import pt.ist.bennu.core.domain.groups.legacy.SingleUserGroup;
+import pt.ist.bennu.core.security.Authenticate;
 import pt.ist.fenixframework.Atomic;
 import pt.utl.ist.fenix.tools.util.NaturalOrderComparator;
 
@@ -94,7 +94,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
     @Atomic
     public void trash(ContextPath contextPath) {
         if (!isWriteGroupMember()) {
-            throw new DomainException("no.write.permissions", FileManagementSystem.getBundle(), getDisplayName());
+            throw new FileManagementDomainException("no.write.permissions", getDisplayName());
         }
         if (this instanceof FileNode) {
             Collection<SharedFileNode> shared = new ArrayList<SharedFileNode>(((FileNode) this).getSharedFileNodes());
@@ -109,7 +109,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
                 node.deleteLink(contextPath);
             }
         }
-        final User currentUser = Authenticate.getCurrentUser();
+        final User currentUser = Authenticate.getUser();
         // final SingleUserGroup currentUserGroup =
         // currentUser.getSingleUserGroup();
         // setReadGroup(currentUserGroup);
@@ -145,7 +145,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
     }
 
     private boolean isGroupMember(final PersistentGroup group) {
-        final User user = Authenticate.getCurrentUser();
+        final User user = Authenticate.getUser();
         return group.isMember(user);
     }
 
@@ -235,7 +235,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
         final PersistentGroup writeGroup = getWriteGroup();
         final PersistentGroup newWriteGroup = visibilityList.getWriteGroup();
         if (newWriteGroup == null) {
-            throw new DomainException("error.file.must.have.at.least.one.write");
+            throw new FileManagementDomainException("error.file.must.have.at.least.one.write");
         }
         if (writeGroup != newWriteGroup) {
             setWriteGroup(newWriteGroup);
@@ -274,7 +274,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
         final DirNode sharedFolder = userRootDir.getSharedFolder();
         if (!hasSharedNode(sharedFolder, this)) { // TODO: deal with same name
             // when shared later
-            final AbstractFileNode sharedNode = makeSharedNode(Authenticate.getCurrentUser(), contextPath, group, sharedFolder);
+            final AbstractFileNode sharedNode = makeSharedNode(Authenticate.getUser(), contextPath, group, sharedFolder);
             sharedFolder.addChild(sharedNode);
         } else {
             FileManagementSystem.getLogger().warn(
@@ -282,7 +282,7 @@ public abstract class AbstractFileNode extends AbstractFileNode_Base implements 
         }
 
         addVisibilityGroup(group);
-        // final User currentUser = Authenticate.getCurrentUser();
+        // final User currentUser = Authenticate.getUser();
         // Set<PersistentGroup> readGroupSet = new HashSet<PersistentGroup>();
         // final PersistentGroup readGroup = getReadGroup();
         // if (readGroup instanceof UnionGroup) {

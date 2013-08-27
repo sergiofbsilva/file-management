@@ -1,13 +1,15 @@
 package module.fileManagement.domain.exception;
 
 import module.fileManagement.domain.FileManagementSystem;
-import pt.ist.bennu.core.domain.exceptions.DomainException;
 
-public class CannotCreateFileException extends DomainException {
+import org.apache.commons.lang.StringUtils;
+
+@SuppressWarnings("serial")
+public class CannotCreateFileException extends FileManagementDomainException {
     private String fileName;
 
     public CannotCreateFileException(String fileName) {
-        super();
+        super(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY);
         this.fileName = fileName;
     }
 

@@ -42,8 +42,8 @@ import module.vaadin.ui.BennuTheme;
 import org.apache.commons.lang.StringUtils;
 import org.vaadin.dialogs.ConfirmDialog;
 
-import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.Presentable;
+import pt.ist.bennu.core.security.Authenticate;
 import pt.ist.fenixframework.FenixFramework;
 import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
@@ -143,7 +143,7 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
             // if (visibilityGroup.persistentGroup instanceof SingleUserGroup) {
             // final SingleUserGroup singleUserGroup = (SingleUserGroup)
             // visibilityGroup.persistentGroup;
-            // if (singleUserGroup.isMember(Authenticate.getCurrentUser())) {
+            // if (singleUserGroup.isMember(Authenticate.getUser())) {
             // continue;
             // }
             // }
@@ -370,7 +370,7 @@ public class DocumentShare extends CustomComponent implements EmbeddedComponentC
 
                     @Override
                     public void buttonClick(ClickEvent event) {
-                        if (visibilityGroup.persistentGroup.isMember(Authenticate.getCurrentUser())) {
+                        if (visibilityGroup.persistentGroup.isMember(Authenticate.getUser())) {
                             ConfirmDialog.show(getWindow(), "Atenção",
                                     "Encontra-se neste grupo. Tem a certeza que o deseja remover ? ", "Sim", "Não",
                                     new ConfirmDialog.Listener() {

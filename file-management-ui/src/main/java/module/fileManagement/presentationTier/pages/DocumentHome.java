@@ -41,12 +41,13 @@ import module.vaadin.ui.BennuTheme;
 
 import org.apache.commons.lang.StringUtils;
 
-import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.Presentable;
 import pt.ist.bennu.core.domain.RoleType;
 import pt.ist.bennu.core.domain.User;
-import pt.ist.fenixframework.plugins.luceneIndexing.queryBuilder.dsl.BuildingState;
-import pt.ist.fenixframework.plugins.luceneIndexing.queryBuilder.dsl.DSLState;
+import pt.ist.bennu.core.security.Authenticate;
+import pt.ist.bennu.core.util.legacy.LegacyUtil;
+import pt.ist.bennu.search.queryBuilder.dsl.BuildingState;
+import pt.ist.bennu.search.queryBuilder.dsl.DSLState;
 import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.reflect.DomainContainer;
@@ -87,7 +88,7 @@ public class DocumentHome extends CustomComponent implements EmbeddedComponentCo
 
     @Override
     public boolean isAllowedToOpen(Map<String, String> arguments) {
-        return Authenticate.getCurrentUser() != null;
+        return Authenticate.getUser() != null;
     }
 
     @Override
@@ -162,7 +163,7 @@ public class DocumentHome extends CustomComponent implements EmbeddedComponentCo
                 public boolean passesFilter(Object itemId, Item item) throws UnsupportedOperationException {
                     final Unit unit = (Unit) itemId;
                     return unit.getFileRepository() != null
-                            && (Authenticate.getCurrentUser().hasRoleType(RoleType.MANAGER) || unit.getFileRepository()
+                            && (LegacyUtil.hasRoleType(Authenticate.getUser(), RoleType.MANAGER) || unit.getFileRepository()
                                     .isAccessible());
                 }
 
@@ -271,7 +272,7 @@ public class DocumentHome extends CustomComponent implements EmbeddedComponentCo
         panel.setStyleName(BennuTheme.PANEL_LIGHT);
         ((VerticalLayout) panel.getContent()).setSpacing(Boolean.TRUE);
 
-        final User currentUser = Authenticate.getCurrentUser();
+        final User currentUser = Authenticate.getUser();
         final Person person = currentUser.getPerson();
 
         final DirNode sharedFolder = person.getFileRepository().getSharedFolder();

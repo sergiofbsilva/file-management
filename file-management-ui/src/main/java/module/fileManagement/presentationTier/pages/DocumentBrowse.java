@@ -33,7 +33,7 @@ import module.fileManagement.domain.ContextPath;
 import module.fileManagement.presentationTier.component.AddDirWindow;
 import module.fileManagement.presentationTier.component.DocumentFileBrowser;
 import module.fileManagement.presentationTier.component.NodeDetails;
-import pt.ist.bennu.core.applicationTier.Authenticate;
+import pt.ist.bennu.core.security.Authenticate;
 import pt.ist.vaadinframework.EmbeddedApplication;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.data.reflect.DomainItem;
@@ -71,7 +71,7 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
 
     @Override
     public boolean isAllowedToOpen(Map<String, String> arguments) {
-        return Authenticate.getCurrentUser() != null;
+        return Authenticate.getUser() != null;
     }
 
     @Override
@@ -80,7 +80,7 @@ public class DocumentBrowse extends CustomComponent implements EmbeddedComponent
         if (pathString != null) {
             browser.setContextPath(pathString);
         } else {
-            browser.setContextPath(new ContextPath(Authenticate.getCurrentUser().getFileRepository()));
+            browser.setContextPath(new ContextPath(Authenticate.getUser().getFileRepository()));
         }
         setFileDetails(browser.getNodeItem());
     }

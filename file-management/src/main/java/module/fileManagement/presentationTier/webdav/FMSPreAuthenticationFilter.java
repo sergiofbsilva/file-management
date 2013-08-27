@@ -36,8 +36,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.User;
+import pt.ist.bennu.core.security.Authenticate;
 
 /**
  * A filter to perform authentication before resource location.
@@ -88,17 +88,19 @@ public class FMSPreAuthenticationFilter implements Filter {
             if (authTag != null) {
                 request.getAuthorization().setTag(authTag);
                 User user = (User) authTag;
-                Authenticate.authenticate(user);
+                //TODO: 
+//                Authenticate.authenticate(user);
                 log.info("set thread user {}", user.getUsername());
                 chain.process(request, response);
             } else {
                 responseHandler.respondUnauthorised(null, response, request);
             }
         } finally {
-            final User currentUser = Authenticate.getCurrentUser();
+            final User currentUser = Authenticate.getUser();
             if (currentUser != null) {
                 log.info("remove user {} from thread", currentUser.getUsername());
-                pt.ist.fenixWebFramework.security.UserView.setUser(null);
+                // TODO: 
+//                pt.ist.fenixWebFramework.security.UserView.setUser(null);
             } else {
                 log.warn("trying to logout but no user in thread");
             }

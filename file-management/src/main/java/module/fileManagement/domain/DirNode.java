@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import jvstm.cps.ConsistencyPredicate;
+import module.fileManagement.domain.exception.FileManagementDomainException;
 import module.fileManagement.domain.exception.NoAvailableQuotaException;
 import module.fileManagement.domain.exception.NodeDuplicateNameException;
 import module.fileManagement.domain.log.CreateDirLog;
@@ -25,15 +26,14 @@ import module.organization.domain.groups.UnitGroup;
 
 import org.apache.commons.io.FileUtils;
 
-import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.RoleType;
 import pt.ist.bennu.core.domain.User;
-import pt.ist.bennu.core.domain.exceptions.DomainException;
-import pt.ist.bennu.core.domain.groups.EmptyGroup;
-import pt.ist.bennu.core.domain.groups.PersistentGroup;
-import pt.ist.bennu.core.domain.groups.Role;
-import pt.ist.bennu.core.domain.groups.SingleUserGroup;
-import pt.ist.bennu.core.domain.groups.UnionGroup;
+import pt.ist.bennu.core.domain.groups.legacy.EmptyGroup;
+import pt.ist.bennu.core.domain.groups.legacy.PersistentGroup;
+import pt.ist.bennu.core.domain.groups.legacy.Role;
+import pt.ist.bennu.core.domain.groups.legacy.SingleUserGroup;
+import pt.ist.bennu.core.domain.groups.legacy.UnionGroup;
+import pt.ist.bennu.core.security.Authenticate;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.dml.runtime.DirectRelation;
 import pt.ist.fenixframework.dml.runtime.Relation;
@@ -207,7 +207,7 @@ public class DirNode extends DirNode_Base {
             throw new NodeDuplicateNameException(dirName);
         }
         final DirNode resultNode = new DirNode(this, dirName);
-        new CreateDirLog(Authenticate.getCurrentUser(), contextPath, resultNode);
+        new CreateDirLog(Authenticate.getUser(), contextPath, resultNode);
         return resultNode;
     }
 
@@ -323,7 +323,7 @@ public class DirNode extends DirNode_Base {
             }
 
             fileNode = new FileNode(this, fileContent, fileName, displayName);
-            new CreateFileLog(Authenticate.getCurrentUser(), contextPath, fileNode);
+            new CreateFileLog(Authenticate.getUser(), contextPath, fileNode);
             return fileNode;
         }
 
@@ -617,7 +617,7 @@ public class DirNode extends DirNode_Base {
     @Atomic
     public Integer getNextSequenceNumber() {
         if (getSequenceNumber() == null) {
-            throw new DomainException("Sequence Number is null: Must be 0 to use a sequence number");
+            throw new FileManagementDomainException("Sequence Number is null: Must be 0 to use a sequence number");
         }
         setSequenceNumber(getSequenceNumber() + 1);
         return getSequenceNumber();
@@ -626,7 +626,7 @@ public class DirNode extends DirNode_Base {
     @Override
     @Atomic
     public void recoverTo(DirNode targetDir) {
-        new RecoverDirLog(Authenticate.getCurrentUser(), targetDir.getContextPath(), this);
+        new RecoverDirLog(Authenticate.getUser(), targetDir.getContextPath(), this);
         setParent(targetDir);
     }
 

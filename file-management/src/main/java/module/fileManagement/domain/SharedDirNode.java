@@ -32,7 +32,7 @@ import jvstm.cps.ConsistencyPredicate;
 import module.fileManagement.domain.log.AbstractLog;
 import module.fileManagement.domain.log.DirLog;
 import pt.ist.bennu.core.domain.User;
-import pt.ist.bennu.core.domain.groups.PersistentGroup;
+import pt.ist.bennu.core.domain.groups.legacy.PersistentGroup;
 import pt.ist.fenixframework.Atomic;
 
 /**

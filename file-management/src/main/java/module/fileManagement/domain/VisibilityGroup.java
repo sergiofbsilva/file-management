@@ -26,7 +26,7 @@ package module.fileManagement.domain;
 
 import java.io.Serializable;
 
-import pt.ist.bennu.core.domain.groups.PersistentGroup;
+import pt.ist.bennu.core.domain.groups.legacy.PersistentGroup;
 
 /**
  * 

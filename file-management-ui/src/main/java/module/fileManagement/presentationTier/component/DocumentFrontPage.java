@@ -49,10 +49,10 @@ import module.vaadin.ui.BennuTheme;
 
 import org.vaadin.easyuploads.DirectoryFileFactory;
 
-import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.Presentable;
 import pt.ist.bennu.core.domain.User;
 import pt.ist.bennu.core.domain.exceptions.DomainException;
+import pt.ist.bennu.core.security.Authenticate;
 import pt.ist.fenixframework.FenixFramework;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
@@ -338,7 +338,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
 
         @Override
         protected void handleFile(final File file, final String fileName, final String mimeType, final long length) {
-            final User user = Authenticate.getCurrentUser();
+            final User user = Authenticate.getUser();
             final DirNode destination =
                     dirNode == null || !dirNode.isWriteGroupMember() ? FileRepository.getOrCreateFileRepository(user) : dirNode;
             if (destination != null) {
@@ -367,7 +367,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
         private class HomeIconDirNodeLink extends DirNodeLink {
 
             public HomeIconDirNodeLink() {
-                super(FileRepository.getOrCreateFileRepository(Authenticate.getCurrentUser()), null);
+                super(FileRepository.getOrCreateFileRepository(Authenticate.getUser()), null);
                 final ThemeResource icon = new ThemeResource("../../../images/fileManagement/HomeBlack32.png");
                 setIcon(icon);
                 setDescription(getMessage("label.menu.home"));
@@ -1170,7 +1170,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
     }
 
     protected DirNode getInitialDirNode() {
-        return FileRepository.getOrCreateFileRepository(Authenticate.getCurrentUser());
+        return FileRepository.getOrCreateFileRepository(Authenticate.getUser());
     }
 
     private void changeSelectedNode(final AbstractFileNode abstractFileNode) {
@@ -1214,7 +1214,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
     }
 
     public String getNodeName(final AbstractFileNode node) {
-        final User user = Authenticate.getCurrentUser();
+        final User user = Authenticate.getUser();
         final DirNode fileRepository = FileRepository.getOrCreateFileRepository(user);
         return fileRepository == node ? getMessage("label.menu.home") : node.getDisplayName();
     }

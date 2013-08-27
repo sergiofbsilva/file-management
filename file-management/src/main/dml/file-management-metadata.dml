@@ -1,8 +1,5 @@
 package module.fileManagement.domain.metadata;
 
-class .module.fileManagement.domain.task.CreateDefaultMetadataTemplates extends .pt.ist.bennu.core.domain.scheduler.Task {
-}
-
 class MetadataKey {
 	String keyValue;
 	Boolean reserved;

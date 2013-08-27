@@ -25,7 +25,7 @@
 package module.fileManagement.presentationTier.component;
 
 import module.fileManagement.domain.FileNode;
-import pt.ist.bennu.core.util.BundleUtil;
+import pt.ist.bennu.core.i18n.BundleUtil;
 
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -49,7 +49,7 @@ public class ConfirmDeleteFile extends Window {
     }
 
     protected static String getMessage(final String key, final String... args) {
-        return BundleUtil.getFormattedStringFromResourceBundle(getBundle(), key, args);
+        return BundleUtil.getString(getBundle(), key, args);
     }
 
     public ConfirmDeleteFile(final FileNode fileNode, final Table fileTable) {

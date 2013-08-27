@@ -1,8 +1,8 @@
 package module.fileManagement.presentationTier.component;
 
 import module.fileManagement.domain.FileNode;
-import pt.ist.bennu.core.util.BundleUtil;
-import pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile;
+import pt.ist.bennu.core.i18n.BundleUtil;
+import pt.ist.bennu.io.domain.GenericFile;
 
 import com.vaadin.data.Item;
 import com.vaadin.ui.Alignment;
@@ -22,7 +22,7 @@ public class EditFileNode extends Window {
     }
 
     protected static String getMessage(final String key, final String... args) {
-        return BundleUtil.getFormattedStringFromResourceBundle(getBundle(), key, args);
+        return BundleUtil.getString(getBundle(), key, args);
     }
 
     public EditFileNode(final FileNode fileNode, final Table fileTable) {

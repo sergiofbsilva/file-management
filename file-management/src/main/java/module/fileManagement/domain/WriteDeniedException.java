@@ -1,11 +1,17 @@
 package module.fileManagement.domain;
 
-import pt.ist.bennu.core.domain.exceptions.DomainException;
+import module.fileManagement.domain.exception.FileManagementDomainException;
 
-public class WriteDeniedException extends DomainException {
+@SuppressWarnings("serial")
+public class WriteDeniedException extends FileManagementDomainException {
 
     public WriteDeniedException() {
         super();
+    }
+
+    @Override
+    public String getLocalizedMessage() {
+        return getMessage();
     }
 
     @Override

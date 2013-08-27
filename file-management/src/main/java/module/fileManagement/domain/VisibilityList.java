@@ -5,9 +5,9 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import module.fileManagement.domain.VisibilityGroup.VisibilityOperation;
-import pt.ist.bennu.core.domain.groups.PersistentGroup;
-import pt.ist.bennu.core.domain.groups.SingleUserGroup;
-import pt.ist.bennu.core.domain.groups.UnionGroup;
+import pt.ist.bennu.core.domain.groups.legacy.PersistentGroup;
+import pt.ist.bennu.core.domain.groups.legacy.SingleUserGroup;
+import pt.ist.bennu.core.domain.groups.legacy.UnionGroup;
 
 public class VisibilityList extends ArrayList<VisibilityGroup> {
 

@@ -28,9 +28,9 @@ import module.fileManagement.domain.metadata.Metadata;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.User;
 import pt.ist.bennu.core.domain.exceptions.DomainException;
+import pt.ist.bennu.core.security.Authenticate;
 import pt.ist.fenixframework.FenixFramework;
 
 import com.sun.jersey.core.header.FormDataContentDisposition;
@@ -92,7 +92,7 @@ public class FMSJerseyServices {
     @Produces(MediaType.TEXT_PLAIN)
     public String upload(@PathParam("dirNodeOid") final String dirNodeOid, @FormDataParam("file") final File file,
             @FormDataParam("file") final FormDataContentDisposition fileDetails) {
-        Authenticate.authenticate(User.findByUsername("ist152416"));
+        Authenticate.setUser(User.findByUsername("ist152416"));
         final DirNode dirNode = FenixFramework.getDomainObject(dirNodeOid);
         try {
             final FileNode createFile =
@@ -100,6 +100,8 @@ public class FMSJerseyServices {
             return createFile.getDocument().getExternalId();
         } catch (final DomainException de) {
             return "-1";
+        } finally {
+            Authenticate.setUser((User) null);
         }
     }
 
@@ -125,7 +127,7 @@ public class FMSJerseyServices {
     @GET
     @Path("root")
     public Response getRoot() {
-        final User currentUser = Authenticate.getCurrentUser();
+        final User currentUser = Authenticate.getUser();
         if (currentUser == null) {
             return Response.noContent().build();
         }

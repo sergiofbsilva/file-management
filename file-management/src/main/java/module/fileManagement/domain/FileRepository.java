@@ -33,8 +33,8 @@ import java.util.Set;
 import module.organization.domain.Accountability;
 import module.organization.domain.Party;
 import module.organization.domain.Person;
-import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.User;
+import pt.ist.bennu.core.security.Authenticate;
 import pt.ist.fenixframework.Atomic;
 
 /**
@@ -86,7 +86,7 @@ public class FileRepository {
     }
 
     public static Set<DirNode> getAvailableRepositories() {
-        return getAvailableRepositories(Authenticate.getCurrentUser());
+        return getAvailableRepositories(Authenticate.getUser());
     }
 
     public static Set<DirNode> getAvailableRepositories(final User user) {

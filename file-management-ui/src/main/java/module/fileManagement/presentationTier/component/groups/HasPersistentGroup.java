@@ -27,7 +27,7 @@ package module.fileManagement.presentationTier.component.groups;
 import org.apache.poi.openxml4j.exceptions.InvalidOperationException;
 
 import pt.ist.bennu.core.domain.User;
-import pt.ist.bennu.core.domain.groups.PersistentGroup;
+import pt.ist.bennu.core.domain.groups.legacy.PersistentGroup;
 
 import com.vaadin.ui.AbstractOrderedLayout;
 

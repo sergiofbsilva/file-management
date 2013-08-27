@@ -1,8 +1,5 @@
 package module.fileManagement.domain;
 
- class task.PopulateRootDirTask extends .pt.ist.bennu.core.domain.scheduler.Task { }
-
-
 class AbstractFileNode {
 }
 
@@ -33,7 +30,7 @@ class Document {
 
 // RELATIONS
 
-class VersionedFile extends .pt.ist.fenixframework.plugins.fileSupport.domain.GenericFile {
+class VersionedFile extends .pt.ist.bennu.io.domain.GenericFile {
 }
 
 
@@ -87,28 +84,28 @@ relation DirNodeReadGroup {
 	DirNode playsRole dirNodeFromReadGroup {
 		multiplicity *;
 	}
-	.pt.ist.bennu.core.domain.groups.PersistentGroup playsRole readGroup;
+	.pt.ist.bennu.core.domain.groups.legacy.PersistentGroup playsRole readGroup;
 }
 
 relation DirNodeWriteGroup {
 	DirNode playsRole dirNodeFromWriteGroup {
 		multiplicity *;
 	}
-	.pt.ist.bennu.core.domain.groups.PersistentGroup playsRole writeGroup;
+	.pt.ist.bennu.core.domain.groups.legacy.PersistentGroup playsRole writeGroup;
 }
 
 relation DocumentReadGroup {
 	Document playsRole documentFromReadGroup {
 		multiplicity *;
 	}
-	.pt.ist.bennu.core.domain.groups.PersistentGroup playsRole readGroup;
+	.pt.ist.bennu.core.domain.groups.legacy.PersistentGroup playsRole readGroup;
 }
 
 relation DocumentWriteGroup {
 	Document playsRole documentFromWriteGroup {
 		multiplicity *;
 	}
-	.pt.ist.bennu.core.domain.groups.PersistentGroup playsRole writeGroup;
+	.pt.ist.bennu.core.domain.groups.legacy.PersistentGroup playsRole writeGroup;
 }
 
 

@@ -25,19 +25,21 @@
 package module.fileManagement.domain.exception;
 
 import module.fileManagement.domain.FileManagementSystem;
-import pt.ist.bennu.core.domain.exceptions.DomainException;
+
+import org.apache.commons.lang.StringUtils;
 
 /**
  * 
  * @author Sérgio Silva
  * 
  */
-public class NodeDuplicateNameException extends DomainException {
+@SuppressWarnings("serial")
+public class NodeDuplicateNameException extends FileManagementDomainException {
 
     private final String name;
 
     public NodeDuplicateNameException(final String name) {
-        super();
+        super(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY);
         this.name = name;
     }
 

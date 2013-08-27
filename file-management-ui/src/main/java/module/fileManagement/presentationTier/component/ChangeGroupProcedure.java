@@ -1,6 +1,6 @@
 package module.fileManagement.presentationTier.component;
 
-import pt.ist.bennu.core.domain.groups.PersistentGroup;
+import pt.ist.bennu.core.domain.groups.legacy.PersistentGroup;
 
 public interface ChangeGroupProcedure {
 

@@ -24,7 +24,7 @@
  */
 package module.fileManagement.presentationTier.component.groups;
 
-import pt.ist.bennu.core.domain.groups.PersistentGroup;
+import pt.ist.bennu.core.domain.groups.legacy.PersistentGroup;
 
 import com.vaadin.ui.AbstractOrderedLayout;
 

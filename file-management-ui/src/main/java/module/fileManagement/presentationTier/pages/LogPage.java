@@ -21,8 +21,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.joda.time.DateTime;
 
-import pt.ist.bennu.core.applicationTier.Authenticate;
 import pt.ist.bennu.core.domain.User;
+import pt.ist.bennu.core.security.Authenticate;
 import pt.ist.vaadinframework.VaadinFrameworkLogger;
 import pt.ist.vaadinframework.annotation.EmbeddedComponent;
 import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
@@ -135,7 +135,7 @@ public class LogPage extends CustomComponent implements EmbeddedComponentContain
     }
 
     private Set<AbstractLog> getLogs(Date selectionDate) {
-        final User currentUser = Authenticate.getCurrentUser();
+        final User currentUser = Authenticate.getUser();
 
         final TreeSet<AbstractLog> sortedLogs = new TreeSet<AbstractLog>(AbstractLog.TIMESTAMP_COMPARATOR);
         final Set<AbstractLog> operationLogs = currentUser.getOperationLogSet();

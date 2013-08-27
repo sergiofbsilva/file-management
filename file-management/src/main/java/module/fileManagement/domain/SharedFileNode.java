@@ -29,7 +29,7 @@ import java.util.Set;
 
 import module.fileManagement.domain.log.FileLog;
 import pt.ist.bennu.core.domain.User;
-import pt.ist.bennu.core.domain.groups.PersistentGroup;
+import pt.ist.bennu.core.domain.groups.legacy.PersistentGroup;
 import pt.ist.fenixframework.Atomic;
 
 /**

@@ -9,7 +9,6 @@ import pt.ist.fenixframework.DomainObject;
 
 import com.vaadin.Application;
 import com.vaadin.ui.Window;
-import com.vaadin.ui.Window.Notification;
 
 public class VaadinHelper {
 
