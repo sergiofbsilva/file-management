@@ -1,22 +1,29 @@
 package module.fileManagement.presentationTier.component.fields;
 
-import java.util.Collection;
-
-import module.organization.domain.Person;
-import pt.ist.bennu.search.queryBuilder.dsl.BuildingState;
-import pt.ist.bennu.search.queryBuilder.dsl.DSLState;
+import pt.ist.bennu.search.Search;
 import pt.ist.vaadinframework.data.reflect.DomainContainer;
 import pt.ist.vaadinframework.ui.TimeoutSelect;
+import pt.utl.ist.fenix.tools.util.StringNormalizer;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import module.organization.domain.Person;
+
+import org.apache.commons.lang.StringUtils;
 
 import com.vaadin.data.Property;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 
+@SuppressWarnings("serial")
 public class PersonField extends TimeoutSelect {
 
     private final PersonContainer container;
 
-    private static class PersonContainer extends DomainContainer<Person> {
+    public static class PersonContainer extends DomainContainer<Person> {
+
         public PersonContainer() {
             super(Person.class);
         }
@@ -38,24 +45,19 @@ public class PersonField extends TimeoutSelect {
         }
 
         @Override
-        protected DSLState createFilterExpression(String filterText) {
-            if (!org.apache.commons.lang.StringUtils.isEmpty(filterText)) {
-                final String[] split = filterText.trim().split("\\s+");
-                BuildingState expr = new BuildingState();
-                for (int i = 0; i < split.length; i++) {
-                    if (i == split.length - 1) {
-                        if (split[i].startsWith("ist")) {
-                            return expr.matches(Person.IndexableFields.PERSON_USERNAME, split[i]);
-                        }
-                        return expr.matches(Person.IndexableFields.PERSON_NAME, split[i]);
+        protected List<Search> getSearch(String filterText) {
+            if (!StringUtils.isEmpty(filterText)) {
+                List<Search> searches = new ArrayList<>();
+                filterText = StringNormalizer.normalize(filterText);
+                for (String part : filterText.trim().split("\\s+")) {
+                    if (part.startsWith("ist")) {
+                        searches.add(new Search().must(Person.IndexableFields.PERSON_USERNAME, part));
                     }
-                    if (split[i].startsWith("ist")) {
-                        expr = expr.matches(Person.IndexableFields.PERSON_USERNAME, split[i]).and();
-                    }
-                    expr = expr.matches(Person.IndexableFields.PERSON_NAME, split[i]).and();
+                    searches.add(new Search().must(Person.IndexableFields.PERSON_NAME, part));
                 }
+                return searches;
             }
-            return new BuildingState();
+            return super.getSearch(filterText);
         }
     }
 

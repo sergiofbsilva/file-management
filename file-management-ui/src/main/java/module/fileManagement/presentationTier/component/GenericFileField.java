@@ -1,16 +1,13 @@
 package module.fileManagement.presentationTier.component;
 
 import static module.fileManagement.domain.FileManagementSystem.getMessage;
+import pt.ist.bennu.io.domain.GenericFile;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.io.FileUtils;
 import org.vaadin.easyuploads.DirectoryFileFactory;
-
-import pt.ist.bennu.io.domain.GenericFile;
 
 import com.vaadin.data.Validator.InvalidValueException;
 import com.vaadin.ui.CustomField;
@@ -38,11 +35,12 @@ public class GenericFileField extends CustomField {
             return getMessage("label.file.repository.add.file");
         }
 
+        //TODO : redo this
         @Override
         protected void handleFile(File file, String fileName, String mimeType, long length) {
             try {
                 final GenericFile genericFileInstance = (GenericFile) getPropertyDataSource().getType().newInstance();
-                genericFileInstance.setContent(FileUtils.readFileToByteArray(file));
+//                genericFileInstance.setContent(FileUtils.readFileToByteArray(file)); 
                 genericFileInstance.setContentType(mimeType);
                 genericFileInstance.setFilename(fileName);
                 uploadedFiles.add(genericFileInstance);
@@ -53,10 +51,11 @@ public class GenericFileField extends CustomField {
             } catch (IllegalAccessException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
             }
+//            } catch (IOException e) {
+//                 TODO Auto-generated catch block
+//                e.printStackTrace();
+//            }
 
         }
 

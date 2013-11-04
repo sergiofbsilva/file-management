@@ -854,7 +854,7 @@ public class DocumentFrontPage extends CustomComponent implements EmbeddedCompon
                                     }
                                     /*
                                      * for (final Party party :
-                                     * MyOrg.getInstance().getPartiesSet()) { if
+                                     * Bennu.getInstance().getPartiesSet()) { if
                                      * (party.isUnit() || (party.isPerson() &&
                                      * ((Person) party).hasUser())) { final
                                      * String externalId =

@@ -4,7 +4,7 @@
 <%@ taglib uri="http://jakarta.apache.org/struts/tags-logic" prefix="logic"%>
 <%@ taglib uri="http://fenix-ashes.ist.utl.pt/fenix-renderers" prefix="fr"%>
 
-<logic:present role="pt.ist.bennu.core.domain.RoleType.MANAGER">
+<logic:present role="#managers">
 	<bean:define id="partyName" name="party" property="presentationName" />
 	<logic:present name="party" property="fileRepository">
 		A unidade <%= partyName %> tem repositório definido

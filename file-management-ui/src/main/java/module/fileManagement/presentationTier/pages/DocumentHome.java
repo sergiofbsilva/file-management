@@ -25,7 +25,21 @@
 package module.fileManagement.presentationTier.pages;
 
 import static module.fileManagement.domain.FileManagementSystem.getMessage;
+import pt.ist.bennu.core.domain.Presentable;
+import pt.ist.bennu.core.domain.RoleType;
+import pt.ist.bennu.core.domain.User;
+import pt.ist.bennu.core.security.Authenticate;
+import pt.ist.bennu.core.util.legacy.LegacyUtil;
+import pt.ist.bennu.search.Search;
+import pt.ist.vaadinframework.EmbeddedApplication;
+import pt.ist.vaadinframework.annotation.EmbeddedComponent;
+import pt.ist.vaadinframework.data.reflect.DomainContainer;
+import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
+import pt.ist.vaadinframework.ui.GridSystemLayout;
+import pt.ist.vaadinframework.ui.TimeoutSelect;
+import pt.utl.ist.fenix.tools.util.StringNormalizer;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -40,21 +54,6 @@ import module.organization.domain.Unit;
 import module.vaadin.ui.BennuTheme;
 
 import org.apache.commons.lang.StringUtils;
-
-import pt.ist.bennu.core.domain.Presentable;
-import pt.ist.bennu.core.domain.RoleType;
-import pt.ist.bennu.core.domain.User;
-import pt.ist.bennu.core.security.Authenticate;
-import pt.ist.bennu.core.util.legacy.LegacyUtil;
-import pt.ist.bennu.search.queryBuilder.dsl.BuildingState;
-import pt.ist.bennu.search.queryBuilder.dsl.DSLState;
-import pt.ist.vaadinframework.EmbeddedApplication;
-import pt.ist.vaadinframework.annotation.EmbeddedComponent;
-import pt.ist.vaadinframework.data.reflect.DomainContainer;
-import pt.ist.vaadinframework.ui.EmbeddedComponentContainer;
-import pt.ist.vaadinframework.ui.GridSystemLayout;
-import pt.ist.vaadinframework.ui.TimeoutSelect;
-import pt.utl.ist.fenix.tools.util.StringNormalizer;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
@@ -119,23 +118,16 @@ public class DocumentHome extends CustomComponent implements EmbeddedComponentCo
         }
 
         @Override
-        protected DSLState createFilterExpression(String filterText) {
+        protected List<Search> getSearch(String filterText) {
             filterText = StringNormalizer.normalize(filterText);
             if (!StringUtils.isEmpty(filterText)) {
-                final String[] split = filterText.trim().split("\\s+");
-                BuildingState expr = new BuildingState();
-                for (int i = 0; i < split.length; i++) {
-                    final String normalizedSplit = StringNormalizer.normalize(split[i]);
-                    if (i == split.length - 1) {
-                        return expr.matches(Unit.IndexableFields.UNIT_NAME, normalizedSplit).or()
-                                .matches(Unit.IndexableFields.UNIT_ACRONYM, normalizedSplit);
-                    }
-                    expr =
-                            expr.matches(Unit.IndexableFields.UNIT_NAME, normalizedSplit).or()
-                                    .matches(Unit.IndexableFields.UNIT_ACRONYM, normalizedSplit).or();
-                }
+                String[] values = filterText.trim().split("\\s+");
+                List<Search> searches = new ArrayList<Search>();
+                searches.add(new Search().must(Unit.IndexableFields.UNIT_NAME, values));
+                searches.add(new Search().must(Unit.IndexableFields.UNIT_ACRONYM, values));
+                return searches;
             }
-            return new BuildingState();
+            return super.getSearch(filterText);
         }
     }
 
