@@ -80,8 +80,16 @@ public class VersionedFile extends VersionedFile_Base {
     @Override
     public void delete() {
         final Document document = getDocument();
-        document.setLastVersionedFile(getPreviousVersion());
+        if (document != null) {
+            document.setLastVersionedFile(getPreviousVersion());
+        }
+        final VersionedFile nextVersion = getNextVersion();
+        if (nextVersion != null) {
+            nextVersion.setPreviousVersion(getPreviousVersion());
+        }
+        setNextVersion(null);
         setPreviousVersion(null);
+        setDocument(null);
         super.delete();
     }
 
